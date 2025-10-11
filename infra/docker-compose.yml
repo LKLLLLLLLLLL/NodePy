@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: nodepy-postgresql
+    environment:
+      POSTGRES_DB: nodepy
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      # store postgres data in project folder (bind mount) for easy access
+      - ../data:/var/lib/postgresql/data
+
+  server:
+    build:
+      context: ..
+      dockerfile: infra/docker/server.Dockerfile
+    container_name: nodepy-server
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../server:/app
+      # mount the frontend build output into the server dist folder for development
+      - ../client/dist:/app/dist:ro
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
+      - DEBUG=true
+    depends_on:
+      - postgres

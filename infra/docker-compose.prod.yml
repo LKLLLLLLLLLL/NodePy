@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: nodepy-postgresql
+    environment:
+      POSTGRES_DB: nodepy
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  server:
+    build:
+      context: ..
+      dockerfile: infra/docker/server.Dockerfile
+      target: production
+    container_name: nodepy-server
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
+      - DEBUG=false
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
