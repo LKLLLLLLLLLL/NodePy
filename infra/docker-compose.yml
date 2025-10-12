@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       # store postgres data in project folder (bind mount) for easy access
-      - ../data:/var/lib/postgresql/data
+      - ../data/db:/var/lib/postgresql/data
 
   server:
     build:

@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
 import os
@@ -36,6 +35,10 @@ try:
 except Exception as e:
     print(f"Database connection failed: {e}")
 
+@app.get("/api/health")
+async def health():
+    """Simple health check endpoint."""
+    return {"status": "ok", "database": "connected"}
 
 # Static files directory - fixed path in container
 # In container: /nodepy/static (mapped from host client/dist via mount or COPY)
@@ -50,16 +53,11 @@ else:
     print(f"Dist directory not found at {dist_dir}; frontend files will not be served")
 
 
-@app.get("/")
-async def root():
-    """Return the frontend index page if available."""
-    index_file = dist_dir / "index.html"
-    if index_file.exists():
-        return FileResponse(str(index_file))
-    return {"message": "Frontend not built yet"}
+# @app.get("/")
+# async def root():
+#     """Return the frontend index page if available."""
+#     index_file = dist_dir / "index.html"
+#     if index_file.exists():
+#         return FileResponse(str(index_file))
+#     return {"message": "Frontend not built yet"}
 
-
-@app.get("/api/health")
-async def health():
-    """Simple health check endpoint."""
-    return {"status": "ok", "database": "connected"}

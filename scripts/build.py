@@ -17,6 +17,11 @@ def _compose_prefix() -> List[str]:
         return ["docker", "compose"]
     raise RuntimeError("Neither 'docker-compose' nor 'docker' found in PATH")
 
+def _npm_prefix() -> List[str]:
+    """ Return the command prefix for invoking npm. """
+    if shutil.which("npm"):
+        return ["npm"]
+    raise RuntimeError("Neither 'npm' nor 'npx' found in PATH")
 
 def build() -> None:
     """Build frontend assets and Docker images."""
@@ -25,7 +30,8 @@ def build() -> None:
     # 1. Build frontend
     print("🔨 Building frontend...")
     client_dir = project_root / "client"
-    subprocess.run(["npm", "run", "build"], cwd=client_dir, check=True)
+    cmd = _npm_prefix() + ["run", "build"]
+    subprocess.run(cmd, cwd=client_dir, check=True)
 
     # 2. Build Docker images
     print("🐳 Building Docker images...")
@@ -33,7 +39,7 @@ def build() -> None:
     compose = _compose_prefix()
     cmd = compose + ["-f", "docker-compose.yml", "-p", "nodepy", "build"]
     try:
-        subprocess.run(cmd, cwd=infra_dir, check=True)
+        subprocess.run(cmd, cwd=infra_dir, check=True, capture_output=True, text=True)
     except subprocess.CalledProcessError as exc:
         print(f"Error: docker compose build failed with exit code {exc.returncode}")
         raise

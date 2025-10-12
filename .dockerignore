@@ -1,0 +1,14 @@
+server/.venv
+server/__pycache__
+server/*.pyc
+server/*.pyo
+server/*.pyd
+server/.env
+client/node_modules
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+.DS_Store
