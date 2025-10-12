@@ -6,7 +6,6 @@ from sqlalchemy import create_engine
 import os
 from pathlib import Path
 
-
 app = FastAPI(title="NodePy API")
 
 # Add CORS middleware to allow local frontend development origins
@@ -38,9 +37,9 @@ except Exception as e:
     print(f"Database connection failed: {e}")
 
 
-# Compute static files directory (project root / dist)
-BASE_DIR = Path(__file__).resolve().parents[1]
-dist_dir = BASE_DIR / "dist"
+# Static files directory - fixed path in container
+# In container: /nodepy/static (mapped from host client/dist via mount or COPY)
+dist_dir = Path("/nodepy/static")
 
 
 # Mount static files if they exist

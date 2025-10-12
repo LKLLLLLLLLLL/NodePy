@@ -21,9 +21,10 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ../server:/app
-      # mount the frontend build output into the server dist folder for development
-      - ../client/dist:/app/dist:ro
+      # mount server source code for hot-reload in development
+      - ../server:/nodepy/server
+      # mount frontend build output for serving static files in development
+      - ../client/dist:/nodepy/static:ro
     environment:
       - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
       - DEBUG=true

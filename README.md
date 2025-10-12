@@ -20,17 +20,17 @@
 3. 构建并运行
     请先确保已经安装docker。
     ```bash
-    uv run dev
+    uv run task prod
     ```
 ## 开发
 ## 使用和生产环境接近的测试环境
 ```bash
-uv run dev
+uv run task dev
 ```
 访问http://localhost:8000
 ## 使用实时更新的测试环境
 ```bash
-uv run dev
+uv run task dev
 cd client
 npm run dev
 ```
