@@ -11,7 +11,6 @@
 #       ├── assets/
 #       └── ...
 
-
 FROM python:3.13-slim as development
 WORKDIR /nodepy
 # configure uv

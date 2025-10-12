@@ -35,15 +35,17 @@ try:
 except Exception as e:
     print(f"Database connection failed: {e}")
 
+
+# api routes
 @app.get("/api/health")
 async def health():
     """Simple health check endpoint."""
     return {"status": "ok", "database": "connected"}
 
-# Static files directory - fixed path in container
+
+# Static files directory
 # In container: /nodepy/static (mapped from host client/dist via mount or COPY)
 dist_dir = Path("/nodepy/static")
-
 
 # Mount static files if they exist
 if dist_dir.exists() and dist_dir.is_dir():
@@ -51,13 +53,3 @@ if dist_dir.exists() and dist_dir.is_dir():
     print(f"Frontend static files mounted at {dist_dir}")
 else:
     print(f"Dist directory not found at {dist_dir}; frontend files will not be served")
-
-
-# @app.get("/")
-# async def root():
-#     """Return the frontend index page if available."""
-#     index_file = dist_dir / "index.html"
-#     if index_file.exists():
-#         return FileResponse(str(index_file))
-#     return {"message": "Frontend not built yet"}
-

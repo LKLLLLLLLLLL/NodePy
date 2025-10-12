@@ -19,9 +19,10 @@ def _compose_prefix() -> List[str]:
 
 def _npm_prefix() -> List[str]:
     """ Return the command prefix for invoking npm. """
-    if shutil.which("npm"):
-        return ["npm"]
-    raise RuntimeError("Neither 'npm' nor 'npx' found in PATH")
+    npm_prefix = shutil.which("npm")
+    if npm_prefix:
+        return [npm_prefix]
+    raise RuntimeError("'npm' not found in PATH")
 
 def build() -> None:
     """Build frontend assets and Docker images."""
@@ -30,7 +31,8 @@ def build() -> None:
     # 1. Build frontend
     print("🔨 Building frontend...")
     client_dir = project_root / "client"
-    cmd = _npm_prefix() + ["run", "build"]
+    npm = _npm_prefix()
+    cmd = npm + ["run", "build"]
     subprocess.run(cmd, cwd=client_dir, check=True)
 
     # 2. Build Docker images

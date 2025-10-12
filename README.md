@@ -13,13 +13,11 @@
     # 安装前端依赖
     cd client
     npm install
-    # 安装后端依赖
-    cd ../server
-    uv sync
     ```
 3. 构建并运行
     请先确保已经安装docker。
     ```bash
+    cd ..
     uv run task prod
     ```
 ## 开发
@@ -31,7 +29,6 @@ uv run task dev
 ## 使用实时更新的测试环境
 ```bash
 uv run task dev
-cd client
 npm run dev
 ```
 访问http://localhost:5173
