@@ -1,5 +1,6 @@
 from .BaseNode import BaseNode, NodeValidationError, InPort, OutPort, Data, Schema
 from pandas import DataFrame
+from .Utils import Visualization
 
 class RangeNode(BaseNode):
     """
@@ -52,6 +53,12 @@ class RangeNode(BaseNode):
                 current += self.step
         
         table = DataFrame({self.column_name: data})
+        self.vis = Visualization(
+            node_id=self.id,
+            type=Visualization.Type.TABLE,
+            payload=table
+        )
+        
         return {
             "output": Data(
                 schem=Schema(
@@ -61,4 +68,4 @@ class RangeNode(BaseNode):
                 payload=table
             )
         }
-    
+

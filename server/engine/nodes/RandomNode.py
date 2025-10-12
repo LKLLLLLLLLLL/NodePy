@@ -1,7 +1,8 @@
 from .BaseNode import BaseNode, NodeValidationError, InPort, OutPort, Data, Schema
 from pandas import DataFrame
 from typing import Literal
-from numpy import random
+import numpy as np
+from .Utils import Visualization
 
 class RandomNode(BaseNode):
     """
@@ -52,15 +53,20 @@ class RandomNode(BaseNode):
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         """generate random data"""
         if self.data_type == "int" and isinstance(self.top, int) and isinstance(self.bottom, int):
-            data = random.RandomState(self.seed).randint(
-                self.top, self.bottom, size=100
+            data = np.random.default_rng(self.seed).integers(
+                self.bottom, self.top, size=100
             )
         else:
-            data = random.RandomState(self.seed).uniform(
-                self.top, self.bottom, size=100
+            data = np.random.default_rng(self.seed).uniform(
+                self.bottom, self.top, size=100
             )
 
         table = DataFrame({self.column_name: data})
+        self.vis = Visualization(
+            node_id=self.id,
+            type=Visualization.Type.TABLE,
+            payload=table
+        )
         return {
             "output": Data(
                 schem=Schema(type=Schema.DataType.TABLE, columns=[self.column_name]),

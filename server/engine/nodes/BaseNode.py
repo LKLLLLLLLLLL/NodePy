@@ -1,92 +1,8 @@
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
-from enum import Enum
 from abc import abstractmethod
-from pandas import DataFrame
 from typing import Literal
-
-"""
-Errors definitions
-"""
-class NodeValidationError(Exception): 
-    """ static validation error"""
-    pass
-
-class NodeExecutionError(Exception):
-    """ runtime execution error """
-    pass
-
-
-"""
-static analyze
-"""
-
-class Schema(BaseModel):
-    """ schema defined the data type between nodes """
-    
-    class DataType(str, Enum):
-        """ data type of object passed between nodes """
-        TABLE = "table" # dataframe
-        STR = "str"   # string
-        INT = "int"   # integer
-    
-    type: DataType
-    columns: list[str] | None = None  # for TABLE type, list of column names
-    
-    @model_validator(mode='after')
-    def verify(self) -> Self:
-        if self.type == Schema.DataType.TABLE and self.columns is None:
-            raise NodeValidationError("For TABLE type, columns must be specified.")
-        elif self.type != Schema.DataType.TABLE and self.columns is not None:
-            raise NodeValidationError("For non-TABLE type, columns must be None.")
-        return self
-    
-    def include(self, other: "Schema") -> bool:
-        """ check if self includes other schema """
-        if self.type != other.type:
-            return False
-        if self.type == Schema.DataType.TABLE:
-            if self.columns is None or other.columns is None:
-                return False
-            return all(col in self.columns for col in other.columns)
-        return True
-
-
-class Data(BaseModel):
-    """ the data wrapper """
-    schem: Schema
-    payload: DataFrame | str | int
-    
-    model_config = {"arbitrary_types_allowed": True} # allow DataFrame type
-    
-    @model_validator(mode='after')
-    def verify(self) -> Self:
-        if self.schem.type == Schema.DataType.TABLE:
-            if not isinstance(self.payload, DataFrame):
-                raise NodeExecutionError("Payload must be a DataFrame for TABLE schema.")
-            if self.schem.columns is not None:
-                missing_cols = [col for col in self.schem.columns if col not in self.payload.columns]
-                if missing_cols:
-                    raise NodeExecutionError(f"Payload is missing columns: {missing_cols}")
-        elif self.schem.type == Schema.DataType.STR:
-            if not isinstance(self.payload, str):
-                raise NodeExecutionError("Payload must be a string for STR schema.")
-        elif self.schem.type == Schema.DataType.INT:
-            if not isinstance(self.payload, int):
-                raise NodeExecutionError("Payload must be an integer for INT schema.")
-        else:
-            raise NodeExecutionError(f"Unsupported schema type: {self.schem.type}")
-        return self
-  
-class InPort(BaseModel):
-    name: str
-    schem: Schema
-    description: str | None = None
-    required: bool
-
-class OutPort(BaseModel):
-    name: str
-    description: str | None = None
+from .Utils import NodeValidationError, InPort, OutPort, Data, Schema, Visualization, NodeExecutionError, GlobalConfig
 
 """
 BaseNode definition
@@ -95,7 +11,9 @@ class BaseNode(BaseModel):
     id: str
     name: str
     type: str
+    global_config: GlobalConfig # set by engine
 
+    vis: Visualization | None = None # set by process method
 
     """
     methods to be implemented by subclasses
@@ -185,7 +103,7 @@ class BaseNode(BaseModel):
             # 2. infer output schema
             return self.infer_output_schema(input)
         except Exception as e:
-            raise NodeValidationError(f"Error inferring schema for node {self.id} ({self.name}): {str(e)}")
+            raise NodeValidationError(f"Error inferring schema for node {self.id} ({self.name}): {e}") from e
     
     def execute(self, input: dict[str, Data]) -> dict[str, Data]:
         """ unified execution entry point """
@@ -197,4 +115,10 @@ class BaseNode(BaseModel):
             # 3. process input data
             return self.process(input)
         except Exception as e:
-            raise NodeExecutionError(f"Error executing node {self.id} ({self.name}): {str(e)}")
+            raise NodeExecutionError(f"Error executing node {self.id} ({self.name}): {e}") from e
+    
+    def visualization(self) -> Visualization:
+        """ return visualization info for front-end to render """
+        if self.vis is None:
+            raise NodeExecutionError(f"Node {self.id} ({self.name}) has no visualization info.")
+        return self.vis
