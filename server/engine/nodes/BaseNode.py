@@ -5,7 +5,8 @@ from typing import Literal
 from .Utils import NodeValidationError, InPort, OutPort, Data, Schema, Visualization, NodeExecutionError, GlobalConfig
 
 """
-BaseNode definition
+BaseNode definition.
+An abstract base class for all nodes.
 """
 class BaseNode(BaseModel):
     id: str

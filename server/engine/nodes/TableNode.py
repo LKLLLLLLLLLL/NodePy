@@ -1,6 +1,6 @@
 from .BaseNode import BaseNode, NodeValidationError, InPort, OutPort, Data, Schema
 from pandas import DataFrame
-from .Utils import Visualization
+from .Utils import Visualization, add_index_column, validate_no_index_column_conflict, INDEX_COLUMN_NAME
 from typing import List, Dict, Any
 
 
@@ -24,6 +24,10 @@ class TableNode(BaseNode):
             raise NodeValidationError("Empty rows require column_names to be provided.")
 
         first_keys = set(self.rows[0].keys())
+        
+        # Validate that _index column is not used
+        validate_no_index_column_conflict(first_keys)
+        
         for r in self.rows:
             # pydantic already validated each r is dict
             if set(r.keys()) != first_keys:
@@ -65,6 +69,9 @@ class TableNode(BaseNode):
         """
         cols: Dict[str, set[Schema.ColumnType]] = {}
 
+        # Add _index column (always INT)
+        cols[INDEX_COLUMN_NAME] = {Schema.ColumnType.INT}
+        
         for c in self.rows[0].keys():
             cols[c] = set()
         for r in self.rows:
@@ -86,6 +93,9 @@ class TableNode(BaseNode):
         else:
             df = DataFrame(self.rows)
 
+        # Add automatic index column
+        df = add_index_column(df)
+        
         # Use centralized schema computation to ensure consistency
         schem = self._compute_output_schema()
         

@@ -1,6 +1,6 @@
 from .Utils import Data
 from .BaseNode import BaseNode, InPort, OutPort, Schema, NodeValidationError
-from .Utils import CmpCondition, Visualization
+from .Utils import CmpCondition, Visualization, validate_no_index_column_conflict
 from typing import Literal
 from pandas import DataFrame
 import operator
@@ -33,6 +33,10 @@ class TableCmpNode(BaseNode):
             raise NodeValidationError("column cannot be empty.")
         if self.result_col == "" or self.result_col.strip() == "":
             raise NodeValidationError("result_col cannot be empty.")
+        
+        # Validate that result_col doesn't conflict with reserved _index column
+        validate_no_index_column_conflict([self.result_col])
+        
         # set CmpCondition
         self._cond = CmpCondition(
             op=self.op,
@@ -87,6 +91,9 @@ class TableCmpNode(BaseNode):
         )
     
     def infer_output_schema(self, input_schema: dict[str, Schema]) -> dict[str, Schema]:
+        # Static validate via condition if available
+        if self._cond is not None:
+            self._cond.static_validate(input_schema)
         # Delegate to centralized schema computation
         return {"output": self._compute_output_schema(input_schema)}
     
