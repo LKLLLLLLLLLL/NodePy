@@ -46,9 +46,25 @@ class RandomNode(BaseNode):
         """no input"""
         pass
 
+    def _compute_output_schema(self) -> Schema:
+        """
+        Centralized schema computation logic.
+        This ensures infer_output_schema and process return consistent schemas.
+        """
+        if self.data_type == "int":
+            return Schema(
+                type=Schema.DataType.TABLE,
+                columns={self.column_name: {Schema.ColumnType.INT}},
+            )
+        else:
+            return Schema(
+                type=Schema.DataType.TABLE,
+                columns={self.column_name: {Schema.ColumnType.FLOAT}},
+            )
+
     def infer_output_schema(self, input_schema: dict[str, Schema]) -> dict[str, Schema]:
-        output_schema = Schema(type=Schema.DataType.TABLE, columns=[self.column_name])
-        return {"output": output_schema}
+        # Delegate to centralized schema computation
+        return {"output": self._compute_output_schema()}
 
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         """generate random data"""
@@ -67,9 +83,11 @@ class RandomNode(BaseNode):
             type=Visualization.Type.TABLE,
             payload=table
         )
+        
+        # Use centralized schema computation to ensure consistency
         return {
             "output": Data(
-                schem=Schema(type=Schema.DataType.TABLE, columns=[self.column_name]),
+                sche=self._compute_output_schema(),
                 payload=table,
             )
         }

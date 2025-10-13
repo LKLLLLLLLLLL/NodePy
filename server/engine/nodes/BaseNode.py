@@ -21,22 +21,34 @@ class BaseNode(BaseModel):
     
     @abstractmethod
     def validate_parameters(self) -> None:
-        """ validate parameters when constructing the node """
+        """ 
+        validate parameters when constructing the node 
+        as a part of stage1 validation
+        """
         pass
     
     @abstractmethod
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
-        """ define input and output port constraint """
+        """ 
+        define input and output port constraint 
+        as a part of stage2 validation
+        """
         pass
 
     @abstractmethod
     def validate_input(self, input: dict[str, Data]) -> None:
-        """validate input during processing stage"""
+        """
+        validate input during processing stage
+        as a part of stage3 validation
+        """
         pass
     
     @abstractmethod
     def infer_output_schema(self, input_schema: dict[str, Schema]) -> dict[str, Schema]:
-        """ infer output schema based on input schema during static analysis stage """
+        """ 
+        infer output schema based on input schema during static analysis stage 
+        will be called during stage2 validation, for output schema inference
+        """
         pass
     
     @abstractmethod
@@ -53,6 +65,7 @@ class BaseNode(BaseModel):
     """
     private methods
     """
+    """ Stage1: simple parameter validation after initialization """
     @model_validator(mode='after')
     def _validate_parameters(self) -> Self:
         """ validate parameters """
@@ -81,8 +94,20 @@ class BaseNode(BaseModel):
                     raise NodeValidationError(f"Required port '{port.name}' not found in schema.")
                 else:
                     continue
-            if not port.schem.include(real_schema):
-                raise NodeValidationError(f"Port '{port.name}' schema mismatch. Expected: {port.schem}, Got: {real_schema}")
+            # Use the accepts() method which handles type and column validation
+            if not port.accepts(real_schema):
+                expected_types = ", ".join([t.value for t in port.accept_types])
+                if port.table_columns is not None:
+                    raise NodeValidationError(
+                        f"Port '{port.name}' schema mismatch. "
+                        f"Expected TABLE with columns {list(port.table_columns.keys())}, "
+                        f"Got: {real_schema}"
+                    )
+                else:
+                    raise NodeValidationError(
+                        f"Port '{port.name}' type mismatch. "
+                        f"Expected one of: [{expected_types}], Got: {real_schema.type.value}"
+                    )
             input_copy.pop(port.name)
         if input_copy:
             raise NodeValidationError(f"Extra input ports not defined: {list(input_copy.keys())}")
@@ -95,6 +120,7 @@ class BaseNode(BaseModel):
         in_ports, out_ports = self.port_def()
         return {"in": in_ports, "out": out_ports}
 
+    """ Stage2: static schema inference before execution """
     def infer_schema(self, input: dict[str, Schema]) -> dict[str, Schema]:
         """ unified static schema inference entry point """
         try:
@@ -105,11 +131,12 @@ class BaseNode(BaseModel):
         except Exception as e:
             raise NodeValidationError(f"Error inferring schema for node {self.id} ({self.name}): {e}") from e
     
+    """ Stage3: validate during execution """
     def execute(self, input: dict[str, Data]) -> dict[str, Data]:
         """ unified execution entry point """
         try:
             # 1. static validate input schema against port definitions
-            self._validate_schem_to_port_def({k: v.schem for k, v in input.items()})
+            self._validate_schem_to_port_def({k: v.sche for k, v in input.items()})
             # 2. dynamic validate input data
             self.validate_input(input)
             # 3. process input data
