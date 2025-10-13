@@ -18,4 +18,16 @@
     </Teleport>
 </template>
 <style scoped lang = "scss">
+    .modal-manager{
+        position: fixed;
+        top: 40%;
+        left: 40%;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+        z-index: 1000;
+    }
+    .modal-manager > * {
+        pointer-events: auto;
+    }
 </style>

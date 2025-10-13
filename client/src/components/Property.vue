@@ -7,8 +7,9 @@
 </template>
 <style lang = "scss" scoped>
     .property-container{
-        width: 15%;
+        width: 100%;
         height: 100%;
         background-color: #4e4e4e;
+        color: white;
     }
 </style>

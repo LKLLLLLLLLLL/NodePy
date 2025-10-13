@@ -9,5 +9,6 @@
     .result-container{
         flex: 1;
         background-color: #393939;
+        color: white;
     }
 </style>

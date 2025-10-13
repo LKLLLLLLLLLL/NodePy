@@ -3,7 +3,7 @@
     const modalStore = useModalStore();
     function openModal(){
         modalStore.createModal({
-            id: 'node-selector-modal',
+            id: Date.now().toString(),
             title: 'NodeSelector',
             content: 'This is NodeSelector modal',
             isActive: true
@@ -18,8 +18,9 @@
 </template>
 <style lang = "scss" scoped>
     .node-selector-container{
-        width: 15%;
+        width: 100%;
         height: 100%;
         background-color: #1b1b1b;
+        color: white;
     }
 </style>

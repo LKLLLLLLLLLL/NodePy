@@ -4,42 +4,70 @@
     import NodeSelector from './components/NodeSelector.vue';
     import Property from './components/Property.vue';
     import Result from './components/Result.vue';
+    import { useLayoutStore } from './stores/layoutStore';
+    import { Splitpanes, Pane } from 'splitpanes';
+    const layoutStore = useLayoutStore();
+
 </script>
 <template>
     <div class = "main-container">
         <div class = "up-container">
             <ControlBar />
         </div>
-        <div class = "down-container">
-            <NodeSelector />
-            <div class = "middle-container">
-                <Result/>
-                <Graph />
-            </div>
-            <Property/>
-        </div>
+        <Splitpanes 
+            class = "down-container"
+            vertical
+        >
+            <Pane :size="15" :min-size="10">
+                <NodeSelector />
+            </Pane>
+            <Pane :size="70" :min-size="40">
+                <Splitpanes
+                    horizontal
+                >
+                    <Pane :size="40" :min-size="20">
+                        <Result/>
+                    </Pane>
+                    <Pane :size="60" :min-size="20">
+                        <Graph />
+                    </Pane>
+                </Splitpanes>
+            </Pane>
+            <Pane :size="15" :min-size="10">
+                <Property/>
+            </Pane>
+        </Splitpanes>
     </div>
+    <ModalManager />
 </template>
 <style scoped lang = "scss">
     .main-container{
         display: flex;
         flex-direction: column;
         width: 100%;
-        height: 100vh;
+        height: 98vh;
     }
     .up-container{
-        height: 10%;
+        height: 50px;
         width: 100%;
     }
     .down-container{
-        display: flex;
-        flex-direction: row;
-        width: 100%;
-        height: 90%;
-    }
-    .middle-container{
         flex: 1;
+    }
+</style>
+<style lang = "scss">
+    @import 'splitpanes/dist/splitpanes.css';
+    .splitpanes__pane {
         display: flex;
-        flex-direction: column;
+        width: 100%;
+        height: 100%;
+    }
+
+    .splitpanes--vertical > .splitpanes__splitter {
+        width: 6px;
+    }
+
+    .splitpanes--horizontal > .splitpanes__splitter {
+        height: 6px;
     }
 </style>

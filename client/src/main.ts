@@ -6,9 +6,7 @@ import App from './App.vue'
 const pinia = createPinia()
 
 const app = createApp(App)
+app.component('ModalManager', ModalManager)
 app.use(pinia)
 app.mount('#app')
 
-const modalManager = createApp(ModalManager)
-modalManager.use(pinia)
-modalManager.mount('#modal')
