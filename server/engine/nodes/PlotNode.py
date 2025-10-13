@@ -28,17 +28,30 @@ class PlotNode(BaseNode):
         return [
             InPort(
                 name="input",
-                schem=Schema(type=Schema.DataType.TABLE, columns=[self.x_column, self.y_column]),
+                accept_types={Schema.DataType.TABLE},
+                table_columns={
+                    self.x_column: {Schema.ColumnType.INT, Schema.ColumnType.FLOAT},
+                    self.y_column: {Schema.ColumnType.INT, Schema.ColumnType.FLOAT}
+                },
                 description="Input table data to visualize",
                 required=True
             )
         ], []
 
     def validate_input(self, input: dict[str, Data]) -> None:
-        pass # no more thing to validate beyond port_def
+        assert isinstance(input["input"].payload, DataFrame)
+        assert isinstance(input["input"].payload, DataFrame)
+        assert input["input"].sche.columns is not None
+        x_data = input["input"].payload[self.x_column]
+        y_data = input["input"].payload[self.y_column]
+        if x_data.empty:
+            raise NodeValidationError(f"x_column '{self.x_column}' is empty.")
+        if y_data.empty:
+            raise NodeValidationError(f"y_column '{self.y_column}' is empty.")
+        pass
 
     def infer_output_schema(self, input_schema: dict[str, Schema]) -> dict[str, Schema]:
-        return {"output": Schema(type=Schema.DataType.STR)}
+        return {}
 
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         """Generate plot from input data"""

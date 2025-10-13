@@ -1,8 +1,10 @@
 from server.engine.nodes.RangeNode import RangeNode
 from server.engine.nodes.RandomNode import RandomNode
 from server.engine.nodes.PlotNode import PlotNode
-from .nodes.Utils import GlobalConfig
+from server.engine.nodes.SplitNode import SplitNode
+from .nodes.Utils import GlobalConfig, Data, Schema
 from pathlib import Path
+import pandas as pd
 
 global_config = GlobalConfig(
     temp_dir=Path("./tmp"),
@@ -69,3 +71,24 @@ plot_node = PlotNode(
 # 执行
 result = plot_node.execute({"input": data["output"]})
 # print(result["output"].payload)  # 输出: my_plot.png
+
+
+# --- SplitNode 测试 ---
+print("\n--- SplitNode Test ---")
+df_split = pd.DataFrame({"group": ["A", "B", "A", "C"], "val": [1, 2, 3, 4]})
+split_data = Data(sche=Schema(type=Schema.DataType.TABLE, columns=None), payload=df_split)
+split_node = SplitNode(
+    id="s1",
+    name="Split",
+    type="SplitNode",
+    split_column="group",
+    split_values=["A", "B"],
+    reserved_columns=None,
+    global_config=global_config,
+)
+split_out = split_node.execute({"input": split_data})
+for k, v in split_out.items():
+    rows = getattr(v.payload, "shape", (None, None))[0]
+    cols = list(getattr(v.payload, "columns", []))
+    print(k, "-> rows:", rows, "cols:", cols)
+
