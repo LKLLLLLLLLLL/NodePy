@@ -100,8 +100,7 @@ function removeMultipleEdges() {
 
 <style lang="scss" scoped>
   .box {
-    width: 800px; 
-    height: 800px; 
+    flex: 1;
     border: 1px solid black;
   }
 </style>
