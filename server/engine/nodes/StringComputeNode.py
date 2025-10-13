@@ -7,29 +7,6 @@ String processing nodes for primitive str inputs/outputs.
 Each node follows the same strict validation and typing style used in other nodes.
 """
 
-class StringNode(BaseNode):
-    """Node to generate a user-provided string"""
-    value: str
-
-    def validate_parameters(self) -> None:
-        if not self.type == "StringNode":
-            raise NodeValidationError("Node type must be 'StringNode'.")
-        if self.value is None:
-            raise NodeValidationError("value cannot be None")
-
-    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
-        return [], [OutPort(name="output", description="String output")]
-
-    def validate_input(self, input: dict[str, Data]) -> None:
-        pass
-
-    def infer_output_schema(self, input_schema: dict[str, Schema]) -> dict[str, Schema]:
-        return {"output": Schema(type=Schema.DataType.STR)}
-
-    def process(self, input: dict[str, Data]) -> dict[str, Data]:
-        self.vis = Visualization(node_id=self.id, type=Visualization.Type.STR, payload=self.value)
-        return {"output": Data(sche=Schema(type=Schema.DataType.STR), payload=self.value)}
-
 
 class ClipStringNode(BaseNode):
     """Clip a string by start/end indices."""

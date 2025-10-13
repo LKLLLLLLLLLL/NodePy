@@ -2,11 +2,17 @@ from .BaseNode import BaseNode, NodeValidationError, InPort, OutPort, Data, Sche
 from typing import Literal
 from .Utils import Visualization
 
+
 """
-A node to generate a constant value.
-Only support generate str, float, int, bool.
+A series of nodes to generate primitive() data.
 """
+
+
 class ConstNode(BaseNode):
+    """
+    A node to generate a constant value.
+    Only support generate str, float, int, bool.
+    """
     value: str | float | int | bool
     data_type: Literal["str", "float", "int", "bool"]
 

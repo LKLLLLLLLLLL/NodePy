@@ -11,17 +11,13 @@ from server.engine.nodes.ComputeNode import (
     UnaryNumComputeNode,
     BoolBinComputeNode,
     BoolNotNode,
+    CmpNode,
 )
-from server.engine.nodes.CmpNode import CmpNode
-from server.engine.nodes.ConstNode import ConstNode
+from server.engine.nodes.GenNode import ConstNode
 from server.engine.nodes.PlotNode import PlotNode
-from server.engine.nodes.RandomNode import RandomNode
-from server.engine.nodes.RangeNode import RangeNode
-from server.engine.nodes.SelectColNode import SelectColNode
-from server.engine.nodes.SplitNode import SplitNode
-from server.engine.nodes.TableNode import TableNode
-from server.engine.nodes.StringNode import (
-    StringNode,
+from server.engine.nodes.TableGenNode import RandomNode, RangeNode, TableNode
+from server.engine.nodes.TableColNode import SelectColNode, SplitNode
+from server.engine.nodes.StringComputeNode import (
     ClipStringNode,
     StripStringNode,
     ReplaceStringNode,
@@ -34,7 +30,7 @@ from server.engine.nodes.TableComputeNode import (
     TableUnaryNumComputeNode,
     TableBoolBinComputeNode,
 )
-from server.engine.nodes.TableCmpNode import TableCmpNode
+from server.engine.nodes.TableComputeNode import TableCmpNode
 from server.engine.nodes.Utils import (
     Schema,
     Data,
@@ -158,7 +154,7 @@ def test_constnode_type_validation_and_values():
 
 
 def test_string_nodes_basic_and_bounds():
-    sn = StringNode(id="s", name="s", type="StringNode", value="hello", global_config=GLOBAL_CFG)
+    sn = ConstNode(id="s", name="s", type="ConstNode", data_type = "str", value="hello", global_config=GLOBAL_CFG)
     p = sn.execute({})["output"].payload
     assert isinstance(p, str)
     assert p == "hello"

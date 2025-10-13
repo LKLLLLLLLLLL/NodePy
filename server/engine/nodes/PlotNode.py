@@ -5,6 +5,12 @@ import matplotlib.pyplot as plt
 from .Utils import Visualization
 from pathlib import Path
 
+
+"""
+A series of nodes to visualize data.
+"""
+
+
 class PlotNode(BaseNode):
     """
     Node to visualize data from input table using matplotlib.
@@ -86,3 +92,4 @@ class PlotNode(BaseNode):
             payload=Path(path)
         )
         return {}
+
