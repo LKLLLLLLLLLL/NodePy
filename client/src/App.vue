@@ -1,11 +1,19 @@
-<script setup lang="ts"></script>
+<script lang="ts" setup>
+import Graph from './components/Graph.vue';
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div  class="box">
+    <Graph></Graph>
+  </div>
 </template>
 
-<style scoped></style>
+<style lang="scss">
+  .box {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+</style>
