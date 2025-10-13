@@ -7,6 +7,11 @@ from pathlib import Path
 from typing import Literal
 
 """
+Constants
+"""
+INDEX_COLUMN_NAME = "_index"  # Reserved column name for automatic row indexing
+
+"""
 Errors definitions
 """
 class NodeValidationError(Exception):
@@ -16,6 +21,48 @@ class NodeValidationError(Exception):
 class NodeExecutionError(Exception):
     """runtime execution error"""
     pass
+
+"""
+Helper functions
+"""
+def add_index_column(df: DataFrame) -> DataFrame:
+    """
+    Add automatic index column to a DataFrame.
+    This column is required for all table operations and cannot be removed.
+    
+    Args:
+        df: Input DataFrame
+        
+    Returns:
+        DataFrame with _index column added at the beginning
+        
+    Raises:
+        NodeValidationError: If _index column already exists
+    """
+    if INDEX_COLUMN_NAME in df.columns:
+        raise NodeValidationError(
+            f"Column name '{INDEX_COLUMN_NAME}' is reserved for automatic indexing."
+        )
+    
+    # Create a copy and add index column at the beginning
+    result = df.copy()
+    result.insert(0, INDEX_COLUMN_NAME, range(len(result)))
+    return result
+
+def validate_no_index_column_conflict(column_names: list[str] | set[str]) -> None:
+    """
+    Validate that user-provided column names don't conflict with reserved index column.
+    
+    Args:
+        column_names: List or set of column names to validate
+        
+    Raises:
+        NodeValidationError: If _index is used in column names
+    """
+    if INDEX_COLUMN_NAME in column_names:
+        raise NodeValidationError(
+            f"Column name '{INDEX_COLUMN_NAME}' is reserved and cannot be used."
+        )
 
 
 """
@@ -148,7 +195,7 @@ class InPort(BaseModel):
     """
     name: str
     accept_types: set[Schema.DataType]  # Always use this, no more sche field
-    table_columns: dict[str, set[Schema.ColumnType]] | None = None  # Only for TABLE types
+    table_columns: dict[str, set[Schema.ColumnType]] | None = None  # Only for TABLE types, None means no restriction
     description: str | None = None
     required: bool = True
     
@@ -180,7 +227,10 @@ class InPort(BaseModel):
         if schema.type == Schema.DataType.TABLE and self.table_columns is not None:
             # If the incoming schema has no column info, raise error
             if schema.columns is None:
-                return False
+                if self.table_columns is None:
+                    return True  # Accept any columns
+                else:
+                    return False  # Cannot verify required columns
 
             # Ensure every required column is present and its declared types
             # are compatible with what this port expects.
@@ -378,6 +428,36 @@ class CmpCondition(BaseModel):
         }
         return type_map[col_type]
 
+    def _get_value(
+        self, data: Data, col_name: str | None, idx: int | None
+    ) -> int | float | str | bool:
+        """Get scalar value from Data (handles primitive and TABLE with row index).
+
+        Returns:
+            Scalar value (int, float, str, or bool)
+        """
+        if col_name is None:
+            # Primitive type - return payload directly
+            payload = data.payload
+            assert isinstance(payload, (int, float, str, bool))
+            return payload
+
+        # TABLE type - must have idx to return scalar
+        assert isinstance(data.payload, DataFrame)
+        if idx is None:
+            raise NodeExecutionError(
+                f"Cannot get scalar value from column '{col_name}' without row index (idx is None)."
+            )
+
+        # Use .iat for fast scalar access by integer position
+        col_idx = data.payload.columns.get_loc(col_name)
+        if not isinstance(col_idx, int):
+            # get_loc can return slice or array for duplicate columns
+            raise NodeExecutionError(
+                f"Column '{col_name}' has ambiguous location (duplicate columns?)."
+            )
+        return data.payload.iat[idx, col_idx]  # type: ignore[return-value]
+
     def dynamic_validate(self, data: dict[str, Data]) -> None:
         pass # no need for more dynamic validation
 
@@ -422,31 +502,3 @@ class CmpCondition(BaseModel):
 
         # Ensure return type is bool (handle numpy bool)
         return bool(result)
-
-    def _get_value(self, data: Data, col_name: str | None, idx: int | None) -> int | float | str | bool:
-        """Get scalar value from Data (handles primitive and TABLE with row index).
-        
-        Returns:
-            Scalar value (int, float, str, or bool)
-        """
-        if col_name is None:
-            # Primitive type - return payload directly
-            payload = data.payload
-            assert isinstance(payload, (int, float, str, bool))
-            return payload
-
-        # TABLE type - must have idx to return scalar
-        assert isinstance(data.payload, DataFrame)
-        if idx is None:
-            raise NodeExecutionError(
-                f"Cannot get scalar value from column '{col_name}' without row index (idx is None)."
-            )
-        
-        # Use .iat for fast scalar access by integer position
-        col_idx = data.payload.columns.get_loc(col_name)
-        if not isinstance(col_idx, int):
-            # get_loc can return slice or array for duplicate columns
-            raise NodeExecutionError(
-                f"Column '{col_name}' has ambiguous location (duplicate columns?)."
-            )
-        return data.payload.iat[idx, col_idx]  # type: ignore[return-value]

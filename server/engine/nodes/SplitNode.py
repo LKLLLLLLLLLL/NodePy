@@ -1,7 +1,7 @@
 from .BaseNode import BaseNode, NodeValidationError, InPort, OutPort, Data, Schema
 from pandas import DataFrame
 from typing import List
-from .Utils import Visualization
+from .Utils import Visualization, INDEX_COLUMN_NAME
 
 
 class SplitNode(BaseNode):
@@ -59,6 +59,7 @@ class SplitNode(BaseNode):
         """
         Centralized schema computation logic.
         This ensures infer_output_schema and process return consistent schemas.
+        Note: _index column is always preserved in all outputs.
         """
         out: dict[str, Schema] = {}
         
@@ -70,12 +71,15 @@ class SplitNode(BaseNode):
 
         # determine output columns
         if self.reserved_columns is None:
-            # keep same columns as input
+            # keep same columns as input (including _index)
             for i in range(len(self.split_values)):
                 out[f"out_{i}"] = Schema(type=Schema.DataType.TABLE, columns=input_schema.columns)
         else:
-            # restrict to reserved_columns
-            cols = {c: input_schema.columns[c] for c in self.reserved_columns if c in input_schema.columns}
+            # restrict to reserved_columns, but always include _index
+            cols = {INDEX_COLUMN_NAME: input_schema.columns[INDEX_COLUMN_NAME]}  # Always include _index
+            for c in self.reserved_columns:
+                if c in input_schema.columns:
+                    cols[c] = input_schema.columns[c]
             for i in range(len(self.split_values)):
                 out[f"out_{i}"] = Schema(type=Schema.DataType.TABLE, columns=cols)
         return out
@@ -109,9 +113,12 @@ class SplitNode(BaseNode):
         outputs: dict[str, Data] = {}
         for i, val in enumerate(self.split_values):
             if self.reserved_columns is None:
+                # Keep all columns (including _index)
                 sub = data.loc[data[self.split_column] == val].copy()
             else:
-                sub = data.loc[data[self.split_column] == val, self.reserved_columns].copy()
+                # Keep reserved_columns plus _index
+                cols_to_keep = [INDEX_COLUMN_NAME] + self.reserved_columns
+                sub = data.loc[data[self.split_column] == val, cols_to_keep].copy()
 
             outputs[f"out_{i}"] = Data(
                 sche=output_schemas[f"out_{i}"],

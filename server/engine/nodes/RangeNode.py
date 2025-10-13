@@ -1,6 +1,6 @@
 from .BaseNode import BaseNode, NodeValidationError, InPort, OutPort, Data, Schema
 from pandas import DataFrame
-from .Utils import Visualization
+from .Utils import Visualization, add_index_column, validate_no_index_column_conflict, INDEX_COLUMN_NAME
 
 class RangeNode(BaseNode):
     """
@@ -20,6 +20,10 @@ class RangeNode(BaseNode):
             raise NodeValidationError("step must be positive.")
         if self.column_name == "" or self.column_name.strip() == "":
             raise NodeValidationError("column_name cannot be empty.")
+        
+        # Validate that _index column is not used
+        validate_no_index_column_conflict([self.column_name])
+        
         if isinstance(self.start, int) and isinstance(self.end, int) and isinstance(self.step, int):
             return
         elif isinstance(self.start, float) and isinstance(self.end, float) and isinstance(self.step, float):
@@ -39,16 +43,14 @@ class RangeNode(BaseNode):
         Centralized schema computation logic.
         This ensures infer_output_schema and process return consistent schemas.
         """
+        cols = {INDEX_COLUMN_NAME: {Schema.ColumnType.INT}}  # Add _index column
+        
         if isinstance(self.start, int) and isinstance(self.end, int) and isinstance(self.step, int):
-            return Schema(
-                type=Schema.DataType.TABLE,
-                columns={self.column_name: {Schema.ColumnType.INT}}
-            )
+            cols[self.column_name] = {Schema.ColumnType.INT}
         else:
-            return Schema(
-                type=Schema.DataType.TABLE,
-                columns={self.column_name: {Schema.ColumnType.FLOAT}}
-            )
+            cols[self.column_name] = {Schema.ColumnType.FLOAT}
+            
+        return Schema(type=Schema.DataType.TABLE, columns=cols)
     
     def infer_output_schema(self, input_schema: dict[str, Schema]) -> dict[str, Schema]:
         # Delegate to centralized schema computation
@@ -66,6 +68,10 @@ class RangeNode(BaseNode):
                 current += self.step
         
         table = DataFrame({self.column_name: data})
+        
+        # Add automatic index column
+        table = add_index_column(table)
+        
         self.vis = Visualization(
             node_id=self.id,
             type=Visualization.Type.TABLE,
