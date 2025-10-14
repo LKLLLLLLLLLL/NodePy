@@ -13,9 +13,23 @@ const y = computed(() => `${Math.round(props.position.y)}px`)
   <!-- 节点内容 -->
   <div class="custom-node" style="position:relative">
     <!-- 左边一个 target 把手 -->
-    <Handle id="targer-1" type="target" :position="Position.Left" style="top: 5px" />
-    <Handle id="targer-2" type="target" :position="Position.Left" style="top: 15px" />
-    <Handle id="targer-3" type="target" :position="Position.Left" style="top: 25px" />
+    <Handle
+    id="target-1"
+    type="target"
+    :position="Position.Left"
+    style="top: 5px"
+    />
+    <Handle
+    id="target-2"
+    type="target"
+    :position="Position.Left"
+    style="bottom: -5px; top: auto;"
+    />
+    <Handle
+    id="target-3"
+    type="target"
+    :position="Position.Left"
+    />
 
 
     <div>{{ data.label }}</div>

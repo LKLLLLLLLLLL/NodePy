@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'  
 import { VueFlow, useVueFlow, Panel } from '@vue-flow/core'
+import { Background } from '@vue-flow/background'
+import { MiniMap } from '@vue-flow/minimap'
 import CustomNode from './nodes/CustomNode.vue'
-const { onConnect } = useVueFlow()
+const { onConnect, onInit, removeEdges} = useVueFlow()
 
 onConnect(({ source, target, sourceHandle, targetHandle }) => {
   console.log('source', source)
@@ -65,7 +67,12 @@ const edges = ref([
   },
 ])
 
-const { removeEdges } = useVueFlow()
+
+// any event that is emitted from the `<VueFlow />` component can be listened to using the `onEventName` method
+onInit((instance) => {
+  // `instance` is the same type as the return of `useVueFlow` (VueFlowStore)
+  instance.fitView()
+})
 
 function removeOneEdge() {
   removeEdges('e1->2')
@@ -73,12 +80,21 @@ function removeOneEdge() {
 
 function removeMultipleEdges() {
   removeEdges(['e1->3', 'e2->3'])
+  console.log(edges.value)
 }
 </script>
 
 <template>
   <div class="box">
-    <VueFlow :nodes="nodes" :edges="edges">
+    <VueFlow
+    v-model:nodes="nodes"
+    v-model:edges="edges"
+    connection-mode="strict"
+    >
+      <Background color="#111" bgColor="rgba(0,0,0,0.5)"/>
+
+      <MiniMap mask-color="rgba(0,0,0,0.1)" pannable zoomable position="bottom-left"/>
+
       <template #node-custom="customNodeProps">
         <CustomNode v-bind="customNodeProps"/> 
       </template>
@@ -91,16 +107,21 @@ function removeMultipleEdges() {
 </template>
 
 <style lang="scss">
+/*import default minimap styles*/
+@import '@vue-flow/minimap/dist/style.css' ;
+
 /* import the necessary styles for Vue Flow to work */
 @import '@vue-flow/core/dist/style.css';
 
 /* import the default theme, this is optional but generally recommended */
 @import '@vue-flow/core/dist/theme-default.css';
+
 </style>
 
 <style lang="scss" scoped>
   .box {
     flex: 1;
     border: 1px solid black;
+    background: #fff;
   }
 </style>
