@@ -9,7 +9,7 @@ A series of node which operate columns of table.
 """
 
 
-class SplitNode(BaseNode):
+class SplitColNode(BaseNode):
     """
     Split an input table into multiple output tables by values of a column.
 
@@ -277,3 +277,13 @@ class SelectColNode(BaseNode):
                 sche=self._compute_output_schema(input["input"].sche), payload=result
             )
         }
+
+
+class JoinColNode(BaseNode):
+    """
+    A node to join two tables with given condition.
+    Only support simple compare condition(==, !=, >, >=, <, <=) between two columns of the two tables.
+    If user provides none condition, meas Cartesian product.
+    Only support inner join.
+    This node implement can be very slow.
+    """

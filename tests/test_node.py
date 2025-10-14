@@ -16,7 +16,7 @@ from server.engine.nodes.ComputeNode import (
 from server.engine.nodes.GenNode import ConstNode
 from server.engine.nodes.PlotNode import PlotNode
 from server.engine.nodes.TableGenNode import RandomNode, RangeNode, TableNode
-from server.engine.nodes.TableColNode import SelectColNode, SplitNode
+from server.engine.nodes.TableColNode import SelectColNode, SplitColNode
 from server.engine.nodes.StringComputeNode import (
     ClipStringNode,
     StripStringNode,
@@ -245,7 +245,7 @@ def test_select_and_split_node_behaviour_and_infer():
     with pytest.raises(NodeExecutionError):
         node.execute({"input": Data(sche=Schema(type=Schema.DataType.TABLE, columns=None), payload=df2)})
 
-    sp = SplitNode(id="sp", name="sp", type="SplitNode", split_column="k", split_values=["a","b"], reserved_columns=None, global_config=GLOBAL_CFG)
+    sp = SplitColNode(id="sp", name="sp", type="SplitNode", split_column="k", split_values=["a","b"], reserved_columns=None, global_config=GLOBAL_CFG)
     df3 = DataFrame({"k": ["a","b","a"]})
     df3.insert(0, INDEX_COLUMN_NAME, range(len(df3)))
     outsp = sp.execute({"input": Data(sche=Schema(type=Schema.DataType.TABLE, columns={INDEX_COLUMN_NAME:{Schema.ColumnType.INT}, "k":{Schema.ColumnType.STR}}), payload=df3)})

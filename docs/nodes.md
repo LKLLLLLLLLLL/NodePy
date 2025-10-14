@@ -34,6 +34,10 @@
   - [RangeNode](#rangenode)
   - [SelectColNode](#selectcolnode)
   - [SplitNode](#splitnode)
+  - [JoinColNode](#joincolnode)
+  - [TableFilterNode](#TableFilterNode)
+  - [TableRowAppendNode](#tablerowappendnode)
+  - [TableSortNode](#tablesortnode)
 - [表格计算节点](#表格计算节点)
   - [TableCmpNode](#tablecmpnode)
   - [TableBinNumComputeNode](#tablebinnumcomputenode)
@@ -532,6 +536,130 @@
 连接包含 "market", "stock_code", "price", "volume", "industry" 列的股票表格，预期行为: 输出两个表格：
 - out_0: 沪市主板股票，包含 "_index", "stock_code", "price", "volume" 列
 - out_1: 深市主板股票，包含 "_index", "stock_code", "price", "volume" 列
+
+
+### JoinColNode
+
+**操作**: 将两个表按照指定列进行连接（join），支持 inner/left/right/outer。
+
+**参数**:
+- `left_on`: 左表用于 join 的列名 (str)
+- `right_on`: 右表用于 join 的列名 (str)
+- `how`: join 类型 (`"inner" | "left" | "right" | "outer"`)，默认 `"inner"`
+- `op`: 比较操作 (`"EQ","NE","GT","LT","GE","LE"`)，用于指定用户提供的连接谓词（默认 `"EQ"`）
+
+> 注：该节点现在使用 `Utils.CmpCondition` 来表示和校验用户提供的连接条件（left=("left_table", left_on), right=("right_table", right_on)）。连接在运行时通过逐对评估条件来匹配行（实现为 O(N*M) 的逐对检查），因此在数据量大时可能较慢；后续可以针对常见等值连接优化为向量化实现。
+
+**输入**:
+- `left_table`: 左表 (TABLE)
+- `right_table`: 右表 (TABLE)
+
+**输出**:
+- `output`: join 后的表格 (TABLE)。若任一输入表的列信息未知（columns=None），则输出的 columns 也为 None。
+
+**静态校验**:
+- 要求两侧表均包含 `_index` 列。
+- 要求 join 列在各自表的 schema 中存在（如果 schema 已知）。
+- 若两侧存在非 `_index` 的同名列，则静态阶段会报错以避免歧义（可按需改为自动重命名策略）。
+
+**示例**:
+```json
+{
+  "id": "join1",
+  "name": "按代码合并基本面与行情",
+  "type": "JoinColNode",
+  "left_on": "stock_code",
+  "right_on": "code",
+  "op": "EQ",
+  "how": "inner"
+}
+```
+
+### TableFilterNode
+
+**操作**: 根据给定列与原始值的比较条件将表格拆分为两张表：满足条件的 `matched` 与不满足的 `unmatched`。
+
+**参数**:
+- `column`: 要比较的列名 (str)
+- `op`: 比较操作 (`"EQ","NE","GT","LT","GE","LE"`)
+
+- `value`: 用于比较的原始值 (int|float|str|bool)。注意：在实现中该值应通过 `value` 输入端口提供（见下文输入项）。
+
+**输入**:
+- `input`: 输入表格 (TABLE)
+- `value`: 比较值（可通过端口或参数提供）
+
+注意：`TableFilterNode` 使用 `Utils.CmpCondition` 来表示比较条件（left=("input", column), right=("value", None)）。运行时会对每一行逐一调用 `CmpCondition.evaluate(...)` 进行判断（非向量化），以保证与 `CmpCondition` 的静态/动态校验逻辑一致。
+
+**输出**:
+- `matched`: 满足条件的子表 (TABLE)
+- `unmatched`: 不满足条件的子表 (TABLE)
+
+**静态与运行时行为**:
+- 当输入表的 schema 已知且包含列信息时，输出表在静态阶段会被推断为与输入表相同的列集合。
+- 运行时会验证输入表非空且包含指定列。
+
+**示例**:
+```json
+{
+  "id": "filter1",
+  "name": "筛选高价股",
+  "type": "TableFilterNode",
+  "column": "price",
+  "op": "GT",
+  "value": 100
+}
+```
+
+### TableRowAppendNode
+
+**操作**: 将两张表按行追加（append）成一张表，并重建 `_index` 列为连续索引。
+
+**参数**: 无
+
+**输入**:
+- `table`: 目标表 (TABLE)
+- `to_append`: 要追加的表 (TABLE)
+
+**输出**:
+- `output`: 追加并重建 `_index` 的表 (TABLE)
+
+**静态校验**:
+- 要求两张表的 schema.columns 必须存在且列集合一致（包括 `_index`）。若列信息未知则输出 columns=None。
+
+**示例**:
+```json
+{
+  "id": "append1",
+  "name": "追加日内成交",
+  "type": "TableRowAppendNode"
+}
+```
+
+### TableSortNode
+
+**操作**: 按指定列对表格排序，生成排序后的表格。
+
+**参数**:
+- `column`: 排序列名 (str)
+- `ascending`: 是否升序 (bool, 默认 true)
+
+**输入**:
+- `input`: 输入表格 (TABLE)
+
+**输出**:
+- `output`: 排序后的表格 (TABLE)
+
+**示例**:
+```json
+{
+  "id": "sort1",
+  "name": "按价格排序",
+  "type": "TableSortNode",
+  "column": "price",
+  "ascending": false
+}
+```
 
 ## 表格计算节点
 

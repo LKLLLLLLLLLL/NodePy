@@ -1,6 +1,7 @@
 from .BaseNode import BaseNode, InPort, OutPort, Data, Schema, NodeValidationError
 from .Utils import Visualization, CmpCondition
 from typing import Literal
+from pydantic import PrivateAttr
 
 """
 A series of nodes to compute int, float, bool values (primitive values).
@@ -123,7 +124,7 @@ class CmpNode(BaseNode):
     """
 
     op: Literal["EQ", "NE", "GT", "LT", "GE", "LE"]
-    _cond: CmpCondition | None = None
+    _cond: CmpCondition | None = PrivateAttr(default=None)
 
     def validate_parameters(self) -> None:
         if not self.type == "CmpNode":

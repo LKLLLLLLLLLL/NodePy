@@ -3,6 +3,7 @@ from .Utils import Visualization, validate_no_index_column_conflict, CmpConditio
 from pandas import DataFrame
 from typing import Literal
 import operator
+from pydantic import PrivateAttr
 
 """
 A series of nodes to compute columns of tables vectorizedly.
@@ -258,7 +259,7 @@ class TableCmpNode(BaseNode):
     op: Literal["EQ", "NE", "GT", "LT", "GE", "LE"]
     column: str
     result_col: str
-    _cond: CmpCondition | None = None
+    _cond: CmpCondition | None = PrivateAttr(default=None)
 
     def validate_parameters(self) -> None:
         if not self.type == "TableCmpNode":
