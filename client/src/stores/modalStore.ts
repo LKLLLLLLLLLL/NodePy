@@ -2,7 +2,6 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { ModalInstance } from '@/types/modalType';
 let baseZIndex = 1000;
-const initialPosition = {x: 100, y: 100};
 export const useModalStore = defineStore('modal', () => {
     const modals = ref<ModalInstance[]>([]);
 
@@ -16,9 +15,13 @@ export const useModalStore = defineStore('modal', () => {
             title: modal.title,
             content: modal.content,
             isActive: modal.isActive,
+            isResizable: modal.isResizable,
             props: modal.props,
             zIndex: baseZIndex++,
-            position: modal.position || { ...initialPosition },
+            position: modal.position || { x: 100, y: 100 },
+            size: modal.size || { width: 200, height: 200 },
+            minSize: modal.minSize || { width: 100, height: 100 },
+            maxSize: modal.maxSize,
             component: modal.component,
             onSubmit: modal.onSubmit
         }
@@ -66,5 +69,12 @@ export const useModalStore = defineStore('modal', () => {
         }
     }
 
-    return { modals, createModal, destroyModal, activateModal, deactivateModal, updateModalInfo , bringToFront, updateModalPosition };
+    function updateModalSize(id:string,size:{width:number,height:number}){
+        const modal = modals.value.find(modal => modal.id === id);
+        if(modal){
+            modal.size = size;
+        }
+    }
+
+    return { modals, createModal, destroyModal, activateModal, deactivateModal, updateModalInfo , bringToFront, updateModalPosition, updateModalSize };
 });

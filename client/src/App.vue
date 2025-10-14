@@ -14,29 +14,18 @@
         <div class = "up-container">
             <ControlBar />
         </div>
-        <Splitpanes 
+        <!-- <Splitpanes 
             class = "down-container"
             vertical
         >
-            <Pane :size="15" :min-size="10">
-                <NodeSelector />
+            <Pane :size="70">
+                <Graph />
             </Pane>
-            <Pane :size="70" :min-size="40">
-                <Splitpanes
-                    horizontal
-                >
-                    <Pane :size="40" :min-size="20">
-                        <Result/>
-                    </Pane>
-                    <Pane :size="60" :min-size="20">
-                        <Graph />
-                    </Pane>
-                </Splitpanes>
+            <Pane :size="30">
+                <Result />
             </Pane>
-            <Pane :size="15" :min-size="10">
-                <Property/>
-            </Pane>
-        </Splitpanes>
+        </Splitpanes> -->
+        <Graph></Graph>
     </div>
     <ModalManager />
 </template>
@@ -51,11 +40,12 @@
         height: 50px;
         width: 100%;
     }
-    .down-container{
-        flex: 1;
-    }
+    // .down-container{
+    //     flex: 1;
+    //     width: 100%;
+    // }
 </style>
-<style lang = "scss">
+<!-- <style lang = "scss">
     @import 'splitpanes/dist/splitpanes.css';
     .splitpanes__pane {
         display: flex;
@@ -70,4 +60,4 @@
     .splitpanes--horizontal > .splitpanes__splitter {
         height: 6px;
     }
-</style>
+</style> -->

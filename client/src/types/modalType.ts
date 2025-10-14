@@ -5,9 +5,13 @@ export interface ModalInstance{
     title: string;
     content?: string;
     isActive: boolean;
+    isResizable: boolean;
     component?: Component;
     zIndex?: number;
-    position?: {x: number, y: number};
+    position: {x: number, y: number};
+    size: {width: number, height: number};
+    minSize?: {width: number, height: number};
+    maxSize?: {width: number, height: number};
     props?: Record<string, any>;
     onSubmit?: () => void;
 }

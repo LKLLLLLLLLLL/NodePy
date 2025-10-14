@@ -20,8 +20,8 @@
 <style scoped lang = "scss">
     .modal-manager{
         position: fixed;
-        top: 40%;
-        left: 40%;
+        top: 0;
+        left: 0;
         width: 0;
         height: 0;
         pointer-events: none;
