@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Position, Handle } from '@vue-flow/core'
+import { Position, Handle, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
-  
+import { NodeToolbar } from '@vue-flow/node-toolbar'
+import { NodeResizer } from '@vue-flow/node-resizer'
+
 const props = defineProps<NodeProps>()
+const {removeNodes} = useVueFlow()
 
 const x = computed(() => `${Math.round(props.position.x)}px`)
 const y = computed(() => `${Math.round(props.position.y)}px`)
@@ -12,6 +15,10 @@ const y = computed(() => `${Math.round(props.position.y)}px`)
 <template>
   <!-- 节点内容 -->
   <div class="custom-node" style="position:relative">
+    <NodeToolbar :node-id="props.id">
+      <button @click="removeNodes(props.id)">🗑</button>
+    </NodeToolbar>
+
     <!-- 左边一个 target 把手 -->
     <Handle
     id="target-1"
@@ -54,4 +61,9 @@ const y = computed(() => `${Math.round(props.position.y)}px`)
   align-items: center;
   gap: 6px;
 }
+</style>
+
+<style lang="scss">
+  // make sure to include the necessary styles!
+  @import '@vue-flow/node-resizer/dist/style.css';
 </style>

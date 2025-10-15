@@ -1,8 +1,10 @@
-<script setup>
+<script lang='ts' setup>
 import { ref, onMounted } from 'vue'  
 import { VueFlow, useVueFlow, Panel } from '@vue-flow/core'
+import type { Node, Edge } from '@vue-flow/core'  
 import { Background } from '@vue-flow/background'
-import { MiniMap } from '@vue-flow/minimap'
+import { MiniMap, MiniMapNode } from '@vue-flow/minimap'
+import { Controls } from '@vue-flow/controls'
 import CustomNode from './nodes/CustomNode.vue'
 const { onConnect, onInit, removeEdges} = useVueFlow()
 
@@ -15,7 +17,7 @@ onConnect(({ source, target, sourceHandle, targetHandle }) => {
   console.log('targetHandle', targetHandle)
 })
 
-const nodes = ref([
+const nodes = ref<Node[]>([
   {
     id: '1',
     position: { x: 50, y: 50 },
@@ -82,6 +84,16 @@ function removeMultipleEdges() {
   removeEdges(['e1->3', 'e2->3'])
   console.log(edges.value)
 }
+
+const nodeColor = (node: Node) => {
+  switch (node.type) {
+    case 'input':  return '#6ede87'
+    case 'output': return '#6865A5'
+    case 'custom': return '#ccc'
+    default:       return '#ff0072'
+  }
+}
+
 </script>
 
 <template>
@@ -89,16 +101,18 @@ function removeMultipleEdges() {
     <VueFlow
     v-model:nodes="nodes"
     v-model:edges="edges"
-    connection-mode="strict"
     >
       <Background color="#111" bgColor="rgba(0,0,0,0.5)"/>
 
-      <MiniMap mask-color="rgba(0,0,0,0.1)" pannable zoomable position="bottom-left"/>
+      <MiniMap mask-color="rgba(0,0,0,0.1)" pannable zoomable position="bottom-left" :node-color="nodeColor"/>
+
+      <Controls position="bottom-right"/>
 
       <template #node-custom="customNodeProps">
         <CustomNode v-bind="customNodeProps"/> 
       </template>
-      <Panel>
+
+      <Panel position="top-left">
         <button @click="removeOneEdge">Remove Edge 1</button>
         <button @click="removeMultipleEdges">Remove Edges 2 and 3</button>
       </Panel>
@@ -115,6 +129,9 @@ function removeMultipleEdges() {
 
 /* import the default theme, this is optional but generally recommended */
 @import '@vue-flow/core/dist/theme-default.css';
+
+// import default controls styles
+@import '@vue-flow/controls/dist/style.css';
 
 </style>
 
