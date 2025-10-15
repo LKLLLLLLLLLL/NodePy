@@ -1,57 +1,64 @@
-from pydantic import BaseModel, model_validator
-from typing_extensions import Self
+from .DataType import Schema, Data, Pattern
+from pydantic import BaseModel, model_validator, PrivateAttr
 from abc import abstractmethod
-from typing import Literal
-from .Utils import NodeValidationError, InPort, OutPort, Data, Schema, Visualization, NodeExecutionError, GlobalConfig
+from typing_extensions import Self
+from .Exceptions import NodeParameterError, NodeValidationError, NodeExecutionError
+from .Utils import GlobalConfig
 
 """
-BaseNode definition.
-An abstract base class for all nodes.
+This file defines the base class for all nodes.
 """
+
+class InPort(BaseModel):
+    name: str
+    description: str
+    optional: bool = False # default is False, means this port must be connected
+    accept: Pattern
+    
+    def accept_schema(self, schema: Schema) -> bool:
+        assert isinstance(schema, Schema)
+        return schema in self.accept
+
+class OutPort(BaseModel):
+    name: str
+    description: str
+
 class BaseNode(BaseModel):
     id: str
     name: str
     type: str
-    global_config: GlobalConfig # set by engine
-
-    vis: Visualization | None = None # set by process method
+    global_config: GlobalConfig
+    
+    _schemas_in: dict[str, Schema] | None = PrivateAttr(None) # cache for input schema
+    _schemas_out: dict[str, Schema] | None = PrivateAttr(None) # cache for output schema
 
     """
     methods to be implemented by subclasses
     """
-    
     @abstractmethod
     def validate_parameters(self) -> None:
         """ 
-        validate parameters when constructing the node 
-        as a part of stage1 validation
-        """
-        pass
-    
-    @abstractmethod
-    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
-        """ 
-        define input and output port constraint 
-        as a part of stage2 validation
+        Validate parameters when constructing the node,
+        as a part of stage1 validation(param validation).
         """
         pass
 
     @abstractmethod
-    def validate_input(self, input: dict[str, Data]) -> None:
-        """
-        validate input during processing stage
-        as a part of stage3 validation
-        """
-        pass
-    
-    @abstractmethod
-    def infer_output_schema(self, input_schema: dict[str, Schema]) -> dict[str, Schema]:
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         """ 
-        infer output schema based on input schema during static analysis stage 
-        will be called during stage2 validation, for output schema inference
+        Define input and output port constraint.
+        The in port "accept" will be validate during stage2 validation(static analysis).
         """
         pass
-    
+
+    @abstractmethod
+    def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
+        """ 
+        Infer output schema based on input schema during static analysis stage.
+        will be called during stage2 validation.
+        """
+        pass
+
     @abstractmethod
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         """ 
@@ -59,94 +66,103 @@ class BaseNode(BaseModel):
         
         input: { port_name: data, ... }
         output: { port_name: data, ... }
+        
+        Running as stage3 validation while process.
         """
         pass
     
-    
     """
-    private methods
+    Private methods
     """
-    """ Stage1: simple parameter validation after initialization """
     @model_validator(mode='after')
     def _validate_parameters(self) -> Self:
-        """ validate parameters """
-        # validate BaseNode parameters
-        if self.id == "" or self.id.strip() == "":
-            raise NodeValidationError("Node id cannot be empty.")
-        if self.name == "" or self.name.strip() == "":
-            raise NodeValidationError("Node name cannot be empty.")
-        if self.type == "" or self.type.strip() == "":
-            raise NodeValidationError("Node type cannot be empty.")
-        
-        # call subclass-specific parameter validation
+        """ validate parameters when constructing """
+        if self.id.strip() == "":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="id",
+                err_msg="Node id cannot be empty."
+            )
+        if self.name.strip() == "":
+            raise NodeParameterError(
+                node_id = self.id,
+                err_param_key = "name",
+                err_msg = "Node name cannot be empty."
+            )
+        if self.type.strip() == "":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Node type cannot be empty."
+            )
         self.validate_parameters()
-        
         return self
-
-    def _validate_schem_to_port_def(self, input: dict[str, Schema]) -> None:
+    
+    def _validate_schema_to_port_def(self, input_schema: dict[str, Schema]) -> None:
         in_ports, _ = self.port_def()
-        input_copy = input.copy()
-        if not isinstance(in_ports, list):
-            raise NodeValidationError("port_def must return a list of input ports.")
         for port in in_ports:
-            real_schema = input_copy.get(port.name)
-            if real_schema is None:
-                if port.required:
-                    raise NodeValidationError(f"Required port '{port.name}' not found in schema.")
-                else:
-                    continue
-            # Use the accepts() method which handles type and column validation
-            if not port.accepts(real_schema):
-                expected_types = ", ".join([t.value for t in port.accept_types])
-                if port.table_columns is not None:
+            port_name = port.name
+            sche = input_schema.get(port_name)
+            if sche is None:
+                if not port.optional:
                     raise NodeValidationError(
-                        f"Port '{port.name}' schema mismatch. "
-                        f"Expected TABLE with columns {list(port.table_columns.keys())}, "
-                        f"Got: {real_schema}"
+                        node_id=self.id,
+                        err_input=[port_name],
+                        err_msg=f"Input port '{port_name}' is required but not provided."
                     )
                 else:
-                    raise NodeValidationError(
-                        f"Port '{port.name}' type mismatch. "
-                        f"Expected one of: [{expected_types}], Got: {real_schema.type.value}"
-                    )
-            input_copy.pop(port.name)
-        if input_copy:
-            raise NodeValidationError(f"Extra input ports not defined: {list(input_copy.keys())}")
-    
+                    continue # optional port, can be None
+            if sche not in port.accept:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input=[port_name],
+                    err_msg=f"Input port '{port_name}' schema {sche} not in accepted schemas {port.accept}."
+                )
+        if len(input_schema) > len(in_ports):
+            raise ValueError("Input schema has more ports than defined in port_def.")
+        return
+        
     """
-    methods to be called by the engine
-    """  
-    def get_ports(self) -> dict[Literal["in", "out"], list[InPort] | list[OutPort]]:
-        """ get all ports defination of this node """
+    methods to be called by outside
+    """
+    def get_port(self):
+        """ get all ports definition """
         in_ports, out_ports = self.port_def()
-        return {"in": in_ports, "out": out_ports}
-
-    """ Stage2: static schema inference before execution """
+        return {
+            "input": in_ports,
+            "output": out_ports
+        }
+    
     def infer_schema(self, input: dict[str, Schema]) -> dict[str, Schema]:
-        """ unified static schema inference entry point """
-        try:
-            # 1. validate input schema against port definitions
-            self._validate_schem_to_port_def(input)
-            # 2. infer output schema
-            return self.infer_output_schema(input)
-        except Exception as e:
-            raise NodeValidationError(f"Error inferring schema for node {self.id} ({self.name}): {e}") from e
+        """ static analysis  """
+        self._schemas_in = input
+        # 1. validate input schema against port definitions
+        self._validate_schema_to_port_def(input)
+        # 2. infer output schema
+        self._schemas_out = self.infer_output_schemas(input)
+        return self._schemas_out
     
-    """ Stage3: validate during execution """
     def execute(self, input: dict[str, Data]) -> dict[str, Data]:
-        """ unified execution entry point """
-        try:
-            # 1. static validate input schema against port definitions
-            self._validate_schem_to_port_def({k: v.sche for k, v in input.items()})
-            # 2. dynamic validate input data
-            self.validate_input(input)
-            # 3. process input data
-            return self.process(input)
-        except Exception as e:
-            raise NodeExecutionError(f"Error executing node {self.id} ({self.name}): {e}") from e
-    
-    def visualization(self) -> Visualization:
-        """ return visualization info for front-end to render """
-        if self.vis is None:
-            raise NodeExecutionError(f"Node {self.id} ({self.name}) has no visualization info.")
-        return self.vis
+        """ run time execution """
+        # 1. check if schema is inferred
+        if self._schemas_in is None or self._schemas_out is None:
+            raise NodeExecutionError(
+                node_id=self.id,
+                err_msg="Node schema not inferred before execution."
+            )
+        # 2. check if input data matches input schema
+        input_schemas = {k : v.extract_schema() for k, v in input.items()}
+        if input_schemas != self._schemas_in:
+            raise NodeExecutionError(
+                node_id=self.id,
+                err_msg=f"Input data schema {input_schemas} does not match inferred schema {self._schemas_in}."
+            )
+        # 3. check if output data matches output schema
+        output = self.process(input)
+        output_schema = {k : v.extract_schema() for k, v in output.items()}
+        if output_schema != self._schemas_out:
+            raise NodeExecutionError(
+                node_id=self.id,
+                err_msg=f"Output data schema {output_schema} does not match inferred schema {self._schemas_out}."
+            )
+        return output

@@ -1,4 +1,4 @@
-from .BaseNode import BaseNode
+from ..BaseNode import BaseNode
 
 """
 A series of utility help nodes.

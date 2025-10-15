@@ -2,933 +2,288 @@
 
 本文档描述了 NodePy 项目中所有已实现的节点。每个节点包括其操作描述、接受的参数、输入和输出类型要求，以及一个简单的使用示例。
 
+## 总体逻辑
+
+### 类型系统
+NodePy 的节点系统是一个完全静态类型的节点系统，类型验证分为三个阶段：
+- Stage1 参数验证
+- Stage2 输入输出静态推导
+- Stage3 运行时验证
+
 ## 目录
 
-- [原始值节点](#原始值节点)
-  - [ConstNode](#constnode)
-  - [CmpNode](#cmpnode)
-- [数值计算节点](#数值计算节点)
-  - [BinNumComputeNode](#binnumcomputenode)
-  - [UnaryNumComputeNode](#unarynumcomputenode)
-- [布尔计算节点](#布尔计算节点)
-  - [BoolBinComputeNode](#boolbincomputenode)
-  - [BoolNotNode](#boolnotnode)
-- [字符串处理节点](#字符串处理节点)
-  - [StringNode](#stringnode)
-  - [ClipStringNode](#clipstringnode)
-  - [StripStringNode](#stripstringnode)
-  - [ReplaceStringNode](#replacestringnode)
-  - [JoinStringNode](#joinstringnode)
-  - [SplitStringNode](#splitstringnode)
-  - [UpperStringNode](#upperstringnode)
-  - [LowerStringNode](#lowerstringnode)
-  - [TableAppendStringNode](#tableappendstringnode)
-  - [TablePrependStringNode](#tableprependstringnode)
-  - [TableContainsStringNode](#tablecontainsstringnode)
-  - [TableStartsWithStringNode](#tablestartswithstringnode)
-  - [TableEndsWithStringNode](#tableendswithstringnode)
-  - [TableReplaceStringNode](#tablereplacestringnode)
-- [表格节点](#表格节点)
-  - [TableNode](#tablenode)
-  - [RandomNode](#randomnode)
-  - [RangeNode](#rangenode)
-  - [SelectColNode](#selectcolnode)
-  - [SplitNode](#splitnode)
-  - [JoinColNode](#joincolnode)
-  - [TableFilterNode](#TableFilterNode)
-  - [TableRowAppendNode](#tablerowappendnode)
-  - [TableSortNode](#tablesortnode)
-- [表格计算节点](#表格计算节点)
-  - [TableCmpNode](#tablecmpnode)
-  - [TableBinNumComputeNode](#tablebinnumcomputenode)
-  - [TableUnaryNumComputeNode](#tableunarynumcomputenode)
-  - [TableBoolBinComputeNode](#tableboolbincomputenode)
-- [可视化节点](#可视化节点)
-  - [PlotNode](#plotnode)
+下面按模块列出已实现节点的说明（构造参数、输入接口、输出接口、示例）。示例以伪代码/简短 python 片段说明期望输入 payload 与期望输出。
 
-## 原始值节点
+### 说明约定
+- 构造参数：指在节点实例化时需要/可选传入的字段，类型采用项目中 `Schema`, `ColType`, `TableSchema` 命名。必填项会在 Stage1 校验时被检查。
+- 输入接口：列出输入端口名、可接受的数据类型（例如 `TABLE` / `STR` / `INT` / `FLOAT` / `BOOL`），以及对于 `TABLE` 类型的列要求（若有）
+- 输出接口：列出输出端口名和其输出的 schema 描述
+- 示例：给出节点构造、期望输入 Data（payload 形式）与期望输出 Data（或说明）
+
+## 节点列表
 
 ### ConstNode
+描述：产生一个常量值（原生标量：int/float/str/bool）。
 
-**操作**: 生成一个常量值。
+构造参数：
+- `id: str` （必填）
+- `name: str` （必填）
+- `type: Literal['ConstNode']` （必填，值必须为 'ConstNode'）
+- `value: int|float|str|bool` （必填，类型必须和 data_type 匹配）
+- `data_type: Literal['int','float','str','bool']` （必填，指定 value 的类型）
+- `global_config: GlobalConfig` （必填）
 
-**参数**:
-- `value`: 要生成的常量值 (str | float | int | bool)
-- `data_type`: 值的数据类型 ("str", "float", "int", "bool")
+输入接口：无输入端口。
 
-**输入**: 无
+输出接口：
+- `const` -> 对应 `Schema.Type.INT|FLOAT|STR|BOOL`，与 `data_type` 一致。
 
-**输出**:
-- `output`: 常量值 (类型根据 data_type)
-
-**示例**:
-```json
-{
-  "id": "const1",
-  "name": "阈值常量",
-  "type": "ConstNode",
-  "value": 100000,
-  "data_type": "int"
-}
-```
-预期行为: 输出整数 100000，可用于作为交易金额阈值。
-
-### CmpNode
-
-**操作**: 比较两个相同类型的原始值 (int, float, str, bool)，返回布尔结果。
-
-**参数**:
-- `op`: 比较操作 ("EQ", "NE", "GT", "LT", "GE", "LE")
-
-**输入**:
-- `input1`: 第一个值 (int | float | str | bool)
-- `input2`: 第二个值 (int | float | str | bool，必须与 input1 类型相同)
-
-**输出**:
-- `output`: 比较结果 (bool)
-
-**示例**:
-```json
-{
-  "id": "cmp1",
-  "name": "价格比较",
-  "type": "CmpNode",
-  "op": "GT"
-}
-```
-连接 input1=当前股价, input2=买入价，预期行为: 输出 true 表示股价已上涨。
-
-## 数值计算节点
-
-### BinNumComputeNode
-
-**操作**: 对两个数值执行二元运算。
-
-**参数**:
-- `op`: 操作类型 ("ADD", "SUB", "MUL", "DIV", "POW")
-
-**输入**:
-- `left`: 左操作数 (int | float)
-- `right`: 右操作数 (int | float)
-
-**输出**:
-- `output`: 计算结果 (int | float，根据操作和输入类型)
-
-**示例**:
-```json
-{
-  "id": "calc1",
-  "name": "计算收益率",
-  "type": "BinNumComputeNode",
-  "op": "DIV"
-}
-```
-连接 left=卖出价, right=买入价，预期行为: 输出收益率比例。
-
-### UnaryNumComputeNode
-
-**操作**: 对单个数值执行一元运算。
-
-**参数**:
-- `op`: 操作类型 ("NEG", "ABS", "SQRT")
-
-**输入**:
-- `input`: 操作数 (int | float)
-
-**输出**:
-- `output`: 计算结果 (int | float)
-
-**示例**:
-```json
-{
-  "id": "unary1",
-  "name": "绝对收益率",
-  "type": "UnaryNumComputeNode",
-  "op": "ABS"
-}
-```
-连接 input=-0.05（-5%亏损），预期行为: 输出 0.05（5%绝对收益率）。
-
-## 布尔计算节点
-
-### BoolBinComputeNode
-
-**操作**: 对两个布尔值执行二元运算。
-
-**参数**:
-- `op`: 操作类型 ("AND", "OR", "XOR", "SUB")
-
-**输入**:
-- `left`: 左操作数 (bool)
-- `right`: 右操作数 (bool)
-
-**输出**:
-- `output`: 计算结果 (bool)
-
-**示例**:
-```json
-{
-  "id": "bool1",
-  "name": "多条件买入信号",
-  "type": "BoolBinComputeNode",
-  "op": "AND"
-}
-```
-连接 left=价格上涨信号, right=成交量放大信号，预期行为: 输出 true 表示同时满足买入条件。
-
-### BoolNotNode
-
-**操作**: 对布尔值执行逻辑非运算。
-
-**参数**: 无
-
-**输入**:
-- `input`: 操作数 (bool)
-
-**输出**:
-- `output`: 非运算结果 (bool)
-
-**示例**:
-```json
-{
-  "id": "not1",
-  "name": "反转卖出信号",
-  "type": "BoolNotNode"
-}
-```
-连接 input=买入信号，预期行为: 输出卖出信号（买入信号的反转）。
-
-## 字符串处理节点
+示例：
+- 构造参数：type='ConstNode', value=3, data_type='int'
+- 输入：无
+- 期望输出：输出端口 `const`，payload 为常量值 3（类型 int）
 
 ### StringNode
+描述：产生一个字符串常量。
 
-**操作**: 生成用户提供的字符串。
+构造参数：
+- `id,name,type='StringNode'`
+- `value: str` （必填）
+- `global_config: GlobalConfig`
 
-**参数**:
-- `value`: 要生成的字符串 (str)
+输入接口：无输入端口。
 
-**输入**: 无
+输出接口：
+- `string` -> `Schema.Type.STR`
 
-**输出**:
-- `output`: 字符串值 (str)
+示例：
+- 构造参数：type='StringNode', value='hello'
+- 输入：无
+- 期望输出：输出端口 `string`，payload 为字符串 'hello'
 
-**示例**:
-```json
-{
-  "id": "str1",
-  "name": "股票代码",
-  "type": "StringNode",
-  "value": "000001.SZ"
-}
-```
-预期行为: 输出股票代码字符串 "000001.SZ"。
-
-### ClipStringNode
-
-**操作**: 按起始和结束索引剪切字符串。
-
-**参数**:
-- `start`: 起始索引 (int | None)
-- `end`: 结束索引 (int | None)
-
-**输入**:
-- `input`: 输入字符串 (str)
+### TableNode (Generate.Table.TableNode)
+描述：由用户提供的行（list[dict]）构造一个表（Table）；在构造阶段会推断并缓存每列的类型。
 
-**输出**:
-- `output`: 剪切后的字符串 (str)
+构造参数：
+- `rows: List[Dict[str, int|float|str|bool]]` （必填；每行 dict 的 key 顺序需与 `col_names` 一致）
+- `col_names: List[str]` （必填；列名顺序）
+- `global_config: GlobalConfig`
 
-**示例**:
-```json
-{
-  "id": "clip1",
-  "name": "提取股票代码前缀",
-  "type": "ClipStringNode",
-  "start": 0,
-  "end": 6
-}
-```
-连接 input="000001.SZ"，预期行为: 输出 "000001"。
-
-### StripStringNode
-
-**操作**: 去除字符串两端的指定字符。
-
-**参数**:
-- `chars`: 要去除的字符 (str | None)
+约束：
+- `rows` 不能为空；所有行必须具有与 `col_names` 相同的键集合与顺序；列类型必须在所有行间可一致推断（int 与 float 可升级为 float，bool 单独识别）。
 
-**输入**:
-- `input`: 输入字符串 (str)
+输入接口：无输入端口。
 
-**输出**:
-- `output`: 处理后的字符串 (str)
+输出接口：
+- `table` -> `Schema.Type.TABLE`，`tab` 字段包含每列的 `ColType`（INT/FLOAT/STR/BOOL）。
 
-**示例**:
-```json
-{
-  "id": "strip1",
-  "name": "清理交易备注",
-  "type": "StripStringNode",
-  "chars": null
-}
-```
-连接 input=" 买入信号  "，预期行为: 输出 "买入信号"。
-
-### ReplaceStringNode
-
-**操作**: 替换字符串中的子串。
+示例：
+- 构造参数：type='TableNode', col_names=['a','b'], rows = [{a:1,b:'x'}, {a:2,b:'y'}]
+- 输入：无
+- 期望输出：输出端口 `table`，payload 为一张表，列 a (int) 和 b (str)，含两行数据
 
-**参数**:
-- `old`: 要替换的子串 (str)
-- `new`: 替换为的子串 (str)
+### NumBinComputeNode (二元数值运算，Primitive)
+描述：对两个原生数值（int/float）执行二元运算（ADD, SUB, MUL, DIV, POW 等），根据输入类型推断输出类型（DIV 或任一为 float 时输出 float）。
 
-**输入**:
-- `input`: 输入字符串 (str)
+构造参数：
+- `op: Literal['ADD','SUB','MUL','DIV','POW', ...]`（必填）
+- `id,name,type`，`global_config`
 
-**输出**:
-- `output`: 替换后的字符串 (str)
+输入接口：
+- `x`、`y`（端口接受原生数值 `INT`/`FLOAT`）
 
-**示例**:
-```json
-{
-  "id": "replace1",
-  "name": "格式化市场代码",
-  "type": "ReplaceStringNode",
-  "old": "SH",
-  "new": "SSE"
-}
-```
-连接 input="600000.SH"，预期行为: 输出 "600000.SSE"。
+输出接口：
+- `result` -> `Schema.Type.INT` 或 `Schema.Type.FLOAT`（根据输入及 op 决定）
 
-### MergeStringNode
+示例：
+- 构造参数：op='ADD'
+- 输入：两个原生数值输入 x=3, y=4
+- 期望输出：输出端口 `result`，payload 为数值 7
 
-**操作**: 使用分隔符合并字符串 (当前实现返回原字符串)。
+异常/边界：
+- DIV 运算在运行时如果除数为 0，应抛出 `NodeExecutionError`。
 
-**参数**:
-- `sep`: 分隔符 (str，默认 ",")
+### NumUnaryComputeNode (一元数值运算)
+描述：对一个原生数值执行一元运算（NEG, ABS, SQRT, LOG 等）。
 
-**输入**:
-- `input`: 输入字符串 (str)
+构造参数：
+- `op: Literal['NEG','ABS','SQRT', ...]`
+- `id,name,type,global_config`
 
-**输出**:
-- `output`: 合并后的字符串 (str)
+输入接口：
+- `x` -> 原生数值（INT/FLOAT）
 
-**示例**:
-```json
-{
-  "id": "merge1",
-  "name": "合并字符串节点",
-  "type": "JoinStringNode",
-  "sep": ","
-}
-```
-连接 input="a,b,c"，预期行为: 输出 "a,b,c"。
-
-### SplitStringNode
-
-**操作**: 按分隔符分割字符串，返回包含分割结果的表格。
-
-**参数**:
-- `delimiter`: 分隔符 (str，默认 ",")
-- `column_name`: 输出列名 (str，默认 "value")
-
-**输入**:
-- `input`: 输入字符串 (str)
-
-**输出**:
-- `output`: 包含分割结果的表格 (TABLE)
+输出接口：
+- `result` -> INT/ FLOAT（例如 SQRT 总是 FLOAT）
 
-**示例**:
-```json
-{
-  "id": "split_str1",
-  "name": "分割股票组合",
-  "type": "SplitStringNode",
-  "delimiter": ",",
-  "column_name": "stock_code"
-}
-```
-连接 input="000001,000002,600000"，预期行为: 输出包含列 "stock_code" 和 "_index" 的表格，行数据为 ["000001", "000002", "600000"]。
-
-### UpperStringNode
-
-**操作**: 将字符串转换为大写。
-
-**参数**: 无
-
-**输入**:
-- `input`: 输入字符串 (str)
-
-**输出**:
-- `output`: 大写字符串 (str)
-
-**示例**:
-```json
-{
-  "id": "upper1",
-  "name": "标准化交易指令",
-  "type": "UpperStringNode"
-}
-```
-连接 input="buy"，预期行为: 输出 "BUY"。
-
-### LowerStringNode
-
-**操作**: 将字符串转换为小写。
-
-**参数**: 无
-
-**输入**:
-- `input`: 输入字符串 (str)
-
-**输出**:
-- `output`: 小写字符串 (str)
-
-**示例**:
-```json
-{
-  "id": "lower1",
-  "name": "标准化日志级别",
-  "type": "LowerStringNode"
-}
-```
-连接 input="ERROR"，预期行为: 输出 "error"。
-
-## 表格节点
-
-### TableNode
-
-**操作**: 从用户提供的行数据创建表格。
-
-**参数**:
-- `rows`: 行数据列表，每个元素为字典 (List[Dict[str, Any]])
-- `column_names`: 列名列表 (List[str])
-
-**输入**: 无
-
-**输出**:
-- `output`: 创建的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "table1",
-  "name": "股票价格表",
-  "type": "TableNode",
-  "rows": [
-    {"stock_code": "000001", "price": 10.5, "volume": 1000000},
-    {"stock_code": "000002", "price": 8.3, "volume": 500000}
-  ],
-  "column_names": ["stock_code", "price", "volume"]
-}
-```
-预期行为: 输出包含 "_index", "stock_code", "price", "volume" 列的股票价格表格。
-
-### RandomNode
-
-**操作**: 生成包含随机数列的表格。
-
-**参数**:
-- `data_type`: 数据类型 ("int" | "float")
-- `top`: 随机数上限 (float | int)
-- `bottom`: 随机数下限 (float | int)
-- `seed`: 随机种子 (int | None)
-- `column_name`: 列名 (str)
-
-**输入**: 无
-
-**输出**:
-- `output`: 包含随机数据的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "random1",
-  "name": "模拟交易量",
-  "type": "RandomNode",
-  "data_type": "int",
-  "top": 1000000,
-  "bottom": 10000,
-  "seed": 42,
-  "column_name": "simulated_volume"
-}
-```
-预期行为: 输出包含 "_index" 和 "simulated_volume" 列的表格，simulated_volume 列包含 10000-1000000 之间的随机交易量。
-
-### RangeNode
-
-**操作**: 生成包含范围数列的表格。
-
-**参数**:
-- `start`: 起始值 (float | int)
-- `end`: 结束值 (float | int)
-- `step`: 步长 (float | int)
-- `column_name`: 列名 (str)
-
-**输入**: 无
-
-**输出**:
-- `output`: 包含范围数据的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "range1",
-  "name": "价格区间",
-  "type": "RangeNode",
-  "start": 10.0,
-  "end": 20.0,
-  "step": 0.5,
-  "column_name": "price_levels"
-}
-```
-预期行为: 输出包含 "_index" 和 "price_levels" 列的表格，price_levels 列包含 [10.0, 10.5, 11.0, ..., 19.5]。
-
-### SelectColNode
-
-**操作**: 从输入表格中选择指定的列。
-
-**参数**:
-- `selected_columns`: 要选择的列名列表 (List[str])
-
-**输入**:
-- `input`: 输入表格 (TABLE)
-
-**输出**:
-- `output`: 包含选中列的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "select1",
-  "name": "选择关键指标",
-  "type": "SelectColNode",
-  "selected_columns": ["stock_code", "close_price", "volume"]
-}
-```
-连接包含 "stock_code", "open_price", "close_price", "high", "low", "volume" 列的股票数据表格，预期行为: 输出只包含 "_index", "stock_code", "close_price", "volume" 列的精简表格。
-
-### SplitNode
-
-**操作**: 根据指定列的值将输入表格分割成多个输出表格。
-
-**参数**:
-- `split_column`: 用于分割的列名 (str)
-- `split_values`: 分割值列表 (List[str])
-- `reserved_columns`: 要保留的列名列表 (List[str] | None)
-
-**输入**:
-- `input`: 输入表格 (TABLE)
-
-**输出**:
-- `out_0`, `out_1`, ...: 分割后的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "split1",
-  "name": "按市场分割股票",
-  "type": "SplitNode",
-  "split_column": "market",
-  "split_values": ["沪市主板", "深市主板"],
-  "reserved_columns": ["stock_code", "price", "volume"]
-}
-```
-连接包含 "market", "stock_code", "price", "volume", "industry" 列的股票表格，预期行为: 输出两个表格：
-- out_0: 沪市主板股票，包含 "_index", "stock_code", "price", "volume" 列
-- out_1: 深市主板股票，包含 "_index", "stock_code", "price", "volume" 列
-
-
-### JoinColNode
-
-**操作**: 将两个表按照指定列进行连接（join），支持 inner/left/right/outer。
-
-**参数**:
-- `left_on`: 左表用于 join 的列名 (str)
-- `right_on`: 右表用于 join 的列名 (str)
-- `how`: join 类型 (`"inner" | "left" | "right" | "outer"`)，默认 `"inner"`
-- `op`: 比较操作 (`"EQ","NE","GT","LT","GE","LE"`)，用于指定用户提供的连接谓词（默认 `"EQ"`）
-
-> 注：该节点现在使用 `Utils.CmpCondition` 来表示和校验用户提供的连接条件（left=("left_table", left_on), right=("right_table", right_on)）。连接在运行时通过逐对评估条件来匹配行（实现为 O(N*M) 的逐对检查），因此在数据量大时可能较慢；后续可以针对常见等值连接优化为向量化实现。
-
-**输入**:
-- `left_table`: 左表 (TABLE)
-- `right_table`: 右表 (TABLE)
-
-**输出**:
-- `output`: join 后的表格 (TABLE)。若任一输入表的列信息未知（columns=None），则输出的 columns 也为 None。
-
-**静态校验**:
-- 要求两侧表均包含 `_index` 列。
-- 要求 join 列在各自表的 schema 中存在（如果 schema 已知）。
-- 若两侧存在非 `_index` 的同名列，则静态阶段会报错以避免歧义（可按需改为自动重命名策略）。
-
-**示例**:
-```json
-{
-  "id": "join1",
-  "name": "按代码合并基本面与行情",
-  "type": "JoinColNode",
-  "left_on": "stock_code",
-  "right_on": "code",
-  "op": "EQ",
-  "how": "inner"
-}
-```
-
-### TableFilterNode
-
-**操作**: 根据给定列与原始值的比较条件将表格拆分为两张表：满足条件的 `matched` 与不满足的 `unmatched`。
-
-**参数**:
-- `column`: 要比较的列名 (str)
-- `op`: 比较操作 (`"EQ","NE","GT","LT","GE","LE"`)
-
-- `value`: 用于比较的原始值 (int|float|str|bool)。注意：在实现中该值应通过 `value` 输入端口提供（见下文输入项）。
-
-**输入**:
-- `input`: 输入表格 (TABLE)
-- `value`: 比较值（可通过端口或参数提供）
-
-注意：`TableFilterNode` 使用 `Utils.CmpCondition` 来表示比较条件（left=("input", column), right=("value", None)）。运行时会对每一行逐一调用 `CmpCondition.evaluate(...)` 进行判断（非向量化），以保证与 `CmpCondition` 的静态/动态校验逻辑一致。
-
-**输出**:
-- `matched`: 满足条件的子表 (TABLE)
-- `unmatched`: 不满足条件的子表 (TABLE)
-
-**静态与运行时行为**:
-- 当输入表的 schema 已知且包含列信息时，输出表在静态阶段会被推断为与输入表相同的列集合。
-- 运行时会验证输入表非空且包含指定列。
-
-**示例**:
-```json
-{
-  "id": "filter1",
-  "name": "筛选高价股",
-  "type": "TableFilterNode",
-  "column": "price",
-  "op": "GT",
-  "value": 100
-}
-```
-
-### TableRowAppendNode
-
-**操作**: 将两张表按行追加（append）成一张表，并重建 `_index` 列为连续索引。
-
-**参数**: 无
-
-**输入**:
-- `table`: 目标表 (TABLE)
-- `to_append`: 要追加的表 (TABLE)
-
-**输出**:
-- `output`: 追加并重建 `_index` 的表 (TABLE)
-
-**静态校验**:
-- 要求两张表的 schema.columns 必须存在且列集合一致（包括 `_index`）。若列信息未知则输出 columns=None。
-
-**示例**:
-```json
-{
-  "id": "append1",
-  "name": "追加日内成交",
-  "type": "TableRowAppendNode"
-}
-```
-
-### TableSortNode
-
-**操作**: 按指定列对表格排序，生成排序后的表格。
-
-**参数**:
-- `column`: 排序列名 (str)
-- `ascending`: 是否升序 (bool, 默认 true)
-
-**输入**:
-- `input`: 输入表格 (TABLE)
-
-**输出**:
-- `output`: 排序后的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "sort1",
-  "name": "按价格排序",
-  "type": "TableSortNode",
-  "column": "price",
-  "ascending": false
-}
-```
-
-## 表格计算节点
-
-### TableCmpNode
-
-**操作**: 将表格中的指定列与原始值进行比较，添加结果列。
-
-**参数**:
-- `op`: 比较操作 ("EQ", "NE", "GT", "LT", "GE", "LE")
-- `column`: 要比较的列名 (str)
-- `result_col`: 结果列名 (str)
-
-**输入**:
-- `table_input`: 输入表格 (TABLE)
-- `value_input`: 比较值 (int | float | str | bool)
-
-**输出**:
-- `output`: 添加了比较结果列的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "table_cmp1",
-  "name": "筛选高价股",
-  "type": "TableCmpNode",
-  "op": "GT",
-  "column": "price",
-  "result_col": "is_expensive"
-}
-```
-连接包含 "price" 列的股票表格和 value_input=50.0，预期行为: 输出表格添加 "is_expensive" 列，标识股价是否超过50元。
-
-### TableBinNumComputeNode
-
-**操作**: 对表格列执行二元数值运算，添加结果列。
-
-**参数**:
-- `op`: 操作类型 ("ADD", "SUB", "MUL", "DIV", "POW")
-- `left_col`: 左操作数列名 (str)
-- `right_col`: 右操作数列名 (str | None)
-- `result_col`: 结果列名 (str)
-
-**输入**:
-- `table`: 输入表格 (TABLE)
-- `value`: 右操作数 (int | float，如果 right_col 为 None)
-- `table_right`: 右操作数表格 (TABLE，如果 right_col 不为 None)
-
-**输出**:
-- `output`: 添加了计算结果列的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "table_calc1",
-  "name": "计算涨跌幅",
-  "type": "TableBinNumComputeNode",
-  "op": "DIV",
-  "left_col": "close_price",
-  "right_col": "prev_close",
-  "result_col": "daily_return"
-}
-```
-连接包含 "close_price", "prev_close" 列的股票表格，预期行为: 输出表格添加 "daily_return" 列，计算日收益率。
-
-### TableUnaryNumComputeNode
-
-**操作**: 对表格列执行一元数值运算，添加结果列。
-
-**参数**:
-- `op`: 操作类型 ("NEG", "ABS", "SQRT")
-- `column`: 操作数列名 (str)
-- `result_col`: 结果列名 (str)
-
-**输入**:
-- `table`: 输入表格 (TABLE)
-
-**输出**:
-- `output`: 添加了计算结果列的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "table_unary1",
-  "name": "计算波动率",
-  "type": "TableUnaryNumComputeNode",
-  "op": "SQRT",
-  "column": "variance",
-  "result_col": "volatility"
-}
-```
-连接包含 "variance" 列的表格，预期行为: 输出表格添加 "volatility" 列，包含方差的平方根（波动率）。
-
-### TableBoolBinComputeNode
-
-**操作**: 对表格列执行二元布尔运算，添加结果列。
-
-**参数**:
-- `op`: 操作类型 ("AND", "OR", "XOR", "SUB")
-- `left_col`: 左操作数列名 (str)
-- `right_col`: 右操作数列名 (str | None)
-- `result_col`: 结果列名 (str)
-
-**输入**:
-- `table`: 输入表格 (TABLE)
-- `table_right`: 右操作数表格 (TABLE)
-
-**输出**:
-- `output`: 添加了计算结果列的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "table_bool1",
-  "name": "组合交易信号",
-  "type": "TableBoolBinComputeNode",
-  "op": "AND",
-  "left_col": "price_signal",
-  "right_col": "volume_signal",
-  "result_col": "combined_signal"
-}
-```
-连接包含 "price_signal", "volume_signal" 列的信号表格，预期行为: 输出表格添加 "combined_signal" 列，标识价格和成交量信号同时成立。
-
-## 可视化节点
-
-### PlotNode
-
-**操作**: 使用 matplotlib 根据表格数据生成散点图、线图或柱状图。
-
-**参数**:
-- `x_column`: X轴列名 (str)
-- `y_column`: Y轴列名 (str)
-- `plot_type`: 图表类型 ("scatter", "line", "bar")
-- `title`: 图表标题 (str | None)
-
-**输入**:
-- `input`: 输入表格 (TABLE)
-
-**输出**: 无 (生成图片文件)
-
-**示例**:
-```json
-{
-  "id": "plot1",
-  "name": "股价走势图",
-  "type": "PlotNode",
-  "x_column": "date",
-  "y_column": "close_price",
-  "plot_type": "line",
-  "title": "股票价格走势"
-}
-```
-连接包含 "date", "close_price" 列的股票历史数据表格，预期行为: 生成股价走势的线图图片文件。
-
-## 表格 × 单字符串 操作节点
-
-以下节点把单个字符串（primitive str）与表格的一列进行逐行运算，输出为在表格中新增的一列。所有这些节点在静态分析阶段会推断输出表格的列集合（包含新增 result_col），并在运行时验证输入表格包含指定列且不会与保留的索引列冲突。
-
-### TableAppendStringNode
-
-**操作**: 将给定字符串 append 到每行指定列的字符串末尾，并将结果写入 `result_col`。
-
-**参数**:
-- `column`: 要操作的源列名 (str)
-- `result_col`: 输出结果列名 (str)
-
-**输入**:
-- `table_input`: 输入表格 (TABLE)
-- `value_input`: 要追加的字符串 (str)
-
-**输出**:
-- `output`: 包含新增列的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "t_append1",
-  "name": "给股票代码追加后缀",
-  "type": "TableAppendStringNode",
-  "column": "stock_code",
-  "result_col": "stock_code_tagged"
-}
-```
-
-### TablePrependStringNode
-
-**操作**: 将给定字符串 prepend 到每行指定列的字符串开头，并将结果写入 `result_col`。
-
-**参数/输入/输出**: 同 `TableAppendStringNode`，只是把字符串放在前面。
-
-**示例**:
-```json
-{
-  "id": "t_prepend1",
-  "name": "给代码添加前缀",
-  "type": "TablePrependStringNode",
-  "column": "stock_code",
-  "result_col": "prefixed_code"
-}
-```
-
-### TableContainsStringNode
-
-**操作**: 检查每行指定列的字符串是否包含给定子串，结果为布尔列写入 `result_col`。
-
-**参数**:
-- `column`: 源列名 (str)
-- `result_col`: 输出结果列名 (str)
-
-**输入**:
-- `table_input`: 输入表格 (TABLE)
-- `value_input`: 要搜索的子串 (str)
-
-**输出**:
-- `output`: 包含新增布尔列的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "t_contains1",
-  "name": "代码是否包含300",
-  "type": "TableContainsStringNode",
-  "column": "stock_code",
-  "result_col": "has_300"
-}
-```
-
-### TableStartsWithStringNode / TableEndsWithStringNode
-
-**操作**: 分别检测每行指定列的字符串是否以给定前缀开始或以给定后缀结束，结果为布尔列写入 `result_col`。
-
-**参数/输入/输出**: 与 `TableContainsStringNode` 相同。
-
-**示例**:
-```json
-{
-  "id": "t_starts1",
-  "name": "是否以6开头",
-  "type": "TableStartsWithStringNode",
-  "column": "stock_code",
-  "result_col": "starts_with_6"
-}
-```
-
-### TableReplaceStringNode
-
-**操作**: 在每行指定列的字符串中将 `old` 子串替换为 `new`，结果写入 `result_col`。
-
-**参数**:
-- `column`: 源列名 (str)
-- `result_col`: 输出列名 (str)
-
-**输入**:
-- `table_input`: 输入表格 (TABLE)
-- `old_input`: 要替换的子串 (str)
-- `new_input`: 替换为的子串 (str)
-
-**输出**:
-- `output`: 包含替换结果的新列的表格 (TABLE)
-
-**示例**:
-```json
-{
-  "id": "t_replace1",
-  "name": "替换后缀",
-  "type": "TableReplaceStringNode",
-  "column": "stock_code",
-  "result_col": "code_fixed"
-}
-```
-
-注: 这些节点在静态分析（infer_output_schema）阶段即可推断出新增列的名称和类型（STR 或 BOOL），符合项目“编译期已知列集合”要求；在运行时（validate_input）它们会验证输入表格是否包含指定列并防止 result_col 与保留索引列冲突。
+示例：
+- 构造参数：op='SQRT'
+- 输入：单个数值 x=9.0
+- 期望输出：输出端口 `result`，payload 为数值 3.0（float）
+
+异常/边界：
+- SQRT 对负数会在运行时抛出 `NodeExecutionError`。
+
+### CmpNode（比较运算）
+描述：对两个原生值进行比较（EQ, NE, GT, LT, GE, LE）。Stage2 会校验两边的静态类型一致。
+
+构造参数：
+- `op: Literal['EQ','NE','GT','LT','GE','LE']`
+- `id,name,type,global_config`
+
+输入接口：
+- `x`, `y` -> 接受任意同类型原生值（INT/FLOAT/STR/BOOL），两侧类型需兼容。
+
+输出接口：
+- `result` -> `Schema.Type.BOOL`
+
+示例：
+- 构造参数：op='EQ'
+- 输入：两个同类型原语 x='a', y='a'
+- 期望输出：输出端口 `result`，payload 为布尔值 True
+
+### BoolBinComputeNode / BoolUnaryComputeNode
+描述：对布尔值进行二元（AND, OR, XOR, SUB）或一元（NOT）运算。
+
+构造参数：
+- `op`（二元节点）或无（一元）以及 `id,name,type,global_config`
+
+输入接口：
+- 二元：`x`,`y` -> `Schema.Type.BOOL`
+- 一元：`x` -> `Schema.Type.BOOL`
+
+输出接口：
+- `result` -> `Schema.Type.BOOL`
+
+示例：
+- 构造参数：op='XOR'
+- 输入：两个布尔值 x=true, y=false
+- 期望输出：输出端口 `result`，payload 为 true
+
+### TableAppendStringNode / TablePrependStringNode
+描述：对表中某列的每个值追加或前置一个给定字符串，并写入新的列。
+
+构造参数：
+- `column: str`（被操作的列名，必填）
+- `result_col: str`（输出列名，必填，不能与保留索引列冲突）
+- `id,name,type,global_config`
+
+输入接口：
+- `table_input` -> `Schema.Type.TABLE`，要求 `column` 为 `STR` 类型
+- `value_input` / `string` -> `Schema.Type.STR`（要追加/前置的字符串）
+
+输出接口：
+- `output` -> `Schema.Type.TABLE`（包含原始列 + 新的 `result_col`，类型为 STR）
+
+示例：
+- 构造参数：column='s', result_col='s2'
+- 输入表格：一列 s 包含 ['a','b']
+- 附加字符串输入：'z'
+- 期望输出表格：新增列 s2，其值为 ['az','bz']，其余列保持不变
+
+### TableContainsStringNode / TableStartWithStringNode / TableEndWithStringNode / TableReplaceStringNode / TableStringLengthNode
+描述：针对表列做字符串相关的向量化操作（包含检测、前缀/后缀检测、替换、长度计算），并将结果写到新列。
+
+构造参数（通用）：
+- `column: str`（源列）
+- `result_col: str`（输出列）
+- `id,name,type,global_config`
+
+输入接口（示例）:
+- `table` -> `Schema.Type.TABLE`，要求 `column` 为 STR 类型
+- `substring` / `old` / `new` / `string` 视节点而定 -> `Schema.Type.STR`
+
+输出接口：
+- `output` -> `Schema.Type.TABLE`，新增 `result_col` 类型根据节点而定（BOOL / STR / INT）
+
+示例（contains）：
+- 构造参数：column='s', result_col='has_a'
+- 输入表格：列 s 包含 ['a','ab']
+- 输入参数：substring='a'
+- 期望输出表格：新增列 has_a（布尔），值为 [true, true]
+
+示例（length）：
+- 构造参数：column='s', result_col='len_s'
+- 输入表格：列 s 包含 ['a','ab']
+- 输入：无额外参数
+- 期望输出表格：新增列 len_s（整数），值为 [1,2]
+
+### TabBinPrimNumComputeNode / TabUnaryNumComputeNode
+描述：向量化地对表列进行数值二元/一元运算（例如表列与原生数值或另一列做算术运算，或对列做 SQRT/LOG 等），并把结果写入新列。
+
+构造参数（通用）：
+- `col` / `left_col` / `right_col`：列名
+- `result_col`：输出列名
+- `op`：操作符（ADD, SUB, DIV 等或 LOG/SQRT/NEG）
+- `id,name,type,global_config`
+
+输入接口：
+- `table` -> `Schema.Type.TABLE`（要求相应列存在且类型为 INT/FLOAT）
+- 可选 `value`（原生数值）或 `table_right`（另一张表，需包含 right_col）
+
+输出接口：
+- `table` -> `Schema.Type.TABLE`（包含新增 result_col，类型根据运算与列类型推断；DIV/浮点参与会导致 FLOAT）
+
+异常：
+- 除数为 0、缺少列、或类型不匹配会抛出 `NodeExecutionError` 或 `NodeValidationError`。
+
+示例：
+- 构造参数：op='ADD', col='a', result_col='r'
+- 输入表格：列 a 为 [1,2,3]
+- 额外输入：num=2
+- 期望输出表格：新增列 r，值为 [3,4,5]
+
+### ColBinNumComputeNode / ColBinBoolComputeNode
+描述：对表的两列做按元素（elementwise）运算（数值/布尔），并写回结果列。
+
+构造参数与接口与上类相仿，区别在于两操作数均来自同一张表的不同列。
+
+示例：
+- 构造参数：col1='a', col2='b', result_col='r'
+- 输入表格：列 a=[1,2]，b=[3,4]
+- 期望输出表格：新增列 r=[4,6]
+
+### TabBinPrimBoolComputeNode / TabUnaryBoolComputeNode
+描述：向量化布尔运算（表列与原生布尔值或另一列做 AND/OR/XOR/NOT 等），并在表中写回结果列。
+
+参数、接口、示例与数值向量化节点类似，差别仅在列与输入类型为布尔。
+
+### PlotNode (Visualize.Plot.PlotNode)
+描述：使用 matplotlib 从输入表生成图片（PNG），并把图片路径作为输出。
+
+构造参数：
+- `x_column: str`（必填）
+- `y_column: str`（必填）
+- `plot_type: Literal['scatter','line','bar']`（必填）
+- `title: Optional[str]`（可选，非空字符串）
+- `id,name,type='PlotNode', global_config`
+
+输入接口：
+- `input` -> `Schema.Type.TABLE`，要求 `x_column` 与 `y_column` 为数值列（INT/FLOAT）。注意：此节点在运行时使用 pandas.DataFrame 直接绘图，因此测试中有时用 `Data.model_construct(payload=df)` 传入原始 DataFrame 以避免在 pydantic 层被严格拦截。
+
+输出接口：
+- `plot` -> `Schema.Type.FILE`（输出为文件路径 Path，指向生成的 PNG）
+
+示例：
+- 构造参数：x_column='x', y_column='y', plot_type='scatter'
+- 输入表格：列 x=[1,2,3]，y=[4,5,6]（作为 DataFrame payload）
+- 期望输出：输出端口 `plot`，payload 为生成的 PNG 文件路径，文件包含 xy 散点图
+
+### RandomNode / RangeNode
+描述：表格生成类（RandomNode 生成随机列，RangeNode 生成数值序列列）。当前实现为占位或部分实现（见代码），测试将这些类当作 placeholder 进行抽象校验。
+
+构造参数示例（RangeNode）：
+- `start: int|float`, `end: int|float`, `step: int|float`, `column_name: str`
+
+输出接口：
+- `output` -> `Schema.Type.TABLE`，包含 `_index` 自动索引列以及指定的 `column_name`。
+
+示例（直观）：
+- 构造参数：start=0, end=5, step=2, column_name='a'
+- 输入：无
+- 期望输出表格：列 a 包含 [0,2,4]
+
+### WordCloudNode（占位）
+描述：用 wordcloud 库从词频生成词云图片，目前仓库中仅为占位说明，尚未完整实现外部依赖与参数接口。
+
+---
