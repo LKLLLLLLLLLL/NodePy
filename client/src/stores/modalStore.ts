@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref,markRaw } from 'vue';
 import type { ModalInstance } from '@/types/modalType';
 let baseZIndex = 1000;
 export const useModalStore = defineStore('modal', () => {
@@ -22,7 +22,7 @@ export const useModalStore = defineStore('modal', () => {
             size: modal.size || { width: 200, height: 200 },
             minSize: modal.minSize || { width: 100, height: 100 },
             maxSize: modal.maxSize,
-            component: modal.component,
+            component: modal.component?markRaw(modal.component):undefined,
             onSubmit: modal.onSubmit
         }
         modals.value.push(newModal);

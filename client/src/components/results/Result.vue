@@ -1,15 +1,10 @@
-<script lang = "ts" setup>
+<script lang="ts" setup>
     import { useVueFlow } from '@vue-flow/core';
     import ChartView from './ChartView.vue';
     import TableView from './TableView.vue';
     import FileView from './FileView.vue';
     import ImageView from './ImageView.vue';
     import ValueView from './ValueView.vue';
-
-    const {nodes} = useVueFlow();
-
-    console.log(nodes.value[1])
-    console.log('@@@@@@@',nodes)
 
 </script>
 <template>
