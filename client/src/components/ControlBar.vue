@@ -1,7 +1,10 @@
 <script lang = "ts" setup>
     import { ref } from 'vue';
     import { useModalStore } from '@/stores/modalStore';
+    import Result from './results/Result.vue'
+
     const modalStore = useModalStore();
+
     let resultID = 0;
     let width0 = 400;
     let height0 = 300;
@@ -18,12 +21,14 @@
             position: { x: x0++, y: y0++ },
             minSize: { width: 200, height: 150 },
             maxSize: { width: 800, height: 600 },
+            component: Result
         })
     }
+
 </script>
 <template>
     <div class = "control-bar">
-        <button @click="openResult">ShowResult</button>
+        <button @click="openResult">唤起结果弹窗</button>
     </div>
 </template>
 <style lang = "scss" scoped>

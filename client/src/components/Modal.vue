@@ -193,7 +193,7 @@
                 :is="modal.component" 
                 v-bind="modal.props"
             />
-            <div v-else-if="modal.content">
+            <div v-else-if="modal.content" class = "modal-content">
                 {{ modal.content }}
             </div>
         </div>
@@ -204,19 +204,23 @@
         position: fixed;
         display: flex;
         flex-direction: column;
-        background-color: grey;
+        background-color: rgb(46, 130, 165);
     }
     .modal-head{
         display: flex;
         height: 50px;
         width: 100%;
-        background-color: #585858;
+        background-color: #ba3a3a;
         color: black;
     }
     .modal-body{
+        flex: 3;
         display: flex;
         flex-direction: column;
         color: black;
+    }
+    .modal-content{
+        flex: 1;
     }
     .modal-control{
         height: 100%;
