@@ -1,5 +1,5 @@
 from ..BaseNode import BaseNode, InPort, OutPort, register_node
-from typing import Literal
+from typing import Literal, override
 from ..Exceptions import NodeParameterError
 from ..DataType import Schema, ColType, Pattern, Data, Table
 import matplotlib.pyplot as plt
@@ -13,7 +13,8 @@ class PlotNode(BaseNode):
     y_column: str
     plot_type: Literal["scatter", "line", "bar"]
     title: str | None = None
-    
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "PlotNode":
             raise NodeParameterError(
@@ -40,7 +41,8 @@ class PlotNode(BaseNode):
                 err_msg="If provided, title cannot be empty."
             )
         return
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(
@@ -58,12 +60,14 @@ class PlotNode(BaseNode):
         ], [
             OutPort(name="plot", description="Generated plot image in PNG format")
         ]
-    
+
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         return {
             "plot": Schema(type=Schema.Type.FILE)
         }
-    
+
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         input_table = input["input"].payload
         assert isinstance(input_table, Table)

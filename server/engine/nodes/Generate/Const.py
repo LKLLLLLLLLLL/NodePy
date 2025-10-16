@@ -1,6 +1,6 @@
 from ..BaseNode import InPort, OutPort, BaseNode, register_node
 from ..DataType import Schema, Data
-from typing import Literal, Optional
+from typing import Literal, Optional, override
 from ..Exceptions import NodeParameterError
 
 @register_node
@@ -10,7 +10,8 @@ class ConstNode(BaseNode):
     """
     value: Optional[float | int | str | bool]
     data_type: Literal["float", "int", "str", "bool"]
-    
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "ConstNode":
             raise NodeParameterError(
@@ -47,10 +48,12 @@ class ConstNode(BaseNode):
                     err_msg="value must be bool when data_type is 'bool'."
                 )
         return
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [], [OutPort(name="const", description="The constant value")]
-    
+
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         if self.data_type == "float":
             return {"const": Schema(type=Schema.Type.FLOAT)}
@@ -61,6 +64,7 @@ class ConstNode(BaseNode):
         else:
             raise TypeError(f"Unsupported data_type: {self.data_type}")
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         assert self.value is not None
         return {"const": Data(payload = self.value)}

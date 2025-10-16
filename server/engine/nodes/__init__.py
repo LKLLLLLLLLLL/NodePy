@@ -1,49 +1,66 @@
-"""Package initializer for server.engine.nodes.
+"""
+Auto-discovery and registration system for node modules.
 
-This file performs safe, explicit imports of known node submodules so that
-module-level registration (via decorators like ``@register_node``) runs when
-the package is imported. Imports are wrapped in try/except to avoid breaking
-package import if an optional dependency is missing; failures are printed to
-stderr so they are visible during startup.
+This module automatically imports all Python files in the nodes/ directory tree,
+triggering the @register_node decorators to populate the _NODE_REGISTRY.
+
+Adding new nodes:
+- Simply create a new .py file anywhere under nodes/
+- Decorate your node class with @register_node
+- No need to modify this __init__.py file!
 """
 
-from __future__ import annotations
-
 import importlib
-import sys
+from pathlib import Path
 
-# List of submodules (relative to this package) that define node classes.
-# Keep this explicit so the import order is predictable and easy to control.
-_SUBMODULES = [
-	"BaseNode",
-	"DataType",
-	"Exceptions",
-	"Utils",
-	"Utility.Utility",
+# Files to skip during auto-discovery (infrastructure, not node definitions)
+_SKIP_FILES = {
+    '__init__.py',
+    'BaseNode.py',
+    'DataType.py', 
+    'Exceptions.py',
+    'GlobalConfig.py',
+}
 
-	# generators
-	"Generate.Const",
-	"Generate.String",
-	"Generate.Table",
+def _auto_import_nodes():
+    """
+    Automatically discover and import all node modules.
+    
+    This function walks through all subdirectories under the nodes package,
+    finds all .py files (except those in _SKIP_FILES), and imports them.
+    This triggers the @register_node decorators, populating _NODE_REGISTRY.
+    """
+    # Get the nodes package directory
+    nodes_dir = Path(__file__).parent
+    
+    # Recursively walk through all subdirectories
+    for subdir in nodes_dir.iterdir():
+        if not subdir.is_dir() or subdir.name.startswith('_'):
+            continue
+            
+        # Get all .py files in this subdirectory and its children
+        for py_file in subdir.rglob('*.py'):
+            filename = py_file.name
+            
+            # Skip infrastructure files
+            if filename in _SKIP_FILES:
+                continue
+            
+            # Build the import path relative to the nodes package
+            # e.g., "Generate.Const" or "Compute.String"
+            relative_path = py_file.relative_to(nodes_dir)
+            module_parts = list(relative_path.parts[:-1]) + [relative_path.stem]
+            module_name = '.'.join(module_parts)
+            
+            # Import the module (triggers @register_node decorators)
+            try:
+                importlib.import_module(f'.{module_name}', package=__name__)
+            except Exception as e:
+                # Log the error but don't fail the entire import process
+                print(f"Warning: Failed to import {module_name}: {e}")
 
-	# compute
-	"Compute.Prim",
-	"Compute.String",
-	"Compute.Table",
+# Run auto-discovery when this package is imported
+_auto_import_nodes()
 
-	# visualization
-	"Visualize.Plot",
-	"Visualize.WordCloud",
-
-	# table processors
-	"TableProcess.ColProcess",
-	"TableProcess.RowProcess",
-]
-
-for mod in _SUBMODULES:
-	name = f"{__name__}.{mod}"
-	try:
-		importlib.import_module(name)
-	except Exception as e:
-		# don't raise to keep package import resilient; print warning to stderr
-		print(f"Warning: failed to import node module {name}: {e}", file=sys.stderr)
+# Note: __all__ is intentionally not defined here
+# The registry pattern doesn't require explicit exports

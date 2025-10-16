@@ -2,6 +2,7 @@ from ..BaseNode import BaseNode, InPort, OutPort, register_node
 from ..Exceptions import NodeParameterError, NodeValidationError
 from ..DataType import Data, Schema, Pattern, check_no_illegal_cols, ColType, Table, generate_default_col_name
 import pandas as pd
+from typing import override
 
 """
 This file defines compute nodes for string operations.
@@ -18,6 +19,7 @@ class ClipStringNode(BaseNode):
     start: int | None = None
     end: int | None = None
 
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "ClipStringNode":
             raise NodeParameterError(
@@ -26,6 +28,7 @@ class ClipStringNode(BaseNode):
                 err_msg="Node type must be 'ClipStringNode'."
             )
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="input", description="String input", accept=Pattern(types={Schema.Type.STR}), optional=False)
@@ -33,9 +36,11 @@ class ClipStringNode(BaseNode):
             OutPort(name="output", description="Clipped string")
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         return {"output": Schema(type=Schema.Type.STR)}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         v = input["input"].payload
         assert isinstance(v, str)
@@ -48,6 +53,7 @@ class SubStringNode(BaseNode):
     start: str | None = None
     end: str | None = None
 
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "SubStringNode":
             raise NodeParameterError(
@@ -62,6 +68,7 @@ class SubStringNode(BaseNode):
                 err_msg="At least one of start or end must be provided."
             )
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="input", description="String input", accept=Pattern(types={Schema.Type.STR}), optional=False)
@@ -69,9 +76,11 @@ class SubStringNode(BaseNode):
             OutPort(name="output", description="Extracted substring")
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         return {"output": Schema(type=Schema.Type.STR)}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         v = input["input"].payload
         assert isinstance(v, str)
@@ -112,6 +121,7 @@ class StripStringNode(BaseNode):
     """Strip characters from both ends."""
     chars: str | None = None
 
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "StripStringNode":
             raise NodeParameterError(
@@ -120,6 +130,7 @@ class StripStringNode(BaseNode):
                 err_msg="Node type must be 'StripStringNode'."
             )
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="input", description="String input", accept=Pattern(types={Schema.Type.STR}), optional=False)
@@ -127,9 +138,11 @@ class StripStringNode(BaseNode):
             OutPort(name="output", description="Stripped string")
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         return {"output": Schema(type=Schema.Type.STR)}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         v = input["input"].payload
         assert isinstance(v, str)
@@ -142,6 +155,7 @@ class ReplaceStringNode(BaseNode):
     old: str
     new: str
 
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "ReplaceStringNode":
             raise NodeParameterError(
@@ -156,6 +170,7 @@ class ReplaceStringNode(BaseNode):
                 err_msg="old cannot be empty"
             )
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="input", description="String input", accept=Pattern(types={Schema.Type.STR}), optional=False)
@@ -163,9 +178,11 @@ class ReplaceStringNode(BaseNode):
             OutPort(name="output", description="String with replacements")
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         return {"output": Schema(type=Schema.Type.STR)}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         v = input["input"].payload
         assert isinstance(v, str)
@@ -175,7 +192,8 @@ class ReplaceStringNode(BaseNode):
 @register_node
 class UpperStringNode(BaseNode):
     """Convert string to upper case."""
-    
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "UpperStringNode":
             raise NodeParameterError(
@@ -184,6 +202,7 @@ class UpperStringNode(BaseNode):
                 err_msg="Node type must be 'UpperStringNode'."
             )
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="input", description="String input", accept=Pattern(types={Schema.Type.STR}), optional=False)
@@ -191,9 +210,11 @@ class UpperStringNode(BaseNode):
             OutPort(name="output", description="Uppercase string")
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         return {"output": Schema(type=Schema.Type.STR)}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         v = input["input"].payload
         assert isinstance(v, str)
@@ -203,7 +224,8 @@ class UpperStringNode(BaseNode):
 @register_node
 class LowerStringNode(BaseNode):
     """Convert string to lower case."""
-    
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "LowerStringNode":
             raise NodeParameterError(
@@ -212,6 +234,7 @@ class LowerStringNode(BaseNode):
                 err_msg="Node type must be 'LowerStringNode'."
             )
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="input", description="String input", accept=Pattern(types={Schema.Type.STR}), optional=False)
@@ -219,9 +242,11 @@ class LowerStringNode(BaseNode):
             OutPort(name="output", description="Lowercase string")
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         return {"output": Schema(type=Schema.Type.STR)}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         v = input["input"].payload
         assert isinstance(v, str)
@@ -237,8 +262,9 @@ String processing nodes between primitive str and table.
 class TableAppendStringNode(BaseNode):
     """Append a single string to every value in a table column and write to result_col."""
     column: str
-    result_col: str | None # None indicates to use default name
-    
+    result_col: str | None  # None indicates to use default name
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TableAppendStringNode":
             raise NodeParameterError(
@@ -274,6 +300,7 @@ class TableAppendStringNode(BaseNode):
             )
         return
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="table", description="Input table", accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.column: {ColType.STR}}), optional=False),
@@ -282,6 +309,7 @@ class TableAppendStringNode(BaseNode):
             OutPort(name="output", description="Output table with appended strings")
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         table_schema = input_schemas["table"]
         assert table_schema.tab is not None
@@ -300,6 +328,7 @@ class TableAppendStringNode(BaseNode):
 
         return {"output": output_schema}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input["table"].payload
         append_str = input["string"].payload
@@ -317,8 +346,9 @@ class TableAppendStringNode(BaseNode):
 class TablePrependStringNode(BaseNode):
     """Prepend a single string to every value in a table column and write to result_col."""
     column: str
-    result_col: str | None = None # None indicates to use default name
-    
+    result_col: str | None = None  # None indicates to use default name
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TablePrependStringNode":
             raise NodeParameterError(
@@ -354,6 +384,7 @@ class TablePrependStringNode(BaseNode):
             )
         return
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="table", description="Input table", accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.column: {ColType.STR}}), optional=False),
@@ -362,6 +393,7 @@ class TablePrependStringNode(BaseNode):
             OutPort(name="output", description="Output table with prepended strings")
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         table_schema = input_schemas["table"]
         assert table_schema.tab is not None
@@ -379,6 +411,8 @@ class TablePrependStringNode(BaseNode):
         output_schemas = input_schemas["table"].append_col(self.result_col, ColType.STR)
 
         return {"output": output_schemas}
+
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input["table"].payload
         prepend_str = input["string"].payload
@@ -396,8 +430,9 @@ class TablePrependStringNode(BaseNode):
 class TableContainsStringNode(BaseNode):
     """Check whether each value in a table column contains a given substring, output boolean column."""
     column: str
-    result_col: str | None # None indicates to use default name
-    
+    result_col: str | None  # None indicates to use default name
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TableContainsStringNode":
             raise NodeParameterError(
@@ -432,7 +467,8 @@ class TableContainsStringNode(BaseNode):
                 err_msg="column/result_col cannot be _index or _rowid"
             )
         return
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="table", description="Input table", accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.column: {ColType.STR}}), optional=False),
@@ -440,7 +476,8 @@ class TableContainsStringNode(BaseNode):
         ], [
             OutPort(name="output", description="Output table with boolean results")
         ]
-    
+
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert input_schemas["table"].tab is not None
         input_table = input_schemas["table"].tab
@@ -458,6 +495,7 @@ class TableContainsStringNode(BaseNode):
 
         return {"output": output_schema}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input["table"].payload
         substr = input["substring"].payload
@@ -479,7 +517,8 @@ class TableStringLengthNode(BaseNode):
     """Compute the length of each string in a table column, output integer column."""
     column: str
     result_col: str | None
-    
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TableStringLengthNode":
             raise NodeParameterError(
@@ -514,7 +553,8 @@ class TableStringLengthNode(BaseNode):
                 err_msg="column/result_col cannot be _index or _rowid"
             )
         return
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="table", description="Input table", accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.column: {ColType.STR}}), optional=False)
@@ -522,6 +562,7 @@ class TableStringLengthNode(BaseNode):
             OutPort(name="output", description="Output table with string lengths")
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert input_schemas["table"].tab is not None
         input_table = input_schemas["table"].tab
@@ -539,6 +580,7 @@ class TableStringLengthNode(BaseNode):
 
         return {"output": output_schema}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input["table"].payload
         assert isinstance(table, Table)
@@ -554,8 +596,9 @@ class TableStringLengthNode(BaseNode):
 class TableStartWithStringNode(BaseNode):
     """Check whether each value in a table column starts with a given substring, output boolean column."""
     column: str
-    result_col: str | None # None indicates to use default name
-    
+    result_col: str | None  # None indicates to use default name
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TableStartWithStringNode":
             raise NodeParameterError(
@@ -590,7 +633,8 @@ class TableStartWithStringNode(BaseNode):
                 err_msg="column/result_col cannot be _index or _rowid"
             )
         return
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="table", description="Input table", accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.column: {ColType.STR}}), optional=False),
@@ -599,6 +643,7 @@ class TableStartWithStringNode(BaseNode):
             OutPort(name="output", description="Output table with boolean results")
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert input_schemas["table"].tab is not None
         input_table = input_schemas["table"].tab
@@ -616,6 +661,7 @@ class TableStartWithStringNode(BaseNode):
 
         return {"output": output_schema}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input["table"].payload
         substr = input["substring"].payload
@@ -635,8 +681,9 @@ class TableStartWithStringNode(BaseNode):
 class TableEndWithStringNode(BaseNode):
     """Check whether each value in a table column ends with a given substring, output boolean column."""
     column: str
-    result_col: str | None # None indicates to use default name
-    
+    result_col: str | None  # None indicates to use default name
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TableEndWithStringNode":
             raise NodeParameterError(
@@ -672,6 +719,7 @@ class TableEndWithStringNode(BaseNode):
             )
         return
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="table", description="Input table", accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.column: {ColType.STR}}), optional=False),
@@ -680,6 +728,7 @@ class TableEndWithStringNode(BaseNode):
             OutPort(name="output", description="Output table with boolean results")
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert input_schemas["table"].tab is not None
         input_table = input_schemas["table"].tab
@@ -697,6 +746,7 @@ class TableEndWithStringNode(BaseNode):
 
         return {"output": output_schema}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input["table"].payload
         substr = input["substring"].payload
@@ -716,8 +766,9 @@ class TableEndWithStringNode(BaseNode):
 class TableReplaceStringNode(BaseNode):
     """Replace occurrences of old substring with new substring for each value in a table column."""
     column: str
-    result_col: str | None # None indicates to use default name
-    
+    result_col: str | None  # None indicates to use default name
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TableReplaceStringNode":
             raise NodeParameterError(
@@ -752,7 +803,8 @@ class TableReplaceStringNode(BaseNode):
                 err_msg="column/result_col cannot be _index or _rowid"
             )
         return
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name="table", description="Input table", accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.column: {ColType.STR}}), optional=False),
@@ -761,7 +813,8 @@ class TableReplaceStringNode(BaseNode):
         ], [
             OutPort(name="output", description="Output table with replaced values")
         ]
-    
+
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert input_schemas["table"].tab is not None
         input_table = input_schemas["table"].tab
@@ -779,6 +832,7 @@ class TableReplaceStringNode(BaseNode):
 
         return {"output": output_schema}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input["table"].payload
         old_substr = input["old"].payload

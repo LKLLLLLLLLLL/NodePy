@@ -1,5 +1,5 @@
 from ..BaseNode import BaseNode, InPort, OutPort, register_node
-from typing import List, Dict
+from typing import List, Dict, override
 from ..Exceptions import NodeParameterError
 from ..DataType import check_no_illegal_cols, Schema, TableSchema, ColType, Data
 from pydantic import PrivateAttr
@@ -22,8 +22,9 @@ class TableNode(BaseNode):
 
     rows: List[Dict[str, str | int | float | bool]]
     col_names: List[str]
-    _col_types: Dict[str, ColType] | None = PrivateAttr(None) # cache for column types
-    
+    _col_types: Dict[str, ColType] | None = PrivateAttr(None)  # cache for column types
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TableNode":
             raise NodeParameterError(
@@ -112,17 +113,20 @@ class TableNode(BaseNode):
         assert self._col_types is not None
         return
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [], [
             OutPort(name="table", description="The generated table.")
         ]
-    
+
+    @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         assert self._col_types is not None
         return {
             "table": Schema(type=Schema.Type.TABLE, tab=TableSchema(col_types=self._col_types))
         }
-    
+
+    @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         assert self._col_types is not None
         df = DataFrame(self.rows, columns=self.col_names)

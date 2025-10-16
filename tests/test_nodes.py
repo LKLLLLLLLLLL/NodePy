@@ -2,22 +2,9 @@ import pytest
 from pydantic import ValidationError
 from pathlib import Path
 import pandas as pd
-import sys
-from pathlib import Path as _P
 
-# Ensure top-level Utils.py is preferred over a nested package by adjusting sys.path
-_nodes_dir = _P(__file__).resolve().parents[1] / "server" / "engine" / "nodes"
-if str(_nodes_dir) not in sys.path:
-    sys.path.insert(0, str(_nodes_dir))
-
-# Force the import name 'server.engine.nodes.Utils' to resolve to the top-level Utils.py module
-import importlib.util
-import importlib.machinery
-spec = importlib.util.spec_from_file_location("server.engine.nodes.GlobalConfig", str(_nodes_dir / "GlobalConfig.py"))
-utils_mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(utils_mod)
-import sys as _sys
-_sys.modules["server.engine.nodes.GlobalConfig"] = utils_mod
+import server.engine.nodes.GlobalConfig # noqa: F401
+import server.engine.nodes # noqa: F401
 
 from server.engine.nodes.DataType import Data, Table, ColType, TableSchema, Schema
 from server.engine.nodes.Exceptions import NodeParameterError, NodeValidationError, NodeExecutionError

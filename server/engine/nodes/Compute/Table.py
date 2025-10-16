@@ -1,5 +1,5 @@
 from ..BaseNode import BaseNode,InPort, OutPort, register_node
-from typing import Literal
+from typing import Literal, override
 from ..Exceptions import NodeParameterError, NodeValidationError, NodeExecutionError
 from ..DataType import Schema, Pattern, ColType, check_no_illegal_cols, generate_default_col_name, Data, Table
 import numpy as np
@@ -21,8 +21,9 @@ class TabBinPrimNumComputeNode(BaseNode):
     """
     op: Literal["ADD", "SUB", "MUL", "TAB_DIV_PRIM", "PRIM_DIV_TAB", "TAB_POW_PRIM", "PRIM_POW_TAB"]
     col: str # the column to operate on
-    result_col: str | None = None # if None, use default result col name
+    result_col: str | None = None  # if None, use default result col name
 
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TabBinPrimNumComputeNode":
             raise NodeParameterError(
@@ -57,7 +58,8 @@ class TabBinPrimNumComputeNode(BaseNode):
                 err_msg="Result column name cannot start with reserved prefix '_' or be whitespace only."
             )
         return
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name='table', description='Input table', accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.col: {ColType.INT, ColType.FLOAT}}), optional=False),
@@ -65,7 +67,8 @@ class TabBinPrimNumComputeNode(BaseNode):
         ], [
             OutPort(name='table', description='Output table with computed column')
         ]
-    
+
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert input_schemas['table'].tab is not None
         in_tab = input_schemas['table'].tab
@@ -98,6 +101,7 @@ class TabBinPrimNumComputeNode(BaseNode):
 
         return {'table': output_schema}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input['table'].payload
         num = input['num'].payload
@@ -151,8 +155,9 @@ class TabBinPrimBoolComputeNode(BaseNode):
     """
     op: Literal["AND", "OR", "XOR", "PRIM_SUB_TAB", "TAB_SUB_PRIM"]
     col: str # the column to operate on
-    result_col: str | None = None # if None, use default result col name
+    result_col: str | None = None  # if None, use default result col name
 
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TabBinPrimBoolComputeNode":
             raise NodeParameterError(
@@ -187,7 +192,8 @@ class TabBinPrimBoolComputeNode(BaseNode):
                 err_msg="Result column name cannot start with reserved prefix '_' or be whitespace only."
             )
         return
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name='table', description='Input table', accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.col: {ColType.BOOL}}), optional=False),
@@ -195,7 +201,8 @@ class TabBinPrimBoolComputeNode(BaseNode):
         ], [
             OutPort(name='table', description='Output table with computed column')
         ]
-    
+
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert input_schemas['table'].tab is not None
         in_tab = input_schemas['table'].tab
@@ -223,6 +230,7 @@ class TabBinPrimBoolComputeNode(BaseNode):
         output_schema = input_schemas['table'].append_col(self.result_col, ColType.BOOL)
         return {"table": output_schema}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input['table'].payload
         boolean = input['bool'].payload
@@ -266,8 +274,9 @@ class TabUnaryNumComputeNode(BaseNode):
     """
     op: Literal["ABS", "NEG", "EXP", "LOG", "SQRT"]
     col: str # the column to operate on
-    result_col: str | None = None # if None, use default result col name
+    result_col: str | None = None  # if None, use default result col name
 
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TabUnaryNumComputeNode":
             raise NodeParameterError(
@@ -303,6 +312,7 @@ class TabUnaryNumComputeNode(BaseNode):
             )
         return
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name='table', description='Input table', accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.col: {ColType.INT, ColType.FLOAT}}), optional=False)
@@ -310,6 +320,7 @@ class TabUnaryNumComputeNode(BaseNode):
             OutPort(name='table', description='Output table with computed column')
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert input_schemas['table'].tab is not None
         in_tab = input_schemas['table'].tab
@@ -327,6 +338,7 @@ class TabUnaryNumComputeNode(BaseNode):
         
         return {'table': output_schema}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input['table'].payload
         assert isinstance(table, Table)
@@ -373,8 +385,9 @@ class TabUnaryBoolComputeNode(BaseNode):
     """
     op: Literal["NOT"]
     col: str # the column to operate on
-    result_col: str | None = None # if None, use default result col name
+    result_col: str | None = None  # if None, use default result col name
 
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "TabUnaryBoolComputeNode":
             raise NodeParameterError(
@@ -410,6 +423,7 @@ class TabUnaryBoolComputeNode(BaseNode):
             )
         return
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name='table', description='Input table', accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.col: {ColType.BOOL}}), optional=False)
@@ -417,6 +431,7 @@ class TabUnaryBoolComputeNode(BaseNode):
             OutPort(name='table', description='Output table with computed column')
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert input_schemas['table'].tab is not None
         in_tab = input_schemas['table'].tab
@@ -433,6 +448,7 @@ class TabUnaryBoolComputeNode(BaseNode):
         output_schema = input_schemas['table'].append_col(self.result_col, ColType.BOOL)
         return {'table': output_schema}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input['table'].payload
         assert isinstance(table, Table)
@@ -467,8 +483,9 @@ class ColBinNumComputeNode(BaseNode):
     op: Literal["ADD", "SUB", "MUL", "DIV", "POW"]
     col1: str # the first column to operate on
     col2: str # the second column to operate on
-    result_col: str | None = None # if None, use default result col name
+    result_col: str | None = None  # if None, use default result col name
 
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "ColBinNumComputeNode":
             raise NodeParameterError(
@@ -515,7 +532,8 @@ class ColBinNumComputeNode(BaseNode):
                 err_msg="Result column name cannot start with reserved prefix '_' or be whitespace only."
             )
         return
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(
@@ -528,7 +546,8 @@ class ColBinNumComputeNode(BaseNode):
         ], [
             OutPort(name='table', description='Output table with computed column')
         ]
-    
+
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert input_schemas['table'].tab is not None
         in_tab = input_schemas['table'].tab
@@ -562,6 +581,7 @@ class ColBinNumComputeNode(BaseNode):
         
         return {'table': output_schema}
 
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input['table'].payload
         assert isinstance(table, Table)
@@ -608,8 +628,9 @@ class ColBinBoolComputeNode(BaseNode):
     op: Literal["AND", "OR", "XOR", "SUB"]
     col1: str # the first column to operate on
     col2: str # the second column to operate on
-    result_col: str | None = None # if None, use default result col name
+    result_col: str | None = None  # if None, use default result col name
 
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "ColBinBoolComputeNode":
             raise NodeParameterError(
@@ -656,7 +677,8 @@ class ColBinBoolComputeNode(BaseNode):
                 err_msg="Result column name cannot start with reserved prefix '_' or be whitespace only."
             )
         return
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(
@@ -669,7 +691,8 @@ class ColBinBoolComputeNode(BaseNode):
         ], [
             OutPort(name='table', description='Output table with computed column')
         ]
-    
+
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert input_schemas['table'].tab is not None
         in_tab = input_schemas['table'].tab
@@ -686,7 +709,8 @@ class ColBinBoolComputeNode(BaseNode):
         output_schema = input_schemas['table'].append_col(self.result_col, ColType.BOOL)
         
         return {'table': output_schema}
-    
+
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input['table'].payload
         assert isinstance(table, Table)

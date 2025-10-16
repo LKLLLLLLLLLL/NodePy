@@ -1,5 +1,5 @@
 from ..BaseNode import BaseNode, InPort, OutPort, register_node
-from typing import Literal
+from typing import Literal, override
 from ..Exceptions import NodeParameterError, NodeValidationError, NodeExecutionError
 from ..DataType import Data, Schema, Pattern
 
@@ -13,7 +13,8 @@ class NumBinComputeNode(BaseNode):
     A class for binary compute between two numeric inputs(int or float).
     """
     op: Literal["ADD", "SUB", "MUL", "DIV", "POW"]
-    
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "NumBinComputeNode":
             raise NodeParameterError(
@@ -22,6 +23,7 @@ class NumBinComputeNode(BaseNode):
                 err_msg="Node type must be 'NumBinComputeNode'."
             )
 
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name='x', description='First numeric input', accept=Pattern(types={Schema.Type.INT, Schema.Type.FLOAT}), optional=False),
@@ -29,7 +31,8 @@ class NumBinComputeNode(BaseNode):
         ], [
             OutPort(name='result', description='Result of the binary operation')
         ]
-        
+
+
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         x_schema = input_schemas['x']
         y_schema = input_schemas['y']
@@ -47,7 +50,8 @@ class NumBinComputeNode(BaseNode):
             return {'result': Schema(type=Schema.Type.FLOAT)}
         else:
             return {'result': Schema(type=Schema.Type.INT)}
-    
+
+
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         x = input['x'].payload
         y = input['y'].payload
@@ -83,7 +87,8 @@ class NumUnaryComputeNode(BaseNode):
     A node for unary compute on a numeric input(int or float).
     """
     op: Literal["NEG", "ABS", "SQRT"]
-    
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "NumUnaryComputeNode":
             raise NodeParameterError(
@@ -91,7 +96,8 @@ class NumUnaryComputeNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type must be 'NumUnaryComputeNode'."
             )
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name='x', description='Numeric input', accept=Pattern(types={Schema.Type.INT, Schema.Type.FLOAT}), optional=False)
@@ -99,13 +105,15 @@ class NumUnaryComputeNode(BaseNode):
             OutPort(name='result', description='Result of the unary operation')
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         x_schema = input_schemas['x']
         if self.op == "SQRT":
             return {'result': Schema(type=Schema.Type.FLOAT)}
         else:
             return {'result': x_schema}
-    
+
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         x = input['x'].payload
         assert isinstance(x, (int, float))
@@ -136,7 +144,8 @@ class CmpNode(BaseNode):
     The input must be the type of int, float, str or bool.
     """
     op: Literal["EQ", "NE", "GT", "LT", "GE", "LE"]
-    
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "CmpNode":
             raise NodeParameterError(
@@ -144,7 +153,8 @@ class CmpNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type must be 'CmpNode'."
             )
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         primitive_types = Pattern(types={
             Schema.Type.INT,
@@ -159,6 +169,7 @@ class CmpNode(BaseNode):
             OutPort(name='result', description='Comparison result')
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         # Check if both inputs have the same type
         x_type = input_schemas['x'].type
@@ -170,7 +181,8 @@ class CmpNode(BaseNode):
                 err_msg=f"Input types must match: x is {x_type}, y is {y_type}"
             )
         return {'result': Schema(type=Schema.Type.BOOL)}
-    
+
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         x = input['x'].payload
         y = input['y'].payload
@@ -211,7 +223,8 @@ class BoolBinComputeNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type must be 'BoolBinComputeNode'."
             )
-    
+
+    @override 
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name='x', description='First boolean input', accept=Pattern(types={Schema.Type.BOOL}), optional=False),
@@ -220,9 +233,11 @@ class BoolBinComputeNode(BaseNode):
             OutPort(name='result', description='Result of the boolean operation')
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         return {'result': Schema(type=Schema.Type.BOOL)}
-    
+
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         x = input['x'].payload
         y = input['y'].payload
@@ -251,7 +266,8 @@ class BoolUnaryComputeNode(BaseNode):
     Node to compute unary boolean operations.
     Only "NOT" is supported.
     """
-    
+
+    @override
     def validate_parameters(self) -> None:
         if not self.type == "BoolUnaryComputeNode":
             raise NodeParameterError(
@@ -259,7 +275,8 @@ class BoolUnaryComputeNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type must be 'BoolUnaryComputeNode'."
             )
-    
+
+    @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name='x', description='Boolean input', accept=Pattern(types={Schema.Type.BOOL}), optional=False)
@@ -267,9 +284,11 @@ class BoolUnaryComputeNode(BaseNode):
             OutPort(name='result', description='Result of NOT operation')
         ]
 
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         return {'result': Schema(type=Schema.Type.BOOL)}
-    
+
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         x = input['x'].payload
         assert isinstance(x, bool)
