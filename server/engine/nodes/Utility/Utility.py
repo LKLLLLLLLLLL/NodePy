@@ -1,10 +1,10 @@
-from ..BaseNode import BaseNode
+from ..BaseNode import BaseNode, register_node
 
 """
 A series of utility help nodes.
 """
 
-
+@register_node
 class SeqAnalyseNode(BaseNode):
     """
     A node to analyze sequence data, cumulate the frequency of each element in sepecified column.
@@ -12,7 +12,7 @@ class SeqAnalyseNode(BaseNode):
     Export a new table with two columns: element and frequency.
     """
 
-
+@register_node
 class AccumulateNode(BaseNode):
     """
     A node to accumulate values in a specified columns.
@@ -21,7 +21,7 @@ class AccumulateNode(BaseNode):
     The accumulated operation can be sum, average, max, min.
     """
 
-
+@register_node
 class RowDifNode(BaseNode):
     """
     A node to calculate the difference of specified column between each row and the previous row.

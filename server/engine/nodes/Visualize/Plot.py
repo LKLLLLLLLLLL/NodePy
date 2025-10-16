@@ -1,11 +1,10 @@
-from server.engine.nodes.BaseNode import InPort, OutPort
-from ..BaseNode import BaseNode
+from ..BaseNode import BaseNode, InPort, OutPort, register_node
 from typing import Literal
 from ..Exceptions import NodeParameterError
-from ..DataType import Schema, ColType, Pattern, Data
-from pandas import DataFrame
+from ..DataType import Schema, ColType, Pattern, Data, Table
 import matplotlib.pyplot as plt
 
+@register_node
 class PlotNode(BaseNode):
     """
     Node to visualize data from input table using matplotlib.
@@ -51,7 +50,7 @@ class PlotNode(BaseNode):
                 accept=Pattern(
                     types = {Schema.Type.TABLE},
                     table_columns = {
-                        self.x_column: {ColType.INT, ColType.FLOAT},
+                        self.x_column: {ColType.INT, ColType.FLOAT, ColType.STR},
                         self.y_column: {ColType.INT, ColType.FLOAT}
                     }
                 )
@@ -67,11 +66,11 @@ class PlotNode(BaseNode):
     
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         input_table = input["input"].payload
-        assert isinstance(input_table, DataFrame)
-        
-        x_data = input_table[self.x_column]  # type: ignore
-        y_data = input_table[self.y_column]  # type: ignore
-        
+        assert isinstance(input_table, Table)
+
+        x_data = input_table.df[self.x_column]  # type: ignore
+        y_data = input_table.df[self.y_column]  # type: ignore
+
         path = self.global_config.temp_dir / f"{self.id}_plot.png"
         
         plt.figure(figsize=(8, 6))

@@ -1,9 +1,10 @@
-from ..BaseNode import BaseNode
+from ..BaseNode import BaseNode, register_node
 
 """
 A series of nodes to manipulate table rows.
 """
 
+@register_node
 class TableFilterNode(BaseNode):
     """
     A node to filter rows of a table by given condition.
@@ -13,7 +14,7 @@ class TableFilterNode(BaseNode):
     """
     pass
 
-
+@register_node
 class TableRowAppendNode(BaseNode):
     """
     A node to append rows from one table to another.
@@ -21,6 +22,7 @@ class TableRowAppendNode(BaseNode):
     """
     pass
 
+@register_node
 class TableSortNode(BaseNode):
     """
     A node to sort rows of a table by given column.

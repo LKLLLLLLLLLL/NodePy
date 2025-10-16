@@ -3,7 +3,7 @@ from pydantic import BaseModel, model_validator, PrivateAttr
 from abc import abstractmethod
 from typing_extensions import Self
 from .Exceptions import NodeParameterError, NodeValidationError, NodeExecutionError
-from .Utils import GlobalConfig
+from .GlobalConfig import GlobalConfig
 
 """
 This file defines the base class for all nodes.
@@ -125,6 +125,13 @@ class BaseNode(BaseModel):
     """
     methods to be called by outside
     """
+    @classmethod
+    def create_from_type(cls, global_config: GlobalConfig, type: str, **data) -> "BaseNode":
+        node_type = _NODE_REGISTRY.get(type)
+        if node_type is None:
+            raise ValueError(f"Node type '{type}' is not registered.")
+        return node_type(type=type, **data, global_config=global_config)
+    
     def get_port(self):
         """ get all ports definition """
         in_ports, out_ports = self.port_def()
@@ -166,3 +173,14 @@ class BaseNode(BaseModel):
                 err_msg=f"Output data schema {output_schema} does not match inferred schema {self._schemas_out}."
             )
         return output
+
+_NODE_REGISTRY: dict[str, type[BaseNode]] = {}
+
+def register_node(cls):
+    """ Decorator to register node classes by their type name """
+    def _wrap(cls: type[BaseNode]) -> type[BaseNode]:
+        if not issubclass(cls, BaseNode):
+            raise TypeError("Can only register subclasses of BaseNode.")
+        _NODE_REGISTRY[cls.__name__] = cls
+        return cls
+    return _wrap(cls)

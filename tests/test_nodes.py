@@ -13,11 +13,11 @@ if str(_nodes_dir) not in sys.path:
 # Force the import name 'server.engine.nodes.Utils' to resolve to the top-level Utils.py module
 import importlib.util
 import importlib.machinery
-spec = importlib.util.spec_from_file_location("server.engine.nodes.Utils", str(_nodes_dir / "Utils.py"))
+spec = importlib.util.spec_from_file_location("server.engine.nodes.GlobalConfig", str(_nodes_dir / "GlobalConfig.py"))
 utils_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(utils_mod)
 import sys as _sys
-_sys.modules["server.engine.nodes.Utils"] = utils_mod
+_sys.modules["server.engine.nodes.GlobalConfig"] = utils_mod
 
 from server.engine.nodes.DataType import Data, Table, ColType, TableSchema, Schema
 from server.engine.nodes.Exceptions import NodeParameterError, NodeValidationError, NodeExecutionError
@@ -40,7 +40,7 @@ from server.engine.nodes.TableProcess.RowProcess import TableFilterNode, TableRo
 from server.engine.nodes.TableProcess.ColProcess import SelectColNode, SplitColNode, JoinColNode, RenameColNode, CopyColNode
 from server.engine.nodes.BaseNode import BaseNode
 
-from server.engine.nodes.Utils import GlobalConfig
+from server.engine.nodes.GlobalConfig import GlobalConfig
 
 TMP = Path("/tmp/nodepy_test")
 TMP.mkdir(parents=True, exist_ok=True)
@@ -536,9 +536,8 @@ def test_plotnode_basic_and_invalid_params(tmp_path):
     n = PlotNode(id="p_test", name="p", type="PlotNode", global_config=GC, x_column="x", y_column="y", plot_type="line")
     out_schema = n.infer_schema({"input": Schema(type=Schema.Type.TABLE, tab=TableSchema(col_types={"x": ColType.INT, "y": ColType.INT}))})
     assert out_schema is not None
-    # PlotNode expects a raw DataFrame as payload; create Data instance without validation
-    raw_input = Data.model_construct(payload=df)
-    out = n.process({"input": raw_input})
+    # PlotNode expects a Table payload; construct Data.from_df(df) -> Table
+    out = n.process({"input": Data.from_df(df)})
     # output is a Path to the saved image
     p = out["plot"].payload
     assert isinstance(p, Path)
@@ -715,12 +714,12 @@ def test_plotnode_more_variants(tmp_path):
     df = pd.DataFrame({"x": pd.Series([1,2,3], dtype="Int64"), "y": pd.Series([3,2,1], dtype="Int64")})
     # scatter
     n1 = PlotNode(id="p1", name="p1", type="PlotNode", global_config=GC, x_column="x", y_column="y", plot_type="scatter")
-    out1 = n1.process({"input": Data.model_construct(payload=df)})
+    out1 = n1.process({"input": Data.from_df(df)})
     assert isinstance(out1["plot"].payload, Path)
     assert out1["plot"].payload.exists()
     # bar
     n2 = PlotNode(id="p2", name="p2", type="PlotNode", global_config=GC, x_column="x", y_column="y", plot_type="bar")
-    out2 = n2.process({"input": Data.model_construct(payload=df)})
+    out2 = n2.process({"input": Data.from_df(df)})
     assert isinstance(out2["plot"].payload, Path)
     assert out2["plot"].payload.exists()
     # missing column should be caught during infer_schema

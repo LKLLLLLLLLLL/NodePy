@@ -14,6 +14,7 @@
         {
             "id": "string",      // 节点 ID
             "type": "string",    // 节点类型
+            "name": "string",    // 节点名称
             "params": {          // 节点参数
                 // 参数键值对
             },
@@ -23,7 +24,9 @@
     "edges": [                 // 边列表
         {
             "src": "string",   // 起始节点 ID
-            "tar": "string"      // 目标节点 ID
+            "src_port": "string", // 起始节点端口
+            "tar": "string",      // 目标节点 ID
+            "tar_port": "string" // 目标节点端口
         },
         ...
     ]

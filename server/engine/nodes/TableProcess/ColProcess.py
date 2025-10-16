@@ -1,9 +1,10 @@
-from ..BaseNode import BaseNode
+from ..BaseNode import BaseNode, register_node
 
 """
 A series of nodes which operate on columns of tables.
 """
 
+@register_node
 class SelectColNode(BaseNode):
     """
     Select specific columns from input table.
@@ -16,11 +17,12 @@ class SelectColNode(BaseNode):
     """
     pass
 
-
+@register_node
 class SplitColNode(BaseNode):
     pass
     # todo
 
+@register_node
 class JoinColNode(BaseNode):
     """
     A node to join two tables with given condition.
@@ -32,9 +34,11 @@ class JoinColNode(BaseNode):
     pass
     # todo
 
+@register_node
 class RenameColNode(BaseNode):
     pass
 
+@register_node
 class CopyColNode(BaseNode):
     pass
     # todo

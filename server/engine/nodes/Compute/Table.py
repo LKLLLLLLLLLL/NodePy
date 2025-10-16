@@ -1,4 +1,4 @@
-from ..BaseNode import BaseNode,InPort, OutPort
+from ..BaseNode import BaseNode,InPort, OutPort, register_node
 from typing import Literal
 from ..Exceptions import NodeParameterError, NodeValidationError, NodeExecutionError
 from ..DataType import Schema, Pattern, ColType, check_no_illegal_cols, generate_default_col_name, Data, Table
@@ -13,6 +13,7 @@ Each node corresponds to a specific node in ComputeNode.py.
 Calculate between primitive and table column.
 """
 
+@register_node
 class TabBinPrimNumComputeNode(BaseNode):
     """
     Compute binary numeric operation on a table column a primitive number.
@@ -88,8 +89,13 @@ class TabBinPrimNumComputeNode(BaseNode):
                 err_msg=f"Table column '{self.col}' type '{col_type}' does not match primitive number type '{num_type}'."
             )
         # 3. build output schema
-        output_schema = input_schemas['table'].append_col(self.result_col, col_type)
-        
+        res_col_type = None
+        if self.op in {"ADD", "SUB", "MUL"}:
+            res_col_type = col_type
+        else:
+            res_col_type = ColType.FLOAT
+        output_schema = input_schemas['table'].append_col(self.result_col, res_col_type)
+
         return {'table': output_schema}
 
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
@@ -137,7 +143,7 @@ class TabBinPrimNumComputeNode(BaseNode):
         out_table = Data.from_df(df)
         return {'table': out_table}
 
-
+@register_node
 class TabBinPrimBoolComputeNode(BaseNode):
     """
     Compute binary boolean operation on a table column a primitive number.
@@ -252,6 +258,7 @@ class TabBinPrimBoolComputeNode(BaseNode):
 Calculate in one column.
 """
 
+@register_node
 class TabUnaryNumComputeNode(BaseNode):
     """
     Compute unary numeric operation on a table column.
@@ -358,6 +365,7 @@ class TabUnaryNumComputeNode(BaseNode):
         out_table = Data.from_df(df)
         return {'table': out_table}
 
+@register_node
 class TabUnaryBoolComputeNode(BaseNode):
     """
     Compute unary boolean operation on a table column.
@@ -450,6 +458,7 @@ class TabUnaryBoolComputeNode(BaseNode):
 Calculate between two table columns.
 """
 
+@register_node
 class ColBinNumComputeNode(BaseNode):
     """
     Compute binary numeric operation on two table columns.
@@ -544,7 +553,12 @@ class ColBinNumComputeNode(BaseNode):
                 err_msg=f"Table column '{self.col1}' type '{col1_type}' does not match column '{self.col2}' type '{col2_type}'."
             )
         # 3. build output schema
-        output_schema = input_schemas['table'].append_col(self.result_col, col1_type)
+        res_col_type = None
+        if self.op in {"ADD", "SUB", "MUL"}:
+            res_col_type = col1_type
+        else:
+            res_col_type = ColType.FLOAT
+        output_schema = input_schemas['table'].append_col(self.result_col, res_col_type)
         
         return {'table': output_schema}
 
@@ -570,7 +584,9 @@ class ColBinNumComputeNode(BaseNode):
                     node_id=self.id,
                     err_msg="Division by zero error."
                 )
-            df[self.result_col] = series1 / series2
+            df[self.result_col] = (
+                series1.astype("float64") / series2.astype("float64")
+            ).astype("float64")
         elif self.op == "POW":
             df[self.result_col] = series1 ** series2
         else:
@@ -583,6 +599,7 @@ class ColBinNumComputeNode(BaseNode):
         out_table = Data.from_df(df)
         return {'table': out_table}
 
+@register_node
 class ColBinBoolComputeNode(BaseNode):
     """
     Compute binary boolean operation on two table columns.
@@ -696,3 +713,9 @@ class ColBinBoolComputeNode(BaseNode):
         # convert back to Table
         out_table = Data.from_df(df)
         return {'table': out_table}
+
+@register_node
+class ColCmpNode(BaseNode):
+    """
+    A node to compare two columns in a table and output a boolean column.
+    """

@@ -116,6 +116,10 @@ class TableSchema(BaseModel):
             return False
         return True
     
+    def __eq__(self, value: object) -> bool:
+        assert isinstance(value, TableSchema)
+        return self.col_types == value.col_types
+    
     def _append_col(self, new_col: str, col_type: ColType) -> 'TableSchema':
         if not self.validate_new_col_name(new_col):
             raise ValueError(f"Cannot add column '{new_col}': already exists or illegal name.")
@@ -213,6 +217,7 @@ class Schema(BaseModel):
             raise ValueError("Can only append column to non-TABLE schema.")
         new_tab = self.tab._append_col(new_col, col_type)
         return Schema(type=self.Type.TABLE, tab=new_tab)
+
     
 
 class Pattern(BaseModel):
@@ -335,6 +340,12 @@ class Data(BaseModel):
             raise ValueError("Can only append column to Table data.")
         new_table = self.payload._append_col(new_col, ser)
         return Data(payload=new_table)
+    
+    def print(self) -> str:
+        if isinstance(self.payload, Table):
+            return str(self.payload.df)
+        else:
+            return str(self.payload)
 
     @classmethod
     def from_df(cls, df: DataFrame) -> 'Data':

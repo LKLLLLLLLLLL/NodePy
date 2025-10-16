@@ -1,5 +1,6 @@
-from ..BaseNode import BaseNode
+from ..BaseNode import BaseNode, register_node
 
+@register_node
 class WordCloudNode(BaseNode):
     """
     Node to generate a word cloud from table.

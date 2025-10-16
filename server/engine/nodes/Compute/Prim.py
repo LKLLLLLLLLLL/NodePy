@@ -1,4 +1,4 @@
-from ..BaseNode import BaseNode, InPort, OutPort
+from ..BaseNode import BaseNode, InPort, OutPort, register_node
 from typing import Literal
 from ..Exceptions import NodeParameterError, NodeValidationError, NodeExecutionError
 from ..DataType import Data, Schema, Pattern
@@ -7,6 +7,7 @@ from ..DataType import Data, Schema, Pattern
 This file defines compute nodes between primitive(float, int, str, bool) data.
 """
 
+@register_node
 class NumBinComputeNode(BaseNode):
     """
     A class for binary compute between two numeric inputs(int or float).
@@ -68,7 +69,7 @@ class NumBinComputeNode(BaseNode):
                 )
             res = x / y
         elif self.op == "POW":
-            res = x ** y
+            res = float(x ** y)
         else:
             raise NodeExecutionError(
                 node_id=self.id,
@@ -76,7 +77,7 @@ class NumBinComputeNode(BaseNode):
             )
         return {'result': Data(payload=res)}
     
-
+@register_node
 class NumUnaryComputeNode(BaseNode):
     """
     A node for unary compute on a numeric input(int or float).
@@ -128,7 +129,7 @@ class NumUnaryComputeNode(BaseNode):
             )
         return {'result': Data(payload=res)}
 
-
+@register_node
 class CmpNode(BaseNode):
     """
     A node for primitive comparison.
@@ -196,7 +197,7 @@ class CmpNode(BaseNode):
             )
         return {'result': Data(payload=res)}
 
-
+@register_node
 class BoolBinComputeNode(BaseNode):
     """
     Node to compute binary boolean operations.
@@ -244,7 +245,7 @@ class BoolBinComputeNode(BaseNode):
             )
         return {'result': Data(payload=res)}
 
-
+@register_node
 class BoolUnaryComputeNode(BaseNode):
     """
     Node to compute unary boolean operations.

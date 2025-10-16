@@ -1,6 +1,7 @@
-from ..BaseNode import BaseNode, InPort, OutPort, Data, Schema
+from ..BaseNode import BaseNode, InPort, OutPort, Data, Schema, register_node
 from ..Exceptions import NodeParameterError
 
+@register_node
 class StringNode(BaseNode):
     """
     A node to generate a string.

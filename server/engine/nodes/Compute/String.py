@@ -1,4 +1,4 @@
-from ..BaseNode import BaseNode, InPort, OutPort
+from ..BaseNode import BaseNode, InPort, OutPort, register_node
 from ..Exceptions import NodeParameterError, NodeValidationError
 from ..DataType import Data, Schema, Pattern, check_no_illegal_cols, ColType, Table, generate_default_col_name
 import pandas as pd
@@ -12,6 +12,7 @@ String processing nodes for primitive str inputs/outputs.
 String processing nodes for primitive str inputs/outputs.
 """
 
+@register_node
 class ClipStringNode(BaseNode):
     """Clip a string by start/end indices."""
     start: int | None = None
@@ -41,7 +42,7 @@ class ClipStringNode(BaseNode):
         res = v[self.start:self.end]
         return {"output": Data(payload=res)}
 
-
+@register_node
 class SubStringNode(BaseNode):
     """Extract substring between start and end substrings."""
     start: str | None = None
@@ -106,7 +107,7 @@ class SubStringNode(BaseNode):
             res = v[start_idx:end_idx]
         return {"output": Data(payload=res)}
 
-
+@register_node
 class StripStringNode(BaseNode):
     """Strip characters from both ends."""
     chars: str | None = None
@@ -135,7 +136,7 @@ class StripStringNode(BaseNode):
         res = v.strip(self.chars)
         return {"output": Data(payload=res)}
 
-
+@register_node
 class ReplaceStringNode(BaseNode):
     """Replace occurrences of substr with another substr."""
     old: str
@@ -171,7 +172,7 @@ class ReplaceStringNode(BaseNode):
         res = v.replace(self.old, self.new)
         return {"output": Data(payload=res)}
 
-
+@register_node
 class UpperStringNode(BaseNode):
     """Convert string to upper case."""
     
@@ -199,7 +200,7 @@ class UpperStringNode(BaseNode):
         res = v.upper()
         return {"output": Data(payload=res)}
 
-
+@register_node
 class LowerStringNode(BaseNode):
     """Convert string to lower case."""
     
@@ -232,6 +233,7 @@ class LowerStringNode(BaseNode):
 String processing nodes between primitive str and table.
 """
 
+@register_node
 class TableAppendStringNode(BaseNode):
     """Append a single string to every value in a table column and write to result_col."""
     column: str
@@ -311,6 +313,7 @@ class TableAppendStringNode(BaseNode):
         assert self.result_col is not None
         return {"output": Data(payload=Table(df=result, col_types={**table.col_types, self.result_col: ColType.STR}))}
 
+@register_node
 class TablePrependStringNode(BaseNode):
     """Prepend a single string to every value in a table column and write to result_col."""
     column: str
@@ -389,6 +392,7 @@ class TablePrependStringNode(BaseNode):
         assert self.result_col is not None
         return {"output": Data(payload=Table(df=result, col_types={**table.col_types, self.result_col: ColType.STR}))}
 
+@register_node
 class TableContainsStringNode(BaseNode):
     """Check whether each value in a table column contains a given substring, output boolean column."""
     column: str
@@ -470,6 +474,7 @@ class TableContainsStringNode(BaseNode):
         assert self.result_col is not None
         return {"output": Data(payload=Table(df=result, col_types={**table.col_types, self.result_col: ColType.BOOL}))}
 
+@register_node
 class TableStringLengthNode(BaseNode):
     """Compute the length of each string in a table column, output integer column."""
     column: str
@@ -545,6 +550,7 @@ class TableStringLengthNode(BaseNode):
         assert self.result_col is not None
         return {"output": Data(payload=Table(df=result, col_types={**table.col_types, self.result_col: ColType.INT}))}
 
+@register_node
 class TableStartWithStringNode(BaseNode):
     """Check whether each value in a table column starts with a given substring, output boolean column."""
     column: str
@@ -625,6 +631,7 @@ class TableStartWithStringNode(BaseNode):
         assert self.result_col is not None
         return {"output": Data(payload=Table(df=result, col_types={**table.col_types, self.result_col: ColType.BOOL}))}
 
+@register_node
 class TableEndWithStringNode(BaseNode):
     """Check whether each value in a table column ends with a given substring, output boolean column."""
     column: str
@@ -705,6 +712,7 @@ class TableEndWithStringNode(BaseNode):
         assert self.result_col is not None
         return {"output": Data(payload=Table(df=result, col_types={**table.col_types, self.result_col: ColType.BOOL}))}
 
+@register_node
 class TableReplaceStringNode(BaseNode):
     """Replace occurrences of old substring with new substring for each value in a table column."""
     column: str

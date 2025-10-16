@@ -1,11 +1,9 @@
-from server.engine.nodes.BaseNode import InPort, OutPort
-from server.engine.nodes.DataType import Schema
-from ..BaseNode import BaseNode
+from ..BaseNode import InPort, OutPort, BaseNode, register_node
+from ..DataType import Schema, Data
 from typing import Literal, Optional
 from ..Exceptions import NodeParameterError
-from ..DataType import Data
 
-
+@register_node
 class ConstNode(BaseNode):
     """
     A node to generate a constant value(float, bool, int).
