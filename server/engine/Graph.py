@@ -28,19 +28,17 @@ class Edge(BaseModel):
     tar: str
     tar_port: str
 
-class GraphRequest(BaseModel):
+class GraphRequestModel(BaseModel):
     """
     Data structure representing node graph data from frontend.
     For validation data.
     """
 
-    user_id: str
-    timestamp: str
     nodes: list[Node]
     edges: list[Edge]
     
     @model_validator(mode="after")
-    def all_nodes_unique(self) -> "GraphRequest":
+    def all_nodes_unique(self) -> "GraphRequestModel":
         """ Validate all node ids are unique """
         node_ids = [node.id for node in self.nodes]
         if len(node_ids) != len(set(node_ids)):
@@ -48,7 +46,7 @@ class GraphRequest(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def all_edges_valid(self) -> "GraphRequest":
+    def all_edges_valid(self) -> "GraphRequestModel":
         """ Validate all edges connect valid nodes """
         node_ids = {node.id for node in self.nodes}
         for edge in self.edges:
@@ -59,7 +57,7 @@ class GraphRequest(BaseModel):
         return self
     
     @model_validator(mode="after")
-    def no_multiple_edges(self) -> "GraphRequest":
+    def no_multiple_edges(self) -> "GraphRequestModel":
         """ Validate no multiple edges between same nodes and ports """
         edge_set = set()
         for edge in self.edges:
@@ -69,11 +67,11 @@ class GraphRequest(BaseModel):
         return self
     
     @classmethod
-    def from_json(cls, json_str: str) -> "GraphRequest":
+    def from_json(cls, json_str: str) -> "GraphRequestModel":
         """ Create GraphRequest from JSON string """
         try:
             data = json.loads(json_str)
-            return GraphRequest(**data)
+            return GraphRequestModel(**data)
         except json.JSONDecodeError as e:
             raise GraphError(f"Invalid JSON: {e}")
         except Exception as e:
@@ -91,7 +89,7 @@ class NodeGraph:
     _exec_queue: list[str]
     _stage: Literal["init", "constructed", "static_analyzed", "running", "finished"] = "init"
 
-    def __init__(self, request: GraphRequest) -> None:
+    def __init__(self, request: GraphRequestModel) -> None:
         self._nodes = request.nodes
         self._edges = request.edges
         self._graph = nx.MultiDiGraph()

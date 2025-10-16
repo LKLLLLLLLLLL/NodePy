@@ -75,7 +75,7 @@ class PlotNode(BaseNode):
         x_data = input_table.df[self.x_column]  # type: ignore
         y_data = input_table.df[self.y_column]  # type: ignore
 
-        path = self.global_config.temp_dir / f"{self.id}_plot.png"
+        file_manager = self.global_config.file_manager
         
         plt.figure(figsize=(8, 6))
         if self.plot_type == "scatter":
@@ -89,7 +89,14 @@ class PlotNode(BaseNode):
         plt.xlabel(self.x_column)
         plt.ylabel(self.y_column)
         plt.grid()
-        plt.tight_layout()
-        plt.savefig(path)
+        plt.tight_layout()      
+        # save to byte stream
+        buf = file_manager.get_buffer()
+        plt.savefig(buf, format="png")
         plt.close()
-        return {"plot": Data(payload=path)}
+        file = file_manager.write_from_buffer(
+            user_id=self.global_config.user_id, 
+            filename=f"{self.id}_plot.png",
+            buffer=buf
+        )
+        return {"plot": Data(payload=file)}

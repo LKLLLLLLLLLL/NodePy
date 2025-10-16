@@ -8,8 +8,6 @@
 
 ```json
 {
-    "user_id": "string",          // 用户 ID
-    "timestamp": "string",      // 时间戳
     "nodes": [                   // 节点列表
         {
             "id": "string",      // 节点 ID

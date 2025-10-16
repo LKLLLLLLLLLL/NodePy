@@ -5,7 +5,7 @@ from typing_extensions import Self
 from pandas.api import types as ptypes
 import pandas
 from typing import Union, Optional, List, ClassVar
-from pathlib import Path
+from ...lib.FileManager import File
 
 """
 This file defined types of data passed between nodes.
@@ -17,16 +17,6 @@ class ColType(str, Enum):
     STR = "str"      # str
     BOOL = "bool"          # bool
     DATETIME = "datetime"  # datetime64[ns]
-    # def does_ptype_satisfy(self, ser: Series) -> bool:
-    #     """ Check if the pandas Series type equals this ColType """
-    #     ColType_to_ptypes = {
-    #         self.INT: ptypes.is_integer_dtype,
-    #         self.FLOAT: ptypes.is_float_dtype,
-    #         self.STR: ptypes.is_string_dtype,
-    #         self.BOOL: ptypes.is_bool_dtype,
-    #         self.DATETIME: ptypes.is_datetime64_any_dtype,
-    #     }
-    #     return ColType_to_ptypes[self](ser)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, ColType):
@@ -97,14 +87,6 @@ class TableSchema(BaseModel):
             raise ValueError(f"Column names cannot start with reserved prefix '_' or be whitespace only: {list(self.col_types.keys())}")
         return self
     
-    # def __contains__(self, other: 'TableSchema') -> bool:
-    #     if not isinstance(other, TableSchema):
-    #         return NotImplemented
-    #     for col, typ in other.col_types.items():
-    #         if col not in self.col_types or self.col_types[col] != typ:
-    #             return False
-    #     return True
-    
     def __hash__(self) -> int:
         # hash based on frozenset of items in col_types
         return hash(frozenset(self.col_types.items()))
@@ -158,7 +140,7 @@ class Schema(BaseModel):
         INT = "int"
         BOOL = "bool"
         FLOAT = "float"
-        FILE = "file"  # represent a file path
+        FILE = "file"
 
     type: Type
     tab: Optional[TableSchema] = None # not None if type is TABLE
@@ -170,16 +152,6 @@ class Schema(BaseModel):
         if self.type != self.Type.TABLE and self.tab is not None:
             raise ValueError("TableSchema must be None when type is not TABLE.")
         return self
-    
-    # def __contains__(self, other: 'Schema') -> bool:
-    #     if not isinstance(other, Schema):
-    #         return NotImplemented
-    #     if self.type != other.type:
-    #         return False
-    #     if self.type == self.Type.TABLE:
-    #         assert(self.tab is not None and other.tab is not None)
-    #         return self.tab.__contains__(other.tab)
-    #     return True
     
     def __hash__(self) -> int:
         if self.type != self.Type.TABLE:
@@ -314,7 +286,7 @@ class Table(BaseModel):
 
 
 class Data(BaseModel):
-    payload: Union[Table, str, int, bool, float, Path]
+    payload: Union[Table, str, int, bool, float, File]
 
     def extract_schema(self) -> Schema:
         if isinstance(self.payload, Table):
@@ -330,7 +302,7 @@ class Data(BaseModel):
             return Schema(type=Schema.Type.BOOL)
         elif isinstance(self.payload, float):
             return Schema(type=Schema.Type.FLOAT)
-        elif isinstance(self.payload, Path):
+        elif isinstance(self.payload, File):
             return Schema(type=Schema.Type.FILE)
         else:
             raise TypeError(f"Unsupported data payload type: {type(self.payload)}")

@@ -1,6 +1,7 @@
 from .executer import executer
 from .nodes.GlobalConfig import GlobalConfig
-from pathlib import Path
+from ..lib.FileManager import FileManager
+from ..lib.CacheManager import CacheManager
 
 """
 Graph execution engine entry point.
@@ -8,10 +9,8 @@ Graph execution engine entry point.
 
 # for debug
 request = [
-"""
+    """
 {
-  "user_id": "test",
-  "timestamp": "2025-10-15T00:00:00Z",
   "nodes": [
     {
       "id": "n1",
@@ -26,10 +25,8 @@ request = [
   "edges": []
 }
 """,
-        """
+    """
 {
-  "user_id": "test",
-  "timestamp": "2025-10-15T00:01:00Z",
   "nodes": [
     {
       "id": "n1",
@@ -64,9 +61,7 @@ request = [
   ]
 }
 """,
-        """{
-  "user_id": "test",
-  "timestamp": "2025-10-15T00:02:00Z",
+    """{
   "nodes": [
     {
       "id": "c1",
@@ -100,17 +95,8 @@ request = [
     {"src": "u1", "src_port": "result", "tar": "b1", "tar_port": "y"}
   ]
 }""",
-    ]
-global_config = GlobalConfig(temp_dir=Path("./temp"), user_id="test")
-for i in range(len(request)):
-    print("Executing request:", i)
-    executer(request[i], global_config=global_config)
-
-request_examples = [
     """
 {
-  "user_id": "demo_gdp",
-  "timestamp": "2025-10-15T10:00:00Z",
   "nodes": [
     {
       "id": "t_gdp",
@@ -157,8 +143,6 @@ request_examples = [
 """,
     """
 {
-  "user_id": "demo_products",
-  "timestamp": "2025-10-15T10:05:00Z",
   "nodes": [
     {
       "id": "t_products",
@@ -238,8 +222,6 @@ request_examples = [
 """,
     """
 {
-  "user_id": "demo_sales_tax",
-  "timestamp": "2025-10-15T10:12:00Z",
   "nodes": [
     {
       "id": "t_sales",
@@ -319,8 +301,6 @@ request_examples = [
 """,
     """
 {
-  "user_id": "demo_numeric_expr",
-  "timestamp": "2025-10-15T10:20:00Z",
   "nodes": [
     {
       "id": "c_a",
@@ -364,8 +344,6 @@ request_examples = [
 """,
     """
 {
-  "user_id": "demo_catalog_and_visual",
-  "timestamp": "2025-10-15T10:30:00Z",
   "nodes": [
     {
       "id": "t_catalog",
@@ -411,7 +389,14 @@ request_examples = [
 }
 """,
 ]
-for i in range(len(request_examples)):
-    print("Executing example request:", i)
-    executer(request_examples[i], global_config=global_config)
+
+global_config = GlobalConfig(
+    user_id="test",
+    file_manager=FileManager(),
+    cache_manager=CacheManager()
+)
+for i in range(len(request)):
+    print("Executing request:", i)
+    executer(request[i], global_config=global_config)
+
   
