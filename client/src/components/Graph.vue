@@ -30,7 +30,9 @@ const nodes = ref<Node[]>([
   {
     id: '2',
     position: { x: 50, y: 250 },
-    data: { label: 'Node 2', },
+    data: { label: 'Node 2',
+      resultType: 'table'
+     },
   },
   {
     id: '3',

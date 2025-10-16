@@ -44,7 +44,7 @@
             score: 12306
         },
         {
-            name: 'lkl',
+            name: 'lklllllllllllllllllllllllllllllllllllllllllllllllllllllll',
             score: 114514
         },
         {
@@ -91,23 +91,19 @@
 </script>
 <template>
     <div class = 'table-view-container'>
-        <v-data-table 
+        <v-data-table-virtual 
             :items="items" 
             class = 'result-table'
             striped="even"
-            theme="aaaaa"
+            height="500px"
+            :fixed-header="true"
         >
-        </v-data-table>
+        </v-data-table-virtual>
     </div>
 </template>
 <style scoped lang="scss">
     .table-view-container{
         height: 100%;
         width: 100%;
-    }
-    .result-table{
-        height: 100%;
-        text-align: center;
-        max-height: 100%;
     }
 </style>
