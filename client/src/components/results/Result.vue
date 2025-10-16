@@ -1,38 +1,44 @@
 <script lang="ts" setup>
-    import { useVueFlow } from '@vue-flow/core';
     import ChartView from './ChartView.vue';
     import TableView from './TableView.vue';
     import FileView from './FileView.vue';
     import ImageView from './ImageView.vue';
     import ValueView from './ValueView.vue';
+    import { useGraphStore } from '@/stores/graphStore';
 
+    const graphStore = useGraphStore();
+
+    const {getNodes,findNode} = graphStore.vueFlowInstance
+
+    const currentNode = findNode('2')
+
+    console.log(currentNode.data.label)
 </script>
 <template>
     <div class = "result-container">
-        我是结果
-        <!-- <div v-if="!nodeResult">无结果</div>
-        <ChartView v-else-if="nodeResult?.resultType === 'chart'" 
-                            :data="nodeResult?.resultContent"
-                            class = "result-container chart-view">
+        <div v-if="!currentNode">无结果</div>
+        <ChartView v-else-if="currentNode.data.resultType === 'chart'" 
+                            :data="currentNode.data"
+                            class = "view-content chart-view">
         </ChartView>
-        <TableView v-else-if="nodeResult?.resultType === 'table'" 
-                            :data="nodeResult?.resultContent"
-                            class = "result-container table-view">
+        <TableView v-else-if="currentNode.data.resultType === 'table'" 
+                            :data="currentNode.data"
+                            class = "view-content table-view">
         </TableView>
-        <FileView  v-else-if="nodeResult?.resultType === 'file'"  
-                            :data="nodeResult?.resultContent"
-                            class = "result-container file-view">
+        <FileView  v-else-if="currentNode.data.resultType === 'file'"  
+                            :data="currentNode.data"
+                            class = "view-content file-view">
         </FileView>
-        <ImageView v-else-if="nodeResult?.resultType === 'image'" 
-                            :data="nodeResult?.resultContent"
-                            class = "result-container image-view">
+        <ImageView v-else-if="currentNode.data.resultType  === 'image'" 
+                            :data="currentNode.data"
+                            class = "view-content image-view">
         </ImageView>
-        <ValueView v-else-if="nodeResult?.resultType === 'number' 
-                            ||nodeResult?.resultType === 'string' 
-                            ||nodeResult?.resultType === 'boolean'"
-                            :data="nodeResult?.resultContent"
-                            class = "result-container value-view">
-        </ValueView> -->
+        <ValueView v-else-if="currentNode.data.resultType  === 'number' 
+                            ||currentNode.data.resultType  === 'string' 
+                            ||currentNode.data.resultType  === 'boolean'"
+                            :data="currentNode.data"
+                            class = "view-content value-view">
+        </ValueView>
     </div>
 </template>
 <style lang = "scss" scoped>
@@ -42,5 +48,10 @@
         flex: 1;
         background-color: #393939;
         color: white;
+    }
+    .view-content{
+        width: 100%;
+        height: 100%;
+        background-color: aqua;
     }
 </style>

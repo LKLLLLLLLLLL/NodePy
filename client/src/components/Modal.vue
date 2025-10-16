@@ -184,7 +184,7 @@
                 <p>ID: {{ modal.id }}</p>
             </div>
             <div class = "modal-control">
-                <button @click = "closeModal">关闭</button>
+                <v-btn @click = "closeModal">关闭</v-btn>
             </div>
         </div>
         <div class = "modal-body">

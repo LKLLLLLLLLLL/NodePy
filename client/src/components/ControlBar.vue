@@ -28,7 +28,7 @@
 </script>
 <template>
     <div class = "control-bar">
-        <button @click="openResult">唤起结果弹窗</button>
+        <v-btn @click="openResult">唤起结果弹窗</v-btn>
     </div>
 </template>
 <style lang = "scss" scoped>
@@ -38,6 +38,6 @@
         height: 100%;
         width: 100%;
         color: black;
-        background-color: #D3D3D3;
+        background-color: #655555;
     }
 </style>
