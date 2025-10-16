@@ -6,7 +6,11 @@ import { Background } from '@vue-flow/background'
 import { MiniMap, MiniMapNode } from '@vue-flow/minimap'
 import { Controls } from '@vue-flow/controls'
 import CustomNode from './nodes/CustomNode.vue'
-const { onConnect, onInit, removeEdges} = useVueFlow()
+import {useGraphStore} from '../stores/graphStore'
+
+const graphStore = useGraphStore()
+graphStore.vueFlowInstance = useVueFlow()
+const { onConnect, onInit, removeEdges } = useVueFlow()
 
 onConnect(({ source, target, sourceHandle, targetHandle }) => {
   console.log('source', source)
