@@ -135,7 +135,7 @@ const StringOneInputMethodList = ['CONTAIN', 'STARTWITH', 'ENDWITH'] as const
 interface TableOneInputStringMethodNodeData {
     column: string
     result_col: string
-    method: typeof StringOneInputMethodList[number]
+    op: typeof StringOneInputMethodList[number]
     input?: {
         table: TableNodeData
         value_input: string
