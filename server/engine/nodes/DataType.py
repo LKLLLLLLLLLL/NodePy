@@ -190,7 +190,8 @@ class Schema(BaseModel):
         new_tab = self.tab._append_col(new_col, col_type)
         return Schema(type=self.Type.TABLE, tab=new_tab)
 
-    
+    def to_dict(self) -> dict:
+        return super().model_dump()
 
 class Pattern(BaseModel):
     """
@@ -323,3 +324,6 @@ class Data(BaseModel):
     def from_df(cls, df: DataFrame) -> 'Data':
         table = Table._from_df(df)
         return Data(payload=table)
+    
+    def to_dict(self) -> dict:
+        return super().model_dump()

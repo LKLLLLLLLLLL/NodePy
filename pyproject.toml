@@ -13,8 +13,10 @@ dependencies = [
     "pandas>=2.3.3",
     "numpy>=2.3.3",
     "matplotlib>=3.10.7",
-    "wordcloud>=1.9.4",
     "networkx>=3.5",
+    "celery>=5.5.3",
+    "redis>=6.4.0",
+    "websockets>=15.0.1",
 ]
 
 [dependency-groups]

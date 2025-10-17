@@ -41,7 +41,7 @@ def build() -> None:
     compose = _compose_prefix()
     cmd = compose + ["-f", "docker-compose.yml", "-p", "nodepy", "build"]
     try:
-        subprocess.run(cmd, cwd=infra_dir, check=True, capture_output=True, text=True)
+        subprocess.run(cmd, cwd=infra_dir, check=True)
     except subprocess.CalledProcessError as exc:
         print(f"Error: docker compose build failed with exit code {exc.returncode}")
         raise

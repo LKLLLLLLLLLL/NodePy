@@ -4,10 +4,25 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
 import os
 from pathlib import Path
+from contextlib import asynccontextmanager
+from .api import router
+from .context import app_context
+from ..celery import celery_app
 
-app = FastAPI(title="NodePy API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Application lifespan manager.
+    Initializes services on startup and cleans up on shutdown.
+    """
+    app_context.initialize(celery_app)
+    await app_context.startup()
+    yield
+    await app_context.shutdown()
 
-# Add CORS middleware to allow local frontend development origins
+app = FastAPI(title="NodePy API", lifespan=lifespan)
+
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -22,34 +37,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# Database connection
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/nodepy")
+# Database connection (can be moved to a service if it grows)
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL is None:
+    raise ValueError("DATABASE_URL environment variable is not set")
 engine = create_engine(DATABASE_URL)
 
-
-# Test DB connection and print a clear log
-try:
-    with engine.connect() as conn:
-        print("Database connected successfully")
-except Exception as e:
-    print(f"Database connection failed: {e}")
-
-
-# api routes
-@app.get("/api/health")
-async def health():
-    """Simple health check endpoint."""
-    return {"status": "ok", "database": "connected"}
-
+# Include API routes
+app.include_router(router)
 
 # Static files directory
 # In container: /nodepy/static (mapped from host client/dist via mount or COPY)
 dist_dir = Path("/nodepy/static")
-
-# Mount static files if they exist
-if dist_dir.exists() and dist_dir.is_dir():
+if dist_dir.exists():
     app.mount("/", StaticFiles(directory=str(dist_dir), html=True), name="frontend")
-    print(f"Frontend static files mounted at {dist_dir}")
-else:
-    print(f"Dist directory not found at {dist_dir}; frontend files will not be served")

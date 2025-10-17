@@ -95,7 +95,6 @@ class PlotNode(BaseNode):
         plt.savefig(buf, format="png")
         plt.close()
         file = file_manager.write_from_buffer(
-            user_id=self.global_config.user_id, 
             filename=f"{self.id}_plot.png",
             buffer=buf
         )

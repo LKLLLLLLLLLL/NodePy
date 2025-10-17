@@ -15,7 +15,6 @@ class GlobalConfig(BaseModel):
     Manage context like FileManager etc.
     """
     
-    user_id: str    # user id for current request
     file_manager: FileManager      # manager for file operations
 
     model_config = {
@@ -24,7 +23,5 @@ class GlobalConfig(BaseModel):
     
     @model_validator(mode="after")
     def verify(self) -> Self:
-        if self.user_id == "" or self.user_id.strip() == "":
-            raise ValueError("user_id cannot be empty.")
         return self
 

@@ -1,6 +1,6 @@
 import networkx as nx
 from pydantic import BaseModel, model_validator
-from typing import Any, Literal
+from typing import Any, Literal, Callable
 from .nodes.BaseNode import BaseNode
 from .nodes.DataType import Schema, Data
 from .nodes.GlobalConfig import GlobalConfig
@@ -85,7 +85,6 @@ class NodeGraph:
     _stage: Literal["init", "constructed", "static_analyzed", "running", "finished"] = "init"
 
     def __init__(self, 
-                 user_id: str, 
                  request: GraphRequestModel, 
                  file_manager: FileManager, 
                  cache_manager: CacheManager
@@ -106,7 +105,7 @@ class NodeGraph:
         self._stage = "init"
         # construct global config
         self.cache_manager = cache_manager # used only by NodeGraph, no need to pass to nodes
-        self._global_config = GlobalConfig(user_id=user_id, file_manager=file_manager)
+        self._global_config = GlobalConfig(file_manager=file_manager)
     
     def _get_edge_tar_from_src(self, src: str) -> list[str]:
         """ Get all target node ids from a source node id """
@@ -116,7 +115,7 @@ class NodeGraph:
         """ Get all source node ids from a target node id """
         return [src for src, _ in self._graph.in_edges(tar)]
     
-    def construct_nodes(self, global_config: GlobalConfig) -> None:
+    def construct_nodes(self) -> None:
         """ Construct node instances from node definitions to test if there are parameter errors """
         if self._stage != "init":
             raise GraphError(f"Graph is already in stage '{self._stage}', cannot construct nodes again.")
@@ -129,14 +128,14 @@ class NodeGraph:
             type = node.type
             params = node.params
 
-            node_object = BaseNode.create_from_type(type=type, global_config=global_config, id=id, name=name, **params)
+            node_object = BaseNode.create_from_type(type=type, global_config=self._global_config, id=id, name=name, **params)
             if self._node_objects is None:
                 raise GraphError("Node objects initialized failed.")
             self._node_objects[id] = node_object
         self._stage = "constructed"
         return
     
-    def static_analyse(self) -> None:
+    def static_analyse(self, callback: Callable[[str, dict[str, Any]], None]) -> None:
         """ Perform static analysis to infer schemas and validate the graph """
         if self._stage != "constructed":
             raise GraphError(f"Graph is in stage '{self._stage}', cannot perform static analysis.")
@@ -159,10 +158,13 @@ class NodeGraph:
             output_schemas = node.infer_schema(input_schemas)
             for tar_port, schema in output_schemas.items():
                 schema_cache[(node_id, tar_port)] = schema
+            
+            # call call_back
+            callback(node_id, output_schemas)
         self._stage = "static_analyzed"
         return
 
-    def execute(self) -> None:
+    def execute(self, callback: Callable[[str, dict[str, Any]], None]) -> None:
         """ Execute the graph in topological order """
         if self._stage != "static_analyzed":
             raise GraphError(f"Graph is in stage '{self._stage}', cannot run.")
@@ -189,18 +191,22 @@ class NodeGraph:
                 data_cache[(node_id, tar_port)] = data
                 # for debug
                 print(f"Node '{node_id}' output on port '{tar_port}': {data.print()}")
+            
+            # call callback
+            callback(node_id, output_data)
         self._stage = "finished"
         return
-    @classmethod
-    def run_from_request(cls, 
-                         user_id: str, 
-                         request: GraphRequestModel, 
-                         file_manager: FileManager, 
-                         cache_manager: CacheManager
-                        ) -> None:
-        """ Convenience method to run the entire graph from a request """
-        graph = cls(user_id=user_id, request=request, file_manager=file_manager, cache_manager=cache_manager)
-        graph.construct_nodes(global_config=graph._global_config)
-        graph.static_analyse()
-        graph.execute()
-        return
+
+    # @classmethod
+    # def run_from_request(cls, 
+    #                      user_id: str, 
+    #                      request: GraphRequestModel, 
+    #                      file_manager: FileManager, 
+    #                      cache_manager: CacheManager
+    #                     ) -> None:
+    #     """ Convenience method to run the entire graph from a request """
+    #     graph = cls(user_id=user_id, request=request, file_manager=file_manager, cache_manager=cache_manager)
+    #     graph.construct_nodes(global_config=graph._global_config)
+    #     graph.static_analyse()
+    #     graph.execute()
+    #     return

@@ -50,31 +50,42 @@ class FileManager:
     """
     The unified library for managing files for nodes,
     including uploading, downloading, reading, writing, deleting files.
+    Each file manager is bind to a user_id and project_id.
     Can be used in multiple containers.
     """
     
     tmp_path: Path # a simple implementation using local tmp path
+    user_id: str
+    project_id: str
     
-    def __init__(self):
+    def __init__(self, user_id: str, project_id: str) -> None:
         system_tmp_path = os.environ.get("TMP_PATH", None)
         if system_tmp_path is None:
             system_tmp_path = tempfile.gettempdir()
         self.tmp_path = Path(system_tmp_path)
         self.tmp_path.mkdir(parents=True, exist_ok=True)
+        if not isinstance(user_id, str) or user_id.strip() == "":
+            raise ValueError("user_id cannot be empty.")
+        if not isinstance(project_id, str) or project_id.strip() == "":
+            raise ValueError("project_id cannot be empty.")
+        self.user_id = user_id
+        self.project_id = project_id
 
-    def write(self, user_id: str, filename: str, content: bytes) -> File:
+    def write(self, filename: str, content: bytes) -> File:
         """ Write content to a file for a user, return the file path """
         try:
-            user_path = self.tmp_path / user_id
+            user_path = self.tmp_path / self.user_id
             user_path.mkdir(parents=True, exist_ok=True)
-            file_path = user_path / filename
+            project_path = user_path / self.project_id
+            project_path.mkdir(parents=True, exist_ok=True)
+            file_path = project_path / filename
             with open(file_path, "wb") as f:
                 f.write(content)
             return File(path=file_path, format=File.infer_format(filename))
         except PermissionError as e:
-            raise IOError(f"Permission denied when writing file {filename} for user {user_id}: {e}")
+            raise IOError(f"Permission denied when writing file {filename} for user {self.user_id} and project {self.project_id}: {e}")
         except OSError as e:
-            raise IOError(f"Failed to write file {filename} for user {user_id}: {e}")
+            raise IOError(f"Failed to write file {filename} for user {self.user_id} and project {self.project_id}: {e}")
 
     """
     For unsupport lib, you can use write method like this:
@@ -93,11 +104,13 @@ class FileManager:
     def get_buffer() -> io.BytesIO:
         return io.BytesIO()
 
-    def write_from_buffer(self, user_id: str, filename: str, buffer: io.BytesIO) -> File:
+    def write_from_buffer(self, filename: str, buffer: io.BytesIO) -> File:
         """ Write content from a buffer to a file for a user, return the file path """
-        user_path = self.tmp_path / user_id
+        user_path = self.tmp_path / self.user_id
         user_path.mkdir(parents=True, exist_ok=True)
-        file_path = user_path / filename
+        project_path = user_path / self.project_id
+        project_path.mkdir(parents=True, exist_ok=True)
+        file_path = project_path / filename
         with open(file_path, "wb") as f:
             f.write(buffer.getvalue())
         return File(path=file_path, format=File.infer_format(filename))
@@ -110,4 +123,4 @@ class FileManager:
         except FileNotFoundError:
             raise FileNotFoundError(f"File not found: {file.path}")
         except PermissionError as e:
-            raise IOError(f"Permission denied when reading file {file.path}: {e}")
+            raise IOError(f"Permission denied when reading file {file.path} for user {self.user_id} and project {self.project_id}: {e}")

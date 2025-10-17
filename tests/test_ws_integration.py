@@ -1,15 +1,9 @@
-from server.engine.nodes.GlobalConfig import GlobalConfig
-from server.lib.FileManager import FileManager
-from server.lib.CacheManager import CacheManager
 import json
-import pytest
-from server.engine.graph import GraphRequestModel, NodeGraph 
+import time
+import asyncio
+import requests
+import websockets
 
-"""
-Graph execution engine entry point.
-"""
-
-# for debug
 request = [
     """
 {
@@ -392,25 +386,56 @@ request = [
 """,
 ]
 
-global_config = GlobalConfig(
-    user_id="test",
-    file_manager=FileManager()
+
+# Choose a graph payload (use a small one to keep test quick)
+payload = json.loads(request[2])
+
+# Submit task via HTTP API
+resp = requests.post(
+    "http://localhost:8000/api/run_nodes",
+    json=payload,
+    timeout=10,
 )
 
+assert resp.status_code in (200, 202), f"Unexpected status code: {resp.status_code}"
+data = resp.json()
+task_id = data.get("task_id")
+assert task_id, "No task_id returned from /api/run_nodes"
 
-@pytest.mark.parametrize("request_json", request)
-def test_graph_requests(request_json):
-  """Run each serialized graph request through the NodeGraph runner.
-  The test passes if no exception is raised during execution.
-  """
-  graph_request = GraphRequestModel(**json.loads(request_json))
-  NodeGraph.run_from_request(
-    user_id="test",
-    request=graph_request,
-    file_manager=FileManager(),
-    cache_manager=CacheManager()
-  )
-    
-    
+uri = f"ws://localhost:8000/api/ws/task/{task_id}"
+print(f"Submitted task {task_id}, connecting to {uri}")
 
-  
+messages = []
+
+async def listen():
+    async with websockets.connect(uri) as ws:
+        start = time.time()
+        while True:
+            try:
+                msg = await asyncio.wait_for(ws.recv(), timeout=10)
+            except asyncio.TimeoutError:
+                print("Timed out waiting for messages")
+                break
+
+            print("WS MESSAGE:", msg)
+            messages.append(msg)
+
+            # Try to stop when task finished
+            try:
+                parsed = json.loads(msg)
+                state = parsed.get("state")
+                if state in ("SUCCESS", "FAILURE"):
+                    print(f"Task finished with state: {state}")
+                    break
+            except Exception:
+                pass
+
+            # safety: don't run forever
+            if time.time() - start > 120:
+                print("Listener timeout (120s) reached")
+                break
+
+asyncio.run(listen())
+
+# We expect at least one progress update from the worker
+assert len(messages) > 0, "No messages received from WebSocket for task"

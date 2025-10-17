@@ -10,6 +10,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  redis:
+    image: redis:alpine
+    container_name: nodepy-redis
+    volumes:
+      - redis_data_prod:/data
+    restart: unless-stopped
+
   server:
     build:
       context: ..
@@ -21,8 +28,27 @@ services:
     environment:
       - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
       - DEBUG=false
+      - REDIS_URL=redis://redis:6379
     depends_on:
       - postgres
+      - redis
+      - celery-worker
+
+  celery-worker:
+    build:
+      context: ..
+      dockerfile: infra/docker/server.Dockerfile
+      target: production
+    container_name: nodepy-celery-worker
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
+      - DEBUG=false
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    command: ["uv", "run", "celery", "-A", "server.celery", "worker", "--loglevel=info"]
 
 volumes:
   postgres_data:
+  redis_data_prod:

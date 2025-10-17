@@ -13,6 +13,16 @@ services:
       # store postgres data in project folder (bind mount) for easy access
       - ../data/db:/var/lib/postgresql/data
 
+  redis:
+    image: redis:alpine
+    container_name: nodepy-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      # bind-mount redis data into project folder (like postgres) for easy access in dev
+      - ../data/redis:/data
+    restart: unless-stopped
+
   server:
     build:
       context: ..
@@ -27,6 +37,26 @@ services:
       - ../client/dist:/nodepy/static:ro
     environment:
       - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
+      - REDIS_URL=redis://redis:6379
       - DEBUG=true
     depends_on:
       - postgres
+      - redis
+      - celery-worker
+
+  celery-worker:
+    build:
+      context: ..
+      dockerfile: infra/docker/server.Dockerfile
+    container_name: nodepy-celery-worker
+    volumes:
+      # mount server source code for hot-reload in development
+      - ../server:/nodepy/server
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
+      - REDIS_URL=redis://redis:6379
+      - DEBUG=true
+    depends_on:
+      - postgres
+      - redis
+    command: ["uv", "run", "celery", "-A", "server.celery", "worker", "--loglevel=info"]
