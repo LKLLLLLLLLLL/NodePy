@@ -4,7 +4,8 @@ from typing import Any, Literal
 from .nodes.BaseNode import BaseNode
 from .nodes.DataType import Schema, Data
 from .nodes.GlobalConfig import GlobalConfig
-import json
+from ..lib.CacheManager import CacheManager
+from ..lib.FileManager import FileManager
 
 
 """
@@ -65,22 +66,16 @@ class GraphRequestModel(BaseModel):
                 raise GraphError(f"Multiple edges between '{edge.src}' and '{edge.tar}' on ports '{edge.src_port}' and '{edge.tar_port}' are not allowed")
             edge_set.add((edge.src, edge.src_port, edge.tar, edge.tar_port))
         return self
-    
-    @classmethod
-    def from_json(cls, json_str: str) -> "GraphRequestModel":
-        """ Create GraphRequest from JSON string """
-        try:
-            data = json.loads(json_str)
-            return GraphRequestModel(**data)
-        except json.JSONDecodeError as e:
-            raise GraphError(f"Invalid JSON: {e}")
-        except Exception as e:
-            raise GraphError(f"Error parsing GraphRequest: {e}")
 
 class NodeGraph:
     """
     The class representing the entire graph of nodes and edges.
     """
+    
+    file_manager: FileManager
+    cache_manager: CacheManager
+    _global_config: GlobalConfig
+    
     _nodes: list[Node]
     _edges: list[Edge]
     _graph: nx.DiGraph
@@ -89,7 +84,12 @@ class NodeGraph:
     _exec_queue: list[str]
     _stage: Literal["init", "constructed", "static_analyzed", "running", "finished"] = "init"
 
-    def __init__(self, request: GraphRequestModel) -> None:
+    def __init__(self, 
+                 user_id: str, 
+                 request: GraphRequestModel, 
+                 file_manager: FileManager, 
+                 cache_manager: CacheManager
+                ) -> None:
         self._nodes = request.nodes
         self._edges = request.edges
         self._graph = nx.MultiDiGraph()
@@ -104,6 +104,9 @@ class NodeGraph:
         self._node_objects = {}
         self._exec_queue = []
         self._stage = "init"
+        # construct global config
+        self.cache_manager = cache_manager # used only by NodeGraph, no need to pass to nodes
+        self._global_config = GlobalConfig(user_id=user_id, file_manager=file_manager)
     
     def _get_edge_tar_from_src(self, src: str) -> list[str]:
         """ Get all target node ids from a source node id """
@@ -159,7 +162,7 @@ class NodeGraph:
         self._stage = "static_analyzed"
         return
 
-    def run(self) -> None:
+    def execute(self) -> None:
         """ Execute the graph in topological order """
         if self._stage != "static_analyzed":
             raise GraphError(f"Graph is in stage '{self._stage}', cannot run.")
@@ -187,4 +190,17 @@ class NodeGraph:
                 # for debug
                 print(f"Node '{node_id}' output on port '{tar_port}': {data.print()}")
         self._stage = "finished"
+        return
+    @classmethod
+    def run_from_request(cls, 
+                         user_id: str, 
+                         request: GraphRequestModel, 
+                         file_manager: FileManager, 
+                         cache_manager: CacheManager
+                        ) -> None:
+        """ Convenience method to run the entire graph from a request """
+        graph = cls(user_id=user_id, request=request, file_manager=file_manager, cache_manager=cache_manager)
+        graph.construct_nodes(global_config=graph._global_config)
+        graph.static_analyse()
+        graph.execute()
         return

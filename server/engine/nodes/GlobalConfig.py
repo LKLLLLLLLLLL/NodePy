@@ -8,17 +8,15 @@ from typing_extensions import Self
 #     from ...lib.CacheManager import CacheManagerInterface
 
 from ...lib.FileManager import FileManager
-from ...lib.CacheManager import CacheManager
 
 class GlobalConfig(BaseModel):
     """
     Global config shared by all nodes for same requests.
-    Manage context like FileManager, CacheManager etc.
+    Manage context like FileManager etc.
     """
     
     user_id: str    # user id for current request
     file_manager: FileManager      # manager for file operations
-    cache_manager: CacheManager    # manager for node caches
 
     model_config = {
         "arbitrary_types_allowed": True  # 允许非 Pydantic 类型

@@ -1,7 +1,8 @@
-from .executer import executer
-from .nodes.GlobalConfig import GlobalConfig
-from ..lib.FileManager import FileManager
-from ..lib.CacheManager import CacheManager
+from server.engine.nodes.GlobalConfig import GlobalConfig
+from server.lib.FileManager import FileManager
+from server.lib.CacheManager import CacheManager
+import json
+from server.engine.graph import GraphRequestModel, NodeGraph 
 
 """
 Graph execution engine entry point.
@@ -392,11 +393,18 @@ request = [
 
 global_config = GlobalConfig(
     user_id="test",
-    file_manager=FileManager(),
-    cache_manager=CacheManager()
+    file_manager=FileManager()
 )
 for i in range(len(request)):
     print("Executing request:", i)
-    executer(request[i], global_config=global_config)
+    graph_request = GraphRequestModel(**json.loads(request[i]))
+    NodeGraph.run_from_request(
+        user_id="test",
+        request=graph_request,
+        file_manager=FileManager(),
+        cache_manager=CacheManager()
+    )
+    
+    
 
   

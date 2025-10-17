@@ -28,10 +28,11 @@ from server.engine.nodes.TableProcess.ColProcess import SelectColNode, SplitColN
 from server.engine.nodes.BaseNode import BaseNode
 
 from server.engine.nodes.GlobalConfig import GlobalConfig
+from server.lib.FileManager import FileManager, File
 
 TMP = Path("/tmp/nodepy_test")
 TMP.mkdir(parents=True, exist_ok=True)
-GC = GlobalConfig(temp_dir=TMP, user_id="test")
+GC = GlobalConfig(user_id="test", file_manager=FileManager())
 
 # Helper to create Data/Table
 def df_to_data(df: pd.DataFrame) -> Data:
@@ -527,8 +528,8 @@ def test_plotnode_basic_and_invalid_params(tmp_path):
     out = n.process({"input": Data.from_df(df)})
     # output is a Path to the saved image
     p = out["plot"].payload
-    assert isinstance(p, Path)
-    assert p.exists() and p.is_file()
+    assert isinstance(p, File)
+    assert p.get_size() > 0
     # invalid param: empty x_column
     with pytest.raises(NodeParameterError):
         PlotNode(id="p_bad", name="p", type="PlotNode", global_config=GC, x_column="", y_column="y", plot_type="line")
@@ -702,13 +703,13 @@ def test_plotnode_more_variants(tmp_path):
     # scatter
     n1 = PlotNode(id="p1", name="p1", type="PlotNode", global_config=GC, x_column="x", y_column="y", plot_type="scatter")
     out1 = n1.process({"input": Data.from_df(df)})
-    assert isinstance(out1["plot"].payload, Path)
-    assert out1["plot"].payload.exists()
+    assert isinstance(out1["plot"].payload, File)
+    assert out1["plot"].payload.get_size() > 0
     # bar
     n2 = PlotNode(id="p2", name="p2", type="PlotNode", global_config=GC, x_column="x", y_column="y", plot_type="bar")
     out2 = n2.process({"input": Data.from_df(df)})
-    assert isinstance(out2["plot"].payload, Path)
-    assert out2["plot"].payload.exists()
+    assert isinstance(out2["plot"].payload, File)
+    assert out2["plot"].payload.get_size() > 0
     # missing column should be caught during infer_schema
     n3 = PlotNode(id="p3", name="p3", type="PlotNode", global_config=GC, x_column="x", y_column="z", plot_type="line")
     with pytest.raises(NodeValidationError):
