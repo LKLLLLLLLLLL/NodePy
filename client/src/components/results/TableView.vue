@@ -95,7 +95,7 @@
             :items="items" 
             class = 'result-table'
             striped="even"
-            height="500px"
+            :style="{height:'100%'}"
             :fixed-header="true"
         >
         </v-data-table-virtual>

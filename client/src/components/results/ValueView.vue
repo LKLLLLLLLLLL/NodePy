@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { DateAdapterSymbol } from 'vuetify/lib/composables/date/date.mjs';
 
     const props = defineProps<{
         data: any

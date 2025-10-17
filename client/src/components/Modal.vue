@@ -25,6 +25,7 @@
     };
 
     const onDrag = (event: MouseEvent) => {
+        if(!props.modal.isDraggable)return;
         if (isDragging.value) {
 
         const deltaX = event.clientX - dragStartPosition.value.x;
@@ -39,12 +40,14 @@
     }; 
 
     const stopDrag = () => {
+        if(!props.modal.isDraggable)return;
         isDragging.value = false;
         window.removeEventListener('mousemove', onDrag);
         window.removeEventListener('mouseup', stopDrag);
     };
 
     const startDrag = (event: MouseEvent) => {
+        if(!props.modal.isDraggable)return;
         if (isResizing.value) return;
         isDragging.value = true;
         dragStartPosition.value = {
@@ -179,12 +182,21 @@
         <div class="resize-handle resize-handle-bottom-left" @mousedown="startResize($event, 'bottom-left')"></div>
         <div class="resize-handle resize-handle-top-left" @mousedown="startResize($event, 'top-left')"></div>
         <div class = "modal-head" @mousedown="startDrag" >
-            <div class = "modal-title-id">
-                <h3>{{ modal.title }}</h3>
-                <p>ID: {{ modal.id }}</p>
+            <div class = "modal-title-id-container">
+                <div class="modal-title-container">
+                    <div><b>{{ modal.title }}</b></div>
+                </div>
+                <!-- <div class="modal-id-container">
+                    <div>ID: {{ modal.id }}</div>
+                </div> -->
             </div>
             <div class = "modal-control">
-                <v-btn @click = "closeModal">关闭</v-btn>
+                <v-btn 
+                    @click = "closeModal"
+                    :style="{height: '100%',width: 'max(60px, 10%)',borderRadius: '16px'}"
+                >
+                    关闭
+                </v-btn>
             </div>
         </div>
         <div class = "modal-body">
@@ -197,6 +209,9 @@
                 {{ modal.content }}
             </div>
         </div>
+        <div class = "modal-footer">
+            footer
+        </div>
     </div>
 </template>
 <style scoped lang = "scss">
@@ -205,29 +220,49 @@
         display: flex;
         flex-direction: column;
         background-color: rgb(46, 130, 165);
+        color: black;
+        border-radius: 16px;
     }
     .modal-head{
         display: flex;
-        height: 50px;
+        min-height: 35px;
+        height: 10%;
         width: 100%;
-        background-color: #ba3a3a;
-        color: black;
     }
-    .modal-body{
-        flex: 3;
+    .modal-body, .modal-content{
+        height: calc(100% - max(30px, 5%) - max(20px, 5%));
         display: flex;
         flex-direction: column;
-        color: black;
     }
-    .modal-content{
-        flex: 1;
+    .modal-footer{
+        width: 100%;
+        min-height: 20px;
+        height: 5%;
+        margin-left: 20px;
+        display: flex;
+        align-items: center;
     }
     .modal-control{
         height: 100%;
         display: flex;
         margin-left: auto;
     }
-
+    .modal-title-id-container{
+        height: 100%;
+        margin-left: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+    .modal-title-container{
+        margin-top: 8px;
+        font-size: calc(max(35px, 10%)*0.75);
+        flex: 2;
+    }
+    .modal-id-container{
+        font-size: calc(max(35px, 10%)*0.5*0.40);
+        align-items: center;
+        flex: 1;
+    }
     // /* 调整大小手柄样式 */
     // .resize-handle {
     //     position: absolute;

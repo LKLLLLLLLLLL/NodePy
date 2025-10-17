@@ -31,7 +31,7 @@
         display: flex;
         flex-direction: column;
         width: 100%;
-        height: 98vh;
+        height: 100vh;
     }
     .up-container{
         height: 50px;

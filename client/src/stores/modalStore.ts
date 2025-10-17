@@ -16,6 +16,7 @@ export const useModalStore = defineStore('modal', () => {
             content: modal.content,
             isActive: modal.isActive,
             isResizable: modal.isResizable,
+            isDraggable: modal.isDraggable,
             props: modal.props,
             zIndex: baseZIndex++,
             position: modal.position || { x: 100, y: 100 },

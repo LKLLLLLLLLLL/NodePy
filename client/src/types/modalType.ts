@@ -6,6 +6,7 @@ export interface ModalInstance{
     content?: string;
     isActive: boolean;
     isResizable: boolean;
+    isDraggable: boolean;
     component?: Component;
     zIndex?: number;
     position: {x: number, y: number};
