@@ -6,11 +6,13 @@ import { Background } from '@vue-flow/background'
 import { MiniMap, MiniMapNode } from '@vue-flow/minimap'
 import { Controls } from '@vue-flow/controls'
 import CustomNode from './nodes/CustomNode.vue'
+import ConstNode from './nodes/ConstNode.vue'
 import {useGraphStore} from '../stores/graphStore'
+import type * as Nodetypes from './nodes/type'
 
 const graphStore = useGraphStore()
 graphStore.vueFlowInstance = useVueFlow()
-const { onConnect, onInit, removeEdges } = useVueFlow()
+const { onConnect, onInit, addNodes, onNodesChange } = useVueFlow()
 
 onConnect(({ source, target, sourceHandle, targetHandle }) => {
   console.log('source', source)
@@ -23,29 +25,29 @@ onConnect(({ source, target, sourceHandle, targetHandle }) => {
 
 const nodes = ref<Node[]>([
   {
-    id: '1',
+    id: '-1',
     position: { x: 50, y: 50 },
     data: { label: 'Node 1', },
   },
   {
-    id: '2',
+    id: '-2',
     position: { x: 50, y: 250 },
     data: { label: 'Node 2',
       resultType: 'table'
      },
   },
   {
-    id: '3',
+    id: '-3',
     position: { x: 250, y: 50 },
     data: { label: 'Node 3', },
   },
   {
-    id: '4',
+    id: '-4',
     position: { x: 250, y: 250 },
     data: { label: 'Node 4', },
   },
   {
-    id: '5',
+    id: '-5',
     position: { x: 450, y: 150 },
     data: { label: 'Node 5', },
     type: 'custom',
@@ -54,27 +56,29 @@ const nodes = ref<Node[]>([
 
 const edges = ref([
   {
-    id: 'e1->2',
-    source: '1',
-    target: '2',
+    id: 'e-1->-2',
+    source: '-1',
+    target: '-2',
   },
   {
     id: 'e1->3',
-    source: '1',
-    target: '3',
+    source: '-1',
+    target: '-3',
   },
   {
-    id: 'e2->3',
-    source: '2',
-    target: '3',
+    id: 'e-2->-3',
+    source: '-2',
+    target: '-3',
   },
   {
-    id: 'e2->4',
-    source: '2',
-    target: '4',
+    id: 'e-2->-4',
+    source: '-2',
+    target: '-4',
   },
 ])
 
+const selected = ref()
+let count = 0
 
 // any event that is emitted from the `<VueFlow />` component can be listened to using the `onEventName` method
 onInit((instance) => {
@@ -82,21 +86,50 @@ onInit((instance) => {
   instance.fitView()
 })
 
-function removeOneEdge() {
-  removeEdges('e1->2')
-}
+onNodesChange(changes => {
+  changes = changes.filter(c => c.type === 'add')
+  if(changes.length > 0) {
+    count += changes.length
+    console.log(`现在增加了${count}个节点`)
+    console.log(nodes.value)
+  }
+})
 
-function removeMultipleEdges() {
-  removeEdges(['e1->3', 'e2->3'])
-  console.log(edges.value)
-}
 
 const nodeColor = (node: Node) => {
   switch (node.type) {
-    case 'input':  return '#6ede87'
-    case 'output': return '#6865A5'
-    case 'custom': return '#ccc'
-    default:       return '#ff0072'
+    case 'input':
+      return '#6ede87'
+    case 'output':
+      return '#6865A5'
+    case 'custom':
+      return '#ccc'
+    case 'ConstNode':
+      return '#aaa'
+    default:
+      return '#ff0072'
+  }
+}
+
+const addNode = (e?: MouseEvent) => {
+  switch(selected.value){
+    case 'ConstNode':
+      const added: Nodetypes.ConstNode = {
+        id: `${count}`,
+        position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
+        type: 'ConstNode',
+        data: {
+          value: 0,
+          data_type: 'int'
+        }
+      }
+      addNodes(added)
+      break
+
+    
+
+    default:
+      console.log(selected.value)
   }
 }
 
@@ -118,9 +151,16 @@ const nodeColor = (node: Node) => {
         <CustomNode v-bind="customNodeProps"/> 
       </template>
 
+      <template #node-ConstNode="ConstNodeProps">
+        <ConstNode v-bind="ConstNodeProps"/>
+      </template>
+
       <Panel position="top-left">
-        <button @click="removeOneEdge">Remove Edge 1</button>
-        <button @click="removeMultipleEdges">Remove Edges 2 and 3</button>
+        <label for="selectNode">请选择要添加的节点：</label>
+        <select id="selectNode" style="background: #eee; padding: 0px 8px" v-model="selected">
+          <option value="ConstNode">ConstNode</option>
+        </select>
+        <button style="background: #eee; padding: 0px 8px; margin: 10px" @click="addNode">确认</button>
       </Panel>
     </VueFlow>
   </div>

@@ -8,21 +8,20 @@ import { NodeResizer } from '@vue-flow/node-resizer'
 const props = defineProps<NodeProps>()
 const {removeNodes} = useVueFlow()
 
-const minW = ref(150)
-const minH = ref(50)
+let minW = 0
+let minH = 0
 const info = ref()
 const x = computed(() => `${Math.round(props.position.x)}px`)
 const y = computed(() => `${Math.round(props.position.y)}px`)
 
 onMounted(()=> {
-  if (info.value) {
+  if (minW == 0 || minH == 0) {
     const rect = info.value.getBoundingClientRect()
-    minW.value = rect.width + 20
-    minH.value = rect.height + 20
+    minW = rect.width + 10
+    minH = rect.height + 10
   }
-  console.log('minW', minW.value)
-  console.log('minH', minH.value)
 })
+
 </script>
 
 <template>

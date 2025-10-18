@@ -1,33 +1,45 @@
 import type {Node} from '@vue-flow/core'
 
 
+type BaseNode = Omit<Node, 'data' | 'type'>
+
+
 export type FILE = string
 
 
 // CONST NODE
-interface ConstNodeData{
+export interface ConstNodeData{
     value: number|string|boolean
     data_type: 'int' | 'float' | 'str' | 'bool'
 }
-export type ConstNode = Node<ConstNodeData>
+export interface ConstNode extends BaseNode{
+    type: 'ConstNode'
+    data: ConstNodeData
+}
 
 
-interface StringNodeData {
+export interface StringNodeData {
     value: string
 }
-export type StringNode = Node<StringNodeData>
+export interface StringNode extends BaseNode{
+    data: StringNodeData
+    type: 'StringNode'
+}
 
 
-interface TableNodeData {
+export interface TableNodeData {
     rows: Record<string, number|string|boolean>[]
     columns: string[]
 }
-export type TableNode = Node<TableNodeData>
+export interface TableNode extends BaseNode{
+    data: TableNodeData
+    type: 'TableNode'
+}
 
 
 // NUMBER OPERATION NODES
 const NumBinOpList = ['ADD', 'SUB', 'MUL', 'DIV', 'POW'] as const
-interface NumBinComputeNodeData {
+export interface NumBinComputeNodeData {
     input?: {
         x: number
         y: number
@@ -35,21 +47,27 @@ interface NumBinComputeNodeData {
     op: typeof NumBinOpList[number]
     result? : number
 }
-export type NumBinComputeNode = Node<NumBinComputeNodeData>
+export interface NumBinComputeNode extends BaseNode{
+    data: NumBinComputeNodeData
+    type: 'NumBinComputeNode'
+}
 
 
 const NumUnaryOpList = ['NEG', 'ABS', 'SQRT'] as const
-interface NumUnaryComputeNodeData {
+export interface NumUnaryComputeNodeData {
     input?: number
     op: typeof NumUnaryOpList[number]
     result?: number
 }
-export type NumUnaryComputeNode = Node<NumUnaryComputeNodeData>
+export interface NumUnaryComputeNode extends BaseNode{
+    data: NumUnaryComputeNodeData
+    type: 'NumUnaryComputeNode'
+}
 
 
 // COMPARISON NODES
 const CmpOpList = ['LT', 'LE', 'EQ', 'NE', 'GE', 'GT'] as const
-interface CmpNodeData {
+export interface CmpNodeData {
     input?: {
         x: number|string|boolean
         y: number|string|boolean
@@ -57,11 +75,14 @@ interface CmpNodeData {
     op : typeof CmpOpList[number]
     result? : boolean
 }
-export type CmpNode = Node<CmpNodeData>
+export interface CmpNode extends BaseNode{
+    data: CmpNodeData
+    type: 'CmpNode'
+}
 
 
 const BoolBinOpList = ['AND', 'OR', 'XOR', 'SUB'] as const
-interface BoolBinComputeNodeData {
+export interface BoolBinComputeNodeData {
     input?: {
         x: boolean
         y: boolean
@@ -69,55 +90,73 @@ interface BoolBinComputeNodeData {
     op : typeof BoolBinOpList[number]
     result?: boolean
 }
-export type BoolBinComputeNode = Node<BoolBinComputeNodeData>
+export interface BoolBinComputeNode extends BaseNode{
+    data: BoolBinComputeNodeData
+    type: 'BoolBinComputeNode'
+}
 
 
-interface BoolNotNodeData {
+export interface BoolNotNodeData {
     input?: boolean
     result?: boolean
 }
-export type BoolNotNode = Node<BoolNotNodeData>
+export interface BoolNotNode extends BaseNode{
+    data: BoolNotNodeData
+    type: 'BoolNotNode'
+}
 
 
 // CLIP AND SUBSTRING NODES
-interface ClipOrSubStringNodeData {
+export interface ClipOrSubStringNodeData {
     start?: number
     end?: number
     op: 'CLIP' | 'SUBSTRING'
     input?: string
     result?: string
 }
-export type ClipOrSubStringNode = Node<ClipOrSubStringNodeData>
+export interface ClipOrSubStringNode extends BaseNode{
+    data: ClipOrSubStringNodeData
+    type: 'ClipOrSubStringNode'
+}
 
 
-interface StripStringNodeData {
+export interface StripStringNodeData {
     chars?: string
     input?: string
     result?: string
 }
-export type StripStringNode = Node<StripStringNodeData>
+export interface StripStringNode extends BaseNode{
+    data: StripStringNodeData
+    type: 'StripStringNode'
+}
 
 
-interface ReplaceStringNodeData {
+export interface ReplaceStringNodeData {
     old: string
     new: string
     input?: string
     result?: string
 }
-export type ReplaceStringNode = Node<ReplaceStringNodeData>
+export interface ReplaceStringNode extends BaseNode{
+    data: ReplaceStringNodeData
+    type: 'ReplaceStringNode'
+}
 
 
 // UPPER AND LOWER NODES
-interface UpperOrLowerStringNodeData {
+export interface UpperOrLowerStringNodeData {
     op: 'UPPER' | 'LOWER'
     input?: string
     result?: string
 }
-export type UpperOrLowerStringNode = Node<UpperOrLowerStringNodeData>
+export interface UpperOrLowerStringNode extends BaseNode{
+    data: UpperOrLowerStringNodeData
+    type: 'UpperOrLowerStringNode'
+}
 
 
 // TableAppendStringNode / TablePrependStringNode
-interface TableAppendOrPrependStringNodeData {
+export interface TableAppendOrPrependStringNodeData {
     column: string
     result_col: string
     op: 'APPEND' | 'PREPEND'
@@ -127,12 +166,15 @@ interface TableAppendOrPrependStringNodeData {
     }
     result?: TableNodeData
 }
-export type TableAppendOrPrependStringNode = Node<TableAppendOrPrependStringNodeData>
+export interface TableAppendOrPrependStringNode extends BaseNode{
+    data: TableAppendOrPrependStringNodeData
+    type: 'TableAppendOrPrependStringNode'
+}
 
 
 // TableContainsStringNode / TableStartWithStringNode / TableEndWithStringNode
 const StringOneInputMethodList = ['CONTAIN', 'STARTWITH', 'ENDWITH'] as const
-interface TableOneInputStringMethodNodeData {
+export interface TableOneInputStringMethodNodeData {
     column: string
     result_col: string
     op: typeof StringOneInputMethodList[number]
@@ -142,10 +184,13 @@ interface TableOneInputStringMethodNodeData {
     }
     result?: TableNodeData
 }
-export type TableOneInputStringMethodNode = Node<TableOneInputStringMethodNodeData>
+export interface TableOneInputStringMethodNode extends BaseNode{
+    data: TableOneInputStringMethodNodeData
+    type: 'TableOneInputStringMethodNode'
+}
 
 
-interface TableStringLengthNodeData {
+export interface TableStringLengthNodeData {
     column: string
     result_col: string
     input?: {
@@ -153,10 +198,13 @@ interface TableStringLengthNodeData {
     }
     result?: TableNodeData
 }
-export type TableStringLengthNode = Node<TableStringLengthNodeData>
+export interface TableStringLengthNode extends BaseNode{
+    data: TableStringLengthNodeData
+    type: 'TableStringLengthNode'
+}
 
 
-interface TableReplaceStringNodeData {
+export interface TableReplaceStringNodeData {
     column: string
     result_col?: string
     input?: {
@@ -166,10 +214,13 @@ interface TableReplaceStringNodeData {
     }
     result?: TableNodeData
 }
-export type TableReplaceStringNode = Node<TableReplaceStringNodeData>
+export interface TableReplaceStringNode extends BaseNode{
+    data: TableReplaceStringNodeData
+    type: 'TableReplaceStringNode'
+}
 
 
-interface PlotNodeData {
+export interface PlotNodeData {
     x_column: string
     y_column: string
     plot_type: 'scatter' | 'line' | 'bar'
@@ -177,4 +228,7 @@ interface PlotNodeData {
     input?: TableNodeData
     result?: FILE
 }
-export type PlotNode = Node<PlotNodeData>
+export interface PlotNode extends BaseNode{
+    data: PlotNodeData
+    type: 'PlotNode'
+}
