@@ -35,4 +35,4 @@ COPY server /nodepy/server
 # copy frontend build artifacts produced on host into image
 COPY client/dist /nodepy/static
 # run server
-CMD ["uv", "run", "uvicorn", "server.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000"]

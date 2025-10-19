@@ -5,7 +5,7 @@ from typing_extensions import Self
 from pandas.api import types as ptypes
 import pandas
 from typing import Union, Optional, List, ClassVar, Any
-from ...lib.FileManager import File
+from server.lib.FileManager import File
 
 """
 This file defined types of data passed between nodes.

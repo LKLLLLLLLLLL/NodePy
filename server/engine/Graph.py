@@ -1,11 +1,11 @@
 import networkx as nx
-from ..app.model.nodes import GraphRequestModel, Node, Edge
+from server.models.graph import GraphRequestModel, Node, Edge
 from typing import Any, Literal, Callable
 from .nodes.BaseNode import BaseNode
-from .nodes.DataType import Schema, Data
+from ..models.data import Schema, Data
 from .nodes.GlobalConfig import GlobalConfig
-from ..lib.CacheManager import CacheManager
-from ..lib.FileManager import FileManager
+from server.lib.CacheManager import CacheManager
+from server.lib.FileManager import FileManager
 
 
 """

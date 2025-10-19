@@ -1,5 +1,6 @@
-from ..BaseNode import BaseNode, InPort, OutPort, Data, Schema, register_node
-from ..Exceptions import NodeParameterError
+from ..BaseNode import BaseNode, InPort, OutPort, register_node
+from ....models.data import Schema, Data
+from ....models.exception import NodeParameterError
 from typing import override
 
 @register_node

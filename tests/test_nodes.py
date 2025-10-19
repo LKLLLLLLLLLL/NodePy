@@ -6,8 +6,8 @@ import pandas as pd
 import server.engine.nodes.GlobalConfig # noqa: F401
 import server.engine.nodes # noqa: F401
 
-from server.engine.nodes.DataType import Data, Table, ColType, TableSchema, Schema
-from server.engine.nodes.Exceptions import NodeParameterError, NodeValidationError, NodeExecutionError
+from server.model.data import Data, Table, ColType, TableSchema, Schema
+from server.model.exception import NodeParameterError, NodeValidationError, NodeExecutionError
 
 from server.engine.nodes.Generate.Const import ConstNode
 from server.engine.nodes.Generate.String import StringNode
@@ -32,7 +32,8 @@ from server.lib.FileManager import FileManager, File
 
 TMP = Path("/tmp/nodepy_test")
 TMP.mkdir(parents=True, exist_ok=True)
-GC = GlobalConfig(user_id="test", file_manager=FileManager())
+user_id = "test"
+GC = GlobalConfig(file_manager=FileManager(user_id=user_id, project_id="test_project"))
 
 # Helper to create Data/Table
 def df_to_data(df: pd.DataFrame) -> Data:

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, WebSocket
-from ..model.nodes import GraphRequestModel
-from ...engine.task import execute_nodes_task
+from server.models.graph import GraphRequestModel
+from server.engine.task import execute_nodes_task
 from celery.app.task import Task as CeleryTask
 from typing import cast
-from ...lib.SreamQueue import StreamQueue, Status
+from server.lib.SreamQueue import StreamQueue, Status
 
 """
 The api for nodes runing, reporting and so on,
