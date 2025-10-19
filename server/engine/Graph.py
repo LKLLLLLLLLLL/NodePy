@@ -1,5 +1,5 @@
 import networkx as nx
-from pydantic import BaseModel, model_validator
+from ..app.model.nodes import GraphRequestModel, Node, Edge
 from typing import Any, Literal, Callable
 from .nodes.BaseNode import BaseNode
 from .nodes.DataType import Schema, Data
@@ -16,56 +16,6 @@ Graph classes to analyze and execute node graphs.
 class GraphError(Exception):
     """ Custom exception for graph-related errors """
     pass
-
-class Node(BaseModel):
-    id: str
-    type: str
-    name: str
-    params: dict[str, Any] = {}
-
-class Edge(BaseModel):
-    src: str
-    src_port: str
-    tar: str
-    tar_port: str
-
-class GraphRequestModel(BaseModel):
-    """
-    Data structure representing node graph data from frontend.
-    For validation data.
-    """
-
-    nodes: list[Node]
-    edges: list[Edge]
-    
-    @model_validator(mode="after")
-    def all_nodes_unique(self) -> "GraphRequestModel":
-        """ Validate all node ids are unique """
-        node_ids = [node.id for node in self.nodes]
-        if len(node_ids) != len(set(node_ids)):
-            raise GraphError("Node ids must be unique")
-        return self
-
-    @model_validator(mode="after")
-    def all_edges_valid(self) -> "GraphRequestModel":
-        """ Validate all edges connect valid nodes """
-        node_ids = {node.id for node in self.nodes}
-        for edge in self.edges:
-            if edge.src not in node_ids:
-                raise GraphError(f"Edge source '{edge.src}' does not exist")
-            if edge.tar not in node_ids:
-                raise GraphError(f"Edge target '{edge.tar}' does not exist")
-        return self
-    
-    @model_validator(mode="after")
-    def no_multiple_edges(self) -> "GraphRequestModel":
-        """ Validate no multiple edges between same nodes and ports """
-        edge_set = set()
-        for edge in self.edges:
-            if (edge.src, edge.src_port, edge.tar, edge.tar_port) in edge_set:
-                raise GraphError(f"Multiple edges between '{edge.src}' and '{edge.tar}' on ports '{edge.src_port}' and '{edge.tar_port}' are not allowed")
-            edge_set.add((edge.src, edge.src_port, edge.tar, edge.tar_port))
-        return self
 
 class NodeGraph:
     """
@@ -197,16 +147,3 @@ class NodeGraph:
         self._stage = "finished"
         return
 
-    # @classmethod
-    # def run_from_request(cls, 
-    #                      user_id: str, 
-    #                      request: GraphRequestModel, 
-    #                      file_manager: FileManager, 
-    #                      cache_manager: CacheManager
-    #                     ) -> None:
-    #     """ Convenience method to run the entire graph from a request """
-    #     graph = cls(user_id=user_id, request=request, file_manager=file_manager, cache_manager=cache_manager)
-    #     graph.construct_nodes(global_config=graph._global_config)
-    #     graph.static_analyse()
-    #     graph.execute()
-    #     return

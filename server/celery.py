@@ -1,6 +1,10 @@
 from celery import Celery
 import os
 
+"""
+Shared configuration across deferrent container.
+"""
+
 celery_app = Celery(
     "nodepy",
     broker=os.getenv("REDIS_URL", "redis://redis:6379"),  # Message broker
@@ -21,6 +25,3 @@ celery_app.conf.update(
     worker_send_task_events=True,  # Send task events
     include=["server.engine.task"],  # Explicitly include task modules
 )
-
-# Alternative: autodiscover tasks
-# celery_app.autodiscover_tasks(["server.engine"])

@@ -1,4 +1,3 @@
-from server.engine.nodes.GlobalConfig import GlobalConfig
 from server.lib.FileManager import FileManager
 from server.lib.CacheManager import CacheManager
 import json
@@ -392,10 +391,8 @@ request = [
 """,
 ]
 
-global_config = GlobalConfig(
-    user_id="test",
-    file_manager=FileManager()
-)
+user_id = "test"
+project_id = "test_proj"
 
 
 @pytest.mark.parametrize("request_json", request)
@@ -404,13 +401,10 @@ def test_graph_requests(request_json):
   The test passes if no exception is raised during execution.
   """
   graph_request = GraphRequestModel(**json.loads(request_json))
-  NodeGraph.run_from_request(
-    user_id="test",
-    request=graph_request,
-    file_manager=FileManager(),
-    cache_manager=CacheManager()
-  )
-    
-    
-
+  graph = NodeGraph(request=graph_request,
+                    file_manager=FileManager(user_id=user_id, project_id=project_id),
+                    cache_manager=CacheManager(user_id=user_id, project_id=project_id))
+  graph.construct_nodes()
+  graph.static_analyse(lambda x, y: None)
+  graph.execute(lambda x, y: None)
   

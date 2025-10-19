@@ -4,23 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
 import os
 from pathlib import Path
-from contextlib import asynccontextmanager
 from .api import router
-from .context import app_context
-from ..celery import celery_app
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """
-    Application lifespan manager.
-    Initializes services on startup and cleans up on shutdown.
-    """
-    app_context.initialize(celery_app)
-    await app_context.startup()
-    yield
-    await app_context.shutdown()
-
-app = FastAPI(title="NodePy API", lifespan=lifespan)
+app = FastAPI(title="NodePy API")
 
 # Add CORS middleware
 app.add_middleware(
