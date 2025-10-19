@@ -4,7 +4,7 @@ from enum import Enum
 from typing_extensions import Self
 from pandas.api import types as ptypes
 import pandas
-from typing import Union, Optional, List, ClassVar
+from typing import Union, Optional, List, ClassVar, Any
 from ...lib.FileManager import File
 
 """
@@ -108,6 +108,11 @@ class TableSchema(BaseModel):
         new_col_types = self.col_types.copy()
         new_col_types[new_col] = col_type
         return TableSchema(col_types=new_col_types)
+    
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "col_types": {k: v.value for k, v in self.col_types.items()}
+        }
 
 def check_no_illegal_cols(col_names: List[str], allow_index: bool = False) -> bool:
     """Return True if column names don't use reserved prefixes or whitespace-only.
@@ -190,8 +195,13 @@ class Schema(BaseModel):
         new_tab = self.tab._append_col(new_col, col_type)
         return Schema(type=self.Type.TABLE, tab=new_tab)
 
-    def to_dict(self) -> dict:
-        return super().model_dump()
+    def to_dict(self) -> dict[str, Any]:
+        result = {}
+        result["type"] = self.type.value
+        if self.type == self.Type.TABLE:
+            assert self.tab is not None
+            result["tab"] = self.tab.to_dict()
+        return result
 
 class Pattern(BaseModel):
     """
@@ -284,6 +294,12 @@ class Table(BaseModel):
         for col in df.columns:
             col_types[col] = ColType.from_ptype(df[col].dtype)
         return Table(df=df, col_types=col_types)
+    
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "data": self.df.to_dict(orient="list"),
+            "col_types": {k: v.value for k, v in self.col_types.items()}
+        }
 
 
 class Data(BaseModel):
@@ -325,5 +341,20 @@ class Data(BaseModel):
         table = Table._from_df(df)
         return Data(payload=table)
     
-    def to_dict(self) -> dict:
-        return super().model_dump()
+    def to_dict(self) -> dict[str, Any]:
+        if isinstance(self.payload, Table):
+            return {
+                "type": "Table",
+                "value": self.payload.to_dict()
+            }
+        elif isinstance(self.payload, File):
+            return {
+                "type": "File",
+                "value": self.payload.get_url()
+            }
+        else:
+            return {
+                "type": type(self.payload).__name__,
+                "value": self.payload
+            }
+        

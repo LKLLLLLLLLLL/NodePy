@@ -4,7 +4,7 @@ from ..lib.CacheManager import CacheManager
 from .graph import GraphRequestModel, NodeGraph
 from .nodes.Exceptions import NodeParameterError, NodeValidationError, NodeExecutionError
 from typing import Any
-from ..lib.SreamQueue import StreamQueue
+from ..lib.SreamQueue import StreamQueue, Status
 
 @celery_app.task(bind=True)
 def execute_nodes_task(self, graph_request_dict: dict, user_id: str):
@@ -16,7 +16,7 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: str):
     project_id = graph_request.project_id
     task_id = self.request.id
     
-    with StreamQueue() as queue:  # ← 使用同步上下文管理器
+    with StreamQueue(task_id) as queue:
         try:
             # 1. Validate data model
             graph = None
@@ -24,21 +24,21 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: str):
                 file_manager = FileManager(user_id=user_id, project_id=project_id)
                 cache_manager = CacheManager(user_id=user_id, project_id=project_id)
                 graph = NodeGraph(file_manager=file_manager, cache_manager=cache_manager, request=graph_request)
-                queue.push_message_sync(task_id, {"state": "PROGRESS", "meta": {"stage": "VALIDATION", "status": "SUCCESS"}})
+                queue.push_message_sync(Status.IN_PROGRESS, {"stage": "VALIDATION", "status": "SUCCESS"})
             except Exception as e:
-                queue.push_message_sync(task_id, {"state": "FAILURE", "meta": {"stage": "VALIDATION", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}}})
+                queue.push_message_sync(Status.FAILURE, {"stage": "VALIDATION", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}})
                 return
 
             # 2. Construct nodes
             try:
                 assert graph is not None
                 graph.construct_nodes()
-                queue.push_message_sync(task_id, {"state": "PROGRESS", "meta": {"stage": "CONSTRUCTION", "status": "SUCCESS"}})
+                queue.push_message_sync(Status.IN_PROGRESS, {"stage": "CONSTRUCTION", "status": "SUCCESS"})
             except NodeParameterError as e:
-                queue.push_message_sync(task_id, {"state": "FAILURE", "meta": {"stage": "CONSTRUCTION", "status": "FAILURE", "error": {"type": "NodeParameterError", "node_id": e.node_id, "msg": e.err_msg}}})
+                queue.push_message_sync(Status.FAILURE, {"stage": "CONSTRUCTION", "status": "FAILURE", "error": {"type": "NodeParameterError", "node_id": e.node_id, "msg": e.err_msg}})
                 return
             except Exception as e:
-                queue.push_message_sync(task_id, {"state": "FAILURE", "meta": {"stage": "CONSTRUCTION", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}}})
+                queue.push_message_sync(Status.FAILURE, {"stage": "CONSTRUCTION", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}})
                 return
 
             # 3. Static analysis
@@ -51,15 +51,15 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: str):
                         "node_id": node_id,
                         "output_schemas": {k: v.to_dict() for k, v in output_schemas.items()}
                     }
-                    queue.push_message_sync(task_id, {"state": "PROGRESS", "meta": meta})
+                    queue.push_message_sync(Status.IN_PROGRESS, meta)
                 
                 graph.static_analyse(callback=anl_reporter)
-                queue.push_message_sync(task_id, {"state": "PROGRESS", "meta": {"stage": "STATIC_ANALYSIS", "status": "SUCCESS"}})
+                queue.push_message_sync(Status.IN_PROGRESS, {"stage": "STATIC_ANALYSIS", "status": "SUCCESS"})
             except NodeValidationError as e:
-                queue.push_message_sync(task_id, {"state": "FAILURE", "meta": {"stage": "STATIC_ANALYSIS", "status": "FAILURE", "error": {"type": "NodeValidationError", "node_id": e.node_id, "node_input": e.err_input, "msg": e.err_msg}}})
+                queue.push_message_sync(Status.FAILURE, {"stage": "STATIC_ANALYSIS", "status": "FAILURE", "error": {"type": "NodeValidationError", "node_id": e.node_id, "node_input": e.err_input, "msg": e.err_msg}})
                 return
             except Exception as e:
-                queue.push_message_sync(task_id, {"state": "FAILURE", "meta": {"stage": "STATIC_ANALYSIS", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}}})
+                queue.push_message_sync(Status.FAILURE, {"stage": "STATIC_ANALYSIS", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}})
                 return
 
             # 4. Execute graph
@@ -72,17 +72,17 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: str):
                         "node_id": node_id,
                         "output_data": {k: v.to_dict() for k, v in output_data.items()}
                     }
-                    queue.push_message_sync(task_id, {"state": "PROGRESS", "meta": meta})
+                    queue.push_message_sync(Status.IN_PROGRESS, {"stage": "EXECUTION", "status": "IN_PROGRESS", "meta": meta})
                     
                 graph.execute(callback=exec_reporter)
-                queue.push_message_sync(task_id, {"state": "SUCCESS", "meta": {"stage": "EXECUTION", "status": "SUCCESS"}})
+                queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "SUCCESS"})
             except NodeExecutionError as e:
-                queue.push_message_sync(task_id, {"state": "FAILURE", "meta": {"stage": "EXECUTION", "status": "FAILURE", "error": {"type": "NodeExecutionError", "node_id": e.node_id, "msg": e.err_msg}}})
+                queue.push_message_sync(Status.FAILURE, {"stage": "EXECUTION", "status": "FAILURE", "error": {"type": "NodeExecutionError", "node_id": e.node_id, "msg": e.err_msg}})
                 return
             except Exception as e:
-                queue.push_message_sync(task_id, {"state": "FAILURE", "meta": {"stage": "EXECUTION", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}}})
+                queue.push_message_sync(Status.FAILURE, {"stage": "EXECUTION", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}})
                 return
                 
         except Exception as e:
             # Catch any unexpected errors
-            queue.push_message_sync(task_id, {"state": "FAILURE", "meta": {"stage": "UNKNOWN", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}}})
+            queue.push_message_sync(Status.FAILURE, {"stage": "UNKNOWN", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}})

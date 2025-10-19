@@ -3,8 +3,7 @@ from ..model.nodes import GraphRequestModel
 from ...engine.task import execute_nodes_task
 from celery.app.task import Task as CeleryTask
 from typing import cast
-from ...lib.SreamQueue import StreamQueue
-import json
+from ...lib.SreamQueue import StreamQueue, Status
 
 """
 The api for nodes runing, reporting and so on,
@@ -36,17 +35,16 @@ async def nodes_status(task_id: str, websocket: WebSocket):
     """
     await websocket.accept()
 
-    async with StreamQueue() as queue:
+    async with StreamQueue(task_id) as queue:
         while True:
-            message = await queue.read_message(task_id)
+            status, message = await queue.read_message()
             
-            if message is None:
-                await websocket.close(code=1006, reason="No message received, timeout")
-                return
+            if status == Status.TIMEOUT:
+                await websocket.close(code=1006, reason="Task timed out.")
 
+            assert message is not None
             await websocket.send_text(message)
 
-            payload = json.loads(message)
-            if payload.get("state") in ["SUCCESS", "FAILURE"]:
-                await websocket.close(code=1000, reason="Task finished")
-                return
+            if status.is_finished():
+                await websocket.close(code=1000, reason="Task finished.")
+                break

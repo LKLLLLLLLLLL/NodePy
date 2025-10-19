@@ -396,7 +396,7 @@ request = [
 
 
 # Choose a graph payload (use a small one to keep test quick)
-payload = json.loads(request[2])
+payload = json.loads(request[5])
 
 # Submit task via HTTP API
 resp = requests.post(
@@ -416,6 +416,8 @@ print(f"Submitted task {task_id}, connecting to {uri}")
 messages = []
 
 async def listen():
+    from websockets.exceptions import ConnectionClosedOK
+
     async with websockets.connect(uri) as ws:
         start = time.time()
         while True:
@@ -423,6 +425,9 @@ async def listen():
                 msg = await asyncio.wait_for(ws.recv(), timeout=10)
             except asyncio.TimeoutError:
                 print("Timed out waiting for messages")
+                break
+            except ConnectionClosedOK:
+                print("WebSocket closed normally by server (Task finished).")
                 break
 
             print("WS MESSAGE:", msg)
@@ -438,7 +443,6 @@ async def listen():
             except Exception:
                 pass
 
-            # safety: don't run forever
             if time.time() - start > 120:
                 print("Listener timeout (120s) reached")
                 break

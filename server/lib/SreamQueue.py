@@ -3,8 +3,18 @@ import redis as redis_sync
 import os
 import json
 from typing import Any, Optional
+from enum import Enum
 
 STREAMQUEUE_REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379") + "/1"
+
+class Status(str, Enum):
+    SUCCESS = "success"
+    FAILURE = "failure"
+    IN_PROGRESS = "in_progress"
+    TIMEOUT = "timeout"
+    
+    def is_finished(self) -> bool:
+        return self in {Status.SUCCESS, Status.FAILURE}
 
 class StreamQueue:
     """
@@ -12,24 +22,27 @@ class StreamQueue:
     
     Usage (Async):
         async with StreamQueue() as queue:
-            await queue.push_message("key", "message")
-            msg = await queue.read_message("key")
-    
+            await queue.push_message("message")
+            msg = await queue.read_message()
+
     Usage (Sync):
         with StreamQueue() as queue:
-            queue.push_message_sync("key", "message")
-            msg = queue.read_message_sync("key")
+            queue.push_message_sync("message")
+            msg = queue.read_message_sync()
     """
-    
-    def __init__(self, maxlen: int = 1000):
+    # shared members between all instances
+    _positions: dict[str, str] = {}  # Track read positions per stream
+    _finished: dict[str, bool] = {}  # Track finished status per stream
+
+    def __init__(self, stream_name: str, maxlen: int = 1000):
         """
         Args:
             maxlen: Maximum number of messages to keep in each stream
         """
+        self.stream_name = stream_name
         self.maxlen = maxlen
         self._async_conn: Optional[redis.Redis] = None
         self._sync_conn: Optional[redis_sync.Redis] = None
-        self._positions: dict[str, str] = {}  # Track read positions per stream
         self._is_async_context = False
     
     # ========== Context Manager Support (Async) ==========
@@ -58,7 +71,7 @@ class StreamQueue:
     
     # ========== Async Methods ==========
     
-    async def push_message(self, stream_key: str, message: str | dict[str, Any]) -> str:
+    async def push_message(self, status: Status, message: str | dict[str, Any]) -> str:
         """
         Async: Pushes a message to the specified Redis Stream.
         
@@ -71,19 +84,21 @@ class StreamQueue:
         """
         if self._async_conn is None:
             raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+        if self._finished.get(self.stream_name):
+            raise RuntimeError("Cannot push message to a finished stream")
         
         if isinstance(message, dict):
             message = json.dumps(message)
         
         message_id = await self._async_conn.xadd(
-            stream_key, 
-            {"data": message},
+            self.stream_name,
+            {"status": status.value, "data": message},
             maxlen=self.maxlen,
             approximate=True
         )
         return message_id
-    
-    async def read_message(self, stream_key: str, timeout_ms: int = 60000) -> Optional[str]:
+
+    async def read_message(self, timeout_ms: int = 60000) -> tuple[Status, str | None]:
         """
         Async: Reads the next message from the specified Redis Stream.
         Automatically tracks position.
@@ -97,38 +112,46 @@ class StreamQueue:
         """
         if self._async_conn is None:
             raise RuntimeError("Must use 'async with StreamQueue()' context manager")
-        
-        last_id = self._positions.get(stream_key, "0-0")
+        if self._finished.get(self.stream_name):
+            raise RuntimeError("Cannot read message from a finished stream")
+
+        last_id = self._positions.get(self.stream_name, "0-0")
         resp = await self._async_conn.xread(
-            {stream_key: last_id},
+            {self.stream_name: last_id},
             count=1,
             block=timeout_ms
         )
         
         if not resp:
-            return None
-        
+            return Status.TIMEOUT, None
+
         _, messages = resp[0]
         if not messages:
-            return None
+            raise RuntimeError("Unexpected empty message list")
         
         message_id, fields = messages[0]
+        message_status = Status(fields.get("status"))
         message_data = fields.get("data")
         
         # Update position for next read
-        self._positions[stream_key] = message_id
-        
-        return message_data
-    
+        self._positions[self.stream_name] = message_id
+        # Update finished status
+        if message_status.is_finished():
+            self._finished[self.stream_name] = True
+
+        return message_status, message_data
+
     async def close(self):
         """Async: Close the Redis connection"""
-        if self._async_conn:
-            await self._async_conn.close()
-            self._async_conn = None
+        assert self._async_conn
+        if self._finished.get(self.stream_name):
+            self._async_conn.delete(self.stream_name) # Clean up stream if finished
+        await self._async_conn.close()
+        self._async_conn = None
     
     # ========== Sync Methods ==========
     
-    def push_message_sync(self, stream_key: str, message: str | dict[str, Any]) -> str:
+    def push_message_sync(self, status: Status, message: str | dict[str, Any]) -> str:
         """
         Sync: Pushes a message to the specified Redis Stream.
         
@@ -141,19 +164,21 @@ class StreamQueue:
         """
         if self._sync_conn is None:
             raise RuntimeError("Must use 'with StreamQueue()' context manager")
+        if self._finished.get(self.stream_name):
+            raise RuntimeError("Cannot push message to a finished stream")
         
         if isinstance(message, dict):
             message = json.dumps(message)
         
         message_id = self._sync_conn.xadd(
-            stream_key, 
-            {"data": message},
+            self.stream_name,
+            {"status": status.value, "data": message},
             maxlen=self.maxlen,
             approximate=True
         )
         return str(message_id)
-    
-    def read_message_sync(self, stream_key: str, timeout_ms: int = 60000) -> Optional[str]:
+
+    def read_message_sync(self, timeout_ms: int = 60000) -> tuple[Status, str | None]:
         """
         Sync: Reads the next message from the specified Redis Stream.
         Automatically tracks position.
@@ -167,37 +192,45 @@ class StreamQueue:
         """
         if self._sync_conn is None:
             raise RuntimeError("Must use 'with StreamQueue()' context manager")
-        
-        last_id = self._positions.get(stream_key, "0-0")
+        if self._finished.get(self.stream_name):
+            raise RuntimeError("Cannot read message from a finished stream")
+
+        last_id = self._positions.get(self.stream_name, "0-0")
         resp = self._sync_conn.xread(
-            {stream_key: last_id},
+            {self.stream_name: last_id},
             count=1,
             block=timeout_ms
         )
         
         if not resp:
-            return None
+            return Status.TIMEOUT, None
 
         assert isinstance(resp, list)
         _, messages = resp[0]
         if not messages:
-            return None
+            raise RuntimeError("Unexpected empty message list")
         
         message_id, fields = messages[0]
+        message_status = Status(fields.get("status"))
         message_data = fields.get("data")
         
         # Update position for next read
-        self._positions[stream_key] = message_id
-        
-        return message_data
-    
+        self._positions[self.stream_name] = message_id
+        # Update finished status
+        if message_status.is_finished():
+            self._finished[self.stream_name] = True
+
+        return message_status, message_data
+
     def close_sync(self):
         """Sync: Close the Redis connection"""
-        if self._sync_conn:
-            self._sync_conn.close()
-            self._sync_conn = None
+        assert self._sync_conn
+        if self._finished.get(self.stream_name):
+            self._sync_conn.delete(self.stream_name) # Clean up stream if finished
+        self._sync_conn.close()
+        self._sync_conn = None
     
-    def reset_position(self, stream_key: str):
+    def reset_position(self):
         """Reset the read position for a stream (works for both sync and async)"""
-        if stream_key in self._positions:
-            del self._positions[stream_key]
+        if self.stream_name in self._positions:
+            del self._positions[self.stream_name]

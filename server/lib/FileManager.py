@@ -45,6 +45,12 @@ class File(BaseModel):
     def get_format(self) -> Literal["png", "jpg", "pdf", "csv"]:
         return self.format
 
+    def get_url(self) -> str:
+        """
+        Get a URL for frontend to access the file.
+        """
+        return f"/files/{self.path.name}"
+
 
 class FileManager:
     """
