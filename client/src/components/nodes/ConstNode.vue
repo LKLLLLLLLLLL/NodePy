@@ -2,15 +2,15 @@
     <div ref="info" class="ConstNodeLayout">
         <div class="tools">
             <NodeResizer :min-height="minH" :min-width="minW" :max-height="maxH" :max-width="maxW"/>
-            <Handle id="constSource1" type="source" :position="Position.Right"/>
+            <Handle :id="`Node${props.id}Handle`" type="source" :position="Position.Right"/>
         </div>
         <div class="data">
             <div class="value">
-                <span style="margin: 4px;">value: </span>
+                <span>value: </span>
                 <input type="text" v-model="value" class="nodrag" @input="onInput"/>
             </div>
             <div class="data_type">
-                <span style="margin: 4px;">data_type:</span>
+                <span>data_type:</span>
                 <select v-model="data_type" @change="onSelect">
                     <option v-for="item in data_type_options">{{ item }}</option>
                 </select>
@@ -53,11 +53,11 @@
             if (minW == 0 || minH == 0) {
                 const rect = info.value.getBoundingClientRect()
                 const zoom = viewport.value.zoom
-                minW = (rect.width + 10) / zoom
-                minH = (rect.height + 10) / zoom
+                minW = rect.width / zoom  + 10
+                minH = rect.height / zoom  + 10
                 maxH = 2 * minH
                 maxW = 2 * minW
-                console.log(minW, minH, zoom)
+                console.log('minW:',minW, 'minH:', minH, 'zoom:', zoom)
             }
         })
     })
@@ -78,20 +78,28 @@
             .data_type {
                 display: flex;
                 align-items: center;
+                span {
+                    margin: 4px;
+                }
                 select {
                     background: #ccc;
                     height: 1.5rem;
                     width: 2.5rem;
                     padding: 0.1rem;
+                    margin: 4px;
                 }
             }
             .value {
                 display: flex;
                 align-items: center;
+                span {
+                    margin: 4px;
+                }
                 input {
                     width: 7rem;
                     height: 1.2rem;
-                    border: 1px solid #ccc
+                    border: 1px solid #ccc;
+                    margin: 4px;
                 }
             }
         }
@@ -104,7 +112,5 @@
     .vue-flow__node-ConstNode {
         border-radius: 4px;
         background: #fff;
-        width: 180px;
-        height: 60px;
     }
 </style>

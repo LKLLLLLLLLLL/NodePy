@@ -1,26 +1,23 @@
 <script lang='ts' setup>
 import { ref, onMounted } from 'vue'  
-import { VueFlow, useVueFlow, Panel } from '@vue-flow/core'
+import { VueFlow, useVueFlow, Panel, ConnectionMode } from '@vue-flow/core'
 import type { Node, Edge } from '@vue-flow/core'  
 import { Background } from '@vue-flow/background'
 import { MiniMap, MiniMapNode } from '@vue-flow/minimap'
 import { Controls } from '@vue-flow/controls'
 import CustomNode from './nodes/CustomNode.vue'
 import ConstNode from './nodes/ConstNode.vue'
+import StringNode from './nodes/StringNode.vue'
 import {useGraphStore} from '../stores/graphStore'
 import type * as Nodetypes from './nodes/type'
 
 const graphStore = useGraphStore()
 graphStore.vueFlowInstance = useVueFlow()
-const { onConnect, onInit, addNodes, onNodesChange } = useVueFlow()
+const { onConnect, onInit, addNodes, onNodesChange, addEdges } = useVueFlow()
 
-onConnect(({ source, target, sourceHandle, targetHandle }) => {
-  console.log('source', source)
-  console.log('target', target)
-  // these are the handle ids of the source and target node
-  // if no id is specified these will be `null`, meaning the first handle of the necessary type will be used
-  console.log('sourceHandle', sourceHandle)
-  console.log('targetHandle', targetHandle)
+onConnect((connection) => {
+  addEdges(connection)
+  console.log(edges.value)
 })
 
 const nodes = ref<Node[]>([
@@ -54,7 +51,7 @@ const nodes = ref<Node[]>([
   }
 ])
 
-const edges = ref([
+const edges = ref<Edge[]>([
   {
     id: 'e-1->-2',
     source: '-1',
@@ -86,11 +83,22 @@ onInit((instance) => {
   instance.fitView()
 })
 
+// onAddNodes
 onNodesChange(changes => {
   changes = changes.filter(c => c.type === 'add')
   if(changes.length > 0) {
     count += changes.length
     console.log(`现在增加了${count}个节点`)
+    console.log(nodes.value)
+  }
+})
+
+//onRemoveNodes
+onNodesChange(changes => {
+  changes = changes.filter(c => c.type === 'remove')
+  if(changes.length > 0){
+    count -= changes.length
+    console.log(`减少${changes.length}个节点， 现在还有${count}个节点`)
     console.log(nodes.value)
   }
 })
@@ -103,9 +111,13 @@ const nodeColor = (node: Node) => {
     case 'output':
       return '#6865A5'
     case 'custom':
-      return '#ccc'
-    case 'ConstNode':
       return '#aaa'
+    case 'ConstNode':
+      return '#ccc'
+    case 'StringNode':
+      return '#ccc'
+    case 'TableNode':
+      return '#ccc'
     default:
       return '#ff0072'
   }
@@ -114,7 +126,7 @@ const nodeColor = (node: Node) => {
 const addNode = (e?: MouseEvent) => {
   switch(selected.value){
     case 'ConstNode':
-      const added: Nodetypes.ConstNode = {
+      const addedConstNode: Nodetypes.ConstNode = {
         id: `${count}`,
         position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
         type: 'ConstNode',
@@ -123,11 +135,33 @@ const addNode = (e?: MouseEvent) => {
           data_type: 'int'
         }
       }
-      addNodes(added)
+      addNodes(addedConstNode)
       break
 
-    
+    case 'StringNode':
+      const addedStringNode: Nodetypes.StringNode = {
+        id: `${count}`,
+        position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
+        type: 'StringNode',
+        data: {
+          value: ""
+        }
+      }
+      addNodes(addedStringNode)
+      break
 
+    case 'TableNode':
+      const addedTableNode: Nodetypes.TableNode = {
+        id: `${count}`,
+        position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
+        type: 'TableNode',
+        data: {
+          rows: [{hello: "world"}],
+          columns: ['hello']
+        }
+      }
+      break
+    
     default:
       console.log(selected.value)
   }
@@ -140,6 +174,7 @@ const addNode = (e?: MouseEvent) => {
     <VueFlow
     v-model:nodes="nodes"
     v-model:edges="edges"
+    :connection-mode="ConnectionMode.Strict"
     >
       <Background color="#111" bgColor="rgba(0,0,0,0.5)"/>
 
@@ -155,10 +190,15 @@ const addNode = (e?: MouseEvent) => {
         <ConstNode v-bind="ConstNodeProps"/>
       </template>
 
+      <template #node-StringNode="StringNodeProps">
+        <StringNode v-bind="StringNodeProps"/>
+      </template>
+
       <Panel position="top-left">
         <label for="selectNode">请选择要添加的节点：</label>
         <select id="selectNode" style="background: #eee; padding: 0px 8px" v-model="selected">
           <option value="ConstNode">ConstNode</option>
+          <option value="StringNode">StringNode</option>
         </select>
         <button style="background: #eee; padding: 0px 8px; margin: 10px" @click="addNode">确认</button>
       </Panel>
