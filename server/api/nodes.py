@@ -18,7 +18,7 @@ async def nodes_run(graph: GraphRequestModel) -> dict[str, str]:
     submit a node graph execution task and return the task id.
     You need to use this id to query the task status later.
     """
-    user_id = "test_user"  # for debug
+    user_id = 1  # for debug
     
     try:
         celery_task = cast(CeleryTask, execute_nodes_task) # to suppress type checker error

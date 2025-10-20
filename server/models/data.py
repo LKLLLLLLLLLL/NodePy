@@ -350,7 +350,7 @@ class Data(BaseModel):
         elif isinstance(self.payload, File):
             return {
                 "type": "File",
-                "value": self.payload.get_url()
+                "value": self.payload.to_dict()
             }
         else:
             return {

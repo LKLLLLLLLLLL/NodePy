@@ -22,7 +22,7 @@ class GraphRequestModel(BaseModel):
     For validation data.
     """
 
-    project_id: str
+    project_id: int
     nodes: list[Node]
     edges: list[Edge]
 

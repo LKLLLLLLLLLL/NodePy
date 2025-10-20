@@ -16,6 +16,19 @@ services:
     volumes:
       - redis_data_prod:/data
     restart: unless-stopped
+  
+  minio:
+    image: minio/minio:latest
+    container_name: nodepy-minio
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+      MINIO_CONSOLE_ADDRESS: ":9001"
+    command: server /data
 
   server:
     build:
@@ -27,8 +40,11 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
-      - DEBUG=false
       - REDIS_URL=redis://redis:6379
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+      - DEBUG=false
     depends_on:
       - postgres
       - redis
@@ -42,8 +58,11 @@ services:
     container_name: nodepy-celery-worker
     environment:
       - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
-      - DEBUG=false
       - REDIS_URL=redis://redis:6379
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+      - DEBUG=false
     depends_on:
       - postgres
       - redis
@@ -52,3 +71,4 @@ services:
 volumes:
   postgres_data:
   redis_data_prod:
+  minio_data:

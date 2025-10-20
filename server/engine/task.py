@@ -7,7 +7,7 @@ from typing import Any
 from server.lib.SreamQueue import StreamQueue, Status
 
 @celery_app.task(bind=True)
-def execute_nodes_task(self, graph_request_dict: dict, user_id: str):
+def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
     """
     Celery task to execute a node graph with real-time updates via Redis Streams.
     Uses StreamQueue (sync version) to handle state reporting.
@@ -21,9 +21,13 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: str):
             # 1. Validate data model
             graph = None
             try:
+                print(1)
                 file_manager = FileManager(user_id=user_id, project_id=project_id)
+                print(2)
                 cache_manager = CacheManager(user_id=user_id, project_id=project_id)
+                print(3)
                 graph = NodeGraph(file_manager=file_manager, cache_manager=cache_manager, request=graph_request)
+                print(4)
                 queue.push_message_sync(Status.IN_PROGRESS, {"stage": "VALIDATION", "status": "SUCCESS"})
             except Exception as e:
                 queue.push_message_sync(Status.FAILURE, {"stage": "VALIDATION", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}})

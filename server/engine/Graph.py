@@ -103,12 +103,12 @@ class NodeGraph:
                 tar_port = edge_data['tar_port']
                 src_schema = schema_cache[(src_id, src_port)]
                 input_schemas[tar_port] = src_schema
-            
+
             # run schema inference
             output_schemas = node.infer_schema(input_schemas)
             for tar_port, schema in output_schemas.items():
                 schema_cache[(node_id, tar_port)] = schema
-            
+
             # call call_back
             callback(node_id, output_schemas)
         self._stage = "static_analyzed"
@@ -143,10 +143,9 @@ class NodeGraph:
                     raise GraphError(f"Node '{node_id}' output on port '{tar_port}' already exists in cache.")
                 data_cache[(node_id, tar_port)] = data
                 # for debug
-                print(f"Node '{node_id}' output on port '{tar_port}': {data.print()}")
+                # print(f"Node '{node_id}' output on port '{tar_port}': {data.print()}")
             
             # call callafter
             callafter(node_id, output_data)
         self._stage = "finished"
         return
-

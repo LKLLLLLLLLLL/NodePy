@@ -7,7 +7,7 @@ import websockets
 request = [
     """
 {
-    "project_id": "test_project",
+    "project_id": 1,
   "nodes": [
     {
       "id": "n1",
@@ -24,7 +24,7 @@ request = [
 """,
     """
 {
-    "project_id": "test_project",
+    "project_id": 1,
   "nodes": [
     {
       "id": "n1",
@@ -60,7 +60,7 @@ request = [
 }
 """,
     """{
-        "project_id": "test_project",
+        "project_id": 1,
   "nodes": [
     {
       "id": "c1",
@@ -96,7 +96,7 @@ request = [
 }""",
     """
 {
-    "project_id": "test_project",
+    "project_id": 1,
   "nodes": [
     {
       "id": "t_gdp",
@@ -143,7 +143,7 @@ request = [
 """,
     """
 {
-    "project_id": "test_project",
+    "project_id": 1,
   "nodes": [
     {
       "id": "t_products",
@@ -223,7 +223,7 @@ request = [
 """,
     """
 {
-    "project_id": "test_project",
+    "project_id": 1,
   "nodes": [
     {
       "id": "t_sales",
@@ -303,7 +303,7 @@ request = [
 """,
     """
 {
-    "project_id": "test_project",
+    "project_id": 1,
   "nodes": [
     {
       "id": "c_a",
@@ -347,7 +347,7 @@ request = [
 """,
     """
 {
-    "project_id": "test_project",
+    "project_id": 1,
   "nodes": [
     {
       "id": "t_catalog",
@@ -400,7 +400,7 @@ payload = json.loads(request[5])
 
 # Submit task via HTTP API
 resp = requests.post(
-    "http://localhost:8000/nodes/run",
+    "http://localhost:8000/api/nodes/run",
     json=payload,
     timeout=10,
 )
@@ -408,9 +408,9 @@ resp = requests.post(
 assert resp.status_code in (200, 202), f"Unexpected status code: {resp.status_code}, {resp.content}"
 data = resp.json()
 task_id = data.get("task_id")
-assert task_id, "No task_id returned from /nodes/run"
+assert task_id, "No task_id returned from /api/nodes/run"
 
-uri = f"ws://localhost:8000/nodes/status/{task_id}"
+uri = f"ws://localhost:8000/api/nodes/status/{task_id}"
 print(f"Submitted task {task_id}, connecting to {uri}")
 
 messages = []

@@ -30,7 +30,7 @@ if DATABASE_URL is None:
 engine = create_engine(DATABASE_URL)
 
 # Include API routes
-app.include_router(router)
+app.include_router(router, prefix="/api")
 
 # Static files directory
 # In container: /nodepy/static (mapped from host client/dist via mount or COPY)

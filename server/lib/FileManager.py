@@ -1,56 +1,11 @@
-from pathlib import Path
 from typing import Literal, cast
 import io
-from pydantic import BaseModel, model_validator
 import os
-import tempfile
-
-class File(BaseModel):
-    """
-    A abstract file class to represent files managed by FileManager.
-    """
-    path: Path # a simple implementation using local path
-    format: Literal["png", "jpg", "pdf", "csv"]
-    
-    model_config = {
-        "arbitrary_types_allowed": True  # 允许非 Pydantic 类型
-    }
-
-    @model_validator(mode="after")
-    def verify(self) -> "File":
-        if not self.path.exists():
-            raise ValueError(f"File path does not exist: {self.path}")
-        if not self.path.is_file():
-            raise ValueError(f"Path is not a file: {self.path}")
-        suffix = self.path.suffix.lower().lstrip(".")
-        if suffix not in ["png", "jpg", "pdf", "csv"]:
-            raise ValueError(f"Unsupported file format: {suffix}")
-        if suffix != self.format:
-            raise ValueError(f"File format mismatch: expected {self.format}, got {suffix}")
-        return self
-
-    @staticmethod
-    def infer_format(filename: str) -> Literal["png", "jpg", "pdf", "csv"]:
-        suffix = filename.split(".")[-1].lower()
-        if suffix not in ["png", "jpg", "pdf", "csv"]:
-            raise ValueError(f"Unsupported file format: {suffix}")
-        return cast(Literal["png", "jpg", "pdf", "csv"], suffix) # for mypy
-
-    def get_name(self) -> str:
-        return self.path.name
-
-    def get_size(self) -> int:
-        return self.path.stat().st_size
-
-    def get_format(self) -> Literal["png", "jpg", "pdf", "csv"]:
-        return self.format
-
-    def get_url(self) -> str:
-        """
-        Get a URL for frontend to access the file.
-        """
-        return f"/files/{self.path.name}"
-
+from minio import Minio, S3Error
+from uuid import uuid4
+from ..models.database import File as DBFile, User, get_session, Project
+from server.models.file import File, FileItem, UserFileList
+import datetime
 
 class FileManager:
     """
@@ -59,74 +14,168 @@ class FileManager:
     Each file manager is bind to a user_id and project_id.
     Can be used in multiple containers.
     """
-    
-    tmp_path: Path # a simple implementation using local tmp path
-    user_id: str
-    project_id: str
-    
-    def __init__(self, user_id: str, project_id: str) -> None:
-        system_tmp_path = os.environ.get("TMP_PATH", None)
-        if system_tmp_path is None:
-            system_tmp_path = tempfile.gettempdir()
-        self.tmp_path = Path(system_tmp_path)
-        self.tmp_path.mkdir(parents=True, exist_ok=True)
-        if not isinstance(user_id, str) or user_id.strip() == "":
-            raise ValueError("user_id cannot be empty.")
-        if not isinstance(project_id, str) or project_id.strip() == "":
-            raise ValueError("project_id cannot be empty.")
+    def __init__(self, user_id: int, project_id: int) -> None:
+        self.minio_client = Minio(
+            endpoint=os.getenv("MINIO_ENDPOINT", ""),
+            access_key=os.getenv("MINIO_ROOT_USER", ""),
+            secret_key=os.getenv("MINIO_ROOT_PASSWORD", ""),
+            secure=False  # MinIO in Docker is HTTP, not HTTPS
+        )
+        self.db_client = get_session()
+        self.bucket = "nodepy-files"
         self.user_id = user_id
         self.project_id = project_id
+        # Ensure bucket exists
+        if not self.minio_client.bucket_exists(self.bucket):
+            self.minio_client.make_bucket(self.bucket)
 
-    def write(self, filename: str, content: bytes) -> File:
-        """ Write content to a file for a user, return the file path """
-        try:
-            user_path = self.tmp_path / self.user_id
-            user_path.mkdir(parents=True, exist_ok=True)
-            project_path = user_path / self.project_id
-            project_path.mkdir(parents=True, exist_ok=True)
-            file_path = project_path / filename
-            with open(file_path, "wb") as f:
-                f.write(content)
-            return File(path=file_path, format=File.infer_format(filename))
-        except PermissionError as e:
-            raise IOError(f"Permission denied when writing file {filename} for user {self.user_id} and project {self.project_id}: {e}")
-        except OSError as e:
-            raise IOError(f"Failed to write file {filename} for user {self.user_id} and project {self.project_id}: {e}")
+    def __del__(self):
+        if hasattr(self, "db_client"):
+            self.db_client.close()
 
+    def get_file_by_key(self, key: str) -> File:
+        """ Get a File object by its key """
+        db_file = self.db_client.query(DBFile).filter(DBFile.file_key == key).first()
+        if not db_file:
+            raise IOError("File record not found in database")
+        if db_file.user_id != self.user_id or db_file.project_id != self.project_id: # type: ignore
+            raise PermissionError("Permission denied to access this file")
+        return File(
+            key=db_file.file_key,
+            format=cast(Literal["png", "jpg", "pdf", "csv"], db_file.format),
+            size=db_file.file_size, # type: ignore
+            uploaded_at=db_file.upload_time # type: ignore
+        )
     """
     For unsupport lib, you can use write method like this:
     ```py
     buffer = FileManager.get_buffer()
     somelib.save(buffer, format="png")
-    buffer.seek(0)
-    file = file_manager.write_from_buffer(
-        user_id=user_id, 
-        filename=filename,
-        buffer=buffer
+    file = file_manager.write(
+        content=buffer,
+        format="png"
     )
     ```
     """
+
     @staticmethod
     def get_buffer() -> io.BytesIO:
         return io.BytesIO()
 
-    def write_from_buffer(self, filename: str, buffer: io.BytesIO) -> File:
-        """ Write content from a buffer to a file for a user, return the file path """
-        user_path = self.tmp_path / self.user_id
-        user_path.mkdir(parents=True, exist_ok=True)
-        project_path = user_path / self.project_id
-        project_path.mkdir(parents=True, exist_ok=True)
-        file_path = project_path / filename
-        with open(file_path, "wb") as f:
-            f.write(buffer.getvalue())
-        return File(path=file_path, format=File.infer_format(filename))
+    def write(self, content: bytes | io.BytesIO, format: Literal["png", "jpg", "pdf", "csv"]) -> File:
+        """ Write content to a file for a user, return the file path """
+        if isinstance(content, io.BytesIO):
+            content.seek(0)
+            content = content.getvalue()
+        key = uuid4().hex
+        try:
+            user = self.db_client.query(User).filter(User.id == self.user_id).first()
+            if not user:
+                raise ValueError("User not found")
+            if int(user.file_occupy) + len(content) > user.file_total_space: # type: ignore
+                raise IOError("User storage limit exceeded")
+            user.file_occupy += len(content) # type: ignore
+            file = DBFile(
+                file_key=key,
+                format=format,
+                user_id=self.user_id,
+                project_id=self.project_id,
+                file_size=len(content),
+                upload_time=datetime.datetime.now(datetime.timezone.utc).isoformat()
+            )
+            self.db_client.add(file)
+            self.minio_client.put_object(
+                bucket_name=self.bucket,
+                object_name=key,
+                data=io.BytesIO(content),
+                length=len(content),
+                metadata={"project_id": str(self.project_id), "user_id": str(self.user_id)}
+            )
+            self.db_client.commit()
+        except S3Error as e:
+            self.db_client.rollback()
+            raise IOError(f"Failed to upload file to MinIO: {e}")
+        except Exception as e:
+            self.db_client.rollback()
+            raise IOError(f"Failed to write file: {e}")
+        return File(key=key, format=format, size=len(content))
+    
+    def delete(self, file: File) -> None:
+        """ Delete a file """
+        # validate file ownership
+        db_file = self.db_client.query(DBFile).filter(DBFile.file_key == file.key).first()
+        if not db_file:
+            raise IOError("File record not found in database")
+        if db_file.user_id != self.user_id or db_file.project_id != self.project_id: # type: ignore
+            raise PermissionError("Permission denied to access this file")
+        try:
+            self.minio_client.remove_object(
+                bucket_name=self.bucket,
+                object_name=file.key
+            )
+            db_file = self.db_client.query(DBFile).filter(DBFile.file_key == file.key).first()
+            if not db_file:
+                raise IOError("File record not found in database")
+            user = self.db_client.query(User).filter(User.id == db_file.user_id).first()
+            if not user:
+                raise IOError("User not found in database")
+            user.file_occupy -= db_file.file_size  # type: ignore
+            if user.file_occupy < 0: # type: ignore
+                user.file_occupy = 0 # type: ignore
+            self.db_client.delete(db_file)
+            self.db_client.commit()
+        except S3Error as e:
+            self.db_client.rollback()
+            raise IOError(f"Failed to delete file from MinIO: {e}")
+        except Exception as e:
+            self.db_client.rollback()
+            raise IOError(f"Failed to delete file record from database: {e}")
 
     def read(self, file: File) -> bytes:
         """Read content from a file"""
+        db_file = self.db_client.query(DBFile).filter(DBFile.file_key == file.key).first()
+        if not db_file:
+            raise IOError("File record not found in database")
+        if db_file.user_id != self.user_id or db_file.project_id != self.project_id: # type: ignore
+            raise PermissionError("Permission denied to access this file")
         try:
-            with open(file.path, "rb") as f:
-                return f.read()
-        except FileNotFoundError:
-            raise FileNotFoundError(f"File not found: {file.path}")
-        except PermissionError as e:
-            raise IOError(f"Permission denied when reading file {file.path} for user {self.user_id} and project {self.project_id}: {e}")
+            response = self.minio_client.get_object(
+                bucket_name=self.bucket,
+                object_name=file.key
+            )
+            data = response.read()
+            return data
+        except S3Error as e:
+            raise IOError(f"Failed to read file from MinIO: {e}")
+    
+    def list_file(self) -> UserFileList:
+        """ List all files owned by the user in the project """
+        try:
+            db_files = self.db_client.query(DBFile).filter(
+                DBFile.user_id == self.user_id,
+                DBFile.project_id == self.project_id
+            ).all()
+            user = self.db_client.query(User).filter(User.id == self.user_id).first()
+            if not user:
+                raise IOError("User not found in database")
+            file_items = []
+            for db_file in db_files:
+                # query project name
+                project = self.db_client.query(Project).filter(Project.id == db_file.project_id).first()
+                project_name = project.name if project else ""
+                file_items.append(FileItem(
+                    key=db_file.file_key, # type: ignore
+                    format=cast(Literal["png", "jpg", "pdf", "csv"], db_file.format),
+                    size=db_file.file_size, # type: ignore
+                    uploaded_at=db_file.upload_time, # type: ignore
+                    project_name=project_name # type: ignore
+                ))
+            return UserFileList(
+                user_id=self.user_id,
+                files=file_items,
+                total_size=user.file_total_space, # type: ignore
+                used_size=user.file_occupy # type: ignore
+            )
+        except Exception as e:
+            raise IOError(f"Failed to list files: {e}")
+
