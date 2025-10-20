@@ -8,17 +8,15 @@ import { Controls } from '@vue-flow/controls'
 import CustomNode from './nodes/CustomNode.vue'
 import ConstNode from './nodes/ConstNode.vue'
 import StringNode from './nodes/StringNode.vue'
+import TableNode from './nodes/TableNode.vue'
 import {useGraphStore} from '../stores/graphStore'
 import type * as Nodetypes from './nodes/type'
 
 const graphStore = useGraphStore()
-graphStore.vueFlowInstance = useVueFlow()
-const { onConnect, onInit, addNodes, onNodesChange, addEdges } = useVueFlow()
 
-onConnect((connection) => {
-  addEdges(connection)
-  console.log(edges.value)
-})
+graphStore.vueFlowInstance = useVueFlow()
+
+const { onConnect, onInit, addNodes, onNodesChange, addEdges } = useVueFlow()
 
 const nodes = ref<Node[]>([
   {
@@ -75,7 +73,11 @@ const edges = ref<Edge[]>([
 ])
 
 const selected = ref()
-let count = 0
+
+const initTime = Date.now()
+
+let count = nodes.value.length
+
 
 // any event that is emitted from the `<VueFlow />` component can be listened to using the `onEventName` method
 onInit((instance) => {
@@ -88,7 +90,7 @@ onNodesChange(changes => {
   changes = changes.filter(c => c.type === 'add')
   if(changes.length > 0) {
     count += changes.length
-    console.log(`现在增加了${count}个节点`)
+    console.log(`增加${changes.length}个节点, 现在还有${count}个节点`)
     console.log(nodes.value)
   }
 })
@@ -101,6 +103,11 @@ onNodesChange(changes => {
     console.log(`减少${changes.length}个节点， 现在还有${count}个节点`)
     console.log(nodes.value)
   }
+})
+
+onConnect((connection) => {
+  addEdges(connection)
+  console.log(edges.value)
 })
 
 
@@ -127,7 +134,7 @@ const addNode = (e?: MouseEvent) => {
   switch(selected.value){
     case 'ConstNode':
       const addedConstNode: Nodetypes.ConstNode = {
-        id: `${count}`,
+        id: (Date.now() - initTime).toString(),
         position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
         type: 'ConstNode',
         data: {
@@ -140,7 +147,7 @@ const addNode = (e?: MouseEvent) => {
 
     case 'StringNode':
       const addedStringNode: Nodetypes.StringNode = {
-        id: `${count}`,
+        id: (Date.now() - initTime).toString(),
         position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
         type: 'StringNode',
         data: {
@@ -152,7 +159,7 @@ const addNode = (e?: MouseEvent) => {
 
     case 'TableNode':
       const addedTableNode: Nodetypes.TableNode = {
-        id: `${count}`,
+        id: (Date.now() - initTime).toString(),
         position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
         type: 'TableNode',
         data: {
@@ -160,6 +167,7 @@ const addNode = (e?: MouseEvent) => {
           columns: ['hello']
         }
       }
+      addNodes(addedTableNode)
       break
     
     default:
@@ -183,7 +191,7 @@ const addNode = (e?: MouseEvent) => {
       <Controls position="bottom-right"/>
 
       <template #node-custom="customNodeProps">
-        <CustomNode v-bind="customNodeProps"/> 
+        <CustomNode v-bind="customNodeProps"/>
       </template>
 
       <template #node-ConstNode="ConstNodeProps">
@@ -194,11 +202,16 @@ const addNode = (e?: MouseEvent) => {
         <StringNode v-bind="StringNodeProps"/>
       </template>
 
+      <template #node-TableNode="TableNodeProps">
+        <TableNode v-bind="TableNodeProps"/>
+      </template>
+
       <Panel position="top-left">
         <label for="selectNode">请选择要添加的节点：</label>
         <select id="selectNode" style="background: #eee; padding: 0px 8px" v-model="selected">
           <option value="ConstNode">ConstNode</option>
           <option value="StringNode">StringNode</option>
+          <option value="TableNode">TableNode</option>
         </select>
         <button style="background: #eee; padding: 0px 8px; margin: 10px" @click="addNode">确认</button>
       </Panel>
