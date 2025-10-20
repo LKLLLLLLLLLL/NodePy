@@ -49,6 +49,7 @@ services:
       - postgres
       - redis
       - celery-worker
+      - minio
 
   celery-worker:
     build:
@@ -66,6 +67,7 @@ services:
     depends_on:
       - postgres
       - redis
+      - minio
     command: ["uv", "run", "celery", "-A", "server.celery", "worker", "--loglevel=info"]
 
 volumes:

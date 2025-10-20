@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 import os
 from pathlib import Path
 from .api import router
+from .models.database import Base
 
 app = FastAPI(title="NodePy API")
 
@@ -23,11 +24,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Database connection (can be moved to a service if it grows)
+# Database connection
 DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL is None:
     raise ValueError("DATABASE_URL environment variable is not set")
 engine = create_engine(DATABASE_URL)
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 # Include API routes
 app.include_router(router, prefix="/api")

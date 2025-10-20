@@ -1,4 +1,4 @@
-from sqlalchemy import String, Integer, Column, ForeignKey, Enum
+from sqlalchemy import String, Integer, Column, ForeignKey, Enum, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -25,8 +25,8 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String, unique=True, index=True, nullable=False)
-    file_occupy = Column(Integer, default=0, nullable=False)  # in Byte
-    file_total_space = Column(Integer, default=5 * 1024 * 1024 * 1024, nullable=False)  # 5 GB default
+    file_occupy = Column(BigInteger, default=0, nullable=False)  # in Byte
+    file_total_space = Column(BigInteger, default=5 * 1024 * 1024 * 1024, nullable=False)  # 5 GB default
 
 class Project(Base):
     __tablename__ = "projects"
@@ -44,5 +44,5 @@ class File(Base):
     format = Column(Enum("jpg", "png", "csv", "pdf", name="file_format"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
-    file_size = Column(Integer, nullable=False) # Byte
+    file_size = Column(BigInteger, nullable=False) # Byte
     upload_time = Column(String, nullable=False)  # ISO format datetime string
