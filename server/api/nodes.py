@@ -4,6 +4,8 @@ from server.engine.task import execute_nodes_task
 from celery.app.task import Task as CeleryTask
 from typing import cast
 from server.lib.SreamQueue import StreamQueue, Status
+import asyncio
+from server.celery import celery_app
 
 """
 The api for nodes runing, reporting and so on,
@@ -35,16 +37,80 @@ async def nodes_status(task_id: str, websocket: WebSocket):
     """
     await websocket.accept()
 
-    async with StreamQueue(task_id) as queue:
-        while True:
-            status, message = await queue.read_message()
-            
-            if status == Status.TIMEOUT:
-                await websocket.close(code=1006, reason="Task timed out.")
+    try:
+        async with StreamQueue(task_id) as queue:
+            timeout_count = 0
+            while True:
+                # Create tasks for both queue and websocket
+                read_task = asyncio.create_task(queue.read_message())
+                recv_task = asyncio.create_task(websocket.receive_text())
 
-            assert message is not None
-            await websocket.send_text(message)
+                try:
+                    done, pending = await asyncio.wait(
+                        {read_task, recv_task},
+                        return_when=asyncio.FIRST_COMPLETED
+                    )
+                except Exception as e:
+                    read_task.cancel()
+                    recv_task.cancel()
+                    await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")
+                    break
+                
+                # Cancel all pending tasks
+                for task in pending:
+                    task.cancel()
+                
+                # check if websocket is disconnected
+                if websocket.client_state.name != "CONNECTED":
+                    celery_app.control.revoke(task_id, terminate=True)
+                    break
+                
+                # check if the websocket received a message from client
+                if recv_task in done:
+                    try:
+                        message = recv_task.result()
+                        # Client sent a message (usually means disconnect)
+                        if message is not None:
+                            celery_app.control.revoke(task_id, terminate=True)
+                            await websocket.close(code=4001, reason="Client closed the connection.")
+                            break
+                    except asyncio.CancelledError:
+                        pass
+                    except Exception as e:
+                        await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")
+                        break
+                
+                # check if we received a message from the task
+                if read_task in done:
+                    try:
+                        status, message = read_task.result()
+                        
+                        if status == Status.TIMEOUT:
+                            timeout_count += 1
+                            if timeout_count >= 3:
+                                celery_app.control.revoke(task_id, terminate=True)
+                                await websocket.close(code=4000, reason="Task timed out.")
+                                break
+                            else:
+                                continue
+                        else:
+                            # Reset timeout counter on successful message
+                            timeout_count = 0
 
-            if status.is_finished():
-                await websocket.close(code=1000, reason="Task finished.")
-                break
+                        assert message is not None
+                        await websocket.send_text(message)
+
+                        if status.is_finished():
+                            await websocket.close(code=1000, reason="Task finished.")
+                            break
+                    except asyncio.CancelledError:
+                        pass
+                    except Exception as e:
+                        celery_app.control.revoke(task_id, terminate=True)
+                        await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")
+                        break
+    except Exception as e:
+        try:
+            await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")
+        except Exception:
+            pass

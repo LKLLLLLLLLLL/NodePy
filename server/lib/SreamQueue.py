@@ -41,7 +41,6 @@ class StreamQueue:
         self._async_conn: Optional[redis.Redis] = None
         self._sync_conn: Optional[redis_sync.Redis] = None
         self._position: str = "0-0" # "0-0" indicates reading from the start in redis
-        self._finished: bool = False
         self._is_async_context = False
     
     # ========== Context Manager Support (Async) ==========
@@ -68,6 +67,83 @@ class StreamQueue:
         """Sync context manager exit"""
         self.close_sync()
     
+    # ======= Helper functions for distributed status management =======
+    def _finish_sender_sync(self):
+        """Mark the sender as finished in sync mode"""
+        if self._sync_conn is None:
+            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+        self._sync_conn.set(f"{self.stream_name}:sender_finished", str(True))
+
+    def _is_sender_finished_sync(self) -> bool:
+        """Check if the sender is finished in sync mode"""
+        if self._sync_conn is None:
+            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+        return self._sync_conn.get(f"{self.stream_name}:sender_finished") == "True"
+    
+    async def _finish_sender_async(self):
+        """Mark the sender as finished in async mode"""
+        if self._async_conn is None:
+            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+        await self._async_conn.set(f"{self.stream_name}:sender_finished", str(True))
+
+    async def _is_sender_finished_async(self) -> bool:
+        """Check if the sender is finished in async mode"""
+        if self._async_conn is None:
+            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+        val = await self._async_conn.get(f"{self.stream_name}:sender_finished")
+        return val == "True"
+    
+    def _finish_reader_sync(self):
+        """Mark the reader as finished in sync mode"""
+        if self._sync_conn is None:
+            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+        self._sync_conn.set(f"{self.stream_name}:reader_finished", str(True))
+
+    def _is_reader_finished_sync(self) -> bool:
+        """Check if the reader is finished in sync mode"""
+        if self._sync_conn is None:
+            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+        return self._sync_conn.get(f"{self.stream_name}:reader_finished") == "True"
+
+    async def _finish_reader_async(self):
+        """Mark the reader as finished in async mode"""
+        if self._async_conn is None:
+            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+        await self._async_conn.set(f"{self.stream_name}:reader_finished", str(True))
+
+    async def _is_reader_finished_async(self) -> bool:
+        """Check if the reader is finished in async mode"""
+        if self._async_conn is None:
+            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+        val = await self._async_conn.get(f"{self.stream_name}:reader_finished")
+        return val == "True"    
+    
+    def _try_cleanup_stream_sync(self):
+        """Cleanup the stream if both sender and reader are finished (sync mode)"""
+        if self._sync_conn is None:
+            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+        sender_finished = self._sync_conn.get(f"{self.stream_name}:sender_finished") == "True"
+        reader_finished = self._sync_conn.get(f"{self.stream_name}:reader_finished") == "True"
+        if sender_finished and reader_finished:
+            self._sync_conn.delete(self.stream_name)
+            self._sync_conn.delete(f"{self.stream_name}:sender_finished")
+            self._sync_conn.delete(f"{self.stream_name}:reader_finished")
+        elif not sender_finished and reader_finished:
+            raise RuntimeError("Inconsistent state: reader finished but sender not finished")
+    
+    async def _try_cleanup_stream_async(self):
+        """Cleanup the stream if both sender and reader are finished (async mode)"""
+        if self._async_conn is None:
+            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+        sender_finished = await self._async_conn.get(f"{self.stream_name}:sender_finished") == "True"
+        reader_finished = await self._async_conn.get(f"{self.stream_name}:reader_finished") == "True"
+        if sender_finished and reader_finished:
+            await self._async_conn.delete(self.stream_name)
+            await self._async_conn.delete(f"{self.stream_name}:sender_finished")
+            await self._async_conn.delete(f"{self.stream_name}:reader_finished")
+        elif not sender_finished and reader_finished:
+            raise RuntimeError("Inconsistent state: reader finished but sender not finished")
+    
     # ========== Async Methods ==========
     
     async def push_message(self, status: Status, message: str | dict[str, Any]) -> str:
@@ -83,8 +159,8 @@ class StreamQueue:
         """
         if self._async_conn is None:
             raise RuntimeError("Must use 'async with StreamQueue()' context manager")
-        if self._finished:
-            raise RuntimeError("Cannot push message to a finished stream")
+        if await self._is_sender_finished_async():
+            raise RuntimeError("Cannot push message to a finished sending stream")
         
         if isinstance(message, dict):
             message = json.dumps(message)
@@ -95,6 +171,8 @@ class StreamQueue:
             maxlen=self.maxlen,
             approximate=True
         )
+        if status.is_finished():
+            await self._finish_sender_async()
         return message_id
 
     async def read_message(self, timeout_ms: int = 60000) -> tuple[Status, str | None]:
@@ -111,8 +189,8 @@ class StreamQueue:
         """
         if self._async_conn is None:
             raise RuntimeError("Must use 'async with StreamQueue()' context manager")
-        if self._finished:
-            raise RuntimeError("Cannot read message from a finished stream")
+        if await self._is_reader_finished_async():
+            raise RuntimeError("Cannot read message from a finished reading stream")
 
         last_id = self._position
         resp = await self._async_conn.xread(
@@ -136,15 +214,14 @@ class StreamQueue:
         self._position = message_id
         # Update finished status
         if message_status.is_finished():
-            self._finished = True
+            await self._finish_reader_async()
 
         return message_status, message_data
 
     async def close(self):
         """Async: Close the Redis connection"""
         assert self._async_conn
-        if self._finished:
-            self._async_conn.delete(self.stream_name) # Clean up stream if finished
+        await self._try_cleanup_stream_async()
         await self._async_conn.close()
         self._async_conn = None
     
@@ -163,9 +240,9 @@ class StreamQueue:
         """
         if self._sync_conn is None:
             raise RuntimeError("Must use 'with StreamQueue()' context manager")
-        if self._finished:
-            raise RuntimeError("Cannot push message to a finished stream")
-        
+        if self._is_sender_finished_sync():
+            raise RuntimeError("Cannot push message to a finished sending stream")
+
         if isinstance(message, dict):
             message = json.dumps(message)
         
@@ -175,6 +252,8 @@ class StreamQueue:
             maxlen=self.maxlen,
             approximate=True
         )
+        if status.is_finished():
+            self._finish_sender_sync()
         return str(message_id)
 
     def read_message_sync(self, timeout_ms: int = 60000) -> tuple[Status, str | None]:
@@ -191,8 +270,8 @@ class StreamQueue:
         """
         if self._sync_conn is None:
             raise RuntimeError("Must use 'with StreamQueue()' context manager")
-        if self._finished:
-            raise RuntimeError("Cannot read message from a finished stream")
+        if self._is_reader_finished_sync():
+            raise RuntimeError("Cannot read message from a finished reading stream")
 
         last_id = self._position
         resp = self._sync_conn.xread(
@@ -217,18 +296,13 @@ class StreamQueue:
         self._position = message_id
         # Update finished status
         if message_status.is_finished():
-            self._finished = True
+            self._finish_reader_sync()
 
         return message_status, message_data
 
     def close_sync(self):
         """Sync: Close the Redis connection"""
         assert self._sync_conn
-        if self._finished:
-            self._sync_conn.delete(self.stream_name) # Clean up stream if finished
+        self._try_cleanup_stream_sync()
         self._sync_conn.close()
         self._sync_conn = None
-    
-    def reset_position(self):
-        """Reset the read position for a stream (works for both sync and async)"""
-        self._position = "0-0"
