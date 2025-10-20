@@ -10,15 +10,15 @@
 
     const {getNodes,findNode} = graphStore.vueFlowInstance
 
-    const currentNode = findNode('2')
+    const currentNode = findNode('-2')
 
     console.log(currentNode.data.label)
 </script>
 <template>
     <div :style="{width: '100%',height: '100%'}">
         <div class = "result-control">
-            <v-btn height="100%">按钮</v-btn>
-            <v-btn height="100%">按钮</v-btn>
+            <el-button type='primary'height="100%">按钮</el-button>
+            <el-button type='primary'height="100%">按钮</el-button>
         </div>
         <div class = "result-container">
             <div v-if="!currentNode">无结果</div>

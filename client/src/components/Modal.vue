@@ -2,6 +2,7 @@
     import type { ModalInstance } from '../types/modalType';
     import { useModalStore } from '../stores/modalStore';
     import { ref } from 'vue';
+    import {Close} from '@element-plus/icons-vue';
 
     const props = defineProps<{
         modal: ModalInstance
@@ -191,12 +192,13 @@
                 </div> -->
             </div>
             <div class = "modal-control">
-                <v-btn 
+                <el-button 
                     @click = "closeModal"
                     :style="{height: '100%',width: 'max(60px, 10%)',borderRadius: '16px'}"
+                    type="primary"
+                    :icon="Close"
                 >
-                    关闭
-                </v-btn>
+                </el-button>
             </div>
         </div>
         <div class = "modal-body">
