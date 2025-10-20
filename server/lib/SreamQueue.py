@@ -6,6 +6,7 @@ from typing import Any, Optional
 from enum import Enum
 
 STREAMQUEUE_REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379") + "/1"
+STREAM_TTL_SECONDS = 3600  # 1 hour
 
 class Status(str, Enum):
     SUCCESS = "success"
@@ -68,6 +69,16 @@ class StreamQueue:
         self.close_sync()
     
     # ======= Helper functions for distributed status management =======
+    def _refresh_ttl_sync(self):
+        if self._sync_conn is None:
+            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+        self._sync_conn.expire(self.stream_name, STREAM_TTL_SECONDS)
+    
+    async def _refresh_ttl_async(self):
+        if self._async_conn is None:
+            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+        await self._async_conn.expire(self.stream_name, STREAM_TTL_SECONDS)
+        
     def _finish_sender_sync(self):
         """Mark the sender as finished in sync mode"""
         if self._sync_conn is None:
@@ -125,7 +136,7 @@ class StreamQueue:
         sender_finished = self._sync_conn.get(f"{self.stream_name}:sender_finished") == "True"
         reader_finished = self._sync_conn.get(f"{self.stream_name}:reader_finished") == "True"
         if sender_finished and reader_finished:
-            self._sync_conn.delete(self.stream_name)
+            self._sync_conn.delete(f"{self.stream_name}:stream")
             self._sync_conn.delete(f"{self.stream_name}:sender_finished")
             self._sync_conn.delete(f"{self.stream_name}:reader_finished")
         elif not sender_finished and reader_finished:
@@ -138,7 +149,7 @@ class StreamQueue:
         sender_finished = await self._async_conn.get(f"{self.stream_name}:sender_finished") == "True"
         reader_finished = await self._async_conn.get(f"{self.stream_name}:reader_finished") == "True"
         if sender_finished and reader_finished:
-            await self._async_conn.delete(self.stream_name)
+            await self._async_conn.delete(f"{self.stream_name}:stream")
             await self._async_conn.delete(f"{self.stream_name}:sender_finished")
             await self._async_conn.delete(f"{self.stream_name}:reader_finished")
         elif not sender_finished and reader_finished:
@@ -166,11 +177,13 @@ class StreamQueue:
             message = json.dumps(message)
         
         message_id = await self._async_conn.xadd(
-            self.stream_name,
+            f"{self.stream_name}:stream",
             {"status": status.value, "data": message},
             maxlen=self.maxlen,
             approximate=True
         )
+        await self._refresh_ttl_async()
+        
         if status.is_finished():
             await self._finish_sender_async()
         return message_id
@@ -194,7 +207,7 @@ class StreamQueue:
 
         last_id = self._position
         resp = await self._async_conn.xread(
-            {self.stream_name: last_id},
+            {f"{self.stream_name}:stream": last_id},
             count=1,
             block=timeout_ms
         )
@@ -247,11 +260,13 @@ class StreamQueue:
             message = json.dumps(message)
         
         message_id = self._sync_conn.xadd(
-            self.stream_name,
+            f"{self.stream_name}:stream",
             {"status": status.value, "data": message},
             maxlen=self.maxlen,
             approximate=True
         )
+        self._refresh_ttl_sync()
+
         if status.is_finished():
             self._finish_sender_sync()
         return str(message_id)
@@ -275,7 +290,7 @@ class StreamQueue:
 
         last_id = self._position
         resp = self._sync_conn.xread(
-            {self.stream_name: last_id},
+            {f"{self.stream_name}:stream": last_id},
             count=1,
             block=timeout_ms
         )

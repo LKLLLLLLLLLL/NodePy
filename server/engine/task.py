@@ -65,16 +65,23 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: str):
             # 4. Execute graph
             try:
                 assert graph is not None
-                def exec_reporter(node_id: str, output_data: dict[str, Any]) -> None:
+                def exec_before_reporter(node_id: str) -> None: # for timer in frontend
+                    meta = {
+                        "stage": "EXECUTION",
+                        "status": "IN_PROGRESS",
+                        "node_id": node_id
+                    }
+                    queue.push_message_sync(Status.IN_PROGRESS, meta)
+                def exec_after_reporter(node_id: str, output_data: dict[str, Any]) -> None:
                     meta = {
                         "stage": "EXECUTION",
                         "status": "IN_PROGRESS",
                         "node_id": node_id,
                         "output_data": {k: v.to_dict() for k, v in output_data.items()}
                     }
-                    queue.push_message_sync(Status.IN_PROGRESS, {"stage": "EXECUTION", "status": "IN_PROGRESS", "meta": meta})
-                    
-                graph.execute(callback=exec_reporter)
+                    queue.push_message_sync(Status.IN_PROGRESS, meta)
+
+                graph.execute(callbefore=exec_before_reporter, callafter=exec_after_reporter)
                 queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "SUCCESS"})
             except NodeExecutionError as e:
                 queue.push_message_sync(Status.FAILURE, {"stage": "EXECUTION", "status": "FAILURE", "error": {"type": "NodeExecutionError", "node_id": e.node_id, "msg": e.err_msg}})

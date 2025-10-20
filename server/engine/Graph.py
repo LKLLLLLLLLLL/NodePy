@@ -114,7 +114,7 @@ class NodeGraph:
         self._stage = "static_analyzed"
         return
 
-    def execute(self, callback: Callable[[str, dict[str, Any]], None]) -> None:
+    def execute(self, callbefore: Callable[[str], None], callafter: Callable[[str, dict[str, Any]], None]) -> None:
         """ Execute the graph in topological order """
         if self._stage != "static_analyzed":
             raise GraphError(f"Graph is in stage '{self._stage}', cannot run.")
@@ -124,6 +124,9 @@ class NodeGraph:
             node = self._node_objects[node_id]
             in_edges = list(self._graph.in_edges(node_id, data=True))
 
+            # call callbefore
+            callbefore(node_id)
+    
             # get input data
             input_data : dict[str, Data] = {}
             for edge in in_edges:
@@ -142,8 +145,8 @@ class NodeGraph:
                 # for debug
                 print(f"Node '{node_id}' output on port '{tar_port}': {data.print()}")
             
-            # call callback
-            callback(node_id, output_data)
+            # call callafter
+            callafter(node_id, output_data)
         self._stage = "finished"
         return
 
