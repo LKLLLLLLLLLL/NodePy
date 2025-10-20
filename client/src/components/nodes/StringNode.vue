@@ -1,7 +1,7 @@
 <template>
     <div ref="info" class="StringNodeLayout">
         <div class="tools">
-            <NodeResizer :min-height="minH" :min-width="minW" :max-height="maxH" :max-width="maxW"/>
+            <NodeResizer :min-height="minH" :min-width="minW" :max-height="maxH" :max-width="maxW" :isVisible="false"/>
             <Handle :id="`Node${props.id}Handle`" type="source" :position="Position.Right"/>
         </div>
         <div class="data">
@@ -79,5 +79,6 @@
     .vue-flow__node-StringNode {
         border-radius: 4px;
         background: #fff;
+        border: 1px solid #000;
     }
 </style>
