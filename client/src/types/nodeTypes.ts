@@ -40,9 +40,9 @@ export interface TableNode extends BaseNode{
 // NUMBER OPERATION NODES
 const NumBinOpList = ['ADD', 'SUB', 'MUL', 'DIV', 'POW'] as const
 export interface NumBinComputeNodeData {
-    input?: {
-        x: number
-        y: number
+    input: {
+        x?: number
+        y?: number
     }
     op: typeof NumBinOpList[number]
     result? : number
@@ -68,9 +68,9 @@ export interface NumUnaryComputeNode extends BaseNode{
 // COMPARISON NODES
 const CmpOpList = ['LT', 'LE', 'EQ', 'NE', 'GE', 'GT'] as const
 export interface CmpNodeData {
-    input?: {
-        x: number|string|boolean
-        y: number|string|boolean
+    input: {
+        x?: number|string|boolean
+        y?: number|string|boolean
     }
     op : typeof CmpOpList[number]
     result? : boolean
@@ -83,9 +83,9 @@ export interface CmpNode extends BaseNode{
 
 const BoolBinOpList = ['AND', 'OR', 'XOR', 'SUB'] as const
 export interface BoolBinComputeNodeData {
-    input?: {
-        x: boolean
-        y: boolean
+    input: {
+        x?: boolean
+        y?: boolean
     }
     op : typeof BoolBinOpList[number]
     result?: boolean
@@ -160,9 +160,9 @@ export interface TableAppendOrPrependStringNodeData {
     column: string
     result_col: string
     op: 'APPEND' | 'PREPEND'
-    input?: {
-        table_input: TableNodeData
-        value_input: string
+    input: {
+        table_input?: TableNodeData
+        value_input?: string
     }
     result?: TableNodeData
 }
@@ -178,9 +178,9 @@ export interface TableOneInputStringMethodNodeData {
     column: string
     result_col: string
     op: typeof StringOneInputMethodList[number]
-    input?: {
-        table: TableNodeData
-        value_input: string
+    input: {
+        table?: TableNodeData
+        value_input?: string
     }
     result?: TableNodeData
 }
@@ -193,9 +193,7 @@ export interface TableOneInputStringMethodNode extends BaseNode{
 export interface TableStringLengthNodeData {
     column: string
     result_col: string
-    input?: {
-        table: TableNodeData
-    }
+    input?: TableNodeData
     result?: TableNodeData
 }
 export interface TableStringLengthNode extends BaseNode{
@@ -207,10 +205,10 @@ export interface TableStringLengthNode extends BaseNode{
 export interface TableReplaceStringNodeData {
     column: string
     result_col?: string
-    input?: {
-        table: TableNodeData
-        old_value: string
-        new_value: string
+    input: {
+        table?: TableNodeData
+        old_value?: string
+        new_value?: string
     }
     result?: TableNodeData
 }
