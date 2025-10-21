@@ -32,7 +32,7 @@ class NumBinComputeNode(BaseNode):
             OutPort(name='result', description='Result of the binary operation')
         ]
 
-
+    @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         x_schema = input_schemas['x']
         y_schema = input_schemas['y']
@@ -51,7 +51,7 @@ class NumBinComputeNode(BaseNode):
         else:
             return {'result': Schema(type=Schema.Type.INT)}
 
-
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         x = input['x'].payload
         y = input['y'].payload

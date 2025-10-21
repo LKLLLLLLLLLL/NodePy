@@ -20,7 +20,7 @@ MIME_TYPES = {
 }
 
 @router.post(
-    "/files/upload",
+    "/files/upload/{project_id}",
     status_code=201,
     responses={
         201: {"description": "File uploaded successfully", "model": File},
@@ -30,7 +30,7 @@ MIME_TYPES = {
         507: {"description": "Insufficient Storage - user storage limit exceeded"},
     },
 )
-async def upload_file(project_id: int, file: UploadFile = fastapiFile()) -> File:
+async def upload_file(project_id: int, node_id: str, file: UploadFile = fastapiFile()) -> File:
     """
     Upload a file to a project. Return the saved file info.
     """
@@ -45,7 +45,7 @@ async def upload_file(project_id: int, file: UploadFile = fastapiFile()) -> File
     user_id = 1  # for debug
     try:
         file_manager = FileManager(user_id=user_id, project_id=project_id)
-        saved_file = file_manager.write(content=content, filename=file.filename, format=format)
+        saved_file = file_manager.write(content=content, filename=file.filename, format=format, node_id=node_id)
         return saved_file
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
@@ -68,7 +68,7 @@ async def upload_file(project_id: int, file: UploadFile = fastapiFile()) -> File
         500: {"description": "Internal Server Error"},
     },
 )
-async def get_file_content(project_id: int, key: str) -> StreamingResponse:
+async def get_file_content(key: str) -> StreamingResponse:
     """
     Get the content of a file by its key and project id.
     The project id is used to verify the access permission.
@@ -78,7 +78,7 @@ async def get_file_content(project_id: int, key: str) -> StreamingResponse:
     """
     user_id = 1  # for debug
     try:
-        file_manager = FileManager(user_id=user_id, project_id=project_id)
+        file_manager = FileManager(user_id=user_id, project_id=None)
         file = file_manager.get_file_by_key(key=key)
         content = file_manager.read(file=file)
         media_type = MIME_TYPES.get(file.format, "application/octet-stream")
@@ -99,7 +99,6 @@ async def get_file_content(project_id: int, key: str) -> StreamingResponse:
 class DeleteResponse(BaseModel):
     status: str
 
-
 @router.delete(
     "/files/{key}",
     responses={
@@ -109,14 +108,14 @@ class DeleteResponse(BaseModel):
         500: {"description": "Internal Server Error"},
     },
 )
-async def delete_file(project_id: int, key: str) -> DeleteResponse:
+async def delete_file(key: str) -> DeleteResponse:
     """
     Delete a file by its key and project id.
     The project id is used to verify the access permission.
     """
     user_id = 1  # for debug
     try:
-        file_manager = FileManager(user_id=user_id, project_id=project_id)
+        file_manager = FileManager(user_id=user_id, project_id=None)
         file = file_manager.get_file_by_key(key=key)
         file_manager.delete(file=file)
         return DeleteResponse(status="success")
@@ -135,10 +134,10 @@ async def delete_file(project_id: int, key: str) -> DeleteResponse:
         500: {"description": "Internal Server Error"},
     },
 )
-async def list_files(project_id: int) -> UserFileList:
+async def list_files() -> UserFileList:
     user_id = 1  # for debug
     try:
-        file_manager = FileManager(user_id=user_id, project_id=project_id)
+        file_manager = FileManager(user_id=user_id, project_id=None)
         user_file_list = file_manager.list_file()
         return user_file_list
     except ValueError as e:

@@ -1,8 +1,9 @@
-from sqlalchemy import String, Integer, Column, ForeignKey, Enum, BigInteger
+from sqlalchemy import String, Integer, Column, ForeignKey, Enum, BigInteger, UniqueConstraint, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
+from typing import Iterator
 import os
 
 
@@ -11,10 +12,14 @@ Session management.
 """
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def get_session() -> Session:
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    return SessionLocal()
+def get_session() -> Iterator[Session]:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 """
 The models used in database.
@@ -33,6 +38,7 @@ class Project(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, unique=True, index=True, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    graph = Column(JSON, nullable=True)  # Serialized graph structure
 
 
 class File(Base):
@@ -44,8 +50,13 @@ class File(Base):
     format = Column(Enum("jpg", "png", "csv", "pdf", name="file_format"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    node_id = Column(String, nullable=False, index=True) # ID of the node that generated the file
     file_size = Column(BigInteger, nullable=False) # Byte
     upload_time = Column(String, nullable=False)  # ISO format datetime string
+    
+    __table_args__ = (
+        UniqueConstraint('project_id', 'node_id', name='_project_node_uc'),
+    )
 
 # Create database tables
 Base.metadata.create_all(bind=engine)

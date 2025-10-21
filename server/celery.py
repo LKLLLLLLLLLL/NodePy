@@ -25,3 +25,10 @@ celery_app.conf.update(
     worker_send_task_events=True,  # Send task events
     include=["server.engine.task"],  # Explicitly include task modules
 )
+
+celery_app.conf.beat_schedule = {
+    "cleanup-orphan-files-every-hour": {
+        "task": "server.lib.FileManager.cleanup_orphan_files",
+        "schedule": 3600.0,  # Every hour
+    },
+}

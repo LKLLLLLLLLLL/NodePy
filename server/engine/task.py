@@ -73,7 +73,8 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                     meta = {
                         "stage": "EXECUTION",
                         "status": "IN_PROGRESS",
-                        "node_id": node_id
+                        "node_id": node_id,
+                        "timer": "start"
                     }
                     queue.push_message_sync(Status.IN_PROGRESS, meta)
                 def exec_after_reporter(node_id: str, output_data: dict[str, Any]) -> None:
@@ -81,6 +82,7 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                         "stage": "EXECUTION",
                         "status": "IN_PROGRESS",
                         "node_id": node_id,
+                        "timer": "stop",
                         "output_data": {k: v.to_dict() for k, v in output_data.items()}
                     }
                     queue.push_message_sync(Status.IN_PROGRESS, meta)

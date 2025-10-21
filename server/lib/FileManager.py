@@ -5,8 +5,10 @@ from minio import Minio, S3Error
 from uuid import uuid4
 from ..models.database import File as DBFile, User, get_session, Project
 from server.models.file import File, FileItem, UserFileList
+from server.celery import celery_app
 import datetime
 from server.models.exception import InsufficientStorageError
+import json
 
 class FileManager:
     """
@@ -14,32 +16,31 @@ class FileManager:
     including uploading, downloading, reading, writing, deleting files.
     Each file manager is bind to a user_id and project_id.
     Can be used in multiple containers.
+
+    When project_id is provided, all operations including writing are enabled.
+    When project_id is None, only read, delete, and list operations are permitted.
     """
-    def __init__(self, user_id: int, project_id: int) -> None:
+    def __init__(self, user_id: int | None, project_id: int | None) -> None:
         self.minio_client = Minio(
             endpoint=os.getenv("MINIO_ENDPOINT", ""),
             access_key=os.getenv("MINIO_ROOT_USER", ""),
             secret_key=os.getenv("MINIO_ROOT_PASSWORD", ""),
             secure=False  # MinIO in Docker is HTTP, not HTTPS
         )
-        self.db_client = get_session()
+        self.db_client = next(get_session())
         self.bucket = "nodepy-files"
         self.user_id = user_id
-        self.project_id = project_id
+        self.project_id = project_id # if None, means read or delete only
         # Ensure bucket exists
         if not self.minio_client.bucket_exists(self.bucket):
             self.minio_client.make_bucket(self.bucket)
-
-    def __del__(self):
-        if hasattr(self, "db_client"):
-            self.db_client.close()
 
     def get_file_by_key(self, key: str) -> File:
         """ Get a File object by its key """
         db_file = self.db_client.query(DBFile).filter(DBFile.file_key == key).first()
         if not db_file:
             raise IOError("File record not found in database")
-        if db_file.user_id != self.user_id or db_file.project_id != self.project_id: # type: ignore
+        if db_file.user_id != self.user_id: # type: ignore
             raise PermissionError("Permission denied to access this file")
         return File(
             key=db_file.file_key,
@@ -74,19 +75,28 @@ class FileManager:
     def get_buffer() -> io.BytesIO:
         return io.BytesIO()
 
-    def write(self, filename: str, content: bytes | io.BytesIO, format: Literal["png", "jpg", "pdf", "csv"]) -> File:
+    def write(self, filename: str, content: bytes | io.BytesIO, format: Literal["png", "jpg", "pdf", "csv"], node_id: str) -> File:
         """ Write content to a file for a user, return the file path """
+        if self.project_id is None:
+            raise ValueError("Project ID is required to write a file")
+        if node_id is None:
+            raise ValueError("Node ID is required to write a file")
+        if self.user_id is None:
+            raise ValueError("User ID is required to write a file")
         if isinstance(content, io.BytesIO):
             content.seek(0)
             content = content.getvalue()
         key = uuid4().hex
+        existing_file = self.db_client.query(DBFile).filter(DBFile.file_key == key).first()
         try:
+            # check storage limit
             user = self.db_client.query(User).filter(User.id == self.user_id).first()
             if not user:
                 raise ValueError("User not found")
             file_occupy = self._cal_user_occupy(self.user_id)
             if file_occupy + len(content) > user.file_total_space: # type: ignore
                 raise InsufficientStorageError("User storage limit exceeded")
+            # upload to MinIO
             self.minio_client.put_object(
                 bucket_name=self.bucket,
                 object_name=key,
@@ -94,16 +104,36 @@ class FileManager:
                 length=len(content),
                 metadata={"project_id": str(self.project_id), "user_id": str(self.user_id), "filename": filename}
             )
-            file = DBFile(
-                file_key=key,
-                filename=filename,
-                format=format,
-                user_id=self.user_id,
-                project_id=self.project_id,
-                file_size=len(content),
-                upload_time=datetime.datetime.now(datetime.timezone.utc).isoformat()
-            )
-            self.db_client.add(file)
+            # record in database
+            if existing_file:
+                # replace existing file
+                old_key = existing_file.file_key
+                existing_file.file_key = key    # type: ignore
+                existing_file.filename = filename  # type: ignore
+                existing_file.format = format  # type: ignore
+                existing_file.user_id = self.user_id  # type: ignore
+                existing_file.project_id = self.project_id  # type: ignore
+                existing_file.node_id = node_id # type: ignore
+                existing_file.file_size = len(content) # type: ignore
+                existing_file.upload_time = datetime.datetime.now(datetime.timezone.utc).isoformat()  # type: ignore
+                try:
+                    self.minio_client.remove_object(
+                        bucket_name=self.bucket,
+                        object_name=old_key # type: ignore
+                    )
+                except Exception:
+                    pass
+            else:
+                file = DBFile(
+                    file_key=key,
+                    filename=filename,
+                    format=format,
+                    user_id=self.user_id,
+                    project_id=self.project_id,
+                    file_size=len(content),
+                    upload_time=datetime.datetime.now(datetime.timezone.utc).isoformat()
+                )
+                self.db_client.add(file)
             self.db_client.commit()
         except S3Error as e:
             self.db_client.rollback()
@@ -128,7 +158,7 @@ class FileManager:
         db_file = self.db_client.query(DBFile).filter(DBFile.file_key == file.key).first()
         if not db_file:
             raise IOError("File record not found in database")
-        if db_file.user_id != self.user_id or db_file.project_id != self.project_id: # type: ignore
+        if self.user_id and db_file.user_id != self.user_id: # type: ignore
             raise PermissionError("Permission denied to access this file")
         try:
             self.minio_client.remove_object(
@@ -155,7 +185,7 @@ class FileManager:
         db_file = self.db_client.query(DBFile).filter(DBFile.file_key == file.key).first()
         if not db_file:
             raise ValueError("File record not found in database")
-        if db_file.user_id != self.user_id or db_file.project_id != self.project_id: # type: ignore
+        if self.user_id and db_file.user_id != self.user_id: # type: ignore
             raise PermissionError("Permission denied to access this file")
         try:
             response = self.minio_client.get_object(
@@ -169,10 +199,11 @@ class FileManager:
     
     def list_file(self) -> UserFileList:
         """ List all files owned by the user in the project """
+        if self.user_id is None:
+            raise ValueError("User ID is required to list files")
         try:
             db_files = self.db_client.query(DBFile).filter(
                 DBFile.user_id == self.user_id,
-                DBFile.project_id == self.project_id
             ).all()
             user = self.db_client.query(User).filter(User.id == self.user_id).first()
             if not user:
@@ -199,3 +230,74 @@ class FileManager:
         except Exception as e:
             raise IOError(f"Failed to list files: {e}")
 
+@celery_app.task
+def cleanup_orphan_files_task():
+    """
+    A periodic Celery task to clean up orphan files in MinIO that are not referenced in the database.
+    """
+    db_client = next(get_session())
+    file_manager = FileManager(user_id=None, project_id=None)
+    minio_client = Minio(
+        endpoint=os.getenv("MINIO_ENDPOINT", ""),
+        access_key=os.getenv("MINIO_ROOT_USER", ""),
+        secret_key=os.getenv("MINIO_ROOT_PASSWORD", ""),
+        secure=False  # MinIO in Docker is HTTP, not HTTPS
+    )
+    # step 1: delete files for invalid node_id
+    try:
+        print("Starting cleanup of orphan files...")
+        
+        # 1. get all existing node_id from projects
+        all_projects = db_client.query(Project).all()
+        valid_node_ids = set()
+        for project in all_projects:
+            if project.graph: # type: ignore
+                graph_data = project.graph
+                if isinstance(graph_data, str):
+                    graph_data = json.loads(graph_data)
+                for node in graph_data.get("nodes", []):
+                    node_id = node.get("id")
+                    if node_id:
+                        valid_node_ids.add((project.id, node_id))
+        
+        # 2. list all files keys from db
+        all_files = db_client.query(DBFile).all()
+        
+        orphan_files = []
+        for db_file in all_files:
+            if (db_file.project_id, db_file.node_id) not in valid_node_ids:
+                orphan_files.append(db_file)
+        if not orphan_files:
+            print("No orphan files found.")
+            return
+        
+        # 3. delete orphan files from MinIO and database
+        for file_record in orphan_files:
+            try:
+                file_to_delete = file_manager.get_file_by_key(file_record.file_key)
+                file_manager.delete(file_to_delete)
+            except Exception as e:
+                print(f"Failed to delete orphan file {file_record.file_key}: {e}") # type: ignore
+        db_client.commit()
+        
+        print(f"Cleanup completed. Deleted {len(orphan_files)} orphan files.")
+    except Exception as e:
+        print(f"Failed to clean up orphan files: {e}")
+
+    # step 2: delete files in MinIO not in database
+    try:
+        objects = file_manager.minio_client.list_objects(bucket_name=file_manager.bucket, recursive=True)
+        db_file_keys = set([db_file.file_key for db_file in db_client.query(DBFile.file_key).all()])
+        for obj in objects:
+            if obj.object_name not in db_file_keys:
+                assert isinstance(obj.object_name, str)
+                try:
+                    minio_client.remove_object(
+                        bucket_name=file_manager.bucket,
+                        object_name=obj.object_name
+                    )
+                except Exception as e:
+                    print(f"Failed to delete orphan MinIO file {obj.object_name}: {e}")
+        print("MinIO orphan file cleanup completed.") 
+    finally:
+        db_client.close()

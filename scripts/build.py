@@ -32,6 +32,8 @@ def build() -> None:
     print("🔨 Building frontend...")
     client_dir = project_root / "client"
     npm = _npm_prefix()
+    cmd = npm + ["install"]
+    subprocess.run(cmd, cwd=client_dir, check=True)
     cmd = npm + ["run", "build"]
     subprocess.run(cmd, cwd=client_dir, check=True)
 
