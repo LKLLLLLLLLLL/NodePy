@@ -74,6 +74,7 @@ with engine.connect() as conn:
     )
     conn.execute(
         text("""
+        DROP TRIGGER IF EXISTS files_check_storage_limit_before ON files;
         CREATE TRIGGER files_check_storage_limit_before
         BEFORE INSERT OR UPDATE ON files
         FOR EACH ROW EXECUTE FUNCTION check_user_storage_limit();
