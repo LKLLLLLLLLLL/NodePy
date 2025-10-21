@@ -2,8 +2,6 @@
     <div ref="info" class="NumBinComputeNodeLayout">
         <div class="outerTools">
             <NodeResizer :min-height="minH" :min-width="minW" :max-height="maxH" :max-width="maxW" :isVisible="false"/>
-            <Handle :id="`Node${props.id}Handle1`" type="target" :position="Position.Left" style="top: 39px; left: 15px;"/>
-            <Handle :id="`Node${props.id}Handle2`" type="target" :position="Position.Left" style="bottom: 36px; top: auto; left: 15px;"/>
             <Handle :id="`Node${props.id}Handle3`" type="source" :position="Position.Right"/>
         </div>
         <div class="innerContent">
@@ -13,10 +11,28 @@
                     <div class="first">
                         <span>x:</span>
                         <input type="text" v-model="x" class="nodrag" @input="onInputx"/>
+                        <Handle
+                            :id="`Node${props.id}Handle1`"
+                            type="target"
+                            :position="Position.Left"
+                            style="
+                                top: 15px;
+                                left: -26px;
+                            "
+                        />
                     </div>
                     <div class="second">
                         <span>y:</span>
                         <input type="text" v-model="y" class="nodrag" @input="onInputy"/>
+                        <Handle
+                            :id="`Node${props.id}Handle2`"
+                            type="target"
+                            :position="Position.Left"
+                            style="
+                                top: 15px;
+                                left: -26px;
+                            "
+                        />
                     </div>
                 </div>
                 <div class="op">
@@ -89,9 +105,9 @@
             background: white;
             border-radius: 4px;
             box-shadow: 2px 2px 6px 0px black;
-            overflow: hidden;
             .title {
                 background: #ccc;
+                border-radius: 4px 4px 0 0;
                 text-align: left;
                 padding-left: 8px;
             }
@@ -101,6 +117,7 @@
                 align-items: center;
                 .input {
                     .first {
+                        position: relative;
                         span {
                             margin: 4px;
                         }
@@ -112,6 +129,7 @@
                         }
                     }
                     .second {
+                        position: relative;
                         span {
                             margin: 4px;
                         }

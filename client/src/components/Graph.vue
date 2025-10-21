@@ -12,8 +12,7 @@ import NumBinComputeNode from './nodes/NumBinComputeNode.vue'
 import {addNode} from '../stores/graphStore'
 
 
-const { onConnect, onInit, onNodesChange, addEdges, viewport } = useVueFlow('main')
-console.log(viewport)
+const { onConnect, onInit, onNodesChange, addEdges } = useVueFlow('main')
 
 const nodes = ref<Node[]>([])
 
