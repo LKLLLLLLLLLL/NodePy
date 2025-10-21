@@ -1,22 +1,20 @@
 <script lang="ts" setup>
-    // import ChartView from './ChartView.vue';
-    // import TableView from './TableView.vue';
-    // import FileView from './FileView.vue';
-    // import ImageView from './ImageView.vue';
-    // import ValueView from './ValueView.vue';
-    // import { useGraphStore } from '@/stores/graphStore';
+    import ChartView from './ChartView.vue';
+    import TableView from './TableView.vue';
+    import FileView from './FileView.vue';
+    import ImageView from './ImageView.vue';
+    import ValueView from './ValueView.vue';
+    import { useVueFlow } from '@vue-flow/core';
 
-    // const graphStore = useGraphStore();
+    const {findNode} = useVueFlow('main');
 
-    // const {getNodes,findNode} = graphStore.vueFlowInstance
+    const currentNode = findNode('6045');
 
-    // const currentNode = findNode('-2')
-
-    // console.log(currentNode.data.label)
+    console.log(currentNode);
 </script>
 <template>
     <div :style="{width: '100%',height: '100%'}">
-        <!-- <div class = "result-control">
+        <div class = "result-control">
             <el-button type='primary'height="100%">按钮</el-button>
             <el-button type='primary'height="100%">按钮</el-button>
         </div>
@@ -44,7 +42,7 @@
                             :data="currentNode.data"
                             class = "view-content value-view">
             </ValueView>
-        </div> -->
+        </div>
     </div>
 </template>
 <style lang = "scss" scoped>
