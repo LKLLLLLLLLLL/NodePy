@@ -1,7 +1,21 @@
 <script setup lang = "ts">
-    import Graph from './components/Graph.vue';
     import ControlBar from './components/ControlBar.vue';
-    import { Splitpanes, Pane } from 'splitpanes';
+    import Program from './views/Program.vue';
+    import Home from './views/Home.vue';
+    import File from './views/File.vue';
+    import Login from './views/Login.vue';
+    import { usePageStore } from './stores/pageStore';
+    import { computed } from 'vue';
+
+    const pageComponents = {
+        Program,
+        Home,
+        File,
+        Login
+    }
+
+    const pageStore = usePageStore();
+    const currentPage = computed(() => pageStore.currentPage);
 
 </script>
 <template>
@@ -9,18 +23,9 @@
         <div class = "up-container">
             <ControlBar />
         </div>
-        <!-- <Splitpanes 
-            class = "down-container"
-            vertical
-        >
-            <Pane :size="70">
-                <Graph />
-            </Pane>
-            <Pane :size="30">
-                <Result />
-            </Pane>
-        </Splitpanes> -->
-        <Graph></Graph>
+        <div class = "down-container">
+            <component :is="pageComponents[currentPage]" />
+        </div>
     </div>
     <ModalManager />
 </template>
@@ -35,10 +40,10 @@
         height: 50px;
         width: 100%;
     }
-    // .down-container{
-    //     flex: 1;
-    //     width: 100%;
-    // }
+    .down-container{
+        display: flex;
+        flex: 1;
+    }
 </style>
 <!-- <style lang = "scss">
     @import 'splitpanes/dist/splitpanes.css';

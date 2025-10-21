@@ -1,3 +1,87 @@
+<script lang="ts" setup>
+import { ref, computed } from 'vue'
+import { nodeMenuItems } from '@/types/menuTypes'
+import { addNode } from '@/stores/graphStore'
+import {useModalStore} from "@/stores/modalStore";
+import { usePageStore, type Page} from '@/stores/pageStore';
+
+const pageStore = usePageStore()
+
+const modalStore = useModalStore()
+
+const showMenu = ref(false)
+const x = ref(0)
+const y = ref(0)
+
+// 计算菜单位置
+const menuLocation = computed(() => {
+  return x.value > window.innerWidth / 2 ? 'left' : 'right'
+})
+
+// 获取叶子节点（扁平化处理三级菜单）
+const getLeafItems = (item: any) => {
+  const leafItems: any[] = []
+  
+  if (item.children) {
+    item.children.forEach((child: any) => {
+      if (child.children) {
+        // 如果有三级菜单，将其扁平化到二级
+        leafItems.push(...child.children)
+      } else {
+        // 直接是叶子节点
+        leafItems.push(child)
+      }
+    })
+  }
+  
+  return leafItems
+}
+
+// 处理右键点击事件
+const handleContextmenu = (event: MouseEvent) => {
+  event.preventDefault()
+  
+  x.value = event.clientX
+  y.value = event.clientY
+  showMenu.value = false
+  
+  // 使用 setTimeout 确保 DOM 更新后再显示菜单
+  setTimeout(() => {
+    showMenu.value = true
+  }, 10)
+}
+
+// 处理节点选择
+const handleNodeSelect = (nodeType: string) => {
+  console.log('添加节点:', nodeType)
+  addNode(nodeType)
+  showMenu.value = false
+}
+
+function handleClickResult(){
+    modalStore.createModal({
+        id: 'result',
+        title: '结果查看',
+        isActive: true,
+        isDraggable: true,
+        isResizable: false,
+        position:{
+            x: 100,
+            y: 100
+        },
+        size: {
+            width: 600,
+            height: 400
+        },
+    })
+}
+
+function handlePage(page:Page){
+    pageStore.setCurrentPage(page);
+}
+
+</script>
+
 <template>
   <div 
     class="control-bar"
@@ -5,8 +89,15 @@
   >
     <!-- 控制栏内容 -->
     <div class="control-content">
-        <el-button @click="handleClickResult">结果</el-button>
-      <span>右键点击此处显示节点菜单</span>
+        <div :style="{marginRight: 'auto'}">Icon</div>
+        <div :style="{alignItems: 'center', display: 'flex', gap: '8px',justifyContent: 'center'}">
+          <el-button @click="handleClickResult">结果</el-button>
+          <el-button @click="handlePage('Home')">Home</el-button>
+          <el-button @click="handlePage('File')">File</el-button>
+          <el-button @click="handlePage('Program')">Program</el-button>
+          <el-button @click="handlePage('Login')">Login</el-button>
+        </div>
+        <div :style="{marginLeft: 'auto'}">Figure</div>
     </div>
     
     <!-- 透明激活器，确保菜单在鼠标处弹出 -->
@@ -83,82 +174,6 @@
     </v-menu>
   </div>
 </template>
-
-<script lang="ts" setup>
-import { ref, computed } from 'vue'
-import { nodeMenuItems } from '@/types/menuTypes'
-import { addNode } from '@/stores/graphStore'
-import {useModalStore} from "@/stores/modalStore";
-
-const modalStore = useModalStore()
-
-const showMenu = ref(false)
-const x = ref(0)
-const y = ref(0)
-
-// 计算菜单位置
-const menuLocation = computed(() => {
-  return x.value > window.innerWidth / 2 ? 'left' : 'right'
-})
-
-// 获取叶子节点（扁平化处理三级菜单）
-const getLeafItems = (item: any) => {
-  const leafItems: any[] = []
-  
-  if (item.children) {
-    item.children.forEach((child: any) => {
-      if (child.children) {
-        // 如果有三级菜单，将其扁平化到二级
-        leafItems.push(...child.children)
-      } else {
-        // 直接是叶子节点
-        leafItems.push(child)
-      }
-    })
-  }
-  
-  return leafItems
-}
-
-// 处理右键点击事件
-const handleContextmenu = (event: MouseEvent) => {
-  event.preventDefault()
-  
-  x.value = event.clientX
-  y.value = event.clientY
-  showMenu.value = false
-  
-  // 使用 setTimeout 确保 DOM 更新后再显示菜单
-  setTimeout(() => {
-    showMenu.value = true
-  }, 10)
-}
-
-// 处理节点选择
-const handleNodeSelect = (nodeType: string) => {
-  console.log('添加节点:', nodeType)
-  addNode(nodeType)
-  showMenu.value = false
-}
-
-function handleClickResult(){
-    modalStore.createModal({
-        id: 'result',
-        title: '结果查看',
-        isActive: true,
-        isDraggable: true,
-        isResizable: false,
-        position:{
-            x: 100,
-            y: 100
-        },
-        size: {
-            width: 600,
-            height: 400
-        },
-    })
-}
-</script>
 
 <style lang="scss" scoped>
 .control-bar {
