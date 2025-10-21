@@ -6,6 +6,7 @@ from uuid import uuid4
 from ..models.database import File as DBFile, User, get_session, Project
 from server.models.file import File, FileItem, UserFileList
 import datetime
+from server.models.exception import InsufficientStorageError
 
 class FileManager:
     """
@@ -42,10 +43,20 @@ class FileManager:
             raise PermissionError("Permission denied to access this file")
         return File(
             key=db_file.file_key,
+            filename=db_file.filename,
             format=cast(Literal["png", "jpg", "pdf", "csv"], db_file.format),
             size=db_file.file_size, # type: ignore
             uploaded_at=db_file.upload_time # type: ignore
         )
+    def _cal_user_occupy(self, user_id: int) -> int:
+        """ Calculate the total file occupy for a user """
+        total = self.db_client.query(DBFile).with_entities(
+            DBFile.file_size
+        ).filter(
+            DBFile.user_id == user_id
+        ).all()
+        return sum([size for (size,) in total])  # type: ignore
+
     """
     For unsupport lib, you can use write method like this:
     ```py
@@ -53,6 +64,7 @@ class FileManager:
     somelib.save(buffer, format="png")
     file = file_manager.write(
         content=buffer,
+        filename="plot.png",
         format="png"
     )
     ```
@@ -62,7 +74,7 @@ class FileManager:
     def get_buffer() -> io.BytesIO:
         return io.BytesIO()
 
-    def write(self, content: bytes | io.BytesIO, format: Literal["png", "jpg", "pdf", "csv"]) -> File:
+    def write(self, filename: str, content: bytes | io.BytesIO, format: Literal["png", "jpg", "pdf", "csv"]) -> File:
         """ Write content to a file for a user, return the file path """
         if isinstance(content, io.BytesIO):
             content.seek(0)
@@ -72,11 +84,19 @@ class FileManager:
             user = self.db_client.query(User).filter(User.id == self.user_id).first()
             if not user:
                 raise ValueError("User not found")
-            if int(user.file_occupy) + len(content) > user.file_total_space: # type: ignore
-                raise IOError("User storage limit exceeded")
-            user.file_occupy += len(content) # type: ignore
+            file_occupy = self._cal_user_occupy(self.user_id)
+            if file_occupy + len(content) > user.file_total_space: # type: ignore
+                raise InsufficientStorageError("User storage limit exceeded")
+            self.minio_client.put_object(
+                bucket_name=self.bucket,
+                object_name=key,
+                data=io.BytesIO(content),
+                length=len(content),
+                metadata={"project_id": str(self.project_id), "user_id": str(self.user_id), "filename": filename}
+            )
             file = DBFile(
                 file_key=key,
+                filename=filename,
                 format=format,
                 user_id=self.user_id,
                 project_id=self.project_id,
@@ -84,21 +104,23 @@ class FileManager:
                 upload_time=datetime.datetime.now(datetime.timezone.utc).isoformat()
             )
             self.db_client.add(file)
-            self.minio_client.put_object(
-                bucket_name=self.bucket,
-                object_name=key,
-                data=io.BytesIO(content),
-                length=len(content),
-                metadata={"project_id": str(self.project_id), "user_id": str(self.user_id)}
-            )
             self.db_client.commit()
         except S3Error as e:
             self.db_client.rollback()
             raise IOError(f"Failed to upload file to MinIO: {e}")
+        except InsufficientStorageError as e:
+            raise e
         except Exception as e:
             self.db_client.rollback()
+            try:
+                self.minio_client.remove_object(
+                    bucket_name=self.bucket,
+                    object_name=key
+                )
+            except Exception:
+                pass
             raise IOError(f"Failed to write file: {e}")
-        return File(key=key, format=format, size=len(content))
+        return File(key=key, filename=filename, format=format, size=len(content))
     
     def delete(self, file: File) -> None:
         """ Delete a file """
@@ -119,9 +141,6 @@ class FileManager:
             user = self.db_client.query(User).filter(User.id == db_file.user_id).first()
             if not user:
                 raise IOError("User not found in database")
-            user.file_occupy -= db_file.file_size  # type: ignore
-            if user.file_occupy < 0: # type: ignore
-                user.file_occupy = 0 # type: ignore
             self.db_client.delete(db_file)
             self.db_client.commit()
         except S3Error as e:
@@ -135,7 +154,7 @@ class FileManager:
         """Read content from a file"""
         db_file = self.db_client.query(DBFile).filter(DBFile.file_key == file.key).first()
         if not db_file:
-            raise IOError("File record not found in database")
+            raise ValueError("File record not found in database")
         if db_file.user_id != self.user_id or db_file.project_id != self.project_id: # type: ignore
             raise PermissionError("Permission denied to access this file")
         try:
@@ -157,7 +176,7 @@ class FileManager:
             ).all()
             user = self.db_client.query(User).filter(User.id == self.user_id).first()
             if not user:
-                raise IOError("User not found in database")
+                raise ValueError("User not found in database")
             file_items = []
             for db_file in db_files:
                 # query project name
@@ -165,6 +184,7 @@ class FileManager:
                 project_name = project.name if project else ""
                 file_items.append(FileItem(
                     key=db_file.file_key, # type: ignore
+                    filename=db_file.filename, # type: ignore
                     format=cast(Literal["png", "jpg", "pdf", "csv"], db_file.format),
                     size=db_file.file_size, # type: ignore
                     uploaded_at=db_file.upload_time, # type: ignore
@@ -174,7 +194,7 @@ class FileManager:
                 user_id=self.user_id,
                 files=file_items,
                 total_size=user.file_total_space, # type: ignore
-                used_size=user.file_occupy # type: ignore
+                used_size=self._cal_user_occupy(self.user_id)
             )
         except Exception as e:
             raise IOError(f"Failed to list files: {e}")

@@ -50,3 +50,7 @@ class NodeExecutionError(Exception):
         self.node_id = node_id
         self.err_msg = err_msg
         super().__init__(f"NodeExecutionError in node '{node_id}': {err_msg}")
+
+class InsufficientStorageError(Exception):
+    """user storage limit exceeded"""
+    pass

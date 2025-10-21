@@ -1,7 +1,9 @@
 from fastapi import APIRouter, UploadFile, File as fastapiFile, HTTPException
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 from server.models.file import File, UserFileList
-from ..lib.FileManager import FileManager
+from server.models.exception import InsufficientStorageError
+from server.lib.FileManager import FileManager
 from typing import cast, Literal
 import io
 
@@ -17,7 +19,17 @@ MIME_TYPES = {
     "csv": "text/csv",
 }
 
-@router.post("/files/upload")
+@router.post(
+    "/files/upload",
+    status_code=201,
+    responses={
+        201: {"description": "File uploaded successfully", "model": File},
+        400: {"description": "Bad Request - invalid file or parameters"},
+        403: {"description": "Forbidden - not allowed"},
+        500: {"description": "Internal Server Error"},
+        507: {"description": "Insufficient Storage - user storage limit exceeded"},
+    },
+)
 async def upload_file(project_id: int, file: UploadFile = fastapiFile()) -> File:
     """
     Upload a file to a project. Return the saved file info.
@@ -29,17 +41,33 @@ async def upload_file(project_id: int, file: UploadFile = fastapiFile()) -> File
     if not file.filename.endswith(('.png', '.jpg', '.pdf', '.csv')):
         raise HTTPException(status_code=400, detail="Unsupported file format")
     format = cast(Literal['png', 'jpg', 'pdf', 'csv'], file.filename.split('.')[-1])
+
     user_id = 1  # for debug
     try:
         file_manager = FileManager(user_id=user_id, project_id=project_id)
-        saved_file = file_manager.write(content=content, format=format)
+        saved_file = file_manager.write(content=content, filename=file.filename, format=format)
         return saved_file
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
+    except InsufficientStorageError as e:
+        raise HTTPException(status_code=507, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/files/{key}")
+@router.get(
+    "/files/{key}",
+    responses={
+        200: {
+            "description": "Binary file content",
+            "content": {
+                "application/octet-stream": {"schema": {"type": "string", "format": "binary"}},
+            },
+        },
+        403: {"description": "Forbidden - not allowed to access this file"},
+        404: {"description": "File not found"},
+        500: {"description": "Internal Server Error"},
+    },
+)
 async def get_file_content(project_id: int, key: str) -> StreamingResponse:
     """
     Get the content of a file by its key and project id.
@@ -61,13 +89,27 @@ async def get_file_content(project_id: int, key: str) -> StreamingResponse:
                 "Content-Disposition": f"attachment; filename={key}.{file.format}"
             },
         )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.delete("/files/{key}")
-async def delete_file(project_id: int, key: str) -> dict[str, str]:
+class DeleteResponse(BaseModel):
+    status: str
+
+
+@router.delete(
+    "/files/{key}",
+    responses={
+        200: {"description": "File deleted successfully", "content": {"application/json": {"example": {"status": "success"}}}},
+        403: {"description": "Forbidden - not allowed to access this file"},
+        404: {"description": "File not found"},
+        500: {"description": "Internal Server Error"},
+    },
+)
+async def delete_file(project_id: int, key: str) -> DeleteResponse:
     """
     Delete a file by its key and project id.
     The project id is used to verify the access permission.
@@ -77,20 +119,29 @@ async def delete_file(project_id: int, key: str) -> dict[str, str]:
         file_manager = FileManager(user_id=user_id, project_id=project_id)
         file = file_manager.get_file_by_key(key=key)
         file_manager.delete(file=file)
-        return {"status": "success"}
+        return DeleteResponse(status="success")
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/files/list")
+@router.get(
+    "/files/list",
+    responses={
+        200: {"description": "List of files for the user", "model": UserFileList},
+        404: {"description": "Not Found"},
+        500: {"description": "Internal Server Error"},
+    },
+)
 async def list_files(project_id: int) -> UserFileList:
     user_id = 1  # for debug
     try:
         file_manager = FileManager(user_id=user_id, project_id=project_id)
         user_file_list = file_manager.list_file()
         return user_file_list
-    except PermissionError as e:
-        raise HTTPException(status_code=403, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

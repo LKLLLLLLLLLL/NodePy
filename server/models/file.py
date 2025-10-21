@@ -7,6 +7,7 @@ class File(BaseModel):
     """
 
     key: str  # for minio object key
+    filename: str  # original file name
     format: Literal["png", "jpg", "pdf", "csv"]
     size: int  # file size in bytes
 
@@ -22,6 +23,7 @@ class FileItem(BaseModel):
     The file item showed in the file list.
     """
     key: str
+    filename: str
     format: Literal["png", "jpg", "pdf", "csv"]
     size: int  # file size in bytes
     uploaded_at: str  # ISO format datetime string

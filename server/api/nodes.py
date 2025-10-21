@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, WebSocket
+from pydantic import BaseModel
 from server.models.graph import GraphRequestModel
 from server.engine.task import execute_nodes_task
 from celery.app.task import Task as CeleryTask
@@ -10,30 +11,55 @@ from server.celery import celery_app
 """
 The api for nodes runing, reporting and so on,
 """
-router= APIRouter()
+router = APIRouter()
 
-@router.post("/nodes/run")
-async def nodes_run(graph: GraphRequestModel) -> dict[str, str]:
+
+class TaskResponse(BaseModel):
+    """Response returned when a task is submitted."""
+    task_id: str
+
+
+class ErrorResponse(BaseModel):
+    detail: str
+
+@router.post(
+    "/nodes/run",
+    status_code=202,
+    responses={
+        202: {"description": "Task accepted and running", "model": TaskResponse},
+        400: {"description": "Invalid request payload", "model": ErrorResponse},
+        500: {"description": "Internal server error", "model": ErrorResponse},
+    },
+)
+async def nodes_run(graph: GraphRequestModel) -> TaskResponse:
     """
-    submit a node graph execution task and return the task id.
-    You need to use this id to query the task status later.
+    Submit a node graph execution task and return the task id.
+
+    This endpoint validates the graph payload and enqueues a Celery task. Use
+    the returned `task_id` to subscribe to the websocket status endpoint
+    `/nodes/status/{task_id}`.
     """
     user_id = 1  # for debug
     
     try:
-        celery_task = cast(CeleryTask, execute_nodes_task) # to suppress type checker error
-        task = celery_task.delay( # the return message will be sent back via redis pub/sub
+        celery_task = cast(CeleryTask, execute_nodes_task)  # to suppress type checker error
+        task = celery_task.delay(  # the return message will be sent back via redis pub/sub
             graph_request_dict=graph.model_dump(),
-            user_id=user_id
+            user_id=user_id,
         )
-        return {"task_id": task.id}
+        return TaskResponse(task_id=task.id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.websocket("/nodes/status/{task_id}")
-async def nodes_status(task_id: str, websocket: WebSocket):
+async def nodes_status(task_id: str, websocket: WebSocket) -> None:
     """
-    WebSocket endpoint to get the return message of a node graph execution task.
+    WebSocket endpoint to stream execution status for a previously-submitted task.
+
+    The websocket will send JSON messages pushed by the worker. Each message
+    is a JSON-encoded string describing stage/status/error. The connection is
+    closed with code 1000 when the task finishes successfully, or other close
+    codes for errors/timeouts.
     """
     await websocket.accept()
 

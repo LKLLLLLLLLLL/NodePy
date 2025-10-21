@@ -96,6 +96,7 @@ class PlotNode(BaseNode):
         plt.close()
         file = file_manager.write(
             content=buf,
+            filename=f"{self.id}_plot.png",
             format="png"
         )
         return {"plot": Data(payload=file)}
