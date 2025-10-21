@@ -37,8 +37,8 @@ export const addNode = (type: string) => {
         position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
         type: 'TableNode',
         data: {
-          rows: [{hello: "world"}],
-          columns: ['hello']
+          rows: [],
+          col_names: []
         }
       }
       addNodes(addedTableNode)
@@ -50,7 +50,6 @@ export const addNode = (type: string) => {
         position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
         type: 'NumBinComputeNode',
         data: {
-          input: {},
           op: 'ADD'
         }
       }

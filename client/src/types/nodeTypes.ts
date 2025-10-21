@@ -4,10 +4,7 @@ import type {Node} from '@vue-flow/core'
 type BaseNode = Omit<Node, 'data' | 'type'>
 
 
-export type FILE = string
-
-
-// CONST NODE
+/**************  Generate Nodes ****************/
 export interface ConstNodeData{
     value: number|string|boolean
     data_type: 'int' | 'float' | 'str' | 'bool'
@@ -29,7 +26,7 @@ export interface StringNode extends BaseNode{
 
 export interface TableNodeData {
     rows: Record<string, number|string|boolean>[]
-    columns: string[]
+    col_names: string[]
 }
 export interface TableNode extends BaseNode{
     data: TableNodeData
@@ -37,17 +34,12 @@ export interface TableNode extends BaseNode{
 }
 
 
-// NUMBER OPERATION NODES
+/**************  Compute Nodes  ****************/
 const NumBinOpList = ['ADD', 'SUB', 'MUL', 'DIV', 'POW'] as const
 export interface NumBinComputeNodeData {
-    input: {
-        x?: number
-        y?: number
-    }
     op: typeof NumBinOpList[number]
-    result? : number
 }
-export interface NumBinComputeNode extends BaseNode{
+export interface NumBinComputeNode extends BaseNode {
     data: NumBinComputeNodeData
     type: 'NumBinComputeNode'
 }
@@ -55,9 +47,7 @@ export interface NumBinComputeNode extends BaseNode{
 
 const NumUnaryOpList = ['NEG', 'ABS', 'SQRT'] as const
 export interface NumUnaryComputeNodeData {
-    input?: number
     op: typeof NumUnaryOpList[number]
-    result?: number
 }
 export interface NumUnaryComputeNode extends BaseNode{
     data: NumUnaryComputeNodeData
@@ -65,15 +55,9 @@ export interface NumUnaryComputeNode extends BaseNode{
 }
 
 
-// COMPARISON NODES
 const CmpOpList = ['LT', 'LE', 'EQ', 'NE', 'GE', 'GT'] as const
 export interface CmpNodeData {
-    input: {
-        x?: number|string|boolean
-        y?: number|string|boolean
-    }
     op : typeof CmpOpList[number]
-    result? : boolean
 }
 export interface CmpNode extends BaseNode{
     data: CmpNodeData
@@ -83,12 +67,7 @@ export interface CmpNode extends BaseNode{
 
 const BoolBinOpList = ['AND', 'OR', 'XOR', 'SUB'] as const
 export interface BoolBinComputeNodeData {
-    input: {
-        x?: boolean
-        y?: boolean
-    }
     op : typeof BoolBinOpList[number]
-    result?: boolean
 }
 export interface BoolBinComputeNode extends BaseNode{
     data: BoolBinComputeNodeData
@@ -96,12 +75,7 @@ export interface BoolBinComputeNode extends BaseNode{
 }
 
 
-export interface BoolNotNodeData {
-    input?: boolean
-    result?: boolean
-}
-export interface BoolNotNode extends BaseNode{
-    data: BoolNotNodeData
+export interface BoolUnaryComputeNode extends BaseNode{
     type: 'BoolNotNode'
 }
 
@@ -121,9 +95,7 @@ export interface ClipOrSubStringNode extends BaseNode{
 
 
 export interface StripStringNodeData {
-    chars?: string
-    input?: string
-    result?: string
+    chars: string
 }
 export interface StripStringNode extends BaseNode{
     data: StripStringNodeData
@@ -134,8 +106,6 @@ export interface StripStringNode extends BaseNode{
 export interface ReplaceStringNodeData {
     old: string
     new: string
-    input?: string
-    result?: string
 }
 export interface ReplaceStringNode extends BaseNode{
     data: ReplaceStringNodeData
@@ -192,9 +162,7 @@ export interface TableOneInputStringMethodNode extends BaseNode{
 
 export interface TableStringLengthNodeData {
     column: string
-    result_col: string
-    input?: TableNodeData
-    result?: TableNodeData
+    result_col?: string
 }
 export interface TableStringLengthNode extends BaseNode{
     data: TableStringLengthNodeData
@@ -205,12 +173,6 @@ export interface TableStringLengthNode extends BaseNode{
 export interface TableReplaceStringNodeData {
     column: string
     result_col?: string
-    input: {
-        table?: TableNodeData
-        old_value?: string
-        new_value?: string
-    }
-    result?: TableNodeData
 }
 export interface TableReplaceStringNode extends BaseNode{
     data: TableReplaceStringNodeData
@@ -218,13 +180,12 @@ export interface TableReplaceStringNode extends BaseNode{
 }
 
 
+/*********************  Visualize Nodes  **************************/
 export interface PlotNodeData {
     x_column: string
     y_column: string
     plot_type: 'scatter' | 'line' | 'bar'
     title?: string
-    input?: TableNodeData
-    result?: FILE
 }
 export interface PlotNode extends BaseNode{
     data: PlotNodeData

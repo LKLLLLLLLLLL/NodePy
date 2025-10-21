@@ -2,12 +2,11 @@
     <div ref="info" class="StringNodeLayout">
         <div class="outerTools">
             <NodeResizer :min-height="minH" :min-width="minW" :max-height="maxH" :max-width="maxW" :isVisible="false"/>
-            <Handle :id="`Node${props.id}Handle`" type="source" :position="Position.Right"/>
         </div>
-        <div class="innerContent">
-            <div class="title">StringNode</div>
+        <div class="innerContent border-radius">
+            <div class="title topchild-border-radius">StringNode</div>
             <div class="data">
-                <span>value: </span>
+                <Handle :id="`Node${props.id}Handle`" type="source" :position="Position.Right"/>
                 <input type="text" v-model="value" class="nodrag" @input="onInput"/>
             </div>
         </div>
@@ -54,6 +53,7 @@
 </script>
 
 <style lang="scss" scoped>
+    @use '../../../public/style/global.scss';
     .StringNodeLayout{
         height: 100%;
         width: 100%;
@@ -61,28 +61,23 @@
             height: 100%;
             width: 100%;
             background: white;
-            border-radius: 8px;
             box-shadow: 2px 2px 6px 0px black;
-            overflow: hidden;
             .title {
                 background: #ccc;
                 text-align: left;
                 padding-left: 8px;                
             }
             .data {
+                padding: 10px 0;
+                position: relative;
                 display: flex;
-                align-items: center;
                 justify-content: center;
-                span {
-                    margin: 4px;
-                }
                 input {
-                    margin: 4px;
-                    width: 7rem;
+                    width: 80%;
                     height: 1.2rem;
                     border: 1px solid #ccc
                 }
-            }   
+            }
         }
     }
 </style>

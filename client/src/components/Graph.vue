@@ -1,15 +1,14 @@
 <script lang='ts' setup>
 import { ref, onMounted } from 'vue'  
-import { VueFlow, useVueFlow, Panel, ConnectionMode } from '@vue-flow/core'
+import { VueFlow, useVueFlow, ConnectionMode } from '@vue-flow/core'
 import type { Node, Edge } from '@vue-flow/core'  
 import { Background } from '@vue-flow/background'
-import { MiniMap, MiniMapNode } from '@vue-flow/minimap'
+import { MiniMap } from '@vue-flow/minimap'
 import { Controls } from '@vue-flow/controls'
 import ConstNode from './nodes/ConstNode.vue'
 import StringNode from './nodes/StringNode.vue'
 import TableNode from './nodes/TableNode.vue'
 import NumBinComputeNode from './nodes/NumBinComputeNode.vue'
-import {addNode} from '../stores/graphStore'
 
 
 const { onConnect, onInit, onNodesChange, addEdges } = useVueFlow('main')
@@ -81,7 +80,7 @@ const nodeColor = (node: Node) => {
     :connection-mode="ConnectionMode.Strict"
     id="main"
     >
-      <Background bgColor="#999"/>
+      <Background color="#111" bgColor="rgba(200, 200, 200, 0.1)"/> 
 
       <MiniMap mask-color="rgba(0,0,0,0.1)" pannable zoomable position="bottom-left" :node-color="nodeColor"/>
 
@@ -104,17 +103,6 @@ const nodeColor = (node: Node) => {
         <NumBinComputeNode v-bind="NumBinComputeNodeProps" />
       </template>
 
-
-      <Panel position="top-left">
-        <label for="selectNode">请选择要添加的节点：</label>
-        <select id="selectNode" style="background: #eee; padding: 0px 8px" v-model="selected">
-          <option value="ConstNode">ConstNode</option>
-          <option value="StringNode">StringNode</option>
-          <option value="TableNode">TableNode</option>
-          <option value="NumBinComputeNode">NumBinComputeNode</option>
-        </select>
-        <button style="background: #eee; padding: 0px 8px; margin: 10px" @click="addNode(selected)">确认</button>
-      </Panel>
     </VueFlow>
   </div>
 </template>
@@ -131,6 +119,12 @@ const nodeColor = (node: Node) => {
 
 // import default controls styles
 @import '@vue-flow/controls/dist/style.css';
+
+.vue-flow__handle {
+  width: 10px;   
+  height: 10px;
+  border-radius: 50%;
+}
 
 </style>
 

@@ -2,31 +2,13 @@
     <div ref="info" class="NumBinComputeNodeLayout">
         <div class="outerTools">
             <NodeResizer :min-height="minH" :min-width="minW" :max-height="maxH" :max-width="maxW" :isVisible="false"/>
-            <Handle :id="`Node${props.id}Handle3`" type="source" :position="Position.Right"/>
         </div>
-        <div class="innerContent">
-            <div class="title">NumBinComputeNode</div>
+        <div class="innerContent border-radius">
+            <div class="title topchild-border-radius">NumBinComputeNode</div>
             <div class="data">
-                <Handle
-                    :id="`Node${props.id}Handle1`"
-                    type="target"
-                    :position="Position.Left"
-                    style="top: 16.67%"
-                />
-                <Handle
-                    :id="`Node${props.id}Handle2`"
-                    type="target"
-                    :position="Position.Left"
-                    style="top: 50%"
-                />
-                <div class="first_input">
-                    <span>x:</span>
-                    <input type="text" v-model="x" class="nodrag" @input="onInputx"/>
-                </div>
-                <div class="second_input">
-                    <span>y:</span>
-                    <input type="text" v-model="y" class="nodrag" @input="onInputy"/>
-                </div>
+                <Handle :id="`Node${props.id}Handle1`" type="target" :position="Position.Left" style="top: 25%"/>
+                <Handle :id="`Node${props.id}Handle2`" type="target" :position="Position.Left" style="top: 75%"/>
+                <Handle :id="`Node${props.id}Handle3`" type="source" :position="Position.Right"/>
                 <div class="op">
                     <select v-model="selected_op" @change="onSelect">
                         <option v-for="item in op">{{ item }}</option>
@@ -58,14 +40,6 @@
     const selected_op = ref(props.data.op)
 
 
-    const onInputx = (e?: Event) => {
-        props.data.input.x = x.value
-    }
-
-    const onInputy = (e?: Event) => {
-        props.data.input.y = y.value
-    }
-
     const onSelect = (e?: Event) => {
         props.data.op = selected_op.value
     }
@@ -88,6 +62,7 @@
 </script>
 
 <style lang="scss" scoped>
+    @use '../../../public/style/global.scss';
     .NumBinComputeNodeLayout {
         height: 100%;
         width: 100%;
@@ -95,50 +70,23 @@
             height: 100%;
             width: 100%;
             background: white;
-            border-radius: 8px;
             box-shadow: 2px 2px 6px 0px black;
             .title {
                 background: #ccc;
-                border-radius: 8px 8px 0 0;
                 text-align: left;
                 padding-left: 8px;
             }
             .data {
-                padding-left: 8px;
                 display: flex;
                 flex-direction: column;
-                align-items: left;
+                align-items: center;
                 position: relative;
-                .first_input {
-                    span {
-                        margin: 4px;
-                    }
-                    input {
-                        width: 7rem;
-                        height: 1.2rem;
-                        border: 1px solid #ccc;
-                        margin: 4px;
-                    }
-                }
-                .second_input {
-                    span {
-                        margin: 4px;
-                    }
-                    input {
-                        width: 7rem;
-                        height: 1.2rem;
-                        border: 1px solid #ccc;
-                        margin: 4px;
-                    }
-                }
+                padding: 10px 0;
                 .op {
-                    padding-left: 4px;
                     select {
                         background: #ddd;
                         height: 1.5rem;
                         width: 2.5rem;
-                        padding: 0.1rem;
-                        margin: 4px 0;
                     }
                 }
             }
