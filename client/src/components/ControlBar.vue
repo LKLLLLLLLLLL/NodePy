@@ -1,147 +1,274 @@
-<script lang = "ts" setup>
-    import { ref } from 'vue';
-    import { useModalStore } from '@/stores/modalStore';
-    import Result from './results/Result.vue'
-    import ManageNode from './menuModals/ManageNode.vue';
-    import SelectNode from './menuModals/SelectNode.vue';
-
-    const modalStore = useModalStore();
-
-    //result modal params
-    let widthResult = 1000;
-    let heightResult = 1200;
-    let xResult = 400;
-    let yResult = 300;
-
-
-    //select modal params
-    let widthSelect = 400;
-    let heightSelect = 600;
-    let xSelect = 500;
-    let ySelect = 350;
-
-    //manage modal params
-    let widthManage = 600;
-    let heightManage = 800;
-    let xManage = 600;
-    let yManage = 400;
-
-    function openResult(){
-        modalStore.createModal({
-            id: 'result-modal',
-            title: 'Result',
-            content: 'This is the result modal',
-            isActive: true,
-            isResizable: false,
-            isDraggable: true,
-            size: { width: widthResult, height: heightResult },
-            position: { x: xResult, y: yResult },
-            minSize: { width: 200, height: 150 },
-            maxSize: { width: 1000, height: 800 },
-            component: Result
-        })
-    }
-
-    function openSelect(){
-        modalStore.createModal({
-            id: 'select-modal',
-            title: 'Select',
-            content: 'This is the select modal',
-            isActive: true,
-            isResizable: false,
-            isDraggable: true,
-            size: { width: widthSelect, height: heightSelect },
-            position: { x: xSelect, y: ySelect },
-            minSize: { width: 200, height: 150 },
-            maxSize: { width: 1000, height: 800 },
-            component: SelectNode
-        })
-    }
-
-    function openManage(){
-        modalStore.createModal({
-            id: 'manage-modal',
-            title: 'Manage',
-            content: 'This is the manage modal',
-            isActive: true,
-            isResizable: false,
-            isDraggable: true,
-            size: { width: widthManage, height: heightManage },
-            position: { x: xManage, y: yManage },
-            minSize: { width: 200, height: 150 },
-            maxSize: { width: 1000, height: 800 },
-            component: ManageNode
-        })
-    }
-
-    import type { DropdownInstance } from 'element-plus'
-
-    const dropdownRef = ref<DropdownInstance>()
-    const position = ref({
-        top: 0,
-        left: 0,
-        bottom: 0,
-        right: 0,
-    } as DOMRect)
-
-    const triggerRef = ref({
-        getBoundingClientRect: () => position.value,
-    })
-
-    const handleClick = () => {
-        dropdownRef.value?.handleClose()
-    }
-
-    const handleContextmenu = (event: MouseEvent) => {
-        const { clientX, clientY } = event
-        position.value = DOMRect.fromRect({
-            x: clientX,
-            y: clientY,
-    })
-    event.preventDefault()
-    dropdownRef.value?.handleOpen()
-    }
-
-</script>
 <template>
-    <div class = "control-bar" 
-        @click="handleClick"
-        @contextmenu="handleContextmenu"
-    >
-        <el-button
-            @click="openResult" 
-            :style="{height: '100%'}"
-            type="primary"
-        >
-            唤起结果弹窗
-        </el-button>
-        <el-dropdown
-            ref="dropdownRef"
-            :virtual-ref="triggerRef"
-            :show-arrow="false"
-            :popper-options="{
-                modifiers: [{ name: 'offset', options: { offset: [0, 0] } }],
-            }"
-            virtual-triggering
-            trigger="contextmenu"
-            placement="bottom-start"
-        >
-            <template #dropdown>
-                <el-dropdown-menu>
-                    <el-dropdown-item @click="openManage">管理节点</el-dropdown-item>
-                    <el-dropdown-item @click="openSelect">选择节点</el-dropdown-item>
-                </el-dropdown-menu>
-            </template>
-        </el-dropdown>
+  <div 
+    class="control-bar"
+    @contextmenu="handleContextmenu"
+  >
+    <!-- 控制栏内容 -->
+    <div class="control-content">
+        <el-button @click="handleClickResult">结果</el-button>
+      <span>右键点击此处显示节点菜单</span>
     </div>
+    
+    <!-- 透明激活器，确保菜单在鼠标处弹出 -->
+    <div
+      v-if="showMenu"
+      :style="{
+        position: 'fixed',
+        left: x + 'px',
+        top: y + 'px',
+        width: '1px',
+        height: '1px',
+        zIndex: 9999,
+        pointerEvents: 'none'
+      }"
+      id="menu-activator"
+    ></div>
+    
+    <!-- 主菜单 -->
+    <v-menu
+      v-model="showMenu"
+      activator="#menu-activator"
+      absolute
+      :close-on-content-click="false"
+      offset="2"
+      :location="menuLocation"
+    >
+      <v-list density="compact" class="main-menu">
+        <template v-for="(item, index) in nodeMenuItems" :key="item.value">
+          <!-- 有子菜单的项 -->
+          <v-list-item
+            v-if="item.children"
+            :title="item.label"
+            @click.stop
+            class="menu-item parent-item"
+          >
+            <template #append>
+              <v-icon 
+                :icon="menuLocation === 'right' ? 'mdi-chevron-right' : 'mdi-chevron-left'" 
+                size="x-small"
+              ></v-icon>
+            </template>
+            
+            <!-- 二级菜单 -->
+            <v-menu
+              :open-on-focus="false"
+              activator="parent"
+              open-on-hover
+              :location="menuLocation"
+              submenu
+              :close-on-content-click="false"
+              offset="2"
+            >
+              <v-list density="compact" class="submenu">
+                <v-list-item
+                  v-for="(leafItem, leafIndex) in getLeafItems(item)"
+                  :key="leafItem.value"
+                  :title="leafItem.label"
+                  @click="handleNodeSelect(leafItem.value)"
+                  class="leaf-item submenu-item"
+                />
+              </v-list>
+            </v-menu>
+          </v-list-item>
+          
+          <!-- 一级叶子节点 -->
+          <v-list-item
+            v-else
+            :title="item.label"
+            @click="handleNodeSelect(item.value)"
+            class="leaf-item parent-item"
+          />
+        </template>
+      </v-list>
+    </v-menu>
+  </div>
 </template>
-<style lang = "scss" scoped>
-    .control-bar{
-        display: flex;
-        flex-direction: row;
-        height: 100%;
-        width: 100%;
-        color: black;
-        background-color: #655555;
+
+<script lang="ts" setup>
+import { ref, computed } from 'vue'
+import { nodeMenuItems } from '@/types/menuTypes'
+import { addNode } from '@/stores/graphStore'
+import {useModalStore} from "@/stores/modalStore";
+
+const modalStore = useModalStore()
+
+const showMenu = ref(false)
+const x = ref(0)
+const y = ref(0)
+
+// 计算菜单位置
+const menuLocation = computed(() => {
+  return x.value > window.innerWidth / 2 ? 'left' : 'right'
+})
+
+// 获取叶子节点（扁平化处理三级菜单）
+const getLeafItems = (item: any) => {
+  const leafItems: any[] = []
+  
+  if (item.children) {
+    item.children.forEach((child: any) => {
+      if (child.children) {
+        // 如果有三级菜单，将其扁平化到二级
+        leafItems.push(...child.children)
+      } else {
+        // 直接是叶子节点
+        leafItems.push(child)
+      }
+    })
+  }
+  
+  return leafItems
+}
+
+// 处理右键点击事件
+const handleContextmenu = (event: MouseEvent) => {
+  event.preventDefault()
+  
+  x.value = event.clientX
+  y.value = event.clientY
+  showMenu.value = false
+  
+  // 使用 setTimeout 确保 DOM 更新后再显示菜单
+  setTimeout(() => {
+    showMenu.value = true
+  }, 10)
+}
+
+// 处理节点选择
+const handleNodeSelect = (nodeType: string) => {
+  console.log('添加节点:', nodeType)
+  addNode(nodeType)
+  showMenu.value = false
+}
+
+function handleClickResult(){
+    modalStore.createModal({
+        id: 'result',
+        title: '结果查看',
+        isActive: true,
+        isDraggable: true,
+        isResizable: false,
+        position:{
+            x: 100,
+            y: 100
+        },
+        size: {
+            width: 600,
+            height: 400
+        },
+    })
+}
+</script>
+
+<style lang="scss" scoped>
+.control-bar {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  color: white;
+  background-color: #655555;
+  position: relative;
+  
+  .control-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+    padding: 0 16px;
+    font-size: 14px;
+    cursor: context-menu;
+    gap: 12px;
+  }
+}
+
+// 主菜单样式
+:deep(.main-menu) {
+  min-width: 160px;
+  padding: 6px 4px !important;
+  border-radius: 12px !important; // 增大圆角
+  
+  .v-list-item {
+    min-height: 28px !important;
+    margin: 2px 4px !important;
+    border-radius: 6px !important; // 增大菜单项圆角
+    cursor: pointer;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.06);
     }
+  }
+}
+
+// 父级菜单项样式
+:deep(.parent-item) {
+  margin: 3px 4px !important;
+  background-color: rgba(0, 0, 0, 0.02);
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+}
+
+// 子菜单样式
+:deep(.submenu) {
+  min-width: 160px;
+  padding: 6px 4px !important;
+  border-radius: 12px !important; // 增大圆角
+  
+  .v-list-item {
+    min-height: 28px !important;
+    margin: 1px 4px !important;
+    border-radius: 6px !important; // 增大菜单项圆角
+    cursor: pointer;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.06);
+    }
+  }
+}
+
+// 子菜单项样式
+:deep(.submenu-item) {
+  margin: 1px 4px !important;
+}
+
+// 叶子节点样式
+:deep(.leaf-item) {
+  min-height: 28px !important;
+  border-radius: 6px !important; // 增大圆角
+  
+  &:hover {
+    background-color: rgba(0, 123, 255, 0.12) !important;
+  }
+}
+
+// 菜单项内容样式
+:deep(.v-list-item__content) {
+  padding: 4px 0 !important;
+}
+
+// 菜单标题样式
+:deep(.v-list-item-title) {
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+  padding: 0 4px;
+}
+
+// 确保子菜单样式正确 - 增大所有菜单容器的圆角
+:deep(.v-menu__content) {
+  border-radius: 16px !important; // 显著增大圆角
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important; // 增强阴影以配合更大的圆角
+  overflow: hidden; // 确保内容不超出圆角边界
+  
+  .v-list {
+    background-color: #ffffff;
+  }
+}
+
+// 图标样式调整
+:deep(.v-list-item__append) {
+  margin-left: 8px;
+}
 </style>

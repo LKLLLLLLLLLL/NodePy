@@ -1,9 +1,7 @@
 <script setup lang = "ts">
     import Graph from './components/Graph.vue';
     import ControlBar from './components/ControlBar.vue';
-    import { useLayoutStore } from './stores/layoutStore';
     import { Splitpanes, Pane } from 'splitpanes';
-    const layoutStore = useLayoutStore();
 
 </script>
 <template>
