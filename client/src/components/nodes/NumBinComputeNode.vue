@@ -7,33 +7,25 @@
         <div class="innerContent">
             <div class="title">NumBinComputeNode</div>
             <div class="data">
-                <div class="input">
-                    <div class="first">
-                        <span>x:</span>
-                        <input type="text" v-model="x" class="nodrag" @input="onInputx"/>
-                        <Handle
-                            :id="`Node${props.id}Handle1`"
-                            type="target"
-                            :position="Position.Left"
-                            style="
-                                top: 15px;
-                                left: -26px;
-                            "
-                        />
-                    </div>
-                    <div class="second">
-                        <span>y:</span>
-                        <input type="text" v-model="y" class="nodrag" @input="onInputy"/>
-                        <Handle
-                            :id="`Node${props.id}Handle2`"
-                            type="target"
-                            :position="Position.Left"
-                            style="
-                                top: 15px;
-                                left: -26px;
-                            "
-                        />
-                    </div>
+                <Handle
+                    :id="`Node${props.id}Handle1`"
+                    type="target"
+                    :position="Position.Left"
+                    style="top: 16.67%"
+                />
+                <Handle
+                    :id="`Node${props.id}Handle2`"
+                    type="target"
+                    :position="Position.Left"
+                    style="top: 50%"
+                />
+                <div class="first_input">
+                    <span>x:</span>
+                    <input type="text" v-model="x" class="nodrag" @input="onInputx"/>
+                </div>
+                <div class="second_input">
+                    <span>y:</span>
+                    <input type="text" v-model="y" class="nodrag" @input="onInputy"/>
                 </div>
                 <div class="op">
                     <select v-model="selected_op" @change="onSelect">
@@ -103,51 +95,50 @@
             height: 100%;
             width: 100%;
             background: white;
-            border-radius: 4px;
+            border-radius: 8px;
             box-shadow: 2px 2px 6px 0px black;
             .title {
                 background: #ccc;
-                border-radius: 4px 4px 0 0;
+                border-radius: 8px 8px 0 0;
                 text-align: left;
                 padding-left: 8px;
             }
             .data {
+                padding-left: 8px;
                 display: flex;
                 flex-direction: column;
-                align-items: center;
-                .input {
-                    .first {
-                        position: relative;
-                        span {
-                            margin: 4px;
-                        }
-                        input {
-                            width: 7rem;
-                            height: 1.2rem;
-                            border: 1px solid #ccc;
-                            margin: 4px;
-                        }
+                align-items: left;
+                position: relative;
+                .first_input {
+                    span {
+                        margin: 4px;
                     }
-                    .second {
-                        position: relative;
-                        span {
-                            margin: 4px;
-                        }
-                        input {
-                            width: 7rem;
-                            height: 1.2rem;
-                            border: 1px solid #ccc;
-                            margin: 4px;
-                        }
+                    input {
+                        width: 7rem;
+                        height: 1.2rem;
+                        border: 1px solid #ccc;
+                        margin: 4px;
+                    }
+                }
+                .second_input {
+                    span {
+                        margin: 4px;
+                    }
+                    input {
+                        width: 7rem;
+                        height: 1.2rem;
+                        border: 1px solid #ccc;
+                        margin: 4px;
                     }
                 }
                 .op {
+                    padding-left: 4px;
                     select {
                         background: #ddd;
                         height: 1.5rem;
                         width: 2.5rem;
                         padding: 0.1rem;
-                        margin-bottom: 4px;
+                        margin: 4px 0;
                     }
                 }
             }

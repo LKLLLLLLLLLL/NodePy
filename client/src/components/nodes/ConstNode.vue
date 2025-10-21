@@ -76,7 +76,7 @@
             height: 100%;
             width: 100%;
             background: white;
-            border-radius: 4px;
+            border-radius: 8px;
             box-shadow: 2px 2px 6px 0px black;
             overflow: hidden;
             .title {
