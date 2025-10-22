@@ -25,7 +25,6 @@ class OutPort(BaseModel):
 
 class BaseNode(BaseModel):
     id: str
-    name: str
     type: str
     global_config: GlobalConfig
     
@@ -82,12 +81,6 @@ class BaseNode(BaseModel):
                 node_id=self.id,
                 err_param_key="id",
                 err_msg="Node id cannot be empty."
-            )
-        if self.name.strip() == "":
-            raise NodeParameterError(
-                node_id = self.id,
-                err_param_key = "name",
-                err_msg = "Node name cannot be empty."
             )
         if self.type.strip() == "":
             raise NodeParameterError(

@@ -4,7 +4,7 @@ from enum import Enum
 from typing_extensions import Self
 from pandas.api import types as ptypes
 import pandas
-from typing import Union, Optional, List, ClassVar, Any
+from typing import Union, Optional, ClassVar, Any, Literal, cast
 from server.lib.FileManager import File
 
 """
@@ -114,7 +114,7 @@ class TableSchema(BaseModel):
             "col_types": {k: v.value for k, v in self.col_types.items()}
         }
 
-def check_no_illegal_cols(col_names: List[str], allow_index: bool = False) -> bool:
+def check_no_illegal_cols(col_names: list[str], allow_index: bool = False) -> bool:
     """Return True if column names don't use reserved prefixes or whitespace-only.
 
     By default any name starting with '_' is illegal. If allow_index is True,
@@ -346,47 +346,109 @@ class Data(BaseModel):
     def from_df(cls, df: DataFrame) -> 'Data':
         table = Table._from_df(df)
         return Data(payload=table)
-    
-    def to_dict(self) -> dict[str, Any]:
+
+    def to_view(self) -> "DataView":
         if isinstance(self.payload, Table):
-            return {
-                "type": "Table",
-                "value": self.payload.to_dict()
-            }
-        elif isinstance(self.payload, File):
-            return {
-                "type": "File",
-                "value": self.payload.to_dict()
-            }
+            table_view = DataView.TableView(
+                cols={k: self.payload.df[k].tolist() for k in self.payload.df.columns},
+                col_types={k: v.value for k, v in self.payload.col_types.items()}
+            )
+            return DataView(
+                type="Table",
+                value=table_view
+            )
         else:
-            return {
-                "type": type(self.payload).__name__,
-                "value": self.payload
+            # Map Python types to allowed Literal values
+            type_map = {
+                str: "str",
+                int: "int",
+                float: "float",
+                bool: "bool",
+                File: "File"
             }
+            payload_type = type_map.get(type(self.payload))
+            if payload_type is None:
+                raise TypeError(f"Unsupported payload type for DataView: {type(self.payload)}")
+            return DataView(
+                type=cast(
+                    Literal["bool", "int", "float", "str", "File"],
+                    payload_type,
+            ),
+                value=self.payload,
+            )
     
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> 'Data':
-        """
-        Reconstructs a Data object from its dictionary representation.
-        """
-        payload_type = data["type"]
-        payload_value = data["value"]
+    def from_view(cls, data_view: "DataView") -> "Data":
+        payload_type = data_view.type
+        payload_value = data_view.value
 
         payload: Any
         if payload_type == "Table":
-            payload = Table.from_dict(payload_value)
+            assert isinstance(payload_value, DataView.TableView)
+            df = pandas.DataFrame.from_dict(payload_value.cols)
+            col_types = {k: ColType(v) for k, v in payload_value.col_types.items()}
+            payload = Table(df=df, col_types=col_types)
         elif payload_type == "File":
-            # Assuming your File model also has a from_dict method
-            payload = File.from_dict(payload_value)
+            assert isinstance(payload_value, File)
+            payload = payload_value
         elif payload_type == "str":
-            payload = str(payload_value)
+            assert isinstance(payload_value, str)
+            payload = payload_value
         elif payload_type == "int":
-            payload = int(payload_value)
+            assert isinstance(payload_value, int)
+            payload = payload_value
         elif payload_type == "float":
-            payload = float(payload_value)
+            assert isinstance(payload_value, float)
+            payload = payload_value
         elif payload_type == "bool":
-            payload = bool(payload_value)
+            assert isinstance(payload_value, bool)
+            payload = payload_value
         else:
             raise TypeError(f"Unsupported payload type for deserialization: {payload_type}")
         
         return cls(payload=payload)
+    
+    # @classmethod
+    # def from_dict(cls, data: dict[str, Any]) -> 'Data':
+    #     """
+    #     Reconstructs a Data object from its dictionary representation.
+    #     """
+    #     payload_type = data["type"]
+    #     payload_value = data["value"]
+
+    #     payload: Any
+    #     if payload_type == "Table":
+    #         payload = Table.from_dict(payload_value)
+    #     elif payload_type == "File":
+    #         # Assuming your File model also has a from_dict method
+    #         payload = File.from_dict(payload_value)
+    #     elif payload_type == "str":
+    #         payload = str(payload_value)
+    #     elif payload_type == "int":
+    #         payload = int(payload_value)
+    #     elif payload_type == "float":
+    #         payload = float(payload_value)
+    #     elif payload_type == "bool":
+    #         payload = bool(payload_value)
+    #     else:
+    #         raise TypeError(f"Unsupported payload type for deserialization: {payload_type}")
+        
+    #     return cls(payload=payload)
+
+class DataView(BaseModel):
+    """
+    A dict-like view of data, for transmitting or json serialization.
+    """
+    class TableView(BaseModel):
+        cols: dict[str, list[str | bool | int | float]]
+        col_types: dict[str, str]  # col name -> col type
+    
+    type: Literal["int", "float", "str", "bool", "Table", "File"]
+    value: Union[TableView, str, int, bool, float, File]
+    
+    def to_dict(self) -> dict[str, Any]:
+        return super().model_dump()
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "DataView":
+        return cls.model_validate(data)

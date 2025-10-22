@@ -1,5 +1,5 @@
 import networkx as nx
-from server.models.graph import GraphRequestModel, Node, Edge
+from server.models.graph import GraphTopoModel, TopoNode, TopoEdge
 from typing import Any, Literal, Callable
 from .nodes.BaseNode import BaseNode
 from ..models.data import Schema, Data
@@ -23,21 +23,21 @@ class NodeGraph:
     """
 
     def __init__(self, 
-                 request: GraphRequestModel, 
+                 request: GraphTopoModel, 
                  file_manager: FileManager, 
                  cache_manager: CacheManager,
                  user_id: int,
                 ) -> None:
-        self._request: GraphRequestModel = request
-        self._nodes: list[Node] = request.nodes
-        self._edges: list[Edge] = request.edges
+        self._request: GraphTopoModel = request
+        self._nodes: list[TopoNode] = request.nodes
+        self._edges: list[TopoEdge] = request.edges
         self._graph: nx.MultiDiGraph = nx.MultiDiGraph()
         self._graph.add_nodes_from([node.id for node in self._nodes]) # add nodes as indices
         for edge in self._edges:
             self._graph.add_edge(edge.src, edge.tar, src_port=edge.src_port, tar_port=edge.tar_port)
         if not nx.is_directed_acyclic_graph(self._graph):
             raise GraphError("The graph must be a Directed Acyclic Graph (DAG)")
-        self._node_map: dict[str, Node] = {}
+        self._node_map: dict[str, TopoNode] = {}
         for node in self._nodes:
             self._node_map[node.id] = node
         self._node_objects: dict[str, BaseNode] = {}
@@ -64,11 +64,10 @@ class NodeGraph:
         for node_id in self._exec_queue:
             node = self._node_map[node_id]
             id = node.id
-            name = node.name
             type = node.type
             params = node.params
 
-            node_object = BaseNode.create_from_type(type=type, global_config=self._global_config, id=id, name=name, **params)
+            node_object = BaseNode.create_from_type(type=type, global_config=self._global_config, id=id, **params)
             if self._node_objects is None:
                 raise GraphError("Node objects initialized failed.")
             self._node_objects[id] = node_object
