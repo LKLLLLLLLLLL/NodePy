@@ -140,12 +140,12 @@ def generate_default_col_name(id: str, annotation: str) -> str:
 
 class Schema(BaseModel):
     class Type(str, Enum):
-        TABLE = "table"
+        TABLE = "Table"
         STR = "str"
         INT = "int"
         BOOL = "bool"
         FLOAT = "float"
-        FILE = "file"
+        FILE = "File"
 
     type: Type
     tab: Optional[TableSchema] = None # not None if type is TABLE
@@ -200,7 +200,7 @@ class Schema(BaseModel):
         result["type"] = self.type.value
         if self.type == self.Type.TABLE:
             assert self.tab is not None
-            result["tab"] = self.tab.to_dict()
+            result["value"] = self.tab.to_dict()
         return result
 
 class Pattern(BaseModel):
