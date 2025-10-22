@@ -3,13 +3,21 @@ import type {Node} from '@vue-flow/core'
 
 type BaseNode = Omit<Node, 'data' | 'type'>
 
+interface GenerateNode extends BaseNode {}
+
+interface ComputeNode extends BaseNode {
+    timerStatus: 'begin' | 'end' | 'inactive'
+    exTime?: string
+}
+
+interface VisualizeNode extends BaseNode {}
 
 /**************  Generate Nodes ****************/
 export interface ConstNodeData{
     value: number|string|boolean
     data_type: 'int' | 'float' | 'str' | 'bool'
 }
-export interface ConstNode extends BaseNode{
+export interface ConstNode extends GenerateNode{
     type: 'ConstNode'
     data: ConstNodeData
 }
@@ -18,7 +26,7 @@ export interface ConstNode extends BaseNode{
 export interface StringNodeData {
     value: string
 }
-export interface StringNode extends BaseNode{
+export interface StringNode extends GenerateNode{
     data: StringNodeData
     type: 'StringNode'
 }
@@ -28,7 +36,7 @@ export interface TableNodeData {
     rows: Record<string, number|string|boolean>[]
     col_names: string[]
 }
-export interface TableNode extends BaseNode{
+export interface TableNode extends GenerateNode{
     data: TableNodeData
     type: 'TableNode'
 }
@@ -39,7 +47,7 @@ const NumBinOpList = ['ADD', 'SUB', 'MUL', 'DIV', 'POW'] as const
 export interface NumBinComputeNodeData {
     op: typeof NumBinOpList[number]
 }
-export interface NumBinComputeNode extends BaseNode {
+export interface NumBinComputeNode extends ComputeNode {
     data: NumBinComputeNodeData
     type: 'NumBinComputeNode'
 }
@@ -49,7 +57,7 @@ const NumUnaryOpList = ['NEG', 'ABS', 'SQRT'] as const
 export interface NumUnaryComputeNodeData {
     op: typeof NumUnaryOpList[number]
 }
-export interface NumUnaryComputeNode extends BaseNode{
+export interface NumUnaryComputeNode extends ComputeNode{
     data: NumUnaryComputeNodeData
     type: 'NumUnaryComputeNode'
 }
@@ -59,7 +67,7 @@ const CmpOpList = ['LT', 'LE', 'EQ', 'NE', 'GE', 'GT'] as const
 export interface CmpNodeData {
     op : typeof CmpOpList[number]
 }
-export interface CmpNode extends BaseNode{
+export interface CmpNode extends ComputeNode{
     data: CmpNodeData
     type: 'CmpNode'
 }
@@ -69,13 +77,13 @@ const BoolBinOpList = ['AND', 'OR', 'XOR', 'SUB'] as const
 export interface BoolBinComputeNodeData {
     op : typeof BoolBinOpList[number]
 }
-export interface BoolBinComputeNode extends BaseNode{
+export interface BoolBinComputeNode extends ComputeNode{
     data: BoolBinComputeNodeData
     type: 'BoolBinComputeNode'
 }
 
 
-export interface BoolUnaryComputeNode extends BaseNode{
+export interface BoolUnaryComputeNode extends ComputeNode{
     type: 'BoolNotNode'
 }
 
@@ -88,7 +96,7 @@ export interface ClipOrSubStringNodeData {
     input?: string
     result?: string
 }
-export interface ClipOrSubStringNode extends BaseNode{
+export interface ClipOrSubStringNode extends ComputeNode{
     data: ClipOrSubStringNodeData
     type: 'ClipOrSubStringNode'
 }
@@ -97,7 +105,7 @@ export interface ClipOrSubStringNode extends BaseNode{
 export interface StripStringNodeData {
     chars: string
 }
-export interface StripStringNode extends BaseNode{
+export interface StripStringNode extends ComputeNode{
     data: StripStringNodeData
     type: 'StripStringNode'
 }
@@ -107,7 +115,7 @@ export interface ReplaceStringNodeData {
     old: string
     new: string
 }
-export interface ReplaceStringNode extends BaseNode{
+export interface ReplaceStringNode extends ComputeNode{
     data: ReplaceStringNodeData
     type: 'ReplaceStringNode'
 }
@@ -119,7 +127,7 @@ export interface UpperOrLowerStringNodeData {
     input?: string
     result?: string
 }
-export interface UpperOrLowerStringNode extends BaseNode{
+export interface UpperOrLowerStringNode extends ComputeNode{
     data: UpperOrLowerStringNodeData
     type: 'UpperOrLowerStringNode'
 }
@@ -136,7 +144,7 @@ export interface TableAppendOrPrependStringNodeData {
     }
     result?: TableNodeData
 }
-export interface TableAppendOrPrependStringNode extends BaseNode{
+export interface TableAppendOrPrependStringNode extends ComputeNode{
     data: TableAppendOrPrependStringNodeData
     type: 'TableAppendOrPrependStringNode'
 }
@@ -154,7 +162,7 @@ export interface TableOneInputStringMethodNodeData {
     }
     result?: TableNodeData
 }
-export interface TableOneInputStringMethodNode extends BaseNode{
+export interface TableOneInputStringMethodNode extends ComputeNode{
     data: TableOneInputStringMethodNodeData
     type: 'TableOneInputStringMethodNode'
 }
@@ -164,7 +172,7 @@ export interface TableStringLengthNodeData {
     column: string
     result_col?: string
 }
-export interface TableStringLengthNode extends BaseNode{
+export interface TableStringLengthNode extends ComputeNode{
     data: TableStringLengthNodeData
     type: 'TableStringLengthNode'
 }
@@ -174,7 +182,7 @@ export interface TableReplaceStringNodeData {
     column: string
     result_col?: string
 }
-export interface TableReplaceStringNode extends BaseNode{
+export interface TableReplaceStringNode extends ComputeNode{
     data: TableReplaceStringNodeData
     type: 'TableReplaceStringNode'
 }
@@ -187,7 +195,7 @@ export interface PlotNodeData {
     plot_type: 'scatter' | 'line' | 'bar'
     title?: string
 }
-export interface PlotNode extends BaseNode{
+export interface PlotNode extends VisualizeNode{
     data: PlotNodeData
     type: 'PlotNode'
 }

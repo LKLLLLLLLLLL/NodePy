@@ -51,7 +51,8 @@ export const addNode = (type: string) => {
         type: 'NumBinComputeNode',
         data: {
           op: 'ADD'
-        }
+        },
+        timerStatus: 'inactive'
       }
       addNodes(addedNumBinComputeNode)
       break

@@ -1,5 +1,5 @@
 <script lang='ts' setup>
-import { ref, onMounted } from 'vue'  
+import { ref, onMounted, computed, watch } from 'vue'  
 import { VueFlow, useVueFlow, ConnectionMode } from '@vue-flow/core'
 import type { Node, Edge } from '@vue-flow/core'  
 import { Background } from '@vue-flow/background'
@@ -11,15 +11,22 @@ import TableNode from './nodes/TableNode.vue'
 import NumBinComputeNode from './nodes/NumBinComputeNode.vue'
 
 
-const { onConnect, onInit, onNodesChange, addEdges } = useVueFlow('main')
+const { onConnect, onInit, onNodesChange, addEdges, onEdgesChange } = useVueFlow('main')
 
-const nodes = ref<Node[]>([])
+const nodes = ref([])
+
+const nodesData = computed(() => {
+  const result = nodes.value.map((n: Node) => {
+    return {
+      id: n.id,
+      data: n.data
+    }
+  })
+  return result
+})
 
 const edges = ref<Edge[]>([])
 
-const selected = ref()
-
-let count = nodes.value.length
 
 
 // any event that is emitted from the `<VueFlow />` component can be listened to using the `onEventName` method
@@ -28,24 +35,23 @@ onInit((instance) => {
   instance.fitView()
 })
 
-// onAddNodes
 onNodesChange(changes => {
-  changes = changes.filter(c => c.type === 'add')
-  if(changes.length > 0) {
-    count += changes.length
-    console.log(`增加${changes.length}个节点, 现在还有${count}个节点`)
-    console.log(nodes.value)
-  }
+  const ARchanges = changes.filter(c => c.type === 'add' || c.type === 'remove')
+  ARchanges.forEach(c => {
+    if(c.type ==='add') console.log('新增节点:', c.item.id)
+    if(c.type === 'remove') console.log('移除节点', c.id)
+  })
 })
+watch(nodesData, (newValue, oldValue) => {
+  console.log("new: ", newValue[0]?.data.value, "old: ", oldValue[0]?.data.value)
+}, {deep: true})
 
-//onRemoveNodes
-onNodesChange(changes => {
-  changes = changes.filter(c => c.type === 'remove')
-  if(changes.length > 0){
-    count -= changes.length
-    console.log(`减少${changes.length}个节点， 现在还有${count}个节点`)
-    console.log(nodes.value)
-  }
+onEdgesChange(changes => {
+  const ARchanges = changes.filter(c => c.type === 'add' || c.type === 'remove')
+  ARchanges.forEach(c => {
+    if(c.type ==='add') console.log('新增边:', c.item)
+    if(c.type === 'remove') console.log('移除边', c)
+  })
 })
 
 onConnect((connection) => {
