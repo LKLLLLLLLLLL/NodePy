@@ -9,7 +9,8 @@
             <div class="data">
                 <Handle :id="`Node${props.id}Handle`" type="source" :position="Position.Right"/>
                 <div class="value">
-                    <input type="text" v-model="value" class="nodrag" @input="onInput"/>
+                    <!-- <input type="text" v-model="value" class="nodrag" @input="onInput"/> -->
+                    <el-input class="input nodrag" v-model="value"/>
                 </div>
                 <div class="data_type">
                     <span>data_type:</span>
@@ -68,7 +69,7 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../../public/style/global.scss';
+    @use '../../common/style/global.scss';
     .ConstNodeLayout {
         height: 100%;
         width: 100%;
@@ -76,7 +77,7 @@
             height: 100%;
             width: 100%;
             background: white;
-            box-shadow: 2px 2px 6px 0px black;
+            box-shadow: 2px 2px 6px 0px #aaa;
             .title {
                 background: #ccc;
                 text-align: left;
@@ -101,10 +102,9 @@
                 .value {
                     display: flex;
                     justify-content: center;
-                    input {
-                        width: 80%;
-                        height: 1.2rem;
-                        border: 1px solid #ccc;
+                    .input {
+                        width: 90%;
+                        height: 20px !important;
                     }
                 }
             }

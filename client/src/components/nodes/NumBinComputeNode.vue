@@ -62,7 +62,7 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../../public/style/global.scss';
+    @use '../../common/style/global.scss';
     .NumBinComputeNodeLayout {
         height: 100%;
         width: 100%;

@@ -53,7 +53,7 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../../public/style/global.scss';
+    @use '../../common/style/global.scss';
     .StringNodeLayout{
         height: 100%;
         width: 100%;

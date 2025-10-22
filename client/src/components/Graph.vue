@@ -1,7 +1,7 @@
 <script lang='ts' setup>
-import { ref, onMounted, computed, watch } from 'vue'  
+import { ref, onMounted, computed, watch } from 'vue'
 import { VueFlow, useVueFlow, ConnectionMode } from '@vue-flow/core'
-import type { Node, Edge } from '@vue-flow/core'  
+import type { Node, Edge } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import { Controls } from '@vue-flow/controls'
