@@ -4,6 +4,7 @@ import { nodeMenuItems } from '@/types/menuTypes'
 import { addNode } from '@/stores/graphStore'
 import {useModalStore} from "@/stores/modalStore";
 import { usePageStore, type Page} from '@/stores/pageStore';
+import { Avatar, User } from '@element-plus/icons-vue'
 
 const pageStore = usePageStore()
 
@@ -92,12 +93,13 @@ function handlePage(page:Page){
         <div :style="{marginRight: 'auto'}">Icon</div>
         <div :style="{alignItems: 'center', display: 'flex', gap: '8px',justifyContent: 'center'}">
           <el-button @click="handleClickResult">结果</el-button>
-          <el-button @click="handlePage('Home')">Home</el-button>
           <el-button @click="handlePage('File')">File</el-button>
           <el-button @click="handlePage('Program')">Program</el-button>
           <el-button @click="handlePage('Login')">Login</el-button>
         </div>
-        <div :style="{marginLeft: 'auto'}">Figure</div>
+        <div :style="{marginLeft: 'auto'}">
+            <el-button @click="handlePage('Home')" :icon="Avatar"></el-button>
+        </div>
     </div>
     
     <!-- 透明激活器，确保菜单在鼠标处弹出 -->

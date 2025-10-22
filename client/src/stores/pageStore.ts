@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-export type Page = 'File'|'Program'|'Home'|'Login'
+export type Page = 'File'|'Program'|'Home'|'Login'|'Example'|'Visitor';
 export const usePageStore = defineStore('page', () => {
     const currentPage = ref<Page>('Program');
     function setCurrentPage(page:Page){

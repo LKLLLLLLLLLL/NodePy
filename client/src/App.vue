@@ -4,6 +4,8 @@
     import Home from './views/Home.vue';
     import File from './views/File.vue';
     import Login from './views/Login.vue';
+    import Example from './views/Example.vue';
+    import Visitor from './views/Visitor.vue';
     import { usePageStore } from './stores/pageStore';
     import { computed } from 'vue';
 
@@ -11,7 +13,9 @@
         Program,
         Home,
         File,
-        Login
+        Login,
+        Example,
+        Visitor
     }
 
     const pageStore = usePageStore();
