@@ -111,7 +111,7 @@ def data_cleanup_trigger(conn) -> None:
         BEGIN
             -- extract all node ids from graph
             SELECT ARRAY_AGG(node->>'id') INTO node_ids
-            FROM JSONB_ARRAY_ELEMENTS(NEW.graph->'nodes') AS node;
+            FROM JSON_ARRAY_ELEMENTS(NEW.graph->'nodes') AS node;
 
             -- delete data that belongs to the project and whose node_id is not in the node_ids list
             DELETE FROM data

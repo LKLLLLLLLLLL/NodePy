@@ -396,12 +396,38 @@ request = [
 
 
 # Choose a graph payload (use a small one to keep test quick)
-payload = json.loads(request[5])
+topo_payload = json.loads(request[5])
+
+# Convert to Graph format
+graph_payload = {
+    "project_name": "test_project",
+    "project_id": 1,
+    "user_id": 1,
+    "nodes": [
+        {
+            "id": node["id"],
+            "type": node["type"],
+            "position": {"x": 0.0, "y": 0.0},
+            "param": node.get("params", {})
+        }
+        for node in topo_payload["nodes"]
+    ],
+    "edges": [
+        {
+            "id": f"{edge['src']}_{edge['src_port']}_{edge['tar']}_{edge['tar_port']}",
+            "src": edge["src"],
+            "src_port": edge["src_port"],
+            "tar": edge["tar"],
+            "tar_port": edge["tar_port"]
+        }
+        for edge in topo_payload["edges"]
+    ]
+}
 
 # Submit task via HTTP API
 resp = requests.post(
-    "http://localhost:8000/api/nodes/run",
-    json=payload,
+    "http://localhost:8000/api/project/sync",
+    json=graph_payload,
     timeout=10,
 )
 
@@ -410,7 +436,7 @@ data = resp.json()
 task_id = data.get("task_id")
 assert task_id, "No task_id returned from /api/nodes/run"
 
-uri = f"ws://localhost:8000/api/nodes/status/{task_id}"
+uri = f"ws://localhost:8000/api/project/status/{task_id}"
 print(f"Submitted task {task_id}, connecting to {uri}")
 
 messages = []
@@ -433,15 +459,16 @@ async def listen():
             print("WS MESSAGE:", msg)
             messages.append(msg)
 
-            # Try to stop when task finished
-            try:
-                parsed = json.loads(msg)
-                state = parsed.get("state")
-                if state in ("SUCCESS", "FAILURE"):
-                    print(f"Task finished with state: {state}")
-                    break
-            except Exception:
-                pass
+            # # Try to stop when task finished
+            # try:
+            #     parsed = json.loads(msg)
+            #     status = parsed.get("status")
+            #     stage = parsed.get("stage")
+            #     if status in ("SUCCESS", "FAILURE") and stage is None:
+            #         print(f"Task finished with status: {status}")
+            #         break
+            # except Exception:
+            #     pass
 
             if time.time() - start > 120:
                 print("Listener timeout (120s) reached")

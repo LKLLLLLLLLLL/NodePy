@@ -1,7 +1,7 @@
 import redis
 import os
 from typing import Any
-from server.models.data import Data
+from server.models.data import Data, DataView
 import hashlib
 import json
 
@@ -28,7 +28,7 @@ class CacheManager:
         # 2. hash inputs
         input_hashes = []
         for port, data in sorted(inputs.items()):
-            data_str = json.dumps(data.to_dict(), sort_keys=True)
+            data_str = json.dumps(data.to_view().to_dict(), sort_keys=True)
             data_hash = hashlib.sha256(data_str.encode()).hexdigest()
             input_hashes.append(f"{port}:{data_hash}")
         input_hash = hashlib.sha256("||".join(input_hashes).encode()).hexdigest()
@@ -46,7 +46,7 @@ class CacheManager:
             cache_value = json.loads(cached_value)
             result: dict[str, Data] = {}
             for key, data_dict in cache_value.items():
-                result[key] = Data.from_dict(data_dict)
+                result[key] = Data.from_view(DataView.from_dict(data_dict))
             return result
         return None
     
@@ -55,6 +55,6 @@ class CacheManager:
         cache_key = CacheManager._get_cache_key(self.project_id, node_id, params, inputs)
         cache_value: dict[str, dict[str, Any]] = {}
         for key, data in outputs.items():
-            cache_value[key] = data.to_dict()
+            cache_value[key] = data.to_view().to_dict()
         self.redis_client.set(cache_key, json.dumps(cache_value))
         self.redis_client.expire(cache_key, CACHE_TTL_SECONDS)

@@ -75,7 +75,7 @@ async def sync_graph(graph: Graph) -> TaskResponse | NothingTodoResponse:
     need_exec: bool = True
     try:
         # 1. get project graph in db first
-        project = db_client.query(Project).filter(Project.id == project_id).with_for_update().first() # lock this row
+        project = db_client.query(Project).filter(Project.id == project_id).first()
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found")
         

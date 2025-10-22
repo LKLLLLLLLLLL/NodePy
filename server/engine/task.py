@@ -37,13 +37,13 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
     with StreamQueue(task_id) as queue:
         try:
             # 0. lock all rows related to this project
-            project = db_client.query(Project).filter(Project.id == project_id).with_for_update().first()
+            project = db_client.query(Project).filter(Project.id == project_id).first()
             if project is None:
                 raise ValueError("Project not found")
             if project.graph is None:
                 raise ValueError("Project graph is empty")
             graph_data = Graph(**project.graph) # a graph obj in memory for update # type: ignore
-            db_client.query(DBData).filter(DBData.project_id == project_id).with_for_update().delete() # delete old data
+            db_client.query(DBData).filter(DBData.project_id == project_id).delete() # delete old data
             # 1. Validate data model
             graph = None
             try:
@@ -196,7 +196,7 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                             project_id=project_id,
                             node_id=node_id,
                             port=port,
-                            data=data.model_dump()
+                            data=data.to_view().to_dict()
                         )
                         db_client.add(db_data)
                         # 3. construct datazip
