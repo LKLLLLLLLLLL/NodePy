@@ -16,6 +16,8 @@ class GlobalConfig(BaseModel):
     """
     
     file_manager: FileManager      # manager for file operations
+    user_id: int                  # current user id
+    project_id: int               # current project id
 
     model_config = {
         "arbitrary_types_allowed": True  # 允许非 Pydantic 类型

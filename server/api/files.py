@@ -44,8 +44,8 @@ async def upload_file(project_id: int, node_id: str, file: UploadFile = fastapiF
 
     user_id = 1  # for debug
     try:
-        file_manager = FileManager(user_id=user_id, project_id=project_id)
-        saved_file = file_manager.write(content=content, filename=file.filename, format=format, node_id=node_id)
+        file_manager = FileManager()
+        saved_file = file_manager.write(content=content, filename=file.filename, format=format, node_id=node_id, project_id=project_id, user_id=user_id)
         return saved_file
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
@@ -78,9 +78,9 @@ async def get_file_content(key: str) -> StreamingResponse:
     """
     user_id = 1  # for debug
     try:
-        file_manager = FileManager(user_id=user_id, project_id=None)
+        file_manager = FileManager()
         file = file_manager.get_file_by_key(key=key)
-        content = file_manager.read(file=file)
+        content = file_manager.read(file=file, user_id=user_id)
         media_type = MIME_TYPES.get(file.format, "application/octet-stream")
         return StreamingResponse(
             io.BytesIO(content),
@@ -115,9 +115,9 @@ async def delete_file(key: str) -> DeleteResponse:
     """
     user_id = 1  # for debug
     try:
-        file_manager = FileManager(user_id=user_id, project_id=None)
+        file_manager = FileManager()
         file = file_manager.get_file_by_key(key=key)
-        file_manager.delete(file=file)
+        file_manager.delete(file=file, user_id=user_id)
         return DeleteResponse(status="success")
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -137,8 +137,8 @@ async def delete_file(key: str) -> DeleteResponse:
 async def list_files() -> UserFileList:
     user_id = 1  # for debug
     try:
-        file_manager = FileManager(user_id=user_id, project_id=None)
-        user_file_list = file_manager.list_file()
+        file_manager = FileManager()
+        user_file_list = file_manager.list_file(user_id=user_id)
         return user_file_list
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

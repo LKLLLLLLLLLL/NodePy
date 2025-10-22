@@ -5,6 +5,10 @@ from .graph import GraphRequestModel, NodeGraph
 from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
 from typing import Any
 from server.lib.SreamQueue import StreamQueue, Status
+import os
+import redis
+
+LOCK_REDIS_URL = os.getenv("REDIS_URL", "") + "/3"
 
 @celery_app.task(bind=True)
 def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
@@ -16,18 +20,20 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
     project_id = graph_request.project_id
     task_id = self.request.id
     
+    # lock to prevent concurrent runs on the same project
+    print(LOCK_REDIS_URL)
+    redis_client = redis.Redis.from_url(LOCK_REDIS_URL, decode_responses=True)
+    lock_key = f"lock:project_run:{project_id}"
+    project_lock = redis_client.lock(lock_key, timeout=600)
+    
     with StreamQueue(task_id) as queue:
         try:
             # 1. Validate data model
             graph = None
             try:
-                print(1)
-                file_manager = FileManager(user_id=user_id, project_id=project_id)
-                print(2)
-                cache_manager = CacheManager(user_id=user_id, project_id=project_id)
-                print(3)
-                graph = NodeGraph(file_manager=file_manager, cache_manager=cache_manager, request=graph_request)
-                print(4)
+                file_manager = FileManager()
+                cache_manager = CacheManager(project_id=project_id)
+                graph = NodeGraph(file_manager=file_manager, cache_manager=cache_manager, request=graph_request, user_id=user_id)
                 queue.push_message_sync(Status.IN_PROGRESS, {"stage": "VALIDATION", "status": "SUCCESS"})
             except Exception as e:
                 queue.push_message_sync(Status.FAILURE, {"stage": "VALIDATION", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}})
@@ -99,3 +105,6 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
         except Exception as e:
             # Catch any unexpected errors
             queue.push_message_sync(Status.FAILURE, {"stage": "UNKNOWN", "status": "FAILURE", "error": {"type": "unknown", "msg": str(e)}})
+        finally:
+            if project_lock.locked():
+                project_lock.release()

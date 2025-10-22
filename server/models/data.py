@@ -300,6 +300,12 @@ class Table(BaseModel):
             "data": self.df.to_dict(orient="list"),
             "col_types": {k: v.value for k, v in self.col_types.items()}
         }
+    
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> 'Table':
+        df = pandas.DataFrame.from_dict(data["data"])
+        col_types = {k: ColType(v) for k, v in data["col_types"].items()}
+        return Table(df=df, col_types=col_types)
 
 
 class Data(BaseModel):
@@ -357,4 +363,30 @@ class Data(BaseModel):
                 "type": type(self.payload).__name__,
                 "value": self.payload
             }
+    
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> 'Data':
+        """
+        Reconstructs a Data object from its dictionary representation.
+        """
+        payload_type = data["type"]
+        payload_value = data["value"]
+
+        payload: Any
+        if payload_type == "Table":
+            payload = Table.from_dict(payload_value)
+        elif payload_type == "File":
+            # Assuming your File model also has a from_dict method
+            payload = File.from_dict(payload_value)
+        elif payload_type == "str":
+            payload = str(payload_value)
+        elif payload_type == "int":
+            payload = int(payload_value)
+        elif payload_type == "float":
+            payload = float(payload_value)
+        elif payload_type == "bool":
+            payload = bool(payload_value)
+        else:
+            raise TypeError(f"Unsupported payload type for deserialization: {payload_type}")
         
+        return cls(payload=payload)

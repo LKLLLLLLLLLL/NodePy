@@ -98,6 +98,8 @@ class PlotNode(BaseNode):
             content=buf,
             filename=f"{self.id}_plot.png",
             format="png",
-            node_id=self.id
+            node_id=self.id,
+            project_id=self.global_config.project_id,
+            user_id=self.global_config.user_id
         )
         return {"plot": Data(payload=file)}
