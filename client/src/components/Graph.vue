@@ -36,7 +36,9 @@ const edges = ref<Edge[]>()
 
 onInit(async (instance) => {
   try {
+    console.log('getProjectApiProjectProjectIdGet')
     project.value = await DefaultService.getProjectApiProjectProjectIdGet(1)
+    console.log(project.value)
     const graph = parseProject(project.value)
     nodes.value = graph.nodes
     edges.value = graph.edges
@@ -46,13 +48,16 @@ onInit(async (instance) => {
   }
 })
 
-onNodesChange(async (changes) => {
-  const ARchanges = changes.filter(c => c.type === 'add' || c.type === 'remove')
-  ARchanges.forEach(c => {
-    if(c.type ==='add') console.log('新增节点:', c.item)
-    if(c.type === 'remove') console.log('移除节点', c)
-  })
 
+// onNodesChange(async (changes) => {
+  
+// })
+
+//add, move, modify nodes
+watch(nodesData, async (newValue, oldValue) => {
+  console.log("new: ", newValue, "old: ", oldValue)
+  if(!oldValue) return
+  if(oldValue.length <= 0) return
   if(project.value) {
     const proj = getProject(project.value.project_name,
       project.value.project_id,
@@ -60,41 +65,84 @@ onNodesChange(async (changes) => {
       nodes.value as Node[],
       edges.value as Edge[]
     )
+    console.log('@@',proj)
 
     try {
+      console.log('syncProjectApiProjectSyncPost')
       const {task_id} = await DefaultService.syncProjectApiProjectSyncPost(proj)
+      console.log(task_id)
 
       if(task_id) {
         try {
+          console.log('monitorTask')
           const messages = await monitorTask(project.value, task_id)
           console.log("Done:", messages)
         }catch(err) {
-          console.error(err)
+          console.error('@@@',err)
         }
+
+      }else {
+        console.error('task_id is undefined')
       }
-    
+
     }catch(err) {
-      console.log(err)
+      console.error('@@@@',err)
     }
+
   }else {
     console.error('project is undefined')
   }
-})
-watch(nodesData, (newValue, oldValue) => {
-  console.log("new: ", newValue?.[0]?.data.value, "old: ", oldValue?.[0]?.data.value)
+
 }, {deep: true})
 
-onEdgesChange(changes => {
+onEdgesChange(async (changes) => {
   const ARchanges = changes.filter(c => c.type === 'add' || c.type === 'remove')
   ARchanges.forEach(c => {
     if(c.type ==='add') console.log('新增边:', c.item)
     if(c.type === 'remove') console.log('移除边', c)
   })
+
+  if(ARchanges.length >= 0) {
+    if(project.value) {
+      const proj = getProject(project.value.project_name,
+        project.value.project_id,
+        project.value.user_id,
+        nodes.value as Node[],
+        edges.value as Edge[]
+      )
+      console.log('@@@',proj)
+
+      try {
+        console.log('syncProjectApiProjectSyncPost')
+        const {task_id} = await DefaultService.syncProjectApiProjectSyncPost(proj)
+        console.log(task_id)
+
+        if(task_id) {
+          try {
+            console.log('monitorTask')
+            const messages = await monitorTask(project.value, task_id)
+            console.log("Done:", messages)
+          }catch(err) {
+            console.error('@@@@@',err)
+          }
+
+        }else {
+          console.error('task_id is undefined')
+        }
+
+      }catch(err) {
+        console.error('@@@@@@',err)
+      }
+
+    }else {
+      console.error('project is undefined')
+    }
+
+  }
 })
 
 onConnect((connection) => {
   addEdges(connection)
-  console.log(edges.value)
 })
 
 
@@ -175,6 +223,5 @@ const nodeColor = (node: Node) => {
 <style lang="scss" scoped>
   .box {
     flex: 1;
-    border: 1px solid black;
   }
 </style>
