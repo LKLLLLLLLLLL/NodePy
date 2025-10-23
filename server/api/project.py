@@ -171,8 +171,7 @@ async def sync_project(project: Project, response: Response) -> TaskResponse | N
     the returned `task_id` to subscribe to the websocket status endpoint
     `/nodes/status/{task_id}`.
     """
-    async with ProjectLock(project_id=project.project_id, max_block_time=5.0) as lock:
-        await lock.lock_async()
+    async with ProjectLock(project_id=project.project_id, max_block_time=5.0):
         
         user_id = 1  # for debug
         project_id = project.project_id
@@ -214,14 +213,13 @@ async def sync_project(project: Project, response: Response) -> TaskResponse | N
             db_client.commit()
 
         if not need_exec:
-            await lock.release_async()
             response.status_code = 204  # No Content
             return None
         
         try:
             celery_task = cast(CeleryTask, execute_project_task)  # to suppress type checker error
             task = celery_task.delay(  # the return message will be sent back via streamqueue
-                graph_request_dict=graph_topo.model_dump(),
+                topo_graph_dict=graph_topo.model_dump(),
                 user_id=user_id,
             )
             response.status_code = 202  # Accepted
