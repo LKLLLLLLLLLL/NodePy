@@ -1,5 +1,4 @@
 import axios from 'axios';
-import WebSocket from 'ws';
 import type { Project } from '@/utils/api'
 
 export async function monitorTask(project: Project, task_id: string): Promise<any[]> {
@@ -12,18 +11,21 @@ export async function monitorTask(project: Project, task_id: string): Promise<an
       resolve()
     }, 120000)
 
-    ws.on('message', (data) => {
-      const message = JSON.parse(data.toString());
-      messages.push(message);
-      console.log("WS:", message);
-    })
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data)
+      messages.push(message)
+      console.log("WS:", message)
+    }
 
-    ws.on('close', () => {
-      clearTimeout(timeoutId);
-      resolve();
-    })
+    ws.onclose = () => {
+      clearTimeout(timeoutId)
+      resolve()
+    }
 
-    ws.on('error', reject)
+    ws.onerror = (error) => {
+      clearTimeout(timeoutId)
+      reject(error)
+    }
   })
 
   return messages
