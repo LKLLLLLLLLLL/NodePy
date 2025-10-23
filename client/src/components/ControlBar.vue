@@ -96,7 +96,9 @@ function handleOpenEditor(){
   >
     <!-- 控制栏内容 -->
     <div class="control-content">
-        <div :style="{marginRight: 'auto'}">Icon</div>
+        <div :style="{marginRight: 'auto',height: '100%',width: '140px'}">
+          <img src="../../public/logo.png" alt="Logo" :style="{height: '100%',width: '100%'}"/>
+        </div>
         <div :style="{alignItems: 'center', display: 'flex', gap: '8px',justifyContent: 'center'}">
           <el-button @click="handleClickResult">结果</el-button>
           <el-button @click="handleOpenEditor">编辑器</el-button>
@@ -216,8 +218,9 @@ function handleOpenEditor(){
   height: 100%;
   width: 100%;
   color: white;
-  background-color: #655555;
+  background-color: white;
   position: relative;
+  border-bottom: 1px solid #4e4e4e;
   
   .control-content {
     display: flex;
@@ -225,7 +228,8 @@ function handleOpenEditor(){
     justify-content: flex-start;
     width: 100%;
     height: 100%;
-    padding: 0 16px;
+    padding-left: 2px;
+    padding-right: 4px;
     font-size: 14px;
     cursor: context-menu;
     gap: 12px;
