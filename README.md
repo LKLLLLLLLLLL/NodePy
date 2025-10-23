@@ -1,5 +1,5 @@
-<div style="background-color: white; display: inline-block; padding: 0px;">
-  <img src="client/public/logo.png" alt="NodePy logo" style="display: block;">
+<div style="display: inline-block; padding: 0px;">
+  <img src="client/public/logo.png" alt="NodePy logo" style="padding: 10px;">
 </div>
 
 # NodePy
