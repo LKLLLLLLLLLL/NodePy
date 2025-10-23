@@ -135,9 +135,11 @@ def data_cleanup_trigger(conn) -> None:
     )
     conn.commit()
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
-# Create triggers
-with engine.connect() as conn:
-    file_size_trigger(conn)
-    data_cleanup_trigger(conn)
+def init_database() -> None:
+    """ Initialize the database: create tables and triggers """
+    # Create database tables
+    Base.metadata.create_all(bind=engine)
+    # Create triggers
+    with engine.connect() as conn:
+        file_size_trigger(conn)
+        data_cleanup_trigger(conn)

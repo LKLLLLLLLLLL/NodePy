@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine
-import os
+from server.models.database import init_database
 from pathlib import Path
 from .api import router
 
@@ -23,11 +22,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Database connection
-DATABASE_URL = os.getenv("DATABASE_URL")
-if DATABASE_URL is None:
-    raise ValueError("DATABASE_URL environment variable is not set")
-engine = create_engine(DATABASE_URL)
+# init database
+init_database()
 
 # Include API routes
 app.include_router(router, prefix="/api")

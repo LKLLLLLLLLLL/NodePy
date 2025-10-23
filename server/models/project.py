@@ -16,8 +16,8 @@ class ProjNode(BaseModel):
 
     id: str
     type: str
-    position: Position = Position(x=0.0, y=0.0)
-    param: dict[str, Any] = {}
+    position: Position
+    param: dict[str, Any]
     
     runningtime: float | None = None  # in ms
 
@@ -68,6 +68,21 @@ class Project(BaseModel):
             node.runningtime = None
         self.error_message = None
         return self
+    
+    def merge_run_results_from(self, other: "Project") -> None:
+        """
+        Merge running results from another project instance.
+        Matching is done by node id.
+        """
+        other_node_map = {node.id: node for node in other.nodes}
+        for node in self.nodes:
+            if node.id in other_node_map:
+                other_node = other_node_map[node.id]
+                node.schema_out = other_node.schema_out
+                node.data_out = other_node.data_out
+                node.error = other_node.error
+                node.runningtime = other_node.runningtime
+        self.error_message = other.error_message
 
     def apply_patch(self, patch: 'ProjectPatch') -> None:
         """
