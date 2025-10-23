@@ -1,12 +1,12 @@
 import type { Node, Edge } from '@vue-flow/core'
 import type { Project } from './api'
 
-export const getGraph = (nodes: Node[], edges: Edge[]) => {
+export const getProject = (project_name: string, project_id: number, user_id: number, nodes: Node[], edges: Edge[], error_message?: string): Project => {
     const graphNodes = nodes.map(n => {
         return {
             id: n.id,
             position: n.position,
-            type: n.type,
+            type: n.type as string,
             param: n.data.param,
             runningtime: n.data.runningtime,
             schema_out: n.data.schema_out,
@@ -19,17 +19,24 @@ export const getGraph = (nodes: Node[], edges: Edge[]) => {
             id: e.id,
             src: e.source,
             tar: e.target,
-            src_port: e.sourceHandle,
-            tar_port: e.targetHandle
+            src_port: e.sourceHandle as string,
+            tar_port: e.targetHandle as string
         }
     })
     return {
+        project_name,
+        project_id,
+        user_id,
+        error_message,
         nodes: graphNodes,
         edges: graphEdges
     }
 }
 
-export const parseGraph = (g: Project) => {
+export const parseProject = (g: Project): {
+    nodes: Node[],
+    edges: Edge[]
+} => {
     const graphNodes = g.nodes.map(n => {
         return {
             id: n.id,

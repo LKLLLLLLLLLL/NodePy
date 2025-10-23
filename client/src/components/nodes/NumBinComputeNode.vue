@@ -37,11 +37,11 @@
     const x = ref()
     const y = ref()
     const op = ['ADD', 'SUB', 'MUL', 'DIV', 'POW']
-    const selected_op = ref(props.data.op)
+    const selected_op = ref(props.data.param.op)
 
 
     const onSelect = (e?: Event) => {
-        props.data.op = selected_op.value
+        props.data.param.op = selected_op.value
     }
 
 

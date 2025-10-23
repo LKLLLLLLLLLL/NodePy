@@ -37,6 +37,82 @@ export class DefaultService {
         });
     }
     /**
+     * Delete Project
+     * Delete a project.
+     * @param projectId
+     * @returns void
+     * @throws ApiError
+     */
+    public static deleteProjectApiProjectProjectIdDelete(
+        projectId: number,
+    ): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/project/{project_id}',
+            path: {
+                'project_id': projectId,
+            },
+            errors: {
+                403: `User has no access to this project`,
+                404: `Project not found`,
+                422: `Validation Error`,
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
+     * Create Project
+     * Create a new project for a user.
+     * @param projectName
+     * @returns any Project created successfully
+     * @throws ApiError
+     */
+    public static createProjectApiProjectCreatePost(
+        projectName: string,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/project/create',
+            query: {
+                'project_name': projectName,
+            },
+            errors: {
+                400: `Project name already exists`,
+                404: `User not found`,
+                422: `Validation Error`,
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
+     * Rename Project
+     * Rename a project.
+     * @param projectId
+     * @param newName
+     * @returns any Project renamed successfully
+     * @throws ApiError
+     */
+    public static renameProjectApiProjectRenamePost(
+        projectId: number,
+        newName: string,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/project/rename',
+            query: {
+                'project_id': projectId,
+                'new_name': newName,
+            },
+            errors: {
+                400: `Project name already exists`,
+                403: `User has no access to this project`,
+                404: `Project not found`,
+                422: `Validation Error`,
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
      * Sync Project
      * Save a project to the database, if topology changed, enqueue a task to execute it.
      * If decide to execute, enqueues a Celery task. Use

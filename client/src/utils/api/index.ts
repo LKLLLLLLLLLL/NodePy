@@ -14,7 +14,6 @@ export type { fastapi___compat__v2__Body_upload_file_api_files_upload__project_i
 export { File } from './models/File';
 export { FileItem } from './models/FileItem';
 export type { HTTPValidationError } from './models/HTTPValidationError';
-export type { NothingTodoResponse } from './models/NothingTodoResponse';
 export type { Position } from './models/Position';
 export type { Project } from './models/Project';
 export type { ProjEdge } from './models/ProjEdge';

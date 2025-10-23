@@ -9,14 +9,20 @@ import ConstNode from './nodes/ConstNode.vue'
 import StringNode from './nodes/StringNode.vue'
 import TableNode from './nodes/TableNode.vue'
 import NumBinComputeNode from './nodes/NumBinComputeNode.vue'
+import { DefaultService } from '@/utils/api'
+import type { Project } from '@/utils/api'
+import { getProject, parseProject } from '@/utils/projectConvert'
+import { monitorTask } from '@/utils/task'
+import { useGraphStore } from '@/stores/graphStore'
 
+const {project} = useGraphStore()
 
 const { onConnect, onInit, onNodesChange, addEdges, onEdgesChange } = useVueFlow('main')
 
-const nodes = ref([])
+const nodes = ref<Node[]>()
 
 const nodesData = computed(() => {
-  const result = nodes.value.map((n: Node) => {
+  const result = nodes.value?.map((n: Node) => {
     return {
       id: n.id,
       data: n.data
@@ -25,25 +31,57 @@ const nodesData = computed(() => {
   return result
 })
 
-const edges = ref<Edge[]>([])
+const edges = ref<Edge[]>()
 
 
-
-// any event that is emitted from the `<VueFlow />` component can be listened to using the `onEventName` method
-onInit((instance) => {
-  // `instance` is the same type as the return of `useVueFlow` (VueFlowStore)
-  instance.fitView()
+onInit(async (instance) => {
+  try {
+    project.value = await DefaultService.getProjectApiProjectProjectIdGet(1)
+    const graph = parseProject(project.value)
+    nodes.value = graph.nodes
+    edges.value = graph.edges
+    instance.fitView()
+  }catch(err) {
+    console.error(err)
+  }
 })
 
-onNodesChange(changes => {
+onNodesChange(async (changes) => {
   const ARchanges = changes.filter(c => c.type === 'add' || c.type === 'remove')
   ARchanges.forEach(c => {
     if(c.type ==='add') console.log('新增节点:', c.item)
     if(c.type === 'remove') console.log('移除节点', c)
   })
+
+  if(project.value) {
+    const proj = getProject(project.value.project_name,
+      project.value.project_id,
+      project.value.user_id,
+      nodes.value as Node[],
+      edges.value as Edge[]
+    )
+
+    try {
+      const {task_id} = await DefaultService.syncProjectApiProjectSyncPost(proj)
+
+      if(task_id) {
+        try {
+          const messages = await monitorTask(project.value, task_id)
+          console.log("Done:", messages)
+        }catch(err) {
+          console.error(err)
+        }
+      }
+    
+    }catch(err) {
+      console.log(err)
+    }
+  }else {
+    console.error('project is undefined')
+  }
 })
 watch(nodesData, (newValue, oldValue) => {
-  console.log("new: ", newValue[0]?.data.value, "old: ", oldValue[0]?.data.value)
+  console.log("new: ", newValue?.[0]?.data.value, "old: ", oldValue?.[0]?.data.value)
 }, {deep: true})
 
 onEdgesChange(changes => {

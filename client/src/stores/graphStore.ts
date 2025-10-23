@@ -1,63 +1,79 @@
 import { useVueFlow } from "@vue-flow/core"
+import { ref } from "vue"
+import { defineStore } from 'pinia'
 import type * as Nodetypes from '../types/nodeTypes'
+import type { Project } from "@/utils/api"
 
-const initTime = Date.now()
-const vueFLowInstance = useVueFlow('main')
-const {addNodes} = vueFLowInstance
-export const {getNodes} = vueFLowInstance
 
-export const addNode = (type: string) => {
-  switch(type){
-    case 'ConstNode':
-      const addedConstNode: Nodetypes.ConstNode = {
-        id: (Date.now() - initTime).toString(),
-        position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
-        type: 'ConstNode',
-        data: {
-          value: 0,
-          data_type: 'int'
-        }
-      }
-      addNodes(addedConstNode)
-      break
-    case 'StringNode':
-      const addedStringNode: Nodetypes.StringNode = {
-        id: (Date.now() - initTime).toString(),
-        position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
-        type: 'StringNode',
-        data: {
-          value: ""
-        }
-      }
-      addNodes(addedStringNode)
-      break
-    case 'TableNode':
-      const addedTableNode: Nodetypes.TableNode = {
-        id: (Date.now() - initTime).toString(),
-        position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
-        type: 'TableNode',
-        data: {
-          rows: [],
-          col_names: []
-        }
-      }
-      addNodes(addedTableNode)
-      break
+export const useGraphStore = () => {
+  const vueFLowInstance = useVueFlow('main')
+  const {addNodes} = vueFLowInstance
+  const project = ref<Project>()
 
-    case 'NumBinComputeNode':
-      const addedNumBinComputeNode: Nodetypes.NumBinComputeNode = {
-        id: (Date.now() - initTime).toString(),
-        position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
-        type: 'NumBinComputeNode',
-        data: {
-          op: 'ADD'
-        },
-        timerStatus: 'inactive'
-      }
-      addNodes(addedNumBinComputeNode)
-      break
+
+  const addNode = (type: string) => {
+    switch(type){
+      case 'ConstNode':
+        const addedConstNode: Nodetypes.ConstNode = {
+          id: Date.now().toString(),
+          position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
+          type: 'ConstNode',
+          data: {
+            param: {
+              value: 0,
+              data_type: 'int'
+            }
+          }
+        }
+        addNodes(addedConstNode)
+        break
+      case 'StringNode':
+        const addedStringNode: Nodetypes.StringNode = {
+          id: Date.now().toString(),
+          position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
+          type: 'StringNode',
+          data: {
+            param: {
+              value: ""
+            }
+          }
+        }
+        addNodes(addedStringNode)
+        break
+      case 'TableNode':
+        const addedTableNode: Nodetypes.TableNode = {
+          id: Date.now().toString(),
+          position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
+          type: 'TableNode',
+          data: {
+            param: {
+              rows: [],
+              col_names: []
+            }
+          }
+        }
+        addNodes(addedTableNode)
+        break
+
+      case 'NumBinComputeNode':
+        const addedNumBinComputeNode: Nodetypes.NumBinComputeNode = {
+          id: Date.now().toString(),
+          position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
+          type: 'NumBinComputeNode',
+          data: {
+            param: {
+              op: 'ADD'
+            }
+          },
+        }
+        addNodes(addedNumBinComputeNode)
+        break
     
-    default:
-      console.log(type)
+      default:
+        console.log(type)
+    }
   }
+
+
+  return {vueFLowInstance, addNode, project}
 }

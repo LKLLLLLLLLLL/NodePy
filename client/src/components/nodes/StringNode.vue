@@ -28,11 +28,11 @@
     const props = defineProps<NodeProps<StringNodeData>>()
     const { viewport } = useVueFlow()
     const info = ref()
-    const value = ref(props.data.value)
+    const value = ref(props.data.param.value)
 
 
     const onInput = (e?: Event) => {
-        props.data.value = value.value
+        props.data.param.value = value.value
     }
 
 

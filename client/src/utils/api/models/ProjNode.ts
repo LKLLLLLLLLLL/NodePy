@@ -9,8 +9,8 @@ import type { Schema } from './Schema';
 export type ProjNode = {
     id: string;
     type: string;
-    position?: Position;
-    param?: Record<string, any>;
+    position: Position;
+    param: Record<string, any>;
     runningtime?: (number | null);
     schema_out?: Record<string, Schema>;
     data_out?: Record<string, DataRef>;

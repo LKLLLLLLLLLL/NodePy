@@ -37,17 +37,17 @@
     const props = defineProps<NodeProps<ConstNodeData>>()
     const { viewport } = useVueFlow()
     const info = ref()
-    const value = ref(props.data.value)
-    const data_type = ref(props.data.data_type)
+    const value = ref(props.data.param.value)
+    const data_type = ref(props.data.param.data_type)
     const data_type_options = ['int', 'float', 'str', 'bool']
 
 
     const onInput = (e?: Event) => {
-        props.data.value = value.value
+        props.data.param.value = value.value
     }
 
     const onSelect = (e?: Event) => {
-        props.data.data_type = data_type.value
+        props.data.param.data_type = data_type.value
     }
 
 
