@@ -6,20 +6,23 @@
     import Login from './views/Login.vue';
     import Example from './views/Example.vue';
     import Visitor from './views/Visitor.vue';
+    import Editor from './views/Editor.vue';
+    import { RouterView } from 'vue-router';
     import { usePageStore } from './stores/pageStore';
     import { computed } from 'vue';
 
-    const pageComponents = {
-        Program,
-        Home,
-        File,
-        Login,
-        Example,
-        Visitor
-    }
+    // const pageComponents = {
+    //     Program,
+    //     Home,
+    //     File,
+    //     Login,
+    //     Example,
+    //     Visitor,
+    //     Editor
+    // }
 
-    const pageStore = usePageStore();
-    const currentPage = computed(() => pageStore.currentPage);
+    // const pageStore = usePageStore();
+    // const currentPage = computed(() => pageStore.currentPage);
 
 </script>
 <template>
@@ -28,7 +31,7 @@
             <ControlBar />
         </div>
         <div class = "down-container">
-            <component :is="pageComponents[currentPage]" />
+            <RouterView></RouterView>
         </div>
     </div>
     <ModalManager />
@@ -38,15 +41,22 @@
         display: flex;
         flex-direction: column;
         width: 100%;
+        min-width: 1000px;
         height: 100vh;
+        min-height: 800px;
     }
     .up-container{
+        top: 0;
+        z-index: 1000;
         height: 50px;
         width: 100%;
+        position: sticky;
+        flex-shrink: 0;
     }
     .down-container{
         display: flex;
         flex: 1;
+        min-height: 0;
     }
 </style>
 <!-- <style lang = "scss">

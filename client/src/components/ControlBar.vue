@@ -1,14 +1,17 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { nodeMenuItems } from '@/types/menuTypes'
-import { addNode } from '@/stores/graphStore'
+import { useGraphStore } from '@/stores/graphStore'
 import {useModalStore} from "@/stores/modalStore";
 import { usePageStore, type Page} from '@/stores/pageStore';
 import { Avatar, User } from '@element-plus/icons-vue'
+import { RouterLink } from 'vue-router';
 
 const pageStore = usePageStore()
-
+const graphStore = useGraphStore()
 const modalStore = useModalStore()
+
+const { addNode } = graphStore
 
 const showMenu = ref(false)
 const x = ref(0)
@@ -93,12 +96,37 @@ function handlePage(page:Page){
         <div :style="{marginRight: 'auto'}">Icon</div>
         <div :style="{alignItems: 'center', display: 'flex', gap: '8px',justifyContent: 'center'}">
           <el-button @click="handleClickResult">结果</el-button>
-          <el-button @click="handlePage('File')">File</el-button>
-          <el-button @click="handlePage('Program')">Program</el-button>
-          <el-button @click="handlePage('Login')">Login</el-button>
+          <RouterLink 
+            :to="{path:'/File'}"
+            custom
+            v-slot="{navigate}"
+          >
+            <el-button @click="navigate">File</el-button>
+          </RouterLink>
+          <RouterLink 
+            :to="{path:'/Program'}"
+            custom
+            v-slot="{navigate}"
+          >
+            <el-button @click="navigate">Program</el-button>
+          </RouterLink>
+          <RouterLink 
+            :to="{path:'/Example'}"
+            custom
+            v-slot="{navigate}"
+          >
+            <el-button @click="navigate">Example</el-button>
+          </RouterLink>
         </div>
         <div :style="{marginLeft: 'auto'}">
-            <el-button @click="handlePage('Home')" :icon="Avatar"></el-button>
+          <RouterLink 
+            :to="{path:'/Home'}" 
+            custom 
+            v-slot="{navigate}"
+          >
+            <el-button @click="navigate" :icon="Avatar"></el-button>
+          </RouterLink>
+            
         </div>
     </div>
     
