@@ -3,7 +3,7 @@ import io
 import os
 from minio import Minio, S3Error
 from uuid import uuid4
-from ..models.database import File as DBFile, User, get_session, Project
+from ..models.database import FileRecord, UserRecord, get_session, ProjectRecord
 from server.models.file import File, FileItem, UserFileList
 from server.celery import celery_app
 import datetime
@@ -35,7 +35,7 @@ class FileManager:
 
     def get_file_by_key(self, key: str) -> File:
         """ Get a File object by its key """
-        db_file = self.db_client.query(DBFile).filter(DBFile.file_key == key).first()
+        db_file = self.db_client.query(FileRecord).filter(FileRecord.file_key == key).first()
         if not db_file:
             raise IOError("File record not found in database")
         if db_file.user_id != self.user_id: # type: ignore
@@ -49,10 +49,10 @@ class FileManager:
         )
     def _cal_user_occupy(self, user_id: int) -> int:
         """ Calculate the total file occupy for a user """
-        total = self.db_client.query(DBFile).with_entities(
-            DBFile.file_size
+        total = self.db_client.query(FileRecord).with_entities(
+            FileRecord.file_size
         ).filter(
-            DBFile.user_id == user_id
+            FileRecord.user_id == user_id
         ).all()
         return sum([size for (size,) in total])  # type: ignore
 
@@ -79,10 +79,10 @@ class FileManager:
             content.seek(0)
             content = content.getvalue()
         key = uuid4().hex
-        existing_file = self.db_client.query(DBFile).filter(DBFile.project_id == project_id and DBFile.node_id == node_id).first()
+        existing_file = self.db_client.query(FileRecord).filter(FileRecord.project_id == project_id and FileRecord.node_id == node_id).first()
         try:
             # check storage limit
-            user = self.db_client.query(User).filter(User.id == user_id).first()
+            user = self.db_client.query(UserRecord).filter(UserRecord.id == user_id).first()
             if not user:
                 raise ValueError("User not found")
             file_occupy = self._cal_user_occupy(user_id)
@@ -116,7 +116,7 @@ class FileManager:
                 except Exception:
                     pass
             else:
-                file = DBFile(
+                file = FileRecord(
                     file_key=key,
                     filename=filename,
                     format=format,
@@ -148,7 +148,7 @@ class FileManager:
     def delete(self, file: File, user_id: int | None) -> None:
         """ Delete a file. If user_id is None, means admin operation """
         # validate file ownership
-        db_file = self.db_client.query(DBFile).filter(DBFile.file_key == file.key).first()
+        db_file = self.db_client.query(FileRecord).filter(FileRecord.file_key == file.key).first()
         if not db_file:
             raise IOError("File record not found in database")
         if user_id and db_file.user_id != user_id: # type: ignore
@@ -158,10 +158,10 @@ class FileManager:
                 bucket_name=self.bucket,
                 object_name=file.key
             )
-            db_file = self.db_client.query(DBFile).filter(DBFile.file_key == file.key).first()
+            db_file = self.db_client.query(FileRecord).filter(FileRecord.file_key == file.key).first()
             if not db_file:
                 raise IOError("File record not found in database")
-            user = self.db_client.query(User).filter(User.id == db_file.user_id).first()
+            user = self.db_client.query(UserRecord).filter(UserRecord.id == db_file.user_id).first()
             if not user:
                 raise IOError("User not found in database")
             self.db_client.delete(db_file)
@@ -175,7 +175,7 @@ class FileManager:
 
     def read(self, file: File, user_id: int | None) -> bytes:
         """Read content from a file"""
-        db_file = self.db_client.query(DBFile).filter(DBFile.file_key == file.key).first()
+        db_file = self.db_client.query(FileRecord).filter(FileRecord.file_key == file.key).first()
         if not db_file:
             raise ValueError("File record not found in database")
         if user_id and db_file.user_id != user_id: # type: ignore
@@ -193,16 +193,16 @@ class FileManager:
     def list_file(self, user_id: int) -> UserFileList:
         """ List all files owned by the user in the project """
         try:
-            db_files = self.db_client.query(DBFile).filter(
-                DBFile.user_id == user_id,
+            db_files = self.db_client.query(FileRecord).filter(
+                FileRecord.user_id == user_id,
             ).all()
-            user = self.db_client.query(User).filter(User.id == user_id).first()
+            user = self.db_client.query(UserRecord).filter(UserRecord.id == user_id).first()
             if not user:
                 raise ValueError("User not found in database")
             file_items = []
             for db_file in db_files:
                 # query project name
-                project = self.db_client.query(Project).filter(Project.id == db_file.project_id).first()
+                project = self.db_client.query(ProjectRecord).filter(ProjectRecord.id == db_file.project_id).first()
                 project_name = project.name if project else ""
                 file_items.append(FileItem(
                     key=db_file.file_key, # type: ignore
@@ -239,7 +239,7 @@ def cleanup_orphan_files_task():
         print("Starting cleanup of orphan files...")
         
         # 1. get all existing node_id from projects
-        all_projects = db_client.query(Project).all()
+        all_projects = db_client.query(ProjectRecord).all()
         valid_node_ids = set()
         for project in all_projects:
             if project.graph: # type: ignore
@@ -252,7 +252,7 @@ def cleanup_orphan_files_task():
                         valid_node_ids.add((project.id, node_id))
         
         # 2. list all files keys from db
-        all_files = db_client.query(DBFile).all()
+        all_files = db_client.query(FileRecord).all()
         
         orphan_files = []
         for db_file in all_files:
@@ -278,7 +278,7 @@ def cleanup_orphan_files_task():
     # step 2: delete files in MinIO not in database
     try:
         objects = file_manager.minio_client.list_objects(bucket_name=file_manager.bucket, recursive=True)
-        db_file_keys = set([db_file.file_key for db_file in db_client.query(DBFile.file_key).all()])
+        db_file_keys = set([db_file.file_key for db_file in db_client.query(FileRecord.file_key).all()])
         for obj in objects:
             if obj.object_name not in db_file_keys:
                 assert isinstance(obj.object_name, str)

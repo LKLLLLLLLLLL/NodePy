@@ -1,7 +1,13 @@
 from ..BaseNode import BaseNode, InPort, OutPort, register_node
 from typing import List, Dict, override
-from ....models.exception import NodeParameterError
-from ....models.data import check_no_illegal_cols, Schema, TableSchema, ColType, Data
+from server.models.exception import NodeParameterError
+from server.models.data import Data
+from server.models.schema import (
+    Schema,
+    TableSchema,
+    check_no_illegal_cols,
+    ColType,
+)
 from pydantic import PrivateAttr
 from pandas import DataFrame
 

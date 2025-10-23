@@ -1,9 +1,10 @@
-from server.models.data import Schema, Data, Pattern
+from server.models.data import Data
+from server.models.schema import Pattern, Schema
 from pydantic import BaseModel, model_validator, PrivateAttr
 from abc import abstractmethod
 from typing_extensions import Self
 from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
-from .GlobalConfig import GlobalConfig
+from .config import GlobalConfig
 
 """
 This file defines the base class for all nodes.

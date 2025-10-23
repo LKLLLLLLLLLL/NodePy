@@ -1,9 +1,9 @@
 import networkx as nx
-from server.models.graph import GraphTopoModel, TopoNode, TopoEdge
+from server.models.project import ProjectTopology, TopoNode, TopoEdge
 from typing import Any, Literal, Callable
 from .nodes.BaseNode import BaseNode
-from ..models.data import Schema, Data
-from .nodes.GlobalConfig import GlobalConfig
+from server.models.data import Schema, Data
+from .nodes.config import GlobalConfig
 from server.lib.CacheManager import CacheManager
 from server.lib.FileManager import FileManager
 
@@ -12,31 +12,26 @@ from server.lib.FileManager import FileManager
 Graph classes to analyze and execute node graphs.
 """
 
-
-class GraphError(Exception):
-    """ Custom exception for graph-related errors """
-    pass
-
-class NodeGraph:
+class ProjectExecutor:
     """
     The class representing the entire graph of nodes and edges.
     """
 
     def __init__(self, 
-                 request: GraphTopoModel, 
+                 topology: ProjectTopology, 
                  file_manager: FileManager, 
                  cache_manager: CacheManager,
                  user_id: int,
                 ) -> None:
-        self._request: GraphTopoModel = request
-        self._nodes: list[TopoNode] = request.nodes
-        self._edges: list[TopoEdge] = request.edges
+        self._topology: ProjectTopology = topology
+        self._nodes: list[TopoNode] = topology.nodes
+        self._edges: list[TopoEdge] = topology.edges
         self._graph: nx.MultiDiGraph = nx.MultiDiGraph()
         self._graph.add_nodes_from([node.id for node in self._nodes]) # add nodes as indices
         for edge in self._edges:
             self._graph.add_edge(edge.src, edge.tar, src_port=edge.src_port, tar_port=edge.tar_port)
         if not nx.is_directed_acyclic_graph(self._graph):
-            raise GraphError("The graph must be a Directed Acyclic Graph (DAG)")
+            raise ValueError("The graph must be a Directed Acyclic Graph (DAG)")
         self._node_map: dict[str, TopoNode] = {}
         for node in self._nodes:
             self._node_map[node.id] = node
@@ -45,8 +40,8 @@ class NodeGraph:
         self._stage: Literal["init", "constructed", "static_analyzed", "running", "finished"] = "init"
         # construct global config
         self.cache_manager = cache_manager # used only by NodeGraph, no need to pass to nodes
-        self._global_config = GlobalConfig(file_manager=file_manager, user_id=user_id, project_id=request.project_id)
-    
+        self._global_config = GlobalConfig(file_manager=file_manager, user_id=user_id, project_id=topology.project_id)
+
     def _get_edge_tar_from_src(self, src: str) -> list[str]:
         """ Get all target node ids from a source node id """
         return [tar for s, tar in self._graph.out_edges(src)]
@@ -58,7 +53,7 @@ class NodeGraph:
     def construct_nodes(self) -> None:
         """ Construct node instances from node definitions to test if there are parameter errors """
         if self._stage != "init":
-            raise GraphError(f"Graph is already in stage '{self._stage}', cannot construct nodes again.")
+            raise AssertionError(f"Graph is already in stage '{self._stage}', cannot construct nodes again.")
         self._exec_queue = list(nx.topological_sort(self._graph))
         
         for node_id in self._exec_queue:
@@ -69,7 +64,7 @@ class NodeGraph:
 
             node_object = BaseNode.create_from_type(type=type, global_config=self._global_config, id=id, **params)
             if self._node_objects is None:
-                raise GraphError("Node objects initialized failed.")
+                raise RuntimeError("Node objects initialized failed.")
             self._node_objects[id] = node_object
         self._stage = "constructed"
         return
@@ -77,7 +72,7 @@ class NodeGraph:
     def static_analyse(self, callback: Callable[[str, dict[str, Any]], None]) -> None:
         """ Perform static analysis to infer schemas and validate the graph """
         if self._stage != "constructed":
-            raise GraphError(f"Graph is in stage '{self._stage}', cannot perform static analysis.")
+            raise AssertionError(f"Graph is in stage '{self._stage}', cannot perform static analysis.")
 
         schema_cache : dict[tuple[str, str], Schema] = {} # cache for node output schema: (node_id, port) -> Schema
         for node_id in self._exec_queue:
@@ -106,7 +101,7 @@ class NodeGraph:
     def execute(self, callbefore: Callable[[str], None], callafter: Callable[[str, dict[str, Any]], None]) -> None:
         """ Execute the graph in topological order """
         if self._stage != "static_analyzed":
-            raise GraphError(f"Graph is in stage '{self._stage}', cannot run.")
+            raise AssertionError(f"Graph is in stage '{self._stage}', cannot run.")
         data_cache : dict[tuple[str, str], Data] = {} # cache for node output data: (node_id, port) -> Data
 
         for node_id in self._exec_queue:
@@ -139,7 +134,7 @@ class NodeGraph:
             # 4. store output data to self cache
             for tar_port, data in output_data.items():
                 if data_cache.get((node_id, tar_port)) is not None:
-                    raise GraphError(f"Node '{node_id}' output on port '{tar_port}' already exists in cache.")
+                    raise RuntimeError(f"Node '{node_id}' output on port '{tar_port}' already exists in cache.")
                 data_cache[(node_id, tar_port)] = data
 
             # 5. call callafter

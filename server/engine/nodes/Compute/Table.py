@@ -1,7 +1,14 @@
 from ..BaseNode import BaseNode,InPort, OutPort, register_node
 from typing import Literal, override
-from ....models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
-from ....models.data import Schema, Pattern, ColType, check_no_illegal_cols, generate_default_col_name, Data, Table
+from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
+from server.models.data import Table, Data
+from server.models.schema import (
+    Pattern,
+    Schema,
+    generate_default_col_name,
+    check_no_illegal_cols,
+    ColType,
+)
 import numpy as np
 
 """

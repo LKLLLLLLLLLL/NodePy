@@ -2,9 +2,9 @@ from server.celery import celery_app
 from server.lib.FileManager import FileManager
 from server.lib.CacheManager import CacheManager
 from server.models.data import Data
-from server.models.graph import GraphTopoModel, GraphPatch, NodeError, DataZip, Graph
-from server.models.database import get_session, Data as DBData, Project
-from .graph import NodeGraph
+from server.models.project import ProjectTopology, ProjectPatch, DataRef, Project, ProjNodeError
+from server.models.database import get_session, NodeOutputRecord, ProjectRecord
+from .executer import ProjectExecutor
 from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
 from typing import Any
 from server.lib.SreamQueue import StreamQueue, Status
@@ -15,13 +15,13 @@ import time
 LOCK_REDIS_URL = os.getenv("REDIS_URL", "") + "/3"
 
 @celery_app.task(bind=True)
-def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
+def execute_nodes_task(self, topo_graph_dict: dict, user_id: int):
     """
     Celery task to execute a node graph with real-time updates via Redis Streams.
     Uses StreamQueue (sync version) to handle state reporting.
     """
-    graph_request = GraphTopoModel(**graph_request_dict)
-    project_id = graph_request.project_id
+    topo_graph = ProjectTopology(**topo_graph_dict)
+    project_id = topo_graph.project_id
     task_id = self.request.id
     
     # get db client
@@ -37,25 +37,25 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
     with StreamQueue(task_id) as queue:
         try:
             # 0. lock all rows related to this project
-            project = db_client.query(Project).filter(Project.id == project_id).first()
+            project = db_client.query(ProjectRecord).filter(ProjectRecord.id == project_id).first()
             if project is None:
                 raise ValueError("Project not found")
             if project.graph is None:
                 raise ValueError("Project graph is empty")
-            graph_data = Graph(**project.graph) # a graph obj in memory for update # type: ignore
-            db_client.query(DBData).filter(DBData.project_id == project_id).delete() # delete old data
+            graph_data = Project(**project.graph) # a graph obj in memory for update # type: ignore
+            db_client.query(NodeOutputRecord).filter(NodeOutputRecord.project_id == project_id).delete() # delete old data
             # 1. Validate data model
             graph = None
             try:
                 file_manager = FileManager()
                 cache_manager = CacheManager(project_id=project_id)
-                graph = NodeGraph(file_manager=file_manager, cache_manager=cache_manager, request=graph_request, user_id=user_id)
+                graph = ProjectExecutor(file_manager=file_manager, cache_manager=cache_manager, topology=topo_graph, user_id=user_id)
                 queue.push_message_sync(
                     Status.IN_PROGRESS, 
                     {"stage": "VALIDATION", "status": "SUCCESS"}
                 )
             except Exception as e:
-                patch = GraphPatch(
+                patch = ProjectPatch(
                             key=["error_message"], 
                             value="Validation Error:" + str(e)
                         )
@@ -79,11 +79,11 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                     {"stage": "CONSTRUCTION", "status": "SUCCESS"}
                 )
             except NodeParameterError as e:
-                node_index = graph_request.get_index_by_node_id(e.node_id)
+                node_index = topo_graph.get_index_by_node_id(e.node_id)
                 assert node_index is not None
-                patch = GraphPatch(
+                patch = ProjectPatch(
                             key=["nodes", node_index, "error"],
-                            value=NodeError(
+                            value=ProjNodeError(
                                 param=e.err_param_key, input=None, message=e.err_msg
                             ),
                         )
@@ -98,7 +98,7 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                 graph_data.apply_patch(patch)
                 return
             except Exception as e:
-                patch = GraphPatch(
+                patch = ProjectPatch(
                             key=["error_message"],
                             value="Construction Error:" + str(e)
                         )
@@ -117,9 +117,9 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
             try:
                 assert graph is not None
                 def anl_reporter(node_id: str, output_schemas: dict[str, Any]) -> None:
-                    node_index = graph_request.get_index_by_node_id(node_id)
+                    node_index = topo_graph.get_index_by_node_id(node_id)
                     assert node_index is not None
-                    patch = GraphPatch(
+                    patch = ProjectPatch(
                         key=["nodes", node_index, "schema_out"],
                         value=output_schemas
                     )
@@ -136,11 +136,11 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                 graph.static_analyse(callback=anl_reporter)
                 queue.push_message_sync(Status.IN_PROGRESS, {"stage": "STATIC_ANALYSIS", "status": "SUCCESS"})
             except NodeValidationError as e:
-                node_index = graph_request.get_index_by_node_id(e.node_id)
+                node_index = topo_graph.get_index_by_node_id(e.node_id)
                 assert node_index is not None
-                patch = GraphPatch(
+                patch = ProjectPatch(
                             key=["nodes", node_index, "error"],
-                            value=NodeError(
+                            value=ProjNodeError(
                                 param=None, input=e.err_input, message=e.err_msg
                             ),
                         )
@@ -155,7 +155,7 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                 graph_data.apply_patch(patch)
                 raise
             except Exception as e:
-                patch = GraphPatch(
+                patch = ProjectPatch(
                             key=["error_message"],
                             value="Static Analysis Error:" + str(e)
                         )
@@ -192,7 +192,7 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                     data_zips = {}
                     for port, data in output_data.items():
                         # 2. store data in database
-                        db_data = DBData(
+                        db_data = NodeOutputRecord(
                             project_id=project_id,
                             node_id=node_id,
                             port=port,
@@ -202,17 +202,17 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                         # 3. construct datazip
                         db_client.flush()
                         id_data = db_data.id
-                        data_zips[port] = DataZip(
+                        data_zips[port] = DataRef(
                             url=f"/api/project/data/{id_data}"
                         )                    
                     # 4. report to frontend
-                    node_index = graph_request.get_index_by_node_id(node_id)
+                    node_index = topo_graph.get_index_by_node_id(node_id)
                     assert node_index is not None
-                    data_patch = GraphPatch(
+                    data_patch = ProjectPatch(
                         key = ["nodes", node_index, "data_out"],
                         value = data_zips
                     )
-                    time_patch = GraphPatch(
+                    time_patch = ProjectPatch(
                         key = ["nodes", node_index, "runningtime"],
                         value = running_time
                     )
@@ -230,11 +230,11 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                 graph.execute(callbefore=exec_before_reporter, callafter=exec_after_reporter)
                 queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "SUCCESS"})
             except NodeExecutionError as e:
-                node_index = graph_request.get_index_by_node_id(e.node_id)
+                node_index = topo_graph.get_index_by_node_id(e.node_id)
                 assert node_index is not None
-                patch = GraphPatch(
+                patch = ProjectPatch(
                     key=["nodes", node_index, "error"],
-                    value=NodeError(
+                    value=ProjNodeError(
                         param=None, input=None, message=e.err_msg
                     ),
                 )
@@ -249,7 +249,7 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                 graph_data.apply_patch(patch)
                 raise
             except Exception as e:
-                patch = GraphPatch(
+                patch = ProjectPatch(
                     key=["error_message"],
                     value="Execution Error:" + str(e)
                 )

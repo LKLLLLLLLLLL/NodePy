@@ -1,13 +1,6 @@
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
-
-# from typing import TYPE_CHECKING
-# # 避免循环导入，使用 TYPE_CHECKING
-# if TYPE_CHECKING:
-#     from ...lib.FileManager import FileManagerInterface
-#     from ...lib.CacheManager import CacheManagerInterface
-
-from ...lib.FileManager import FileManager
+from server.lib.FileManager import FileManager
 
 class GlobalConfig(BaseModel):
     """
@@ -20,7 +13,7 @@ class GlobalConfig(BaseModel):
     project_id: int               # current project id
 
     model_config = {
-        "arbitrary_types_allowed": True  # 允许非 Pydantic 类型
+        "arbitrary_types_allowed": True
     }
     
     @model_validator(mode="after")

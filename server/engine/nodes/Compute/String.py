@@ -1,6 +1,7 @@
 from ..BaseNode import BaseNode, InPort, OutPort, register_node
-from ....models.exception import NodeParameterError, NodeValidationError
-from ....models.data import Data, Schema, Pattern, check_no_illegal_cols, ColType, Table, generate_default_col_name
+from server.models.exception import NodeParameterError, NodeValidationError
+from server.models.data import Table, Data
+from server.models.schema import Pattern, Schema, generate_default_col_name, check_no_illegal_cols, ColType
 import pandas as pd
 from typing import override
 

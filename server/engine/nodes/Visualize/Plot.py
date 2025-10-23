@@ -1,7 +1,12 @@
 from ..BaseNode import BaseNode, InPort, OutPort, register_node
 from typing import Literal, override
-from ....models.exception import NodeParameterError
-from ....models.data import Schema, ColType, Pattern, Data, Table
+from server.models.exception import NodeParameterError
+from server.models.data import Table, Data
+from server.models.schema import (
+    Pattern,
+    Schema,
+    ColType,
+)
 import matplotlib.pyplot as plt
 
 @register_node

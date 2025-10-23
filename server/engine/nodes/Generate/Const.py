@@ -1,7 +1,8 @@
 from ..BaseNode import InPort, OutPort, BaseNode, register_node
-from ....models.data import Schema, Data
+from server.models.data import Data
+from server.models.schema import Schema
 from typing import Literal, Optional, override
-from ....models.exception import NodeParameterError
+from server.models.exception import NodeParameterError
 
 @register_node
 class ConstNode(BaseNode):
