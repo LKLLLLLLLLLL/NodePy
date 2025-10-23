@@ -2,17 +2,21 @@ import redis.asyncio as redis
 import redis as redis_sync
 import os
 from typing import Optional, Self
+import asyncio
+import time
 
 LOCK_REDIS_URL = os.getenv("REDIS_URL", "") + "/3"
+RETRY_INTERVAL = 0.1  # seconds
 
 class ProjectLock:
     """
     This class handles project locking to prevent concurrent modifications.
     """
-    def __init__(self, project_id: int) -> None:
+    def __init__(self, project_id: int, max_block_time: float | None) -> None:
         self._async_conn: Optional[redis.Redis] = None
         self._sync_conn: Optional[redis_sync.Redis] = None
         self._project_id = project_id
+        self._max_block_time = max_block_time or float("inf")
 
     # ====================== async methods ====================== 
     async def __aenter__(self) -> Self:
@@ -49,7 +53,14 @@ class ProjectLock:
         if self._async_conn is None:
             self._async_conn = await redis.Redis.from_url(LOCK_REDIS_URL)
         lock_key = f"project_lock:{self._project_id}"
-        acquired = await self._async_conn.set(lock_key, "locked", nx=True)
+        total_wait = 0.0
+        acquired = False
+        while total_wait < self._max_block_time:  # wait up to max_block_time
+            acquired = await self._async_conn.set(lock_key, "locked", nx=True)
+            if acquired:
+                break
+            total_wait += RETRY_INTERVAL
+            await asyncio.sleep(RETRY_INTERVAL)
         if not acquired:
             raise RuntimeError(f"Project {self._project_id} is already locked.")
 
@@ -74,18 +85,6 @@ class ProjectLock:
             self._async_conn = await redis.Redis.from_url(LOCK_REDIS_URL)
         key = f"project_lock:{self._project_id}:info"
         await self._async_conn.set(key, info)
-
-    async def set_timeout_async(self, seconds: int | None) -> None:
-        """
-        Set a timeout for the lock.
-        """
-        if self._async_conn is None:
-            self._async_conn = await redis.Redis.from_url(LOCK_REDIS_URL)
-        lock_key = f"project_lock:{self._project_id}"
-        if seconds:
-            await self._async_conn.expire(lock_key, seconds)
-        else:
-            await self._async_conn.persist(lock_key)
 
     # ====================== sync methods ======================
     def __enter__(self) -> Self:
@@ -122,7 +121,14 @@ class ProjectLock:
         if self._sync_conn is None:
             self._sync_conn = redis_sync.Redis.from_url(LOCK_REDIS_URL)
         lock_key = f"project_lock:{self._project_id}"
-        acquired = self._sync_conn.set(lock_key, "locked", nx=True)
+        total_wait = 0.0
+        acquired = False
+        while total_wait < self._max_block_time:  # wait up to max_block_time
+            acquired = self._sync_conn.set(lock_key, "locked", nx=True)
+            if acquired:
+                break
+            total_wait += RETRY_INTERVAL
+            time.sleep(RETRY_INTERVAL)
         if not acquired:
             raise RuntimeError(f"Project {self._project_id} is already locked.")
     
@@ -138,15 +144,3 @@ class ProjectLock:
         # delete lock
         lock_key = f"project_lock:{self._project_id}"
         self._sync_conn.delete(lock_key)
-
-    def set_timeout_sync(self, seconds: int | None) -> None:
-        """
-        Set a timeout for the lock.
-        """
-        if self._sync_conn is None:
-            self._sync_conn = redis_sync.Redis.from_url(LOCK_REDIS_URL)
-        lock_key = f"project_lock:{self._project_id}"
-        if seconds:
-            self._sync_conn.expire(lock_key, seconds)
-        else:
-            self._sync_conn.persist(lock_key)

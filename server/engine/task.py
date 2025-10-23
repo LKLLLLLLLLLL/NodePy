@@ -30,7 +30,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
     db_client = next(get_session())
     
     # lock to prevent concurrent runs on the same project
-    with ProjectLock(project_id=project_id):
+    with ProjectLock(project_id=project_id, max_block_time=30.0):  # wait up to 30 seconds to acquire lock
         project, graph_data = None, None
         with StreamQueue(task_id) as queue:
             try:

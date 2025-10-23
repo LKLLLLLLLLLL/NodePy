@@ -102,7 +102,7 @@ async def delete_project(project_id: int) -> None:
     """
     user_id = 1 # for debug
     db_client = next(get_session())
-    async with ProjectLock(project_id=project_id):
+    async with ProjectLock(project_id=project_id, max_block_time=5.0):
         try:
             project = db_client.query(ProjectRecord).filter(ProjectRecord.id == project_id).first()
             if project is None:
@@ -132,7 +132,7 @@ async def rename_project(project_id: int, new_name: str) -> None:
     """
     user_id = 1 # for debug
     db_client = next(get_session())
-    async with ProjectLock(project_id=project_id):
+    async with ProjectLock(project_id=project_id, max_block_time=5.0):
         try:
             project = db_client.query(ProjectRecord).filter(ProjectRecord.id == project_id).first()
             if project is None:
@@ -171,7 +171,7 @@ async def sync_project(project: Project, response: Response) -> TaskResponse | N
     the returned `task_id` to subscribe to the websocket status endpoint
     `/nodes/status/{task_id}`.
     """
-    async with ProjectLock(project_id=project.project_id) as lock:
+    async with ProjectLock(project_id=project.project_id, max_block_time=5.0) as lock:
         await lock.lock_async()
         
         user_id = 1  # for debug
