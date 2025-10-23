@@ -84,6 +84,9 @@ function handlePage(page:Page){
     pageStore.setCurrentPage(page);
 }
 
+function handleOpenEditor(){
+    const newWindow = window.open('/editor', '_blank')
+}
 </script>
 
 <template>
@@ -96,6 +99,7 @@ function handlePage(page:Page){
         <div :style="{marginRight: 'auto'}">Icon</div>
         <div :style="{alignItems: 'center', display: 'flex', gap: '8px',justifyContent: 'center'}">
           <el-button @click="handleClickResult">结果</el-button>
+          <el-button @click="handleOpenEditor">编辑器</el-button>
           <RouterLink 
             :to="{path:'/File'}"
             custom
