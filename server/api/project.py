@@ -16,7 +16,7 @@ The api for nodes runing, reporting and so on,
 router = APIRouter()
 
 @router.get(
-    "/project/{project_id}", 
+    "/{project_id}", 
     status_code=200,
     responses = {
         200: {"description": "Graph retrieved successfully", "model": Project},
@@ -44,7 +44,7 @@ async def get_project(project_id: int) -> Project:
         raise HTTPException(status_code=500, detail="Internal server error")
     
 @router.post(
-    "/project/create",
+    "/create",
     status_code=201,
     responses={
         201: {"description": "Project created successfully"},
@@ -87,7 +87,7 @@ async def create_project(project_name: str) -> None:
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.delete(
-    "/project/{project_id}",
+    "/{project_id}",
     status_code=204,
     responses={
         204: {"description": "Project deleted successfully"},
@@ -116,7 +116,7 @@ async def delete_project(project_id: int) -> None:
             raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post(
-    "/project/rename",
+    "/rename",
     status_code=200,
     responses={
         200: {"description": "Project renamed successfully"},
@@ -154,7 +154,7 @@ class TaskResponse(BaseModel):
     task_id: str
 
 @router.post(
-    "/project/sync",
+    "/sync",
     status_code=202,
     responses={
         204: {"description": "No execution needed, project synced", "model": None},
@@ -230,7 +230,7 @@ async def sync_project(project: Project, response: Response) -> TaskResponse | N
             raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.websocket("/project/status/{task_id}")
+@router.websocket("/status/{task_id}")
 async def project_status(task_id: str, websocket: WebSocket) -> None:
     """
     WebSocket endpoint to stream execution status for a previously-submitted task.

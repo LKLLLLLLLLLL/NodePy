@@ -5,7 +5,7 @@ from server.models.database import get_session, ProjectRecord, NodeOutputRecord
 router = APIRouter()
 
 @router.get(
-    "/project/data/{data_id}",
+    "/{data_id}",
     status_code=200,
     responses={
         200: {"description": "Data retrieved successfully", "model": DataView},

@@ -20,7 +20,7 @@ MIME_TYPES = {
 }
 
 @router.post(
-    "/files/upload/{project_id}",
+    "/upload/{project_id}",
     status_code=201,
     responses={
         201: {"description": "File uploaded successfully", "model": File},
@@ -55,7 +55,7 @@ async def upload_file(project_id: int, node_id: str, file: UploadFile = fastapiF
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get(
-    "/files/{key}",
+    "/{key}",
     responses={
         200: {
             "description": "Binary file content",
@@ -100,7 +100,7 @@ class DeleteResponse(BaseModel):
     status: str
 
 @router.delete(
-    "/files/{key}",
+    "/{key}",
     responses={
         200: {"description": "File deleted successfully", "content": {"application/json": {"example": {"status": "success"}}}},
         403: {"description": "Forbidden - not allowed to access this file"},
@@ -127,7 +127,7 @@ async def delete_file(key: str) -> DeleteResponse:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get(
-    "/files/list",
+    "/list",
     responses={
         200: {"description": "List of files for the user", "model": UserFileList},
         404: {"description": "Not Found"},
