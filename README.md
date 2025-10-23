@@ -1,9 +1,9 @@
-<div style="display: inline-block; padding: 0px;">
-  <img src="client/public/logo.png" alt="NodePy logo" style="padding: 10px;">
+<div align="center">
+  <img src="client/public/logo.png" alt="NodePy logo" style="width: 500px">
+  <!-- <h1>NodePy</h1> -->
 </div>
 
 # NodePy
-
 NodePy 是一个基于节点的金融数据分析平台，允许用户通过可视化界面创建和执行复杂的数据处理和分析工作流。NodePy 提供了丰富的节点类型，涵盖数据导入、清洗、转换、分析和可视化等功能。
 ## 快速开始
 1. 克隆仓库
