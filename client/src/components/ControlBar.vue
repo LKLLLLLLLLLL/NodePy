@@ -97,7 +97,7 @@ function handleOpenEditor(){
     <!-- 控制栏内容 -->
     <div class="control-content">
         <div :style="{marginRight: 'auto',height: '100%',width: '140px'}">
-          <img src="../../public/logo.png" alt="Logo" :style="{height: '100%',width: '100%'}"/>
+          <img src="../../public/logo-trans.png" alt="Logo" :style="{height: '100%',width: '100%'}"/>
         </div>
         <div :style="{alignItems: 'center', display: 'flex', gap: '8px',justifyContent: 'center'}">
           <el-button @click="handleClickResult">结果</el-button>
@@ -220,7 +220,7 @@ function handleOpenEditor(){
   color: white;
   background-color: white;
   position: relative;
-  border-bottom: 1px solid #4e4e4e;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   
   .control-content {
     display: flex;
