@@ -9,6 +9,7 @@ export default ({ mode }: { mode: string }) => {
   const apiUrl = env.VITE_API_URL || 'http://localhost:8000'
 
   return defineConfig({
+    base: '/static/',
     plugins: [
       vue(),
       vueDevTools(),

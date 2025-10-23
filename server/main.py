@@ -1,9 +1,11 @@
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from server.models.database import init_database
 from pathlib import Path
 from .api import router
+import os
 
 app = FastAPI(title="NodePy API", separate_input_output_schemas=False)
 
@@ -32,4 +34,10 @@ app.include_router(router, prefix="/api")
 # In container: /nodepy/static (mapped from host client/dist via mount or COPY)
 dist_dir = Path("/nodepy/static")
 if dist_dir.exists():
-    app.mount("/", StaticFiles(directory=str(dist_dir), html=True), name="frontend")
+    app.mount("/static", StaticFiles(directory=str(dist_dir), html=True), name="frontend")
+
+# SPA fallback for all other routes
+@app.get("/{full_path:path}")
+async def spa_fallback(full_path: str):
+    index_path = os.path.join(dist_dir, "index.html")
+    return FileResponse(index_path)
