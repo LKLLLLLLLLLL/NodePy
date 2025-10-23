@@ -203,7 +203,7 @@ def execute_nodes_task(self, graph_request_dict: dict, user_id: int):
                         db_client.flush()
                         id_data = db_data.id
                         data_zips[port] = DataZip(
-                            url=f"/nodes/data/{id_data}"
+                            url=f"/api/project/data/{id_data}"
                         )                    
                     # 4. report to frontend
                     node_index = graph_request.get_index_by_node_id(node_id)

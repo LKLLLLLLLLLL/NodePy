@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from .api import router
 
-app = FastAPI(title="NodePy API")
+app = FastAPI(title="NodePy API", separate_input_output_schemas=False)
 
 # Add CORS middleware
 app.add_middleware(
