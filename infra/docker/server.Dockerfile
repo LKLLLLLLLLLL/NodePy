@@ -16,7 +16,7 @@ WORKDIR /nodepy
 # configure uv
 RUN pip install --no-cache-dir uv
 COPY pyproject.toml uv.lock ./
-RUN uv sync --no-dev
+RUN uv sync
 # copy src (in dev mode, this will be overridden by volume mount)
 # COPY server /nodepy/server
 # copy frontend build artifacts (in dev mode, /nodepy/static will be mounted)
@@ -29,7 +29,7 @@ WORKDIR /nodepy
 # configure uv
 RUN pip install --no-cache-dir uv
 COPY pyproject.toml uv.lock ./
-RUN uv sync --no-dev
+RUN uv sync
 # copy src
 COPY server /nodepy/server
 # copy frontend build artifacts produced on host into image

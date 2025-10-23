@@ -8,8 +8,10 @@ export default ({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const apiUrl = env.VITE_API_URL || 'http://localhost:8000'
 
+  const basePath = mode === 'production' ? '/static/' : '/'
+
   return defineConfig({
-    base: '/static/',
+    base: basePath,
     plugins: [
       vue(),
       vueDevTools(),
