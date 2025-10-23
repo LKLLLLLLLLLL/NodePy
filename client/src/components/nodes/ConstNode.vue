@@ -7,10 +7,9 @@
         <div class="innerContent border-radius">
             <div class="title topchild-border-radius">ConstNode</div>
             <div class="data">
-                <Handle :id="`Node${props.id}Handle`" type="source" :position="Position.Right"/>
+                <Handle id="const" type="source" :position="Position.Right"/>
                 <div class="value">
-                    <!-- <input type="text" v-model="value" class="nodrag" @input="onInput"/> -->
-                    <el-input class="input nodrag" v-model="value"/>
+                    <el-input class="input nodrag" v-model="value" @input="onInput"/>
                 </div>
                 <div class="data_type">
                     <span>data_type:</span>
@@ -85,9 +84,9 @@
             }
             .data {
                 position: relative;
-                padding: 10px 0;
+                padding: 5px 0;
                 .data_type {
-                    margin-top: 10px;
+                    margin-top: 5px;
                     display: flex;
                     justify-content: center;
                     span {

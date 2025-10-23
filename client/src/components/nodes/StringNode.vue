@@ -6,7 +6,7 @@
         <div class="innerContent border-radius">
             <div class="title topchild-border-radius">StringNode</div>
             <div class="data">
-                <Handle :id="`Node${props.id}Handle`" type="source" :position="Position.Right"/>
+                <Handle id="string" type="source" :position="Position.Right"/>
                 <input type="text" v-model="value" class="nodrag" @input="onInput"/>
             </div>
         </div>

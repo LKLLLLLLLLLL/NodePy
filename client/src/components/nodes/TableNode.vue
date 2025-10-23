@@ -6,7 +6,7 @@
         <div class="innerContent border-radius">
             <div class="title topchild-border-radius">TableNode</div>
             <div class="data">
-                <Handle :id="`Node${props.id}Handle`" type="source" :position="Position.Right"/>
+                <Handle id="table" type="source" :position="Position.Right"/>
                 渲染表格的地方
             </div>
         </div>

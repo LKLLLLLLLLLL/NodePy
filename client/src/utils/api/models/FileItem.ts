@@ -1,0 +1,24 @@
+/* generated using openapi-typescript-codegen -- do not edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+/**
+ * The file item showed in the file list.
+ */
+export type FileItem = {
+    key: string;
+    filename: string;
+    format: FileItem.format;
+    size: number;
+    uploaded_at: string;
+    project_name: string;
+};
+export namespace FileItem {
+    export enum format {
+        PNG = 'png',
+        JPG = 'jpg',
+        PDF = 'pdf',
+        CSV = 'csv',
+    }
+}
+

@@ -6,9 +6,9 @@
         <div class="innerContent border-radius">
             <div class="title topchild-border-radius">NumBinComputeNode</div>
             <div class="data">
-                <Handle :id="`Node${props.id}Handle1`" type="target" :position="Position.Left" style="top: 25%"/>
-                <Handle :id="`Node${props.id}Handle2`" type="target" :position="Position.Left" style="top: 75%"/>
-                <Handle :id="`Node${props.id}Handle3`" type="source" :position="Position.Right"/>
+                <Handle id="x" type="target" :position="Position.Left" style="top: 25%"/>
+                <Handle id="y" type="target" :position="Position.Left" style="top: 75%"/>
+                <Handle id="result" type="source" :position="Position.Right"/>
                 <div class="op">
                     <select v-model="selected_op" @change="onSelect">
                         <option v-for="item in op">{{ item }}</option>

@@ -38,8 +38,8 @@ onInit((instance) => {
 onNodesChange(changes => {
   const ARchanges = changes.filter(c => c.type === 'add' || c.type === 'remove')
   ARchanges.forEach(c => {
-    if(c.type ==='add') console.log('新增节点:', c.item.id)
-    if(c.type === 'remove') console.log('移除节点', c.id)
+    if(c.type ==='add') console.log('新增节点:', c.item)
+    if(c.type === 'remove') console.log('移除节点', c)
   })
 })
 watch(nodesData, (newValue, oldValue) => {
