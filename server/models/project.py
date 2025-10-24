@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Any
 from .data import Schema, DataRef
-from .project_topology import ProjectTopology, TopoNode, TopoEdge
+from .project_topology import WorkflowTopology, TopoNode, TopoEdge
 
 
 class ProjNodeError(BaseModel):
@@ -38,6 +38,71 @@ class ProjWorkflow(BaseModel):
 
     nodes: list[ProjNode]
     edges: list[ProjEdge]
+    
+    @classmethod
+    def get_empty_workflow(cls) -> "ProjWorkflow":
+        return cls(
+            nodes=[],
+            edges=[],
+            error_message=None,
+        )
+
+    def to_topo(self, project_id: int) -> WorkflowTopology:
+        """Convert to WorkflowTopology"""
+        topo_nodes = [TopoNode(id=node.id, type=node.type, params=node.param) for node in self.nodes]
+        topo_edges = [TopoEdge(src=edge.src, src_port=edge.src_port, tar=edge.tar, tar_port=edge.tar_port) for edge in self.edges]
+        return WorkflowTopology(
+            project_id=project_id,
+            nodes=topo_nodes,
+            edges=topo_edges,
+        )
+
+    def cleanse(self) -> "ProjWorkflow":
+        """
+        Remove unreliable data from frontend before saving to database.
+        Waiting to be overwritten by backend execution results.
+        """
+        for node in self.nodes:
+            node.schema_out = {}
+            node.data_out = {}
+            node.error = None
+            node.runningtime = None
+        self.error_message = None
+        return self
+
+    def merge_run_results_from(self, other: "ProjWorkflow") -> None:
+        """
+        Merge running results from another workflow instance.
+        Matching is done by node id.
+        """
+        other_node_map = {node.id: node for node in other.nodes}
+        for node in self.nodes:
+            if node.id in other_node_map:
+                other_node = other_node_map[node.id]
+                node.schema_out = other_node.schema_out
+                node.data_out = other_node.data_out
+                node.error = other_node.error
+                node.runningtime = other_node.runningtime
+        self.error_message = other.error_message
+
+    def apply_patch(self, patch: 'ProjectPatch') -> None:
+        """
+        Apply a patch to the workflow.
+        """
+        if patch.key[0] != "workflow":
+            return
+        workflow_key = patch.key[1:]
+        target: Any = self
+        for key in workflow_key[:-1]:
+            if isinstance(key, int):
+                target = target[key]
+            else:
+                target = getattr(target, key)
+        last_key = workflow_key[-1]
+        if isinstance(last_key, int):
+            target[last_key] = patch.value
+        else:
+            setattr(target, last_key, patch.value)
 
 class Project(BaseModel):
     """
@@ -48,27 +113,16 @@ class Project(BaseModel):
     user_id: int
 
     workflow: ProjWorkflow
-    def to_topo(self) -> ProjectTopology:
-        """Convert to ProjectTopology"""
-        topo_nodes = [TopoNode(id=node.id, type=node.type, params=node.param) for node in self.workflow.nodes]
-        topo_edges = [TopoEdge(src=edge.src, src_port=edge.src_port, tar=edge.tar, tar_port=edge.tar_port) for edge in self.workflow.edges]
-        return ProjectTopology(
-            project_id=self.project_id,
-            nodes=topo_nodes,
-            edges=topo_edges,
-        )
+    def to_topo(self) -> WorkflowTopology:
+        """Convert to WorkflowTopology"""
+        return self.workflow.to_topo(project_id=self.project_id)
 
     def cleanse(self) -> "Project":
         """
         Remove unreliable data from frontend before saving to database.
         Waiting to be overwritten by backend execution results.
         """
-        for node in self.workflow.nodes:
-            node.schema_out = {}
-            node.data_out = {}
-            node.error = None
-            node.runningtime = None
-        self.workflow.error_message = None
+        self.workflow.cleanse()
         return self
     
     def merge_run_results_from(self, other: "Project") -> None:
@@ -76,31 +130,15 @@ class Project(BaseModel):
         Merge running results from another project instance.
         Matching is done by node id.
         """
-        other_node_map = {node.id: node for node in other.workflow.nodes}
-        for node in self.workflow.nodes:
-            if node.id in other_node_map:
-                other_node = other_node_map[node.id]
-                node.schema_out = other_node.schema_out
-                node.data_out = other_node.data_out
-                node.error = other_node.error
-                node.runningtime = other_node.runningtime
-        self.workflow.error_message = other.workflow.error_message
+        self.workflow.merge_run_results_from(other.workflow)
 
     def apply_patch(self, patch: 'ProjectPatch') -> None:
         """
         Apply a patch to the project.
         """
-        target = self
-        for key in patch.key[:-1]:
-            if isinstance(key, int):
-                target = target[key]  # type: ignore
-            else:
-                target = getattr(target, key)  # type: ignore
-        last_key = patch.key[-1]
-        if isinstance(last_key, int):
-            target[last_key] = patch.value  # type: ignore
-        else:
-            setattr(target, last_key, patch.value)  # type: ignore
+        if patch.key[0] != "workflow":
+            return
+        self.workflow.apply_patch(patch)
 
 class ProjectPatch(BaseModel):
     """

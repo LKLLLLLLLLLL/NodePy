@@ -1,5 +1,5 @@
 import networkx as nx
-from server.models.project import ProjectTopology, TopoNode, TopoEdge
+from server.models.project import WorkflowTopology, TopoNode, TopoEdge
 from typing import Any, Literal, Callable
 from .nodes.BaseNode import BaseNode
 from server.models.data import Schema, Data
@@ -18,12 +18,12 @@ class ProjectExecutor:
     """
 
     def __init__(self, 
-                 topology: ProjectTopology, 
+                 topology: WorkflowTopology, 
                  file_manager: FileManager, 
                  cache_manager: CacheManager,
                  user_id: int,
                 ) -> None:
-        self._topology: ProjectTopology = topology
+        self._topology: WorkflowTopology = topology
         self._nodes: list[TopoNode] = topology.nodes
         self._edges: list[TopoEdge] = topology.edges
         self._graph: nx.MultiDiGraph = nx.MultiDiGraph()

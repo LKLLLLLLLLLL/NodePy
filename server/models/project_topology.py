@@ -16,7 +16,7 @@ class TopoEdge(BaseModel):
     tar_port: str
 
 
-class ProjectTopology(BaseModel):
+class WorkflowTopology(BaseModel):
     """
     Data structure representing a topo graph from a project.
     This class focuses on validation, analysis, and execution.
@@ -27,7 +27,7 @@ class ProjectTopology(BaseModel):
     edges: list[TopoEdge]
 
     @model_validator(mode="after")
-    def all_nodes_unique(self) -> "ProjectTopology":
+    def all_nodes_unique(self) -> "WorkflowTopology":
         """Validate all node ids are unique"""
         node_ids = [node.id for node in self.nodes]
         if len(node_ids) != len(set(node_ids)):
@@ -35,7 +35,7 @@ class ProjectTopology(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def all_edges_valid(self) -> "ProjectTopology":
+    def all_edges_valid(self) -> "WorkflowTopology":
         """Validate all edges connect valid nodes"""
         node_ids = {node.id for node in self.nodes}
         for edge in self.edges:
@@ -46,7 +46,7 @@ class ProjectTopology(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def no_multiple_edges(self) -> "ProjectTopology":
+    def no_multiple_edges(self) -> "WorkflowTopology":
         """Validate no multiple edges between same nodes and ports"""
         edge_set = set()
         for edge in self.edges:

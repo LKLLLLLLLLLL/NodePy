@@ -38,7 +38,7 @@ class ProjectRecord(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, unique=True, index=True, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    graph = Column(JSON, nullable=False)  # Serialized graph structure
+    workflow = Column(JSON, nullable=False)  # Serialized workflow structure
 
 class NodeOutputRecord(Base):
     """
@@ -109,9 +109,9 @@ def data_cleanup_trigger(conn) -> None:
         DECLARE
             node_ids TEXT[];
         BEGIN
-            -- extract all node ids from graph
+            -- extract all node ids from workflow
             SELECT ARRAY_AGG(node->>'id') INTO node_ids
-            FROM JSON_ARRAY_ELEMENTS(NEW.graph->'nodes') AS node;
+            FROM JSON_ARRAY_ELEMENTS(NEW.workflow->'nodes') AS node;
 
             -- delete data that belongs to the project and whose node_id is not in the node_ids list
             DELETE FROM data
@@ -128,7 +128,7 @@ def data_cleanup_trigger(conn) -> None:
         text("""
         DROP TRIGGER IF EXISTS cleanup_data_after_project_update ON projects;
         CREATE TRIGGER cleanup_data_after_project_update
-        AFTER UPDATE OF graph ON projects
+        AFTER UPDATE OF workflow ON projects
         FOR EACH ROW
         EXECUTE FUNCTION cleanup_data_on_project_change();
         """)
@@ -143,3 +143,23 @@ def init_database() -> None:
     with engine.connect() as conn:
         file_size_trigger(conn)
         data_cleanup_trigger(conn)
+
+class DatabaseTransaction:
+    """
+    A context manager for a database transaction.
+    Usage:
+        with DatabaseTransaction() as db:
+            ...
+    """
+    def __init__(self):
+        self.db: Session | None = None
+
+    def __enter__(self) -> Session:
+        self.db = SessionLocal()
+        return self.db
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        if self.db:
+            if exc_type is not None:
+                self.db.rollback()
+            self.db.close()

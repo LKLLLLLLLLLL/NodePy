@@ -206,5 +206,9 @@ class DataRef(BaseModel):
     A lightweight representation of output data from a node port,
     it store only the url of the data object.
     """
-
     url: str
+    @classmethod
+    def from_data_id(cls, data_id: str | int) -> "DataRef":
+        return DataRef(
+            url=f"/api/project/data/{data_id}"
+        )

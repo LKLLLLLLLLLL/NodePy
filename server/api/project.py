@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, WebSocket, Response
+from fastapi import APIRouter, HTTPException, WebSocket, Response, Depends
 from pydantic import BaseModel
 from server.models.project import Project, ProjWorkflow
 from server.engine.task import execute_project_task
@@ -7,6 +7,7 @@ from celery.app.task import Task as CeleryTask
 from typing import cast
 from server.lib.SreamQueue import StreamQueue, Status
 from server.lib.ProjectLock import ProjectLock
+from sqlalchemy.orm import Session
 import asyncio
 from server.celery import celery_app
 from server.models.exception import ProjectLockError
@@ -18,6 +19,37 @@ The api for nodes runing, reporting and so on,
 router = APIRouter()
 
 @router.get(
+    "/list",
+    status_code=200,
+    responses={
+        200: {"description": "List of projects retrieved successfully", "model": list[Project]},
+        500: {"description": "Internal server error"},
+    },
+)
+async def list_projects(db_client: Session = Depends(get_session)) -> list[Project]:
+    """
+    List all projects for the current user.
+    """
+    user_id = 1 # for debug
+    try:
+        projects = db_client.query(ProjectRecord).filter(ProjectRecord.owner_id == user_id).all()
+        result: list[Project] = []
+        for project in projects:
+            workflow = ProjWorkflow(**project.workflow) if project.workflow is not None else ProjWorkflow.get_empty_workflow() # type: ignore
+            result.append(
+                Project(
+                    project_name=project.name, # type: ignore
+                    project_id=project.id,     # type: ignore
+                    user_id=project.owner_id,  # type: ignore
+                    workflow=workflow,
+                )
+            )
+        return result
+    except Exception as e:
+        logger.exception(f"Error listing projects for user {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+@router.get(
     "/{project_id}", 
     status_code=200,
     responses = {
@@ -27,21 +59,27 @@ router = APIRouter()
         500: {"description": "Internal server error"},
     }
 )
-async def get_project(project_id: int) -> Project:
+async def get_project(project_id: int, db_client: Session = Depends(get_session)) -> Project:
     """
     Get the full data structure of a project.
     """
     user_id = 1 # for debug
-    db_client = next(get_session())
     try:
         project = db_client.query(ProjectRecord).filter(ProjectRecord.id == project_id).first()
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found")
         if project.owner_id != user_id: # type: ignore
             raise HTTPException(status_code=403, detail="User has no access to this project")
-        if project.graph is None:
-            raise HTTPException(status_code=404, detail="Graph not found")
-        return Project.model_validate(project.graph)
+        if project.workflow is None:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+        workflow = ProjWorkflow(**project.workflow) # type: ignore
+        project = Project(
+            project_name=project.name, # type: ignore
+            project_id=project.id,     # type: ignore
+            user_id=project.owner_id,  # type: ignore
+            workflow=workflow,
+        )
+        return project
     except Exception as e:
         logger.exception(f"Error getting project {project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
@@ -56,40 +94,35 @@ async def get_project(project_id: int) -> Project:
         500: {"description": "Internal server error"},
     },
 )
-async def create_project(project_name: str) -> None:
+async def create_project(project_name: str, db_client: Session = Depends(get_session)) -> int:
     """
     Create a new project for a user.
+    Return project id.
     """
     user_id = 1 # for debug
-    db_client = next(get_session())
-    # 1. check if user exists
-    user = db_client.query(UserRecord).filter_by(id=user_id).first()
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    # 2. check if project name already exists
-    existing_project = db_client.query(ProjectRecord).filter_by(name=project_name).first()
-    if existing_project is not None:
-        raise HTTPException(status_code=400, detail="Project name already exists")
     try:
+        # 1. check if user exists
+        user = db_client.query(UserRecord).filter_by(id=user_id).first()
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        # 2. check if project name already exists
+        existing_project = db_client.query(ProjectRecord).filter_by(name=project_name).first()
+        if existing_project is not None:
+            raise HTTPException(status_code=400, detail="Project name already exists")
         new_project = ProjectRecord(
             name=project_name,
             owner_id=user_id,
-            graph=Project(
-                project_name=project_name,
-                project_id=0, # will be set after insert
-                user_id=user_id,
-                workflow=ProjWorkflow(
-                    error_message=None,
-                    nodes=[],
-                    edges=[],
-                ),
-            ).model_dump(), # type: ignore
+            workflow=ProjWorkflow.get_empty_workflow().model_dump()
         )
         db_client.add(new_project)
         db_client.commit()
         db_client.refresh(new_project)
-        return
+        return new_project.id  # type: ignore
+    except HTTPException:
+        db_client.rollback()
+        raise
     except Exception as e:
+        db_client.rollback()
         logger.exception(f"Error creating project '{project_name}': {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
@@ -104,12 +137,11 @@ async def create_project(project_name: str) -> None:
         500: {"description": "Internal server error"},
     },
 )
-async def delete_project(project_id: int) -> None:
+async def delete_project(project_id: int, db_client: Session = Depends(get_session)) -> None:
     """
     Delete a project.
     """
     user_id = 1 # for debug
-    db_client = next(get_session())
     try:
         async with ProjectLock(project_id=project_id, max_block_time=5.0, identity=None):
             project = db_client.query(ProjectRecord).filter(ProjectRecord.id == project_id).first()
@@ -121,8 +153,10 @@ async def delete_project(project_id: int) -> None:
             db_client.commit()
             return
     except ProjectLockError:
+        db_client.rollback()
         raise HTTPException(status_code=423, detail="Project is locked, it may be being edited by another process")
     except Exception as e:
+        db_client.rollback()
         logger.exception(f"Error deleting project {project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
@@ -138,12 +172,11 @@ async def delete_project(project_id: int) -> None:
         500: {"description": "Internal server error"},
     },
 )
-async def rename_project(project_id: int, new_name: str) -> None:
+async def rename_project(project_id: int, new_name: str, db_client: Session = Depends(get_session)) -> None:
     """
     Rename a project.
     """
     user_id = 1 # for debug
-    db_client = next(get_session())
     try:
         async with ProjectLock(project_id=project_id, max_block_time=5.0, identity=None):
             project = db_client.query(ProjectRecord).filter(ProjectRecord.id == project_id).first()
@@ -159,8 +192,10 @@ async def rename_project(project_id: int, new_name: str) -> None:
             db_client.commit()
             return
     except ProjectLockError:
+        db_client.rollback()
         raise HTTPException(status_code=423, detail="Project is locked, it may be being edited by another process")
     except Exception as e:
+        db_client.rollback()
         logger.exception(f"Error renaming project {project_id} to '{new_name}': {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
@@ -180,23 +215,21 @@ class TaskResponse(BaseModel):
         500: {"description": "Internal server error"},
     },
 )
-async def sync_project(project: Project, response: Response) -> TaskResponse | None:
+async def sync_project(project: Project, response: Response, db_client: Session = Depends(get_session)) -> TaskResponse | None:
     """
     Save a project to the database, if topology changed, enqueue a task to execute it.
     If decide to execute, enqueues a Celery task. Use
     the returned `task_id` to subscribe to the websocket status endpoint
     `/nodes/status/{task_id}`.
     """
+    user_id = 1  # for debug
+    project_id = project.project_id
+    new_project = project
     try:
-        async with ProjectLock(project_id=project.project_id, max_block_time=5.0, identity=None) as lock:
-            
-            user_id = 1  # for debug
-            project_id = project.project_id
-            db_client = next(get_session())
-            
+        async with ProjectLock(project_id=project.project_id, max_block_time=5.0, identity=None) as lock:            
             need_exec: bool = True
             try:
-                # 1. get project graph in db first
+                # 1. get project workflow in db first
                 project_record = db_client.query(ProjectRecord).filter(ProjectRecord.id == project_id).first()
                 if project_record is None:
                     raise HTTPException(status_code=404, detail="Project not found")
@@ -205,28 +238,33 @@ async def sync_project(project: Project, response: Response) -> TaskResponse | N
                 if project_record.owner_id != user_id: # type: ignore
                     raise HTTPException(status_code=403, detail="User has no access to this project")
                 
-                # 3. compare the compare the topo model to decide whether to run
-                graph_topo = project.to_topo()
-                if project_record.graph is not None:
-                    existing_graph = Project.model_validate(project_record.graph)
-                    existing_topo = existing_graph.to_topo()
-                    if existing_topo == graph_topo:
+                # 3. get old project object
+                if project_record.workflow is None:
+                    raise HTTPException(status_code=404, detail="Project.Workflow not found")
+                old_project = Project(
+                    project_name=project_record.name, # type: ignore
+                    project_id=project_record.id,     # type: ignore
+                    user_id=project_record.owner_id,  # type: ignore
+                    workflow=ProjWorkflow(**project_record.workflow) # type: ignore
+                )
+
+                # 4. compare the compare the topo model to decide whether to run
+                new_topo = new_project.to_topo()
+                if project_record.workflow is not None:
+                    old_topo = old_project.workflow.to_topo(project_id=project_id)
+                    if old_topo == new_topo:
                         need_exec = False
 
-                # 4. save graph to db
+                # 5. save workflow to db
                 # get the project without running results
-                clean_graph = project.cleanse() # type: ignore
                 if not need_exec:
-                    # merge old running results to the new graph
-                    if project_record.graph is not None:
-                        existing_graph = Project.model_validate(project_record.graph)
-                        clean_graph.merge_run_results_from(existing_graph)
-                        project_record.graph = clean_graph.model_dump() # type: ignore
-                    else:
-                        project_record.graph = clean_graph.model_dump() # type: ignore
+                    # merge old running results to the new workflow
+                    new_project.merge_run_results_from(old_project)
+                    project_record.workflow = new_project.workflow.model_dump() # type: ignore
                 else:
-                    # only save the cleansed graph, running results will be updated after execution
-                    project_record.graph = clean_graph.model_dump() # type: ignore
+                    # only save the cleansed workflow, running results will be updated after execution
+                    new_project.cleanse()
+                    project_record.workflow = new_project.workflow.model_dump() # type: ignore
             finally:
                 db_client.commit()
 
@@ -236,15 +274,17 @@ async def sync_project(project: Project, response: Response) -> TaskResponse | N
             
             celery_task = cast(CeleryTask, execute_project_task)  # to suppress type checker error
             task = celery_task.delay(  # the return message will be sent back via streamqueue
-                topo_graph_dict=graph_topo.model_dump(),
+                topo_graph_dict=new_topo.model_dump(),
                 user_id=user_id,
             )
             response.status_code = 202  # Accepted
             await lock.appoint_transfer_async(task.id)
             return TaskResponse(task_id=task.id)
     except ProjectLockError:
+        db_client.rollback()
         raise HTTPException(status_code=423, detail="Project is locked, it may be being edited by another process")
     except Exception as e:
+        db_client.rollback()
         logger.exception(f"Error syncing project {project.project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
