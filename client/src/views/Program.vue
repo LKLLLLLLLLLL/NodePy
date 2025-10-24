@@ -1,14 +1,45 @@
 <script lang="ts" setup>
     import ProjectDemoFrame from '@/components/ProjectDemoFrame.vue';
-    function handleClick(){
+    import AddProject from './AddProject.vue';
+    import { ref } from 'vue';
+    import { DefaultService } from '../utils/api/services/DefaultService';
+    import { useModalStore } from '@/stores/modalStore';
+    import { useProjectStore } from '@/stores/projectStore';
 
+    const modalStore = useModalStore();
+    const projectStore = useProjectStore();
+
+    function openAddProjectModal(){
+        const modalWidth = 400;
+        const modalHeight = 600;
+        modalStore.createModal({
+            id: 'add-project',
+            title: 'Create New Project',
+            isActive: true,
+            isDraggable: true,
+            isResizable: false,
+            component: AddProject,
+            size: {
+                width: modalWidth,
+                height: modalHeight
+            },
+            position: {
+                x: (window.innerWidth - modalWidth) / 2,
+                y: (window.innerHeight - modalHeight) / 2
+            }
+        });
+    }
+
+    function handleClick(){
+        openAddProjectModal();
+        // handleAdd();
     }
 
     function handleAdd(){
-
+        console.log("Adding new project...");
     }
 
-    const ids = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'];
+    const ids = ['1'];
 
 </script>
 

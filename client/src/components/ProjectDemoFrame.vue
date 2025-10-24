@@ -1,16 +1,16 @@
 <script lang="ts" setup>
     import { Plus } from '@element-plus/icons-vue';
     const props = defineProps<{
-        handleClick: () => void
+        handleClick: (name?: string) => void,
         id?: string
     }>()
 </script>
 <template>
     <div class="project-demo-frame">
         <slot>
-            <div class="default-content">
+            <div class="default-content"
+                @click="props.handleClick()">
                 <el-icon 
-                    @click="props.handleClick"
                     :size="60" 
                     color="grey"
                 >

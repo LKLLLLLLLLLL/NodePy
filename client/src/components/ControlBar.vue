@@ -3,13 +3,16 @@ import { ref, computed } from 'vue'
 import { nodeMenuItems } from '@/types/menuTypes'
 import { useGraphStore } from '@/stores/graphStore'
 import {useModalStore} from "@/stores/modalStore";
+import { useProjectStore } from '@/stores/projectStore';
 import { usePageStore, type Page} from '@/stores/pageStore';
 import { Avatar, User } from '@element-plus/icons-vue'
 import { RouterLink } from 'vue-router';
+import { ElMessage } from 'element-plus';
 
 const pageStore = usePageStore()
 const graphStore = useGraphStore()
 const modalStore = useModalStore()
+const projectStore = useProjectStore()
 
 const { addNode } = graphStore
 
@@ -63,6 +66,14 @@ const handleNodeSelect = (nodeType: string) => {
 }
 
 function handleClickResult(){
+    const marginRight = 20; // 距离右侧的间距
+    const modalWidth = 600; // 弹窗宽度
+    const modalHeight = 800; // 弹窗高度
+    
+    // 计算位置：窗口宽度 - 弹窗宽度 - 右侧间距
+    const xPosition = window.innerWidth - modalWidth - marginRight;
+    const yPosition = (window.innerHeight - modalHeight)/2; 
+
     modalStore.createModal({
         id: 'result',
         title: '结果查看',
@@ -70,12 +81,12 @@ function handleClickResult(){
         isDraggable: true,
         isResizable: false,
         position:{
-            x: 100,
-            y: 100
+            x: xPosition,
+            y: yPosition
         },
         size: {
-            width: 600,
-            height: 400
+            width: modalWidth,
+            height: modalHeight
         },
     })
 }
@@ -87,6 +98,13 @@ function handlePage(page:Page){
 function handleOpenEditor(){
     const newWindow = window.open('/editor', '_blank')
 }
+
+function handleNewProject(){
+    projectStore.createProject();
+    handleOpenEditor();
+    ElMessage('项目' + projectStore.currentProjectName + '创建成功');
+}
+
 </script>
 
 <template>
@@ -96,12 +114,13 @@ function handleOpenEditor(){
   >
     <!-- 控制栏内容 -->
     <div class="control-content">
-        <div :style="{marginRight: 'auto',height: '100%',width: '140px'}">
+        <div :style="{marginRight: 'auto',marginLeft: '15px', height: '90%'}">
           <img src="../../public/logo-trans.png" alt="Logo" :style="{height: '100%',width: '100%'}"/>
         </div>
         <div :style="{alignItems: 'center', display: 'flex', gap: '8px',justifyContent: 'center'}">
           <el-button @click="handleClickResult">结果</el-button>
           <el-button @click="handleOpenEditor">编辑器</el-button>
+          <el-button @click="handleNewProject">新建项目</el-button>
           <RouterLink 
             :to="{path:'/File'}"
             custom
@@ -220,7 +239,7 @@ function handleOpenEditor(){
   color: white;
   background-color: white;
   position: relative;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   
   .control-content {
     display: flex;

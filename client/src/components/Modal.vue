@@ -195,7 +195,7 @@
                 <el-button 
                     @click = "closeModal"
                     :style="{height: '100%',width: 'max(60px, 10%)',borderRadius: '16px'}"
-                    type="primary"
+                    
                     :icon="Close"
                 >
                 </el-button>
@@ -221,7 +221,8 @@
         position: fixed;
         display: flex;
         flex-direction: column;
-        background-color: rgb(46, 130, 165);
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         color: black;
         border-radius: 16px;
     }
