@@ -84,7 +84,7 @@ class Project(BaseModel):
                 node.data_out = other_node.data_out
                 node.error = other_node.error
                 node.runningtime = other_node.runningtime
-        self.error_message = other.error_message
+        self.workflow.error_message = other.workflow.error_message
 
     def apply_patch(self, patch: 'ProjectPatch') -> None:
         """

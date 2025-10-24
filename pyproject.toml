@@ -19,6 +19,7 @@ dependencies = [
     "websockets>=15.0.1",
     "minio>=7.2.18",
     "python-multipart>=0.0.20",
+    "loguru>=0.7.3",
 ]
 
 [dependency-groups]

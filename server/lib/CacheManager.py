@@ -36,25 +36,28 @@ class CacheManager:
         signature = hashlib.sha256(param_hash.encode() + input_hash.encode()).hexdigest()
         return f"cache:proj_{project_id}:{node_id}:{signature}"
 
-    def get(self, node_id: str, params: dict[str, Any], inputs: dict[str, Data]) -> dict[str, Data] | None:
+    def get(self, node_id: str, params: dict[str, Any], inputs: dict[str, Data]) -> tuple[dict[str, Data], float] | None:
         """Get cached result for a node with given parameters and inputs. Return None if not found."""
         cache_key = CacheManager._get_cache_key(self.project_id, node_id, params, inputs)
-
         cached_value = self.redis_client.get(cache_key)
         if cached_value is not None:
             assert isinstance(cached_value, str)
-            cache_value = json.loads(cached_value)
+            cache_data = json.loads(cached_value)
+            outputs_dict = cache_data[0]
+            running_time = cache_data[1]
             result: dict[str, Data] = {}
-            for key, data_dict in cache_value.items():
+            for key, data_dict in outputs_dict.items():
                 result[key] = Data.from_view(DataView.from_dict(data_dict))
-            return result
+            return result, running_time
+
         return None
-    
-    def set(self, node_id: str, params: dict[str, Any], inputs: dict[str, Data], outputs: dict[str, Data]) -> None:
+
+    def set(self, node_id: str, params: dict[str, Any], inputs: dict[str, Data], outputs: dict[str, Data], running_time: float) -> None:
         """Set cached result for a node with given parameters and inputs."""
         cache_key = CacheManager._get_cache_key(self.project_id, node_id, params, inputs)
-        cache_value: dict[str, dict[str, Any]] = {}
+        outputs_dict = {}
         for key, data in outputs.items():
-            cache_value[key] = data.to_view().to_dict()
+            outputs_dict[key] = data.to_view().to_dict()
+        cache_value = [outputs_dict, running_time]
         self.redis_client.set(cache_key, json.dumps(cache_value))
         self.redis_client.expire(cache_key, CACHE_TTL_SECONDS)

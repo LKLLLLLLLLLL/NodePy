@@ -9,7 +9,6 @@ from .executer import ProjectExecutor
 from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
 from typing import Any
 from server.lib.SreamQueue import StreamQueue, Status
-import time
 from celery.exceptions import SoftTimeLimitExceeded
 
 @celery_app.task(
@@ -54,7 +53,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     )
                 except Exception as e:
                     patch = ProjectPatch(
-                                key=["error_message"], 
+                                key=["workflow", "error_message"], 
                                 value="Validation Error:" + str(e)
                             )
                     queue.push_message_sync(
@@ -80,7 +79,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     node_index = topo_graph.get_index_by_node_id(e.node_id)
                     assert node_index is not None
                     patch = ProjectPatch(
-                                key=["nodes", node_index, "error"],
+                                key=["workflow", "nodes", node_index, "error"],
                                 value=ProjNodeError(
                                     param=e.err_param_key, input=None, message=e.err_msg
                                 ),
@@ -97,7 +96,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     return
                 except Exception as e:
                     patch = ProjectPatch(
-                                key=["error_message"],
+                                key=["workflow", "error_message"],
                                 value="Construction Error:" + str(e)
                             )
                     queue.push_message_sync(
@@ -118,7 +117,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                         node_index = topo_graph.get_index_by_node_id(node_id)
                         assert node_index is not None
                         patch = ProjectPatch(
-                            key=["nodes", node_index, "schema_out"],
+                            key=["workflow", "nodes", node_index, "schema_out"],
                             value=output_schemas
                         )
                         queue.push_message_sync(
@@ -137,7 +136,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     node_index = topo_graph.get_index_by_node_id(e.node_id)
                     assert node_index is not None
                     patch = ProjectPatch(
-                                key=["nodes", node_index, "error"],
+                                key=["workflow", "nodes", node_index, "error"],
                                 value=ProjNodeError(
                                     param=None, input=e.err_input, message=e.err_msg
                                 ),
@@ -154,7 +153,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     raise
                 except Exception as e:
                     patch = ProjectPatch(
-                                key=["error_message"],
+                                key=["workflow", "error_message"],
                                 value="Static Analysis Error:" + str(e)
                             )
                     queue.push_message_sync(
@@ -171,7 +170,6 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                 # 4. Execute graph
                 try:
                     assert graph is not None
-                    timers: dict[str, float] = {}
                     def exec_before_reporter(node_id: str) -> None: # for timer in frontend
                         meta = {
                             "stage": "EXECUTION",
@@ -180,16 +178,11 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             "timer": "start"
                         }
                         queue.push_message_sync(Status.IN_PROGRESS, meta)
-                        timers[node_id] = time.perf_counter()
-                        
-                    def exec_after_reporter(node_id: str, output_data: dict[str, Data]) -> None:
-                        # 1. get running time
-                        end_time = time.perf_counter()
-                        running_time = (end_time - timers[node_id]) * 1000  # in ms
-                        
+
+                    def exec_after_reporter(node_id: str, output_data: dict[str, Data], running_time: float) -> None:                      
                         data_zips = {}
                         for port, data in output_data.items():
-                            # 2. store data in database
+                            # 1. store data in database
                             db_data = NodeOutputRecord(
                                 project_id=project_id,
                                 node_id=node_id,
@@ -197,21 +190,21 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                                 data=data.to_view().to_dict()
                             )
                             db_client.add(db_data)
-                            # 3. construct datazip
+                            # 2. construct datazip
                             db_client.flush()
                             id_data = db_data.id
                             data_zips[port] = DataRef(
                                 url=f"/api/project/data/{id_data}"
                             )                    
-                        # 4. report to frontend
+                        # 3. report to frontend
                         node_index = topo_graph.get_index_by_node_id(node_id)
                         assert node_index is not None
                         data_patch = ProjectPatch(
-                            key = ["nodes", node_index, "data_out"],
+                            key = ["workflow", "nodes", node_index, "data_out"],
                             value = data_zips
                         )
                         time_patch = ProjectPatch(
-                            key = ["nodes", node_index, "runningtime"],
+                            key = ["workflow", "nodes", node_index, "runningtime"],
                             value = running_time
                         )
                         meta = {
@@ -233,7 +226,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     node_index = topo_graph.get_index_by_node_id(e.node_id)
                     assert node_index is not None
                     patch = ProjectPatch(
-                        key=["nodes", node_index, "error"],
+                        key=["workflow", "nodes", node_index, "error"],
                         value=ProjNodeError(
                             param=None, input=None, message=e.err_msg
                         ),
@@ -250,7 +243,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     raise
                 except Exception as e:
                     patch = ProjectPatch(
-                        key=["error_message"],
+                        key=["workflow", "error_message"],
                         value="Execution Error:" + str(e)
                     )
                     queue.push_message_sync(
@@ -269,7 +262,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
 
             except SoftTimeLimitExceeded:
                 patch = ProjectPatch(
-                    key=["error_message"],
+                    key=["workflow", "error_message"],
                     value="Execution Error: Task timed out."
                 )
                 if graph_data:

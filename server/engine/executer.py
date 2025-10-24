@@ -6,7 +6,7 @@ from server.models.data import Schema, Data
 from .nodes.config import GlobalConfig
 from server.lib.CacheManager import CacheManager
 from server.lib.FileManager import FileManager
-
+import time
 
 """
 Graph classes to analyze and execute node graphs.
@@ -98,7 +98,7 @@ class ProjectExecutor:
         self._stage = "static_analyzed"
         return
 
-    def execute(self, callbefore: Callable[[str], None], callafter: Callable[[str, dict[str, Any]], None]) -> None:
+    def execute(self, callbefore: Callable[[str], None], callafter: Callable[[str, dict[str, Any], float], None]) -> None:
         """ Execute the graph in topological order """
         if self._stage != "static_analyzed":
             raise AssertionError(f"Graph is in stage '{self._stage}', cannot run.")
@@ -118,18 +118,24 @@ class ProjectExecutor:
                 input_data[tar_port] = src_data
 
             # 2. search cache
-            output_data = self.cache_manager.get(
+            cache_data = self.cache_manager.get(
                 node_id=node_id,
                 params=self._node_map[node_id].params,
                 inputs=input_data,
             )
 
             # 3. execute node if cache miss
-            if output_data is None:
+            output_data: dict[str, Data]
+            running_time: float
+            if cache_data is None:
                 # call callbefore, only when cache miss
                 callbefore(node_id)
                 # run node
+                start_time = time.perf_counter()
                 output_data = node.execute(input_data)
+                running_time = (time.perf_counter() - start_time) * 1000  # in ms
+            else:
+                output_data, running_time = cache_data
 
             # 4. store output data to self cache
             for tar_port, data in output_data.items():
@@ -138,7 +144,7 @@ class ProjectExecutor:
                 data_cache[(node_id, tar_port)] = data
 
             # 5. call callafter
-            callafter(node_id, output_data)
+            callafter(node_id, output_data, running_time)
             
             # 6. store to CacheManager
             if output_data is not None:
@@ -147,6 +153,7 @@ class ProjectExecutor:
                     params=self._node_map[node_id].params,
                     inputs=input_data,
                     outputs=output_data,
+                    running_time=running_time,
                 )
         self._stage = "finished"
         return

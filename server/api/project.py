@@ -10,6 +10,7 @@ from server.lib.ProjectLock import ProjectLock
 import asyncio
 from server.celery import celery_app
 from server.models.exception import ProjectLockError
+from loguru import logger
 
 """
 The api for nodes runing, reporting and so on,
@@ -42,6 +43,7 @@ async def get_project(project_id: int) -> Project:
             raise HTTPException(status_code=404, detail="Graph not found")
         return Project.model_validate(project.graph)
     except Exception as e:
+        logger.exception(f"Error getting project {project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.post(
@@ -88,6 +90,7 @@ async def create_project(project_name: str) -> None:
         db_client.refresh(new_project)
         return
     except Exception as e:
+        logger.exception(f"Error creating project '{project_name}': {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.delete(
@@ -120,6 +123,7 @@ async def delete_project(project_id: int) -> None:
     except ProjectLockError:
         raise HTTPException(status_code=423, detail="Project is locked, it may be being edited by another process")
     except Exception as e:
+        logger.exception(f"Error deleting project {project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.post(
@@ -157,6 +161,7 @@ async def rename_project(project_id: int, new_name: str) -> None:
     except ProjectLockError:
         raise HTTPException(status_code=423, detail="Project is locked, it may be being edited by another process")
     except Exception as e:
+        logger.exception(f"Error renaming project {project_id} to '{new_name}': {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 class TaskResponse(BaseModel):
@@ -209,9 +214,9 @@ async def sync_project(project: Project, response: Response) -> TaskResponse | N
                         need_exec = False
 
                 # 4. save graph to db
-                if need_exec:
-                    # cleanse the graph before saving
-                    clean_graph = project.cleanse() # type: ignore
+                # get the project without running results
+                clean_graph = project.cleanse() # type: ignore
+                if not need_exec:
                     # merge old running results to the new graph
                     if project_record.graph is not None:
                         existing_graph = Project.model_validate(project_record.graph)
@@ -220,7 +225,8 @@ async def sync_project(project: Project, response: Response) -> TaskResponse | N
                     else:
                         project_record.graph = clean_graph.model_dump() # type: ignore
                 else:
-                    project_record.graph = project.model_dump() # type: ignore
+                    # only save the cleansed graph, running results will be updated after execution
+                    project_record.graph = clean_graph.model_dump() # type: ignore
             finally:
                 db_client.commit()
 
@@ -239,6 +245,7 @@ async def sync_project(project: Project, response: Response) -> TaskResponse | N
     except ProjectLockError:
         raise HTTPException(status_code=423, detail="Project is locked, it may be being edited by another process")
     except Exception as e:
+        logger.exception(f"Error syncing project {project.project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
@@ -327,6 +334,7 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
                         await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")
                         break
     except Exception as e:
+        logger.exception(f"Error processing websocket for task {task_id}: {e}")
         try:
             await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")
         except Exception:
