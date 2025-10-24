@@ -33,6 +33,12 @@ class ProjEdge(BaseModel):
     tar: str
     tar_port: str
 
+class ProjWorkflow(BaseModel):
+    error_message: str | None = None # global error
+
+    nodes: list[ProjNode]
+    edges: list[ProjEdge]
+
 class Project(BaseModel):
     """
     A unified data structure for all data for a project.
@@ -40,16 +46,12 @@ class Project(BaseModel):
     project_name: str
     project_id: int
     user_id: int
-    
-    error_message: str | None = None # global error
 
-    nodes: list[ProjNode]
-    edges: list[ProjEdge]
-
+    workflow: ProjWorkflow
     def to_topo(self) -> ProjectTopology:
         """Convert to ProjectTopology"""
-        topo_nodes = [TopoNode(id=node.id, type=node.type, params=node.param) for node in self.nodes]
-        topo_edges = [TopoEdge(src=edge.src, src_port=edge.src_port, tar=edge.tar, tar_port=edge.tar_port) for edge in self.edges]
+        topo_nodes = [TopoNode(id=node.id, type=node.type, params=node.param) for node in self.workflow.nodes]
+        topo_edges = [TopoEdge(src=edge.src, src_port=edge.src_port, tar=edge.tar, tar_port=edge.tar_port) for edge in self.workflow.edges]
         return ProjectTopology(
             project_id=self.project_id,
             nodes=topo_nodes,
@@ -61,12 +63,12 @@ class Project(BaseModel):
         Remove unreliable data from frontend before saving to database.
         Waiting to be overwritten by backend execution results.
         """
-        for node in self.nodes:
+        for node in self.workflow.nodes:
             node.schema_out = {}
             node.data_out = {}
             node.error = None
             node.runningtime = None
-        self.error_message = None
+        self.workflow.error_message = None
         return self
     
     def merge_run_results_from(self, other: "Project") -> None:
@@ -74,8 +76,8 @@ class Project(BaseModel):
         Merge running results from another project instance.
         Matching is done by node id.
         """
-        other_node_map = {node.id: node for node in other.nodes}
-        for node in self.nodes:
+        other_node_map = {node.id: node for node in other.workflow.nodes}
+        for node in self.workflow.nodes:
             if node.id in other_node_map:
                 other_node = other_node_map[node.id]
                 node.schema_out = other_node.schema_out

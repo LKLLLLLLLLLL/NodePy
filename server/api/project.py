@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, WebSocket, Response
 from pydantic import BaseModel
-from server.models.project import Project
+from server.models.project import Project, ProjWorkflow
 from server.engine.task import execute_project_task
 from server.models.database import get_session, ProjectRecord, UserRecord
 from celery.app.task import Task as CeleryTask
@@ -75,8 +75,11 @@ async def create_project(project_name: str) -> None:
                 project_name=project_name,
                 project_id=0, # will be set after insert
                 user_id=user_id,
-                nodes=[],
-                edges=[],
+                workflow=ProjWorkflow(
+                    error_message=None,
+                    nodes=[],
+                    edges=[],
+                ),
             ).model_dump(), # type: ignore
         )
         db_client.add(new_project)
