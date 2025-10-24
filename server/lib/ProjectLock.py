@@ -4,18 +4,25 @@ import os
 from typing import Optional, Self
 import asyncio
 import time
+from server.models.exception import ProjectLockError
 
 LOCK_REDIS_URL = os.getenv("REDIS_URL", "") + "/3"
 RETRY_INTERVAL = 0.1  # seconds
+APPOINTED_LOCK_EXPIRY = 60  # seconds
 
 class ProjectLock:
     """
     This class handles project locking to prevent concurrent modifications.
     """
-    def __init__(self, project_id: int, max_block_time: float | None) -> None:
+    def __init__(self, project_id: int, identity: str | None, max_block_time: float | None) -> None:
+        """
+        If max_block_time is None, wait indefinitely.
+        If identity is provided, you will get the lock first to the identity-satisfied lock releaser.
+        """
         self._async_conn: Optional[redis.Redis] = None
         self._sync_conn: Optional[redis_sync.Redis] = None
         self._project_id = project_id
+        self._identity = identity
         self._max_block_time = max_block_time or float("inf")
 
     # ====================== async methods ====================== 
@@ -37,14 +44,10 @@ class ProjectLock:
 
     @staticmethod
     async def is_locked_async(project_id: int) -> bool:
-        """
-        Check if the project is locked.
-        """
-        if ProjectLock._async_conn is None:
-            ProjectLock._async_conn = await redis.Redis.from_url(LOCK_REDIS_URL)
-        lock_key = f"project_lock:{project_id}"
-        exists = await ProjectLock._async_conn.exists(lock_key)
-        return exists == 1
+        async with redis.Redis.from_url(LOCK_REDIS_URL) as conn:
+            lock_key = f"project_lock:{project_id}"
+            exists = await conn.exists(lock_key)
+            return exists == 1
     
     async def lock_async(self) -> None:
         """
@@ -53,16 +56,36 @@ class ProjectLock:
         if self._async_conn is None:
             self._async_conn = await redis.Redis.from_url(LOCK_REDIS_URL)
         lock_key = f"project_lock:{self._project_id}"
+        identity_key = f"project_lock:{self._project_id}:appointed"
         total_wait = 0.0
         acquired = False
+        identity = None
         while total_wait < self._max_block_time:  # wait up to max_block_time
-            acquired = await self._async_conn.set(lock_key, "locked", nx=True)
-            if acquired:
-                break
+            # operations below implement a atomic checking identity and setting a lock 
+            # with optimistic locking
+            await self._async_conn.watch(identity_key)
+            identity = await self._async_conn.get(identity_key)
+            if identity is not None:
+                if self._identity is None or identity.decode() != self._identity:  # type: ignore
+                    await self._async_conn.unwatch()
+                    await asyncio.sleep(RETRY_INTERVAL)
+                    total_wait += RETRY_INTERVAL
+                    continue  # wait for appointed identity to acquire the lock
+            async with self._async_conn.pipeline() as pipe:
+                pipe.multi()
+                pipe.set(lock_key, "locked", nx=True)
+                results = await pipe.execute()
+                if results and results[0]:
+                    acquired = True
+                    break
             total_wait += RETRY_INTERVAL
             await asyncio.sleep(RETRY_INTERVAL)
         if not acquired:
-            raise RuntimeError(f"Project {self._project_id} is already locked.")
+            raise ProjectLockError(f"Project {self._project_id} is already locked.")
+        if identity is not None:
+            # clear appointed identity after acquiring the lock
+            identity_key = f"project_lock:{self._project_id}:appointed"
+            await self._async_conn.delete(identity_key)
 
     async def release_async(self) -> None:
         """
@@ -85,6 +108,15 @@ class ProjectLock:
             self._async_conn = await redis.Redis.from_url(LOCK_REDIS_URL)
         key = f"project_lock:{self._project_id}:info"
         await self._async_conn.set(key, info)
+    
+    async def appoint_transfer_async(self, identity: str) -> None:
+        """
+        Appoint a specific identity to transfer the lock.
+        """
+        if self._async_conn is None:
+            self._async_conn = await redis.Redis.from_url(LOCK_REDIS_URL)
+        key = f"project_lock:{self._project_id}:appointed"
+        await self._async_conn.set(key, identity, ex=APPOINTED_LOCK_EXPIRY)
 
     # ====================== sync methods ======================
     def __enter__(self) -> Self:
@@ -105,14 +137,10 @@ class ProjectLock:
     
     @staticmethod
     def is_locked_sync(project_id: int) -> bool:
-        """
-        Check if the project is locked.
-        """
-        if ProjectLock._sync_conn is None:
-            ProjectLock._sync_conn = redis_sync.Redis.from_url(LOCK_REDIS_URL)
-        lock_key = f"project_lock:{project_id}"
-        exists = ProjectLock._sync_conn.exists(lock_key)
-        return exists == 1
+        with redis_sync.Redis.from_url(LOCK_REDIS_URL) as conn:
+            lock_key = f"project_lock:{project_id}"
+            exists = conn.exists(lock_key)
+            return exists == 1
     
     def lock_sync(self) -> None:
         """
@@ -121,17 +149,37 @@ class ProjectLock:
         if self._sync_conn is None:
             self._sync_conn = redis_sync.Redis.from_url(LOCK_REDIS_URL)
         lock_key = f"project_lock:{self._project_id}"
+        identity_key = f"project_lock:{self._project_id}:appointed"
         total_wait = 0.0
         acquired = False
+        identity = None
         while total_wait < self._max_block_time:  # wait up to max_block_time
-            acquired = self._sync_conn.set(lock_key, "locked", nx=True)
-            if acquired:
-                break
+            # operations below implement a atomic checking identity and setting a lock 
+            # with optimistic locking
+            self._sync_conn.watch(identity_key)
+            identity = self._sync_conn.get(identity_key)
+            if identity is not None:
+                if self._identity is None or identity.decode() != self._identity:  # type: ignore
+                    self._sync_conn.unwatch()
+                    time.sleep(RETRY_INTERVAL)
+                    total_wait += RETRY_INTERVAL
+                    continue  # wait for appointed identity to acquire the lock
+            with self._sync_conn.pipeline() as pipe:
+                pipe.multi()
+                pipe.set(lock_key, "locked", nx=True)
+                results = pipe.execute()
+                if results and results[0]:
+                    acquired = True
+                    break
             total_wait += RETRY_INTERVAL
             time.sleep(RETRY_INTERVAL)
         if not acquired:
-            raise RuntimeError(f"Project {self._project_id} is already locked.")
-    
+            raise ProjectLockError(f"Project {self._project_id} is already locked.")
+        if identity is not None:
+            # clear appointed identity after acquiring the lock
+            identity_key = f"project_lock:{self._project_id}:appointed"
+            self._sync_conn.delete(identity_key)
+
     def release_sync(self) -> None:
         """
         Release the lock for the project.
@@ -144,3 +192,12 @@ class ProjectLock:
         # delete lock
         lock_key = f"project_lock:{self._project_id}"
         self._sync_conn.delete(lock_key)
+
+    def appoint_transfer_sync(self, identity: str) -> None:
+        """
+        Appoint a specific identity to transfer the lock.
+        """
+        if self._sync_conn is None:
+            self._sync_conn = redis_sync.Redis.from_url(LOCK_REDIS_URL)
+        key = f"project_lock:{self._project_id}:appointed"
+        self._sync_conn.set(key, identity, ex=APPOINTED_LOCK_EXPIRY)

@@ -30,7 +30,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
     db_client = next(get_session())
     
     # lock to prevent concurrent runs on the same project
-    with ProjectLock(project_id=project_id, max_block_time=30.0):  # wait up to 30 seconds to acquire lock
+    with ProjectLock(project_id=project_id, max_block_time=30.0, identity=task_id):  # wait up to 30 seconds to acquire lock
         project, graph_data = None, None
         with StreamQueue(task_id) as queue:
             try:
@@ -219,7 +219,9 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             "status": "IN_PROGRESS",
                             "node_id": node_id,
                             "timer": "stop",
-                            "patch": [data_patch.model_dump()] # frontend has its own timer calculation, ours timer only for save to db
+                            "patch": [data_patch.model_dump()] 
+                            # frontend has its own timer calculation, ours timer only for save to db
+                            # if user refresh the page, the runningtime will change to the backend calculated one
                         }
                         queue.push_message_sync(Status.IN_PROGRESS, meta)
                         graph_data.apply_patch(data_patch)

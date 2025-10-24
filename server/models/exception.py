@@ -1,7 +1,7 @@
-
 """
 This file defines custom exceptions.
 """
+
 class ModelValidationError(Exception):
     """
     Exception raised for errors in the model validation.
@@ -53,4 +53,14 @@ class NodeExecutionError(Exception):
 
 class InsufficientStorageError(Exception):
     """user storage limit exceeded"""
+    pass
+
+class ProjectLockError(Exception):
+    """project is locked for editing"""
+    pass
+
+class ProjLockIdentityError(Exception):
+    """
+    project lock identity error: your identity does not match the appointed identity, the appointed identity may timeout or be cleared
+    """
     pass
