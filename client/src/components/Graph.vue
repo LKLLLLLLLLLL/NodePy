@@ -147,7 +147,7 @@ onNodeDragStop(async (event: NodeDragEvent) => {
 })
 
 watch(() => edges.value?.length, async (newValue, oldValue)=> {
-  console.log('边改变了:', edges.value)
+  console.log('边改变了:', edges.value, 'shouldWatch:', shouldWatch.value)
   if(!shouldWatch.value) return
 
   if(project.value) {

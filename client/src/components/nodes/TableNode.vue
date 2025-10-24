@@ -55,7 +55,7 @@
             height: 100%;
             width: 100%;
             background: white;
-            box-shadow: 2px 2px 6px 0px black;
+            box-shadow: 2px 2px 6px 0px #aaa;
             .title {
                 background: #ccc;
                 text-align: left;

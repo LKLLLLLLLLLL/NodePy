@@ -7,7 +7,7 @@
             <div class="title topchild-border-radius">StringNode</div>
             <div class="data">
                 <Handle id="string" type="source" :position="Position.Right"/>
-                <input type="text" v-model="value" class="nodrag" @input="onInput"/>
+                <el-input class="input nodrag" v-model="value" @input="onInput"/>
             </div>
         </div>
     </div>
@@ -61,7 +61,7 @@
             height: 100%;
             width: 100%;
             background: white;
-            box-shadow: 2px 2px 6px 0px black;
+            box-shadow: 2px 2px 6px 0px #aaa;
             .title {
                 background: #ccc;
                 text-align: left;
@@ -72,10 +72,9 @@
                 position: relative;
                 display: flex;
                 justify-content: center;
-                input {
-                    width: 80%;
-                    height: 1.2rem;
-                    border: 1px solid #ccc
+                .input {
+                    width: 90%;
+                    height: 20px !important;
                 }
             }
         }

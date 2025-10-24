@@ -10,7 +10,7 @@
                 <Handle id="y" type="target" :position="Position.Left" style="top: 75%"/>
                 <Handle id="result" type="source" :position="Position.Right"/>
                 <div class="op">
-                    <select v-model="selected_op" @change="onSelect">
+                    <select v-model="selected_op" @change="onSelect" class="border-radius nodrag">
                         <option v-for="item in op">{{ item }}</option>
                     </select>
                 </div>
@@ -70,7 +70,7 @@
             height: 100%;
             width: 100%;
             background: white;
-            box-shadow: 2px 2px 6px 0px black;
+            box-shadow: 2px 2px 6px 0px #aaa;
             .title {
                 background: #ccc;
                 text-align: left;
@@ -84,9 +84,10 @@
                 padding: 10px 0;
                 .op {
                     select {
-                        background: #ddd;
-                        height: 1.5rem;
-                        width: 2.5rem;
+                        border: 1px solid #ccc;
+                        padding-left: 5px;
+                        appearance: auto;
+                        width: 100%;
                     }
                 }
             }

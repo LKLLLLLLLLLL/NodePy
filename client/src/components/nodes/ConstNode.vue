@@ -12,8 +12,7 @@
                     <el-input class="input nodrag" v-model="value" @input="onInput"/>
                 </div>
                 <div class="data_type">
-                    <span>data_type:</span>
-                    <select v-model="data_type" @change="onSelect">
+                    <select v-model="data_type" @change="onSelect" class="border-radius nodrag">
                         <option v-for="item in data_type_options">{{ item }}</option>
                     </select>
                 </div>
@@ -89,13 +88,11 @@
                     margin-top: 5px;
                     display: flex;
                     justify-content: center;
-                    span {
-                        margin-right: 10px;
-                    }
                     select {
-                        background: #ddd;
-                        height: 1.5rem;
-                        width: 2.5rem;
+                        border: 1px solid #ccc;
+                        appearance: auto;
+                        padding-left: 10px;
+                        width: 33%;
                     }
                 }
                 .value {
