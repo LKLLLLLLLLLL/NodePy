@@ -1,8 +1,8 @@
 import type { Node, Edge } from '@vue-flow/core'
-import type { Project } from './api'
+import type { Project, ProjEdge, ProjNode } from './api'
 
-export const getProject = (project_name: string, project_id: number, user_id: number, nodes: Node[], edges: Edge[], error_message?: string): Project => {
-    const graphNodes = nodes.map(n => {
+export const getProject = (project_name: string, project_id: number, user_id: number, nodes: Node[], edges: Edge[], error_message: string | null): Project => {
+    const graphNodes: ProjNode[] = nodes.map(n => {
         return {
             id: n.id,
             position: n.position,
@@ -14,7 +14,7 @@ export const getProject = (project_name: string, project_id: number, user_id: nu
             error: n.data.error
         }
     })
-    const graphEdges = edges.map(e => {
+    const graphEdges:ProjEdge[] = edges.map(e => {
         return {
             id: e.id,
             src: e.source,
@@ -27,9 +27,11 @@ export const getProject = (project_name: string, project_id: number, user_id: nu
         project_name,
         project_id,
         user_id,
-        error_message,
-        nodes: graphNodes,
-        edges: graphEdges
+        workflow: {
+            error_message,
+            nodes: graphNodes,
+            edges: graphEdges
+        }
     }
 }
 
@@ -37,7 +39,7 @@ export const parseProject = (g: Project): {
     nodes: Node[],
     edges: Edge[]
 } => {
-    const graphNodes = g.nodes.map(n => {
+    const graphNodes = g.workflow.nodes.map(n => {
         return {
             id: n.id,
             type: n.type,
@@ -51,7 +53,7 @@ export const parseProject = (g: Project): {
             }
         }
     })
-    const graphEdges = g.edges.map(e => {
+    const graphEdges = g.workflow.edges.map(e => {
         return {
             id: e.id,
             source: e.src,

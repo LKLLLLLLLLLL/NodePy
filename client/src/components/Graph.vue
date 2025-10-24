@@ -1,7 +1,7 @@
 <script lang='ts' setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, nextTick, onUnmounted } from 'vue'
 import { VueFlow, useVueFlow, ConnectionMode } from '@vue-flow/core'
-import type { Node, Edge } from '@vue-flow/core'
+import type { Node, Edge, NodeDragEvent } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import { Controls } from '@vue-flow/controls'
@@ -10,17 +10,14 @@ import StringNode from './nodes/StringNode.vue'
 import TableNode from './nodes/TableNode.vue'
 import NumBinComputeNode from './nodes/NumBinComputeNode.vue'
 import { DefaultService } from '@/utils/api'
-import type { Project } from '@/utils/api'
 import { getProject, parseProject } from '@/utils/projectConvert'
 import { monitorTask } from '@/utils/task'
 import { useGraphStore } from '@/stores/graphStore'
 
 const {project} = useGraphStore()
-
-const { onConnect, onInit, onNodesChange, addEdges, onEdgesChange } = useVueFlow('main')
-
+const { onConnect, onInit, onNodeDragStop, addEdges, onEdgesChange } = useVueFlow('main')
+const shouldWatch = ref(false)
 const nodes = ref<Node[]>()
-
 const nodesData = computed(() => {
   const result = nodes.value?.map((n: Node) => {
     return {
@@ -30,9 +27,17 @@ const nodesData = computed(() => {
   })
   return result
 })
-
 const edges = ref<Edge[]>()
+const listenNodePosition = ref(true)
+const intervalId = setInterval(() => {
+  listenNodePosition.value = true
+  console.log('监听节点位置开始...')
+}, 30000)
 
+
+onUnmounted(() => {
+  clearInterval(intervalId)
+})
 
 onInit(async (instance) => {
   try {
@@ -42,30 +47,28 @@ onInit(async (instance) => {
     const graph = parseProject(project.value)
     nodes.value = graph.nodes
     edges.value = graph.edges
-    instance.fitView()
+    await instance.fitView()
+
+    await nextTick()
+    shouldWatch.value = true
   }catch(err) {
-    console.error(err)
+    console.error('init error:',err)
   }
 })
 
-
-// onNodesChange(async (changes) => {
-  
-// })
-
 //add, move, modify nodes
 watch(nodesData, async (newValue, oldValue) => {
-  console.log("new: ", newValue, "old: ", oldValue)
-  if(!oldValue) return
-  if(oldValue.length <= 0) return
+  console.log("new: ", newValue, "old: ", oldValue, 'shouldWatch:', shouldWatch.value)
+  if(!shouldWatch.value) return
   if(project.value) {
     const proj = getProject(project.value.project_name,
       project.value.project_id,
       project.value.user_id,
       nodes.value as Node[],
-      edges.value as Edge[]
+      edges.value as Edge[],
+      project.value.workflow.error_message as string | null
     )
-    console.log('@@',proj)
+    console.log('@',proj)
 
     try {
       console.log('syncProjectApiProjectSyncPost')
@@ -78,7 +81,7 @@ watch(nodesData, async (newValue, oldValue) => {
           const messages = await monitorTask(project.value, task_id)
           console.log("Done:", messages)
         }catch(err) {
-          console.error('@@@',err)
+          console.error('@@',err)
         }
 
       }else {
@@ -86,59 +89,104 @@ watch(nodesData, async (newValue, oldValue) => {
       }
 
     }catch(err) {
-      console.error('@@@@',err)
+      console.error('@@@',err)
     }
 
   }else {
     console.error('project is undefined')
   }
 
-}, {deep: true})
-
-onEdgesChange(async (changes) => {
-  const ARchanges = changes.filter(c => c.type === 'add' || c.type === 'remove')
-  ARchanges.forEach(c => {
-    if(c.type ==='add') console.log('新增边:', c.item)
-    if(c.type === 'remove') console.log('移除边', c)
+}, {deep: true, immediate: false})
+onNodeDragStop(async (event: NodeDragEvent) => {
+  console.log('节点位置变化:', {
+    nodeId: event.node.id,
+    nodeType: event.node.type,
+    newPosition: event.node.position,
   })
+  if(!listenNodePosition.value) return
+  if(!shouldWatch.value) return
+  listenNodePosition.value = false
 
-  if(ARchanges.length >= 0) {
-    if(project.value) {
-      const proj = getProject(project.value.project_name,
-        project.value.project_id,
-        project.value.user_id,
-        nodes.value as Node[],
-        edges.value as Edge[]
-      )
-      console.log('@@@',proj)
+  if(project.value) {
+    const proj = getProject(project.value.project_name,
+      project.value.project_id,
+      project.value.user_id,
+      nodes.value as Node[],
+      edges.value as Edge[],
+      project.value.workflow.error_message as string | null
+    )
+    console.log('@@@@',proj)
 
-      try {
-        console.log('syncProjectApiProjectSyncPost')
-        const {task_id} = await DefaultService.syncProjectApiProjectSyncPost(proj)
-        console.log(task_id)
+    try {
+      console.log('syncProjectApiProjectSyncPost')
+      const {task_id} = await DefaultService.syncProjectApiProjectSyncPost(proj)
+      console.log(task_id)
 
-        if(task_id) {
-          try {
-            console.log('monitorTask')
-            const messages = await monitorTask(project.value, task_id)
-            console.log("Done:", messages)
-          }catch(err) {
-            console.error('@@@@@',err)
-          }
-
-        }else {
-          console.error('task_id is undefined')
+      if(task_id) {
+        try {
+          console.log('monitorTask')
+          const messages = await monitorTask(project.value, task_id)
+          console.log("Done:", messages)
+        }catch(err) {
+          console.error('@@@@@',err)
         }
 
-      }catch(err) {
-        console.error('@@@@@@',err)
+      }else {
+        console.error('task_id is undefined')
       }
 
-    }else {
-      console.error('project is undefined')
+    }catch(err) {
+      console.error('@@@@@@',err)
     }
 
+  }else {
+    console.error('project is undefined')
   }
+
+
+})
+
+watch(() => edges.value?.length, async (newValue, oldValue)=> {
+  console.log('边改变了:', edges.value)
+  if(!shouldWatch.value) return
+
+  if(project.value) {
+    const proj = getProject(project.value.project_name,
+      project.value.project_id,
+      project.value.user_id,
+      nodes.value as Node[],
+      edges.value as Edge[],
+      project.value.workflow.error_message as string | null
+    )
+    console.log('@@@@@@@',proj)
+
+    try {
+      console.log('syncProjectApiProjectSyncPost')
+      const {task_id} = await DefaultService.syncProjectApiProjectSyncPost(proj)
+      console.log(task_id)
+
+      if(task_id) {
+        try {
+          console.log('monitorTask')
+          const messages = await monitorTask(project.value, task_id)
+          console.log("Done:", messages)
+        }catch(err) {
+          console.error('@@@@@@@@',err)
+        }
+
+      }else {
+        console.error('task_id is undefined')
+      }
+
+    }catch(err) {
+      console.error('@@@@@@@@@',err)
+    }
+
+  }else {
+    console.error('project is undefined')
+  }
+
+
 })
 
 onConnect((connection) => {
