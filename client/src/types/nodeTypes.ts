@@ -2,11 +2,11 @@ import type {Node} from '@vue-flow/core'
 import type { ProjNode } from '@/utils/api'
 
 
-type AbstractNode = Omit<Node, 'data' | 'type'>
+export type AbstractNode = Omit<Node, 'data' | 'type'>
 
-type BaseData = Omit<ProjNode, 'id' | 'type' | 'position'>
+export type BaseData = Omit<ProjNode, 'id' | 'type' | 'position'>
 
-interface BaseNode<T = BaseData> extends AbstractNode{
+export interface BaseNode<T = BaseData> extends AbstractNode{
     type: string
     data: T
 }

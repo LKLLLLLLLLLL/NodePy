@@ -4,12 +4,12 @@
             <NodeResizer :min-height="minH" :min-width="minW" :max-height="maxH" :max-width="maxW" :isVisible="false"/>
         </div>
 
-        <div class="innerContent border-radius">
-            <div class="title topchild-border-radius">ConstNode</div>
+        <div class="innerContent nodes-style">
+            <div class="title nodes-topchild-border-radius">ConstNode</div>
             <div class="data">
                 <Handle id="const" type="source" :position="Position.Right"/>
                 <div class="value">
-                    <el-input class="input nodrag" v-model="value" @input="onInput"/>
+                     <input class="nodrag border-radius" v-model="value" @input="onInput"/>
                 </div>
                 <div class="data_type">
                     <select v-model="data_type" @change="onSelect" class="border-radius nodrag">
@@ -38,15 +38,18 @@
     const info = ref()
     const value = ref(props.data.param.value)
     const data_type = ref(props.data.param.data_type)
-    const data_type_options = ['int', 'float', 'str', 'bool']
+    const data_type_options = ['int', 'float']
 
 
     const onInput = (e?: Event) => {
-        props.data.param.value = value.value
+        const v = value.value
+        props.data.param.value = Number(v)
     }
 
     const onSelect = (e?: Event) => {
         props.data.param.data_type = data_type.value
+        const v = value.value
+        props.data.param.value = Number(v)
     }
 
 
@@ -80,6 +83,7 @@
                 background: #ccc;
                 text-align: left;
                 padding-left: 8px;
+                height: 30px;
             }
             .data {
                 position: relative;
@@ -92,15 +96,18 @@
                         border: 1px solid #ccc;
                         appearance: auto;
                         padding-left: 10px;
-                        width: 33%;
+                        height: 24px;
                     }
                 }
                 .value {
                     display: flex;
                     justify-content: center;
-                    .input {
-                        width: 90%;
-                        height: 20px !important;
+                    input {
+                        border: 1px solid #ccc;
+                        text-align: center;
+                        height: 24px;
+                        width: 160px;
+                        margin: 0 5px;
                     }
                 }
             }

@@ -1,12 +1,15 @@
-import type { Node, Edge } from '@vue-flow/core'
 import type { Project, ProjEdge, ProjNode } from './api'
+import type { vueFlowProject } from '@/types/vueFlowProject'
+import {ref} from 'vue'
+import type { Edge } from '@vue-flow/core'
+import type { BaseNode } from '@/types/nodeTypes'
 
-export const getProject = (project_name: string, project_id: number, user_id: number, nodes: Node[], edges: Edge[], error_message: string | null): Project => {
-    const graphNodes: ProjNode[] = nodes.map(n => {
+export const getProject = (p: vueFlowProject): Project => {
+    const graphNodes: ProjNode[] = p.workflow.nodes.value.map(n => {
         return {
             id: n.id,
             position: n.position,
-            type: n.type as string,
+            type: n.type,
             param: n.data.param,
             runningtime: n.data.runningtime,
             schema_out: n.data.schema_out,
@@ -14,7 +17,7 @@ export const getProject = (project_name: string, project_id: number, user_id: nu
             error: n.data.error
         }
     })
-    const graphEdges:ProjEdge[] = edges.map(e => {
+    const graphEdges:ProjEdge[] = p.workflow.edges.value.map(e => {
         return {
             id: e.id,
             src: e.source,
@@ -24,22 +27,19 @@ export const getProject = (project_name: string, project_id: number, user_id: nu
         }
     })
     return {
-        project_name,
-        project_id,
-        user_id,
+        project_name: p.project_name,
+        project_id: p.project_id,
+        user_id: p.user_id,
         workflow: {
-            error_message,
+            error_message: p.workflow.error_message,
             nodes: graphNodes,
             edges: graphEdges
         }
     }
 }
 
-export const parseProject = (g: Project): {
-    nodes: Node[],
-    edges: Edge[]
-} => {
-    const graphNodes = g.workflow.nodes.map(n => {
+export const parseProject = (p: Project, tar: vueFlowProject) => {
+    const graphNodes = p.workflow.nodes.map(n => {
         return {
             id: n.id,
             type: n.type,
@@ -53,7 +53,7 @@ export const parseProject = (g: Project): {
             }
         }
     })
-    const graphEdges = g.workflow.edges.map(e => {
+    const graphEdges = p.workflow.edges.map(e => {
         return {
             id: e.id,
             source: e.src,
@@ -62,8 +62,13 @@ export const parseProject = (g: Project): {
             targetHandle: e.tar_port
         }
     })
-    return {
-        nodes: graphNodes,
-        edges: graphEdges
+
+    if(tar) {
+        tar.project_id = p.project_id
+        tar.project_name = p.project_name
+        tar.user_id = p.user_id
+        tar.workflow.error_message = p.workflow.error_message
+        tar.workflow.edges.value = graphEdges
+        tar.workflow.nodes.value = graphNodes
     }
 }
