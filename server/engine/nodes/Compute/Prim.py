@@ -21,7 +21,7 @@ class NumBinComputeNode(BaseNode):
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'NumBinComputeNode'."
+                err_msg ="Node type must be 'NumBinComputeNode'."
             )
 
     @override
@@ -40,8 +40,9 @@ class NumBinComputeNode(BaseNode):
         if not x_schema.type == y_schema.type:
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=["x", "y"],
-                err_msg=f"Input types must match: x is {x_schema.type}, y is {y_schema.type}"
+                err_inputs=["x", "y"],
+                err_msgs=[ "",
+                          f"Input types must match: x is {x_schema.type}, y is {y_schema.type}"]
             )
         if x_schema.type == Schema.Type.FLOAT: # avoid implicit int->float conversion
             return {'result': Schema(type=Schema.Type.FLOAT)}
@@ -178,8 +179,9 @@ class CmpNode(BaseNode):
         if x_type != y_type:
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=["x", "y"],
-                err_msg=f"Input types must match: x is {x_type}, y is {y_type}"
+                err_inputs=["x", "y"],
+                err_msgs=[ "",
+                          f"Input types must match: x is {x_type}, y is {y_type}"]
             )
         return {'result': Schema(type=Schema.Type.BOOL)}
 

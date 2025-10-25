@@ -1,13 +1,35 @@
-from pydantic import BaseModel
-from typing import Any
+from pydantic import BaseModel, model_validator
+from typing import Any, Self
 from .data import Schema, DataRef
 from .project_topology import WorkflowTopology, TopoNode, TopoEdge
 
 
 class ProjNodeError(BaseModel):
-    param: str | None
-    input: list[str] | None
-    message: str
+    params: list[str] | None
+    inputs: list[str] | None
+    message: list[str] | str
+    
+    @model_validator(mode="after")
+    def check_error_type(cls) -> Self:
+        if isinstance(cls.params, list):
+            if cls.inputs is not None:
+                raise ValueError("If 'params' is a list, 'inputs' must be None.")
+            if not isinstance(cls.message, list):
+                raise ValueError("If 'params' is a list, 'message' must be a list.")
+            if len(cls.params) != len(cls.message):
+                raise ValueError("Length of 'params' and 'message' must be the same.")
+        elif isinstance(cls.inputs, list):
+            if cls.params is not None:
+                raise ValueError("If 'inputs' is a list, 'params' must be None.")
+            if not isinstance(cls.message, list):
+                raise ValueError("If 'inputs' is a list, 'message' must be a list.")
+            if len(cls.inputs) != len(cls.message):
+                raise ValueError("Length of 'inputs' and 'message' must be the same.")
+        else:
+            if not isinstance(cls.message, str):
+                raise ValueError("If neither 'params' nor 'inputs' is a list, 'message' must be a string.")
+
+        return cls
 
 class ProjNode(BaseModel):
     class Position(BaseModel):

@@ -85,7 +85,7 @@ class TabBinPrimNumComputeNode(BaseNode):
         if not in_tab.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=['table'],
+                err_input='table',
                 err_msg=f"Result column name '{self.result_col}' already exists in input table."
             )
         # 2. check if the table col and the num is in same type
@@ -95,8 +95,9 @@ class TabBinPrimNumComputeNode(BaseNode):
         if col_type != num_type:
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=['table', 'num'],
-                err_msg=f"Table column '{self.col}' type '{col_type}' does not match primitive number type '{num_type}'."
+                err_inputs=['table', 'num'],
+                err_msgs=["",
+                        f"Table column '{self.col}' type '{col_type}' does not match primitive number type '{num_type}'."]
             )
         # 3. build output schema
         res_col_type = None
@@ -219,7 +220,7 @@ class TabBinPrimBoolComputeNode(BaseNode):
         if not in_tab.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=['table'],
+                err_input='table',
                 err_msg=f"Result column name '{self.result_col}' already exists in input table."
             )
         
@@ -229,7 +230,7 @@ class TabBinPrimBoolComputeNode(BaseNode):
         if col_type != ColType.BOOL:
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=['table'],
+                err_input='table',
                 err_msg=f"Table column '{self.col}' type '{col_type}' is not boolean."
             )
         
@@ -337,7 +338,7 @@ class TabUnaryNumComputeNode(BaseNode):
         if not in_tab.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=['table'],
+                err_input='table',
                 err_msg=f"Result column name '{self.result_col}' already exists in input table."
             )
         # 2. build output schema
@@ -448,7 +449,7 @@ class TabUnaryBoolComputeNode(BaseNode):
         if not in_tab.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=['table'],
+                err_input='table',
                 err_msg=f"Result column name '{self.result_col}' already exists in input table."
             )
         # 2. build output schema
@@ -564,7 +565,7 @@ class ColBinNumComputeNode(BaseNode):
         if not in_tab.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=['table'],
+                err_input='table',
                 err_msg=f"Result column name '{self.result_col}' already exists in input table."
             )
         # 2. check if the two columns are in same type
@@ -575,7 +576,7 @@ class ColBinNumComputeNode(BaseNode):
         if col1_type != col2_type:
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=['table'],
+                err_input='table',
                 err_msg=f"Table column '{self.col1}' type '{col1_type}' does not match column '{self.col2}' type '{col2_type}'."
             )
         # 3. build output schema
@@ -709,7 +710,7 @@ class ColBinBoolComputeNode(BaseNode):
         if not in_tab.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=['table'],
+                err_input='table',
                 err_msg=f"Result column name '{self.result_col}' already exists in input table."
             )
         # 2. build output schema

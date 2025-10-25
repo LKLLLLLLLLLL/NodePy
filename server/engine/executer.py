@@ -50,32 +50,62 @@ class ProjectExecutor:
         """ Get all source node ids from a target node id """
         return [src for src, _ in self._graph.in_edges(tar)]
     
-    def construct_nodes(self) -> None:
-        """ Construct node instances from node definitions to test if there are parameter errors """
+    def construct_nodes(self, callback: Callable[[str, Literal["success", "error"], Exception | None], bool]) -> None:
+        """ 
+        Construct node instances from node definitions to test if there are parameter errors .
+        
+        The callback function will look like:
+        continue_execution = callback(node_id: str, status: Literal["success", "error"], exception: Exception | None) -> bool
+        If continue_execution is False, the execution will stop.
+        """
         if self._stage != "init":
             raise AssertionError(f"Graph is already in stage '{self._stage}', cannot construct nodes again.")
         self._exec_queue = list(nx.topological_sort(self._graph))
-        
+
         for node_id in self._exec_queue:
+            # during construction, if one nodes fails, it does not affect others
             node = self._node_map[node_id]
             id = node.id
             type = node.type
             params = node.params
 
-            node_object = BaseNode.create_from_type(type=type, global_config=self._global_config, id=id, **params)
-            if self._node_objects is None:
-                raise RuntimeError("Node objects initialized failed.")
-            self._node_objects[id] = node_object
+            try:
+                node_object = BaseNode.create_from_type(type=type, global_config=self._global_config, id=id, **params)
+                if self._node_objects is None:
+                    raise RuntimeError("Node objects initialized failed.")
+                self._node_objects[id] = node_object
+            except Exception as e:
+                continue_execution = callback(id, "error", e)
+                if not continue_execution:
+                    return
+                else:
+                    continue
+            else:
+                continue_execution = callback(id, "success", None)
+                if not continue_execution:
+                    return
+                else:
+                    continue
         self._stage = "constructed"
         return
-    
-    def static_analyse(self, callback: Callable[[str, dict[str, Any]], None]) -> None:
-        """ Perform static analysis to infer schemas and validate the graph """
+
+    def static_analyse(self, callback: Callable[[str, Literal["success", "error"], dict[str, Any] | Exception], bool]) -> None:
+        """ 
+        Perform static analysis to infer schemas and validate the graph 
+        The callback function will look like:
+        
+        continue_execution = callback(node_id: str, status: Literal["success", "error"], result: dict[str, Any] | Exception) -> bool
+        """
         if self._stage != "constructed":
             raise AssertionError(f"Graph is in stage '{self._stage}', cannot perform static analysis.")
 
         schema_cache : dict[tuple[str, str], Schema] = {} # cache for node output schema: (node_id, port) -> Schema
+        unreachable_nodes = set() # the descendants of nodes that failed static analysis
+        
         for node_id in self._exec_queue:
+            # if one node fails, all its descendants will be skipped for avoiding redundant errors
+            if node_id in unreachable_nodes:
+                continue
             node = self._node_objects[node_id]
             in_edges = list(self._graph.in_edges(node_id, data=True))
 
@@ -89,22 +119,46 @@ class ProjectExecutor:
                 input_schemas[tar_port] = src_schema
 
             # run schema inference
-            output_schemas = node.infer_schema(input_schemas)
-            for tar_port, schema in output_schemas.items():
-                schema_cache[(node_id, tar_port)] = schema
+            try:
+                output_schemas = node.infer_schema(input_schemas)
+                for tar_port, schema in output_schemas.items():
+                    schema_cache[(node_id, tar_port)] = schema
+            except Exception as e:
+                unreachable_nodes.update([node_id, *nx.descendants(self._graph, node_id)])
+                continue_execution = callback(node_id, "error", e)
+                if not continue_execution:
+                    return
+                else:
+                    continue
+            else:
+                continue_execution = callback(node_id, "success", output_schemas)
+                if not continue_execution:
+                    return
+                else:
+                    continue
 
-            # call call_back
-            callback(node_id, output_schemas)
         self._stage = "static_analyzed"
         return
 
-    def execute(self, callbefore: Callable[[str], None], callafter: Callable[[str, dict[str, Any], float], None]) -> None:
-        """ Execute the graph in topological order """
+    def execute(self, 
+                callbefore: Callable[[str], None], 
+                callafter: Callable[[str, Literal["success", "error"], dict[str, Any] | Exception, float | None], bool]) -> None:
+        """ 
+        Execute the graph in topological order.
+        
+        The callbefore function will look like:
+        callbefore(node_id: str) -> None
+        The callafter function will look like:
+        continue_execution = callafter(node_id: str, status: Literal["success", "error"], result: dict[str, Any] | Exception, running_time(in ms): float | None) -> bool
+        """
         if self._stage != "static_analyzed":
             raise AssertionError(f"Graph is in stage '{self._stage}', cannot run.")
         data_cache : dict[tuple[str, str], Data] = {} # cache for node output data: (node_id, port) -> Data
+        unreachable_nodes = set() # the descendants of nodes that failed execution
 
         for node_id in self._exec_queue:
+            if node_id in unreachable_nodes:
+                continue
             node = self._node_objects[node_id]
             in_edges = list(self._graph.in_edges(node_id, data=True))
             
@@ -124,27 +178,40 @@ class ProjectExecutor:
                 inputs=input_data,
             )
 
-            # 3. execute node if cache miss
             output_data: dict[str, Data]
             running_time: float
-            if cache_data is None:
-                # call callbefore, only when cache miss
-                callbefore(node_id)
-                # run node
-                start_time = time.perf_counter()
-                output_data = node.execute(input_data)
-                running_time = (time.perf_counter() - start_time) * 1000  # in ms
+            try:
+                # 3. execute node if cache miss
+                if cache_data is None:
+                    # call callbefore, only when cache miss
+                    callbefore(node_id)
+
+                    # run node
+                    start_time = time.perf_counter()
+                    output_data = node.execute(input_data)
+                    running_time = (time.perf_counter() - start_time) * 1000  # in ms
+                else:
+                    output_data, running_time = cache_data
+            # 4. call callafter
+            except Exception as e:
+                unreachable_nodes.update([node_id, *nx.descendants(self._graph, node_id)])
+                continue_execution = callafter(node_id, "error", e, None)
+                if not continue_execution:
+                    return
+                else:
+                    continue
             else:
-                output_data, running_time = cache_data
+                continue_execution = callafter(node_id, "success", output_data, running_time)
+                if not continue_execution:
+                    return
+                else:
+                    pass
 
             # 4. store output data to self cache
             for tar_port, data in output_data.items():
                 if data_cache.get((node_id, tar_port)) is not None:
                     raise RuntimeError(f"Node '{node_id}' output on port '{tar_port}' already exists in cache.")
                 data_cache[(node_id, tar_port)] = data
-
-            # 5. call callafter
-            callafter(node_id, output_data, running_time)
             
             # 6. store to CacheManager
             if output_data is not None:

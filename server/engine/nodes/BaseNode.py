@@ -77,41 +77,46 @@ class BaseNode(BaseModel):
     @model_validator(mode='after')
     def _validate_parameters(self) -> Self:
         """ validate parameters when constructing """
+        err_param_keys = []
+        err_msgs = []
         if self.id.strip() == "":
-            raise NodeParameterError(
-                node_id=self.id,
-                err_param_key="id",
-                err_msg="Node id cannot be empty."
-            )
+            err_param_keys.append("id")
+            err_msgs.append("Node ID cannot be empty.")
         if self.type.strip() == "":
+            err_param_keys.append("type")
+            err_msgs.append("Node type cannot be empty.")
+        if err_param_keys:
             raise NodeParameterError(
                 node_id=self.id,
-                err_param_key="type",
-                err_msg="Node type cannot be empty."
+                err_param_keys=err_param_keys,
+                err_msgs=err_msgs
             )
         self.validate_parameters()
         return self
     
     def _validate_schema_to_port_def(self, input_schema: dict[str, Schema]) -> None:
         in_ports, _ = self.port_def()
+        err_inputs = []
+        err_msgs = []
         for port in in_ports:
             port_name = port.name
             sche = input_schema.get(port_name)
             if sche is None:
                 if not port.optional:
-                    raise NodeValidationError(
-                        node_id=self.id,
-                        err_input=[port_name],
-                        err_msg=f"Input port '{port_name}' is required but not provided."
-                    )
+                    err_inputs.append(port_name)
+                    err_msgs.append(f"Input port '{port_name}' is required but not provided.")
+                    continue
                 else:
                     continue # optional port, can be None
             if sche not in port.accept:
-                raise NodeValidationError(
-                    node_id=self.id,
-                    err_input=[port_name],
-                    err_msg=f"Input port '{port_name}' schema {sche} not in accepted schemas {port.accept}."
-                )
+                err_inputs.append(port_name)
+                err_msgs.append(f"Input port '{port_name}' schema {sche} not accepted by port pattern {port.accept}.")
+        if err_inputs:
+            raise NodeValidationError(
+                node_id=self.id,
+                err_inputs=err_inputs,
+                err_msgs=err_msgs
+            )
         if len(input_schema) > len(in_ports):
             raise ValueError("Input schema has more ports than defined in port_def.")
         return

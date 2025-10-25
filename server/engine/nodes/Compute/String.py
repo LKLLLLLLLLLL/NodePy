@@ -320,7 +320,7 @@ class TableAppendStringNode(BaseNode):
         if not table_schema.tab.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=["table"],
+                err_input='table',
                 err_msg=f"result_col '{self.result_col}' already exists in input table."
             )
         
@@ -404,7 +404,7 @@ class TablePrependStringNode(BaseNode):
         if not table_schema.tab.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=["table"],
+                err_input="table",
                 err_msg=f"result_col '{self.result_col}' already exists in input table."
             )
         
@@ -488,7 +488,7 @@ class TableContainsStringNode(BaseNode):
         if not input_table.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=["table"],
+                err_input="table",
                 err_msg=f"result_col '{self.result_col}' already exists in input table."
             )
         # Build output col_types: copy input and add result_col as BOOL
@@ -573,7 +573,7 @@ class TableStringLengthNode(BaseNode):
         if not input_table.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=["table"],
+                err_input="table",
                 err_msg=f"result_col '{self.result_col}' already exists in input table."
             )
         # Build output col_types: copy input and add result_col as INT
@@ -654,7 +654,7 @@ class TableStartWithStringNode(BaseNode):
         if not input_table.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=["table"],
+                err_input="table",
                 err_msg=f"result_col '{self.result_col}' already exists in input table."
             )
         # Build output col_types: copy input and add result_col as BOOL
@@ -739,7 +739,7 @@ class TableEndWithStringNode(BaseNode):
         if not input_table.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=["table"],
+                err_input="table",
                 err_msg=f"result_col '{self.result_col}' already exists in input table."
             )
         # Build output col_types: copy input and add result_col as BOOL
@@ -825,7 +825,7 @@ class TableReplaceStringNode(BaseNode):
         if not input_table.validate_new_col_name(self.result_col):
             raise NodeValidationError(
                 node_id=self.id,
-                err_input=["table"],
+                err_input="table",
                 err_msg=f"result_col '{self.result_col}' already exists in input table."
             )
         # Build output col_types: copy input and add result_col as STRING

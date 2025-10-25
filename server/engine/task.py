@@ -7,7 +7,7 @@ from server.models.project import WorkflowTopology, ProjectPatch, DataRef, ProjN
 from server.models.database import NodeOutputRecord, ProjectRecord, DatabaseTransaction
 from .executer import ProjectExecutor
 from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
-from typing import Any
+from typing import Any, Literal
 from server.lib.SreamQueue import StreamQueue, Status
 from celery.exceptions import SoftTimeLimitExceeded
 
@@ -27,17 +27,18 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
     
     # lock to prevent concurrent runs on the same project
     with ProjectLock(project_id=project_id, max_block_time=30.0, identity=task_id):  # wait up to 30 seconds to acquire lock
-        with DatabaseTransaction() as db_client:
-            # 0. get old workflow from db
-            project_record = db_client.query(ProjectRecord).filter(ProjectRecord.id == project_id).first()
-            if project_record is None:
-                raise ValueError("Project not found")
-            if project_record.workflow is None:
-                raise ValueError("Project workflow is empty")
-            workflow = ProjWorkflow(**project_record.workflow)  # type: ignore
-            with StreamQueue(task_id) as queue:
+        with StreamQueue(task_id) as queue:
+            with DatabaseTransaction() as db_client:
+                # 0. get old workflow from db
+                project_record = db_client.query(ProjectRecord).filter(ProjectRecord.id == project_id).first()
+                if project_record is None:
+                    raise ValueError("Project not found")
+                if project_record.workflow is None:
+                    raise ValueError("Project workflow is empty")
+                workflow = ProjWorkflow(**project_record.workflow)  # type: ignore
+
+                # 1. Validate data model
                 try:
-                    # 1. Validate data model
                     graph = None
                     try:
                         file_manager = FileManager()
@@ -64,52 +65,77 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                         raise
 
                     # 2. Construct nodes
-                    try:
-                        assert graph is not None
-                        graph.construct_nodes()
+                    assert graph is not None
+                    has_exception = False
+                    def construct_reporter(node_id: str, status: Literal["success", "error"], exception: Exception | None) -> bool:
+                        nonlocal has_exception
+                        if status == "success":
+                            meta = {
+                                "stage": "CONSTRUCTION",
+                                "node_id": node_id,
+                                "status": "IN_PROGRESS",
+                            }
+                            queue.push_message_sync(Status.IN_PROGRESS, meta)
+                            return True
+                        # error case
+                        assert exception is not None
+                        try:
+                            raise exception
+                        except NodeParameterError as e:
+                            has_exception = True
+                            node_index = topo_graph.get_index_by_node_id(e.node_id)
+                            assert node_index is not None
+                            patch = ProjectPatch(
+                                key=["workflow", "nodes", node_index, "error"],
+                                value=ProjNodeError(
+                                    params=e.err_param_keys, inputs=None, message=e.err_msgs
+                                ),
+                            )
+                            queue.push_message_sync(
+                                Status.IN_PROGRESS,
+                                {
+                                    "stage": "CONSTRUCTION",
+                                    "status": "IN_PROGRESS",
+                                    "patch": [patch.model_dump()],
+                                },
+                            )
+                            workflow.apply_patch(patch)
+                        except Exception as e:
+                            has_exception = True
+                            patch = ProjectPatch(
+                                key=["workflow", "error_message"],
+                                value="Construction Error:" + str(e)
+                            )
+                            queue.push_message_sync(
+                                Status.IN_PROGRESS,
+                                {
+                                    "stage": "CONSTRUCTION",
+                                    "status": "IN_PROGRESS",
+                                    "patch": [patch.model_dump()]
+                                }
+                            )
+                            workflow.apply_patch(patch)
+                        return True # continue execution for other nodes
+                    graph.construct_nodes(callback=construct_reporter)
+                    if has_exception:
+                        queue.push_message_sync(
+                            Status.FAILURE, 
+                            {"stage": "CONSTRUCTION", "status": "FAILURE"}
+                        )
+                        return  # stop execution if construction failed
+                    else:
                         queue.push_message_sync(
                             Status.IN_PROGRESS, 
                             {"stage": "CONSTRUCTION", "status": "SUCCESS"}
                         )
-                    except NodeParameterError as e:
-                        node_index = topo_graph.get_index_by_node_id(e.node_id)
-                        assert node_index is not None
-                        patch = ProjectPatch(
-                                    key=["workflow", "nodes", node_index, "error"],
-                                    value=ProjNodeError(
-                                        param=e.err_param_key, input=None, message=e.err_msg
-                                    ),
-                                )
-                        queue.push_message_sync(
-                            Status.FAILURE,
-                            {
-                                "stage": "CONSTRUCTION",
-                                "status": "FAILURE",
-                                "patch": [patch.model_dump()],
-                            }
-                        )
-                        workflow.apply_patch(patch)
-                        raise
-                    except Exception as e:
-                        patch = ProjectPatch(
-                                    key=["workflow", "error_message"],
-                                    value="Construction Error:" + str(e)
-                                )
-                        queue.push_message_sync(
-                            Status.FAILURE, 
-                            {
-                                "stage": "CONSTRUCTION", 
-                                "status": "FAILURE",
-                                "patch": [patch.model_dump()]
-                            }
-                        )
-                        workflow.apply_patch(patch)
-                        raise
 
                     # 3. Static analysis
-                    try:
-                        assert graph is not None
-                        def anl_reporter(node_id: str, output_schemas: dict[str, Any]) -> None:
+                    assert graph is not None
+                    def anl_reporter(node_id: str, status: Literal["success", "error"], result: dict[str, Any] | Exception) -> bool:
+                        nonlocal has_exception
+                        if status == "success":
+                            assert isinstance(result, dict)
+                            output_schemas = result
                             node_index = topo_graph.get_index_by_node_id(node_id)
                             assert node_index is not None
                             patch = ProjectPatch(
@@ -125,57 +151,72 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                                 }
                             )
                             workflow.apply_patch(patch)
-                        
-                        graph.static_analyse(callback=anl_reporter)
+                            return True
+                        # error case
+                        assert isinstance(result, Exception)
+                        try:
+                            raise result
+                        except NodeValidationError as e:
+                            has_exception = True
+                            node_index = topo_graph.get_index_by_node_id(e.node_id)
+                            assert node_index is not None
+                            patch = ProjectPatch(
+                                        key=["workflow", "nodes", node_index, "error"],
+                                        value=ProjNodeError(
+                                            params=None, inputs=e.err_inputs, message=e.err_msgs
+                                        ),
+                                    )
+                            queue.push_message_sync(
+                                Status.IN_PROGRESS, 
+                                {
+                                    "stage": "STATIC_ANALYSIS", 
+                                    "status": "IN_PROGRESS", 
+                                    "patch": [patch.model_dump()]
+                                }
+                            )
+                            workflow.apply_patch(patch)
+                        except Exception as e:
+                            has_exception = True
+                            patch = ProjectPatch(
+                                        key=["workflow", "error_message"],
+                                        value="Static Analysis Error:" + str(e)
+                                    )
+                            queue.push_message_sync(
+                                Status.IN_PROGRESS, 
+                                {
+                                    "stage": "STATIC_ANALYSIS", 
+                                    "status": "IN_PROGRESS", 
+                                    "patch": [patch.model_dump()]
+                                }
+                            )
+                            workflow.apply_patch(patch)
+                        return True # continue execution for other nodes
+                    graph.static_analyse(callback=anl_reporter)
+                    if has_exception:
+                        queue.push_message_sync(
+                            Status.FAILURE, 
+                            {"stage": "STATIC_ANALYSIS", "status": "FAILURE"}
+                        )
+                        return  # stop execution if static analysis failed
+                    else:
                         queue.push_message_sync(Status.IN_PROGRESS, {"stage": "STATIC_ANALYSIS", "status": "SUCCESS"})
-                    except NodeValidationError as e:
-                        node_index = topo_graph.get_index_by_node_id(e.node_id)
-                        assert node_index is not None
-                        patch = ProjectPatch(
-                                    key=["workflow", "nodes", node_index, "error"],
-                                    value=ProjNodeError(
-                                        param=None, input=e.err_input, message=e.err_msg
-                                    ),
-                                )
-                        queue.push_message_sync(
-                            Status.FAILURE, 
-                            {
-                                "stage": "STATIC_ANALYSIS", 
-                                "status": "FAILURE", 
-                                "patch": [patch.model_dump()]
-                            }
-                        )
-                        workflow.apply_patch(patch)
-                        raise
-                    except Exception as e:
-                        patch = ProjectPatch(
-                                    key=["workflow", "error_message"],
-                                    value="Static Analysis Error:" + str(e)
-                                )
-                        queue.push_message_sync(
-                            Status.FAILURE, 
-                            {
-                                "stage": "STATIC_ANALYSIS", 
-                                "status": "FAILURE", 
-                                "patch": [patch.model_dump()]
-                            }
-                        )
-                        workflow.apply_patch(patch)
-                        raise
 
                     # 4. Execute graph
-                    try:
-                        assert graph is not None
-                        def exec_before_reporter(node_id: str) -> None: # for timer in frontend
-                            meta = {
-                                "stage": "EXECUTION",
-                                "status": "IN_PROGRESS",
-                                "node_id": node_id,
-                                "timer": "start"
-                            }
-                            queue.push_message_sync(Status.IN_PROGRESS, meta)
+                    assert graph is not None
+                    def exec_before_reporter(node_id: str) -> None: # for timer in frontend
+                        meta = {
+                            "stage": "EXECUTION",
+                            "status": "IN_PROGRESS",
+                            "node_id": node_id,
+                            "timer": "start"
+                        }
+                        queue.push_message_sync(Status.IN_PROGRESS, meta)
 
-                        def exec_after_reporter(node_id: str, output_data: dict[str, Data], running_time: float) -> None:                      
+                    def exec_after_reporter(node_id: str, status: Literal["success", "error"], result: dict[str, Data] | Exception, running_time: float | None) -> bool:
+                        nonlocal has_exception
+                        if status == "success":  
+                            assert isinstance(result, dict)
+                            output_data = result                  
                             data_zips = {}
                             for port, data in output_data.items():
                                 # 1. store data in database
@@ -213,44 +254,58 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             queue.push_message_sync(Status.IN_PROGRESS, meta)
                             workflow.apply_patch(data_patch)
                             workflow.apply_patch(time_patch)
-
-                        graph.execute(callbefore=exec_before_reporter, callafter=exec_after_reporter)
-                        queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "SUCCESS"})
-                    except NodeExecutionError as e:
-                        node_index = topo_graph.get_index_by_node_id(e.node_id)
-                        assert node_index is not None
-                        patch = ProjectPatch(
-                            key=["workflow", "nodes", node_index, "error"],
-                            value=ProjNodeError(
-                                param=None, input=None, message=e.err_msg
-                            ),
-                        )
+                            return True
+                        # error case
+                        assert isinstance(result, Exception)
+                        try:
+                            raise result
+                        except NodeExecutionError as e:
+                            has_exception = True
+                            node_index = topo_graph.get_index_by_node_id(e.node_id)
+                            assert node_index is not None
+                            patch = ProjectPatch(
+                                key=["workflow", "nodes", node_index, "error"],
+                                value=ProjNodeError(
+                                    params=None, inputs=None, message=e.err_msg
+                                ),
+                            )
+                            queue.push_message_sync(
+                                Status.IN_PROGRESS, 
+                                {
+                                    "stage": "EXECUTION", 
+                                    "status": "IN_PROGRESS", 
+                                    "patch": [patch.model_dump()]
+                                }
+                            )
+                            workflow.apply_patch(patch)
+                            return True
+                        except Exception as e:
+                            has_exception = True
+                            patch = ProjectPatch(
+                                key=["workflow", "error_message"],
+                                value="Execution Error:" + str(e)
+                            )
+                            queue.push_message_sync(
+                                Status.IN_PROGRESS,
+                                {
+                                    "stage": "EXECUTION", 
+                                    "status": "IN_PROGRESS", 
+                                    "patch": [patch.model_dump()]
+                                }
+                            )
+                            workflow.apply_patch(patch)
+                            return True
+                    graph.execute(callbefore=exec_before_reporter, callafter=exec_after_reporter)
+                    if has_exception:
                         queue.push_message_sync(
                             Status.FAILURE, 
-                            {
-                                "stage": "EXECUTION", 
-                                "status": "FAILURE", 
-                                "patch": [patch.model_dump()]
-                            }
+                            {"stage": "EXECUTION", "status": "FAILURE"}
                         )
-                        workflow.apply_patch(patch)
-                        raise
-                    except Exception as e:
-                        patch = ProjectPatch(
-                            key=["workflow", "error_message"],
-                            value="Execution Error:" + str(e)
-                        )
-                        queue.push_message_sync(
-                            Status.FAILURE,
-                            {
-                                "stage": "EXECUTION", 
-                                "status": "FAILURE", 
-                                "patch": [patch.model_dump()]
-                            }
-                        )
-                        workflow.apply_patch(patch)
-                        raise
+                        return  # stop execution if execution failed
+                    else:
+                        queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "SUCCESS"})
 
+                    # 5. Finalize and save workflow
                     project_record.workflow = workflow.model_dump() # type: ignore
                     db_client.commit()
 
