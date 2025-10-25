@@ -8,7 +8,9 @@ import { usePageStore, type Page} from '@/stores/pageStore';
 import { Avatar, User } from '@element-plus/icons-vue'
 import { RouterLink } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import {useRoute} from 'vue-router';
 
+const route=useRoute()
 const pageStore = usePageStore()
 const graphStore = useGraphStore()
 const modalStore = useModalStore()
@@ -91,18 +93,22 @@ function handleClickResult(){
     })
 }
 
-function handlePage(page:Page){
-    pageStore.setCurrentPage(page);
+// 导航项
+const navItems = [
+  { name: 'Home', path: '/home', label: '首页' },
+  { name: 'File', path: '/file', label: '文件' },
+  { name: 'Program', path: '/program', label: '程序' },
+  { name: 'Example', path: '/example', label: '示例' },
+]
+
+// 判断当前页面是否激活
+const isActive = (path: string) => {
+  return route.path === path
 }
 
-function handleOpenEditor(){
-    const newWindow = window.open('/editor', '_blank')
-}
-
-function handleNewProject(){
-    projectStore.createProject();
-    handleOpenEditor();
-    ElMessage('项目' + projectStore.currentProjectName + '创建成功');
+function handleAvatarClick(){
+    // 处理头像点击事件，比如显示用户菜单
+    console.log('Avatar clicked');
 }
 
 </script>
@@ -114,44 +120,26 @@ function handleNewProject(){
   >
     <!-- 控制栏内容 -->
     <div class="control-content">
-        <div :style="{marginRight: 'auto',marginLeft: '15px', height: '90%'}">
-          <img src="../../public/logo-trans.png" alt="Logo" :style="{height: '100%',width: '100%'}"/>
+        <div class="logo-container">
+          <img src="../../public/logo-trans.png" alt="Logo" class="logo"/>
         </div>
-        <div :style="{alignItems: 'center', display: 'flex', gap: '8px',justifyContent: 'center'}">
-          <el-button @click="handleClickResult">结果</el-button>
-          <el-button @click="handleOpenEditor">编辑器</el-button>
-          <el-button @click="handleNewProject">新建项目</el-button>
+        <nav class="nav-bar">
           <RouterLink
-            :to="{path:'/File'}"
-            custom
-            v-slot="{navigate}"
+            v-for="item in navItems"
+            :key="item.path"
+            :to="item.path"
+            class="nav-link"
+            :class="{ active: isActive(item.path) }"
           >
-            <el-button @click="navigate">File</el-button>
+            {{ item.label }}
           </RouterLink>
-          <RouterLink
-            :to="{path:'/Program'}"
-            custom
-            v-slot="{navigate}"
-          >
-            <el-button @click="navigate">Program</el-button>
-          </RouterLink>
-          <RouterLink
-            :to="{path:'/Example'}"
-            custom
-            v-slot="{navigate}"
-          >
-            <el-button @click="navigate">Example</el-button>
-          </RouterLink>
+        </nav>
+        <div class="actions">
+          <el-button @click="handleClickResult" size="small">结果</el-button>
+          
         </div>
-        <div :style="{marginLeft: 'auto'}">
-          <RouterLink
-            :to="{path:'/Home'}"
-            custom
-            v-slot="{navigate}"
-          >
-            <el-button @click="navigate" :icon="Avatar"></el-button>
-          </RouterLink>
-
+        <div class="user-avatar">
+          <el-avatar :icon="Avatar" size="small" @click="handleAvatarClick"></el-avatar>
         </div>
     </div>
 
@@ -238,19 +226,69 @@ function handleNewProject(){
   width: 100%;
   color: black;
   position: relative;
-  box-shadow: 0 10px 10px rgba(128, 128, 128, 0.05);
+  box-shadow: 0 0px 15px rgba(128, 128, 128, 0.1);
 
   .control-content {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     width: 100%;
     height: 100%;
-    padding-left: 2px;
-    padding-right: 4px;
+    padding: 0 20px;
     font-size: 14px;
     cursor: context-menu;
-    gap: 12px;
+
+    .logo-container {
+      flex-shrink: 0;
+      height: 90%;
+      margin-left: 15px;
+
+      .logo {
+        height: 100%;
+        width: auto;
+      }
+    }
+
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      flex: 1;
+      justify-content: center;
+
+      .nav-link {
+        color: #000000;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s ease;
+
+        &:hover {
+          color: #108EFE;
+        }
+
+        &.active {
+          color: #000000;
+          border-bottom-color: #108EFE;
+        }
+      }
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .user-avatar {
+      flex-shrink: 0;
+      margin-left: 20px;
+      margin-right: 15px;
+      cursor: pointer;
+    }
   }
 }
 

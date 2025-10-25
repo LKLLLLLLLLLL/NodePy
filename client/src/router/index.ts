@@ -44,7 +44,7 @@ const routes: Array<RouteRecordRaw> = [
         component: Example
     },
     {
-        path: '/editor',
+        path: '/editor/:projectId',
         name: 'editor',
         component: Editor
     }
