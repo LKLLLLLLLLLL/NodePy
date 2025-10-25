@@ -3,8 +3,8 @@
         <div class="outerTools">
             <NodeResizer :min-height="minH" :min-width="minW" :max-height="maxH" :max-width="maxW" :isVisible="false"/>
         </div>
-        <div class="innerContent border-radius">
-            <div class="title topchild-border-radius">TableNode</div>
+        <div class="innerContent nodes-style">
+            <div class="title nodes-topchild-border-radius">TableNode</div>
             <div class="data">
                 <Handle id="table" type="source" :position="Position.Right"/>
                 渲染表格的地方

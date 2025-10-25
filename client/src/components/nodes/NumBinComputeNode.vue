@@ -3,8 +3,8 @@
         <div class="outerTools">
             <NodeResizer :min-height="minH" :min-width="minW" :max-height="maxH" :max-width="maxW" :isVisible="false"/>
         </div>
-        <div class="innerContent border-radius">
-            <div class="title topchild-border-radius">NumBinComputeNode</div>
+        <div class="innerContent nodes-style">
+            <div class="title nodes-topchild-border-radius">NumBinComputeNode</div>
             <div class="data">
                 <Handle id="x" type="target" :position="Position.Left" style="top: 25%"/>
                 <Handle id="y" type="target" :position="Position.Left" style="top: 75%"/>
@@ -70,7 +70,7 @@
             height: 100%;
             width: 100%;
             background: white;
-            box-shadow: 2px 2px 6px 0px #aaa;
+            // box-shadow: 2px 2px 6px 0px #aaa;
             .title {
                 background: #ccc;
                 text-align: left;

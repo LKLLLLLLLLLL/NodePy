@@ -28,7 +28,7 @@ const menuLocation = computed(() => {
 // 获取叶子节点（扁平化处理三级菜单）
 const getLeafItems = (item: any) => {
   const leafItems: any[] = []
-  
+
   if (item.children) {
     item.children.forEach((child: any) => {
       if (child.children) {
@@ -40,18 +40,18 @@ const getLeafItems = (item: any) => {
       }
     })
   }
-  
+
   return leafItems
 }
 
 // 处理右键点击事件
 const handleContextmenu = (event: MouseEvent) => {
   event.preventDefault()
-  
+
   x.value = event.clientX
   y.value = event.clientY
   showMenu.value = false
-  
+
   // 使用 setTimeout 确保 DOM 更新后再显示菜单
   setTimeout(() => {
     showMenu.value = true
@@ -69,10 +69,10 @@ function handleClickResult(){
     const marginRight = 20; // 距离右侧的间距
     const modalWidth = 600; // 弹窗宽度
     const modalHeight = 800; // 弹窗高度
-    
+
     // 计算位置：窗口宽度 - 弹窗宽度 - 右侧间距
     const xPosition = window.innerWidth - modalWidth - marginRight;
-    const yPosition = (window.innerHeight - modalHeight)/2; 
+    const yPosition = (window.innerHeight - modalHeight)/2;
 
     modalStore.createModal({
         id: 'result',
@@ -108,8 +108,8 @@ function handleNewProject(){
 </script>
 
 <template>
-  <div 
-    class="control-bar"
+  <div
+    class="control-bar set_background_color"
     @contextmenu="handleContextmenu"
   >
     <!-- 控制栏内容 -->
@@ -121,21 +121,21 @@ function handleNewProject(){
           <el-button @click="handleClickResult">结果</el-button>
           <el-button @click="handleOpenEditor">编辑器</el-button>
           <el-button @click="handleNewProject">新建项目</el-button>
-          <RouterLink 
+          <RouterLink
             :to="{path:'/File'}"
             custom
             v-slot="{navigate}"
           >
             <el-button @click="navigate">File</el-button>
           </RouterLink>
-          <RouterLink 
+          <RouterLink
             :to="{path:'/Program'}"
             custom
             v-slot="{navigate}"
           >
             <el-button @click="navigate">Program</el-button>
           </RouterLink>
-          <RouterLink 
+          <RouterLink
             :to="{path:'/Example'}"
             custom
             v-slot="{navigate}"
@@ -144,17 +144,17 @@ function handleNewProject(){
           </RouterLink>
         </div>
         <div :style="{marginLeft: 'auto'}">
-          <RouterLink 
-            :to="{path:'/Home'}" 
-            custom 
+          <RouterLink
+            :to="{path:'/Home'}"
+            custom
             v-slot="{navigate}"
           >
             <el-button @click="navigate" :icon="Avatar"></el-button>
           </RouterLink>
-            
+
         </div>
     </div>
-    
+
     <!-- 透明激活器，确保菜单在鼠标处弹出 -->
     <div
       v-if="showMenu"
@@ -169,7 +169,7 @@ function handleNewProject(){
       }"
       id="menu-activator"
     ></div>
-    
+
     <!-- 主菜单 -->
     <v-menu
       v-model="showMenu"
@@ -189,12 +189,12 @@ function handleNewProject(){
             class="menu-item parent-item"
           >
             <template #append>
-              <v-icon 
-                :icon="menuLocation === 'right' ? 'mdi-chevron-right' : 'mdi-chevron-left'" 
+              <v-icon
+                :icon="menuLocation === 'right' ? 'mdi-chevron-right' : 'mdi-chevron-left'"
                 size="x-small"
               ></v-icon>
             </template>
-            
+
             <!-- 二级菜单 -->
             <v-menu
               :open-on-focus="false"
@@ -216,7 +216,7 @@ function handleNewProject(){
               </v-list>
             </v-menu>
           </v-list-item>
-          
+
           <!-- 一级叶子节点 -->
           <v-list-item
             v-else
@@ -236,11 +236,10 @@ function handleNewProject(){
   flex-direction: row;
   height: 100%;
   width: 100%;
-  color: white;
-  background-color: white;
+  color: black;
   position: relative;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  
+  box-shadow: 0 10px 10px rgba(128, 128, 128, 0.05);
+
   .control-content {
     display: flex;
     align-items: center;
@@ -260,13 +259,13 @@ function handleNewProject(){
   min-width: 160px;
   padding: 6px 4px !important;
   border-radius: 12px !important; // 增大圆角
-  
+
   .v-list-item {
     min-height: 28px !important;
     margin: 2px 4px !important;
     border-radius: 6px !important; // 增大菜单项圆角
     cursor: pointer;
-    
+
     &:hover {
       background-color: rgba(0, 0, 0, 0.06);
     }
@@ -277,7 +276,7 @@ function handleNewProject(){
 :deep(.parent-item) {
   margin: 3px 4px !important;
   background-color: rgba(0, 0, 0, 0.02);
-  
+
   &:hover {
     background-color: rgba(0, 0, 0, 0.08);
   }
@@ -288,13 +287,13 @@ function handleNewProject(){
   min-width: 160px;
   padding: 6px 4px !important;
   border-radius: 12px !important; // 增大圆角
-  
+
   .v-list-item {
     min-height: 28px !important;
     margin: 1px 4px !important;
     border-radius: 6px !important; // 增大菜单项圆角
     cursor: pointer;
-    
+
     &:hover {
       background-color: rgba(0, 0, 0, 0.06);
     }
@@ -310,7 +309,7 @@ function handleNewProject(){
 :deep(.leaf-item) {
   min-height: 28px !important;
   border-radius: 6px !important; // 增大圆角
-  
+
   &:hover {
     background-color: rgba(0, 123, 255, 0.12) !important;
   }
@@ -333,7 +332,7 @@ function handleNewProject(){
   border-radius: 16px !important; // 显著增大圆角
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important; // 增强阴影以配合更大的圆角
   overflow: hidden; // 确保内容不超出圆角边界
-  
+
   .v-list {
     background-color: #ffffff;
   }
@@ -343,4 +342,11 @@ function handleNewProject(){
 :deep(.v-list-item__append) {
   margin-left: 8px;
 }
+</style>
+
+<style lang="scss" scoped>
+@use '../common/style/global.scss';
+  .box {
+    flex: 1;
+  }
 </style>

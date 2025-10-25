@@ -31,14 +31,14 @@
 
         const deltaX = event.clientX - dragStartPosition.value.x;
         const deltaY = event.clientY - dragStartPosition.value.y;
-    
+
         const newPosition = {
             x: dragStartModalPosition.value.x + deltaX,
             y: dragStartModalPosition.value.y + deltaY
         };
             modalStore.updateModalPosition(props.modal.id, newPosition);
         }
-    }; 
+    };
 
     const stopDrag = () => {
         if(!props.modal.isDraggable)return;
@@ -71,11 +71,11 @@
 
         const deltaX = event.clientX - resizeStartPosition.value.x;
         const deltaY = event.clientY - resizeStartPosition.value.y;
-    
+
         let newWidth = resizeStartSize.value.width;
         let newHeight = resizeStartSize.value.height;
-        let newPosition = { ...resizeStartModalPosition.value };
-    
+        const newPosition = { ...resizeStartModalPosition.value };
+
         // 根据调整方向计算新尺寸和位置
         switch(resizeDirection.value) {
             case 'right':
@@ -113,12 +113,12 @@
                 newPosition.y = resizeStartModalPosition.value.y + deltaY;
                 break;
         }
-    
+
         modalStore.updateModalSize(props.modal.id, {
             width: newWidth,
             height: newHeight
         });
-    
+
         if (newPosition.x !== resizeStartModalPosition.value.x || newPosition.y !== resizeStartModalPosition.value.y) {
             modalStore.updateModalPosition(props.modal.id, newPosition);
         }
@@ -134,19 +134,19 @@
     const startResize = (event: MouseEvent, direction: string) => {
         if (!props.modal.isResizable) return
         if (isDragging.value) return;
-    
+
         isResizing.value = true;
         resizeDirection.value = direction;
         resizeStartPosition.value = {
             x: event.clientX,
             y: event.clientY
         };
-    
+
         resizeStartSize.value = {
             width: props.modal.size?.width || 200,
             height: props.modal.size?.height || 200
         };
-    
+
         resizeStartModalPosition.value = {
             x: props.modal.position.x,
             y: props.modal.position.y
@@ -162,12 +162,12 @@
     };
 </script>
 <template>
-    <div class = "modal-container" v-if="modal.isActive" 
-        :style="{ 
-            left: modal.position.x + 'px', 
-            top: modal.position.y + 'px', 
-            width: modal.size?.width + 'px', 
-            height: modal.size?.height + 'px', 
+    <div class = "modal-container controller-style" v-if="modal.isActive"
+        :style="{
+            left: modal.position.x + 'px',
+            top: modal.position.y + 'px',
+            width: modal.size?.width + 'px',
+            height: modal.size?.height + 'px',
             zIndex: modal.zIndex,
             minWidth: modal.minSize?.width ? modal.minSize.width + 'px' : 'none',
             minHeight: modal.minSize?.height ? modal.minSize.height + 'px' : 'none',
@@ -192,19 +192,19 @@
                 </div> -->
             </div>
             <div class = "modal-control">
-                <el-button 
+                <el-button
                     @click = "closeModal"
                     :style="{height: '100%',width: 'max(60px, 10%)',borderRadius: '16px'}"
-                    
+
                     :icon="Close"
                 >
                 </el-button>
             </div>
         </div>
         <div class = "modal-body">
-            <component 
-                v-if="modal.component" 
-                :is="modal.component" 
+            <component
+                v-if="modal.component"
+                :is="modal.component"
                 v-bind="modal.props"
             />
             <div v-else-if="modal.content" class = "modal-content">
@@ -221,10 +221,8 @@
         position: fixed;
         display: flex;
         flex-direction: column;
-        background-color: white;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        background-color: white !important;
         color: black;
-        border-radius: 16px;
     }
     .modal-head{
         display: flex;
@@ -303,7 +301,7 @@
     //     bottom: -3px;
     // }
 
-    // .resize-handle-top-right, .resize-handle-bottom-right, 
+    // .resize-handle-top-right, .resize-handle-bottom-right,
     // .resize-handle-bottom-left, .resize-handle-top-left {
     //     width: 12px;
     //     height: 12px;
@@ -334,4 +332,8 @@
     //     left: -6px;
     //     cursor: nw-resize;
     // }
+</style>
+
+<style lang="scss" scoped>
+@use '../common/style/global.scss';
 </style>

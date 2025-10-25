@@ -48,7 +48,7 @@
     .up-container{
         top: 0;
         z-index: 1000;
-        height: 60px;
+        height: 55px;
         width: 100%;
         position: sticky;
         flex-shrink: 0;

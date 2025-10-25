@@ -3,8 +3,8 @@
         <div class="outerTools">
             <NodeResizer :min-height="minH" :min-width="minW" :max-height="maxH" :max-width="maxW" :isVisible="false"/>
         </div>
-        <div class="innerContent border-radius">
-            <div class="title topchild-border-radius">StringNode</div>
+        <div class="innerContent nodes-style">
+            <div class="title nodes-topchild-border-radius">StringNode</div>
             <div class="data">
                 <Handle id="string" type="source" :position="Position.Right"/>
                 <el-input class="input nodrag" v-model="value" @input="onInput"/>
@@ -49,7 +49,7 @@
             }
         })
     })
-        
+
 </script>
 
 <style lang="scss" scoped>
@@ -61,11 +61,11 @@
             height: 100%;
             width: 100%;
             background: white;
-            box-shadow: 2px 2px 6px 0px #aaa;
+            // box-shadow: 2px 2px 6px 0px #aaa;
             .title {
                 background: #ccc;
                 text-align: left;
-                padding-left: 8px;                
+                padding-left: 8px;
             }
             .data {
                 padding: 10px 0;
