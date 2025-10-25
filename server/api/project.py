@@ -201,13 +201,13 @@ async def rename_project(project_id: int, new_name: str, db_client: Session = De
 
 class TaskResponse(BaseModel):
     """Response returned when a task is submitted."""
-    task_id: str | None
+    task_id: str
 
 @router.post(
     "/sync",
     status_code=202,
     responses={
-        204: {"description": "No execution needed, project synced", "model": TaskResponse},
+        204: {"description": "No execution needed, project synced", "model": None},
         202: {"description": "Task accepted and running", "model": TaskResponse},
         403: {"description": "User has no access to this project"},
         404: {"description": "Project not found"},
@@ -270,7 +270,7 @@ async def sync_project(project: Project, response: Response, db_client: Session 
 
             if not need_exec:
                 response.status_code = 204  # No Content
-                return TaskResponse(task_id=None)
+                return None
             
             celery_task = cast(CeleryTask, execute_project_task)  # to suppress type checker error
             task = celery_task.delay(  # the return message will be sent back via streamqueue
@@ -287,6 +287,7 @@ async def sync_project(project: Project, response: Response, db_client: Session 
         db_client.rollback()
         logger.exception(f"Error syncing project {project.project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
 
 @router.websocket("/status/{task_id}")
 async def project_status(task_id: str, websocket: WebSocket) -> None:
