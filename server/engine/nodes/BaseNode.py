@@ -73,7 +73,7 @@ class BaseNode(BaseModel):
     
     """
     Private methods
-    """
+    """    
     @model_validator(mode='after')
     def _validate_parameters(self) -> Self:
         """ validate parameters when constructing """

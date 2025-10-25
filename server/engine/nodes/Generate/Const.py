@@ -1,7 +1,7 @@
 from ..BaseNode import InPort, OutPort, BaseNode, register_node
 from server.models.data import Data
 from server.models.schema import Schema
-from typing import Literal, Optional, override
+from typing import Literal, override
 from server.models.exception import NodeParameterError
 
 @register_node
@@ -9,7 +9,7 @@ class ConstNode(BaseNode):
     """
     A node to generate a constant value(float, int).
     """
-    value: Optional[float | int]
+    value: float | int
     data_type: Literal["float", "int"]
 
     @override
@@ -21,6 +21,7 @@ class ConstNode(BaseNode):
                 err_msg="Node type must be 'ConstNode'."
             )
         if self.data_type == "float":
+            self.value = float(self.value)
             if not isinstance(self.value, float):
                 raise NodeParameterError(
                     node_id=self.id,
@@ -28,6 +29,14 @@ class ConstNode(BaseNode):
                     err_msg="value must be float when data_type is 'float'."
                 )
         elif self.data_type == "int":
+            if isinstance(self.value, float):
+                if not self.value.is_integer():
+                    raise NodeParameterError(
+                        node_id=self.id,
+                        err_param_key="value",
+                        err_msg="value must be an integer when data_type is 'int'."
+                    )
+                self.value = int(self.value)
             if not isinstance(self.value, int):
                 raise NodeParameterError(
                     node_id=self.id,

@@ -41,14 +41,6 @@ class ProjectExecutor:
         # construct global config
         self.cache_manager = cache_manager # used only by NodeGraph, no need to pass to nodes
         self._global_config = GlobalConfig(file_manager=file_manager, user_id=user_id, project_id=topology.project_id)
-
-    def _get_edge_tar_from_src(self, src: str) -> list[str]:
-        """ Get all target node ids from a source node id """
-        return [tar for s, tar in self._graph.out_edges(src)]
-    
-    def _get_edge_src_from_tar(self, tar: str) -> list[str]:
-        """ Get all source node ids from a target node id """
-        return [src for src, _ in self._graph.in_edges(tar)]
     
     def construct_nodes(self, callback: Callable[[str, Literal["success", "error"], Exception | None], bool]) -> None:
         """ 
@@ -107,7 +99,7 @@ class ProjectExecutor:
             if node_id in unreachable_nodes:
                 continue
             node = self._node_objects[node_id]
-            in_edges = list(self._graph.in_edges(node_id, data=True))
+            in_edges = list(self._graph.in_edges(node_id, data=True)) # type: ignore
 
             # get input schema
             input_schemas : dict[str, Schema] = {}
@@ -160,7 +152,7 @@ class ProjectExecutor:
             if node_id in unreachable_nodes:
                 continue
             node = self._node_objects[node_id]
-            in_edges = list(self._graph.in_edges(node_id, data=True))
+            in_edges = list(self._graph.in_edges(node_id, data=True)) # type: ignore
             
             # 1. get input data
             input_data : dict[str, Data] = {}

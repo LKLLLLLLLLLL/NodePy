@@ -52,8 +52,6 @@ class CacheManager:
 
     def _add_cache_miss_num(self) -> None:
         """Increment the cache miss counter for the project."""
-        miss_key = "cache_stat:miss"
-        self.redis_client.incr(miss_key)
         total_key = "cache_stat:total"
         self.redis_client.incr(total_key)
         # print to log every 10 requests

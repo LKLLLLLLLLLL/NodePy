@@ -1,7 +1,7 @@
 from ..BaseNode import InPort, OutPort, BaseNode, register_node
 from server.models.data import Data
 from server.models.schema import Schema
-from typing import Optional, override
+from typing import override
 from server.models.exception import NodeParameterError
 
 
@@ -11,7 +11,7 @@ class BoolNode(BaseNode):
     A node to generate a constant boolean value.
     """
 
-    value: Optional[bool]
+    value: bool
 
     @override
     def validate_parameters(self) -> None:
