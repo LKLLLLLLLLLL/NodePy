@@ -14,6 +14,21 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class DefaultService {
     /**
+     * List Projects
+     * List all projects for the current user.
+     * @returns Project List of projects retrieved successfully
+     * @throws ApiError
+     */
+    public static listProjectsApiProjectListGet(): CancelablePromise<Array<Project>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/project/list',
+            errors: {
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
      * Get Project
      * Get the full data structure of a project.
      * @param projectId
@@ -57,6 +72,7 @@ export class DefaultService {
                 403: `User has no access to this project`,
                 404: `Project not found`,
                 422: `Validation Error`,
+                423: `Project is locked, it may be being edited by another process`,
                 500: `Internal server error`,
             },
         });
@@ -64,13 +80,14 @@ export class DefaultService {
     /**
      * Create Project
      * Create a new project for a user.
+     * Return project id.
      * @param projectName
-     * @returns any Project created successfully
+     * @returns number Project created successfully
      * @throws ApiError
      */
     public static createProjectApiProjectCreatePost(
         projectName: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<number> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/project/create',
@@ -109,6 +126,7 @@ export class DefaultService {
                 403: `User has no access to this project`,
                 404: `Project not found`,
                 422: `Validation Error`,
+                423: `Project is locked, it may be being edited by another process`,
                 500: `Internal server error`,
             },
         });
@@ -135,6 +153,7 @@ export class DefaultService {
                 403: `User has no access to this project`,
                 404: `Project not found`,
                 422: `Validation Error`,
+                423: `Project is locked, it may be being edited by another process`,
                 500: `Internal server error`,
             },
         });

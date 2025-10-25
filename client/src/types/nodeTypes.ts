@@ -14,8 +14,8 @@ interface BaseNode<T = BaseData> extends AbstractNode{
 
 /**************  Generate Nodes ****************/
 export interface ConstNodeParam{
-    value: number|string|boolean
-    data_type: 'int' | 'float' | 'str' | 'bool'
+    value: number
+    data_type: 'int' | 'float'
 }
 export type ConstNodeData = BaseData & {
     param: ConstNodeParam

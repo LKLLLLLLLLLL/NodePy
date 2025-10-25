@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ProjNodeError = {
-    param: (string | null);
-    input: (Array<string> | null);
-    message: string;
+    params: (Array<string> | null);
+    inputs: (Array<string> | null);
+    message: (Array<string> | string);
 };
 
