@@ -173,7 +173,7 @@ class ProjectExecutor:
 
             # 2. search cache
             cache_data = self.cache_manager.get(
-                node_id=node_id,
+                node_type=self._node_map[node_id].type,
                 params=self._node_map[node_id].params,
                 inputs=input_data,
             )
@@ -216,7 +216,7 @@ class ProjectExecutor:
             # 6. store to CacheManager
             if output_data is not None:
                 self.cache_manager.set(
-                    node_id=node_id,
+                    node_type=self._node_map[node_id].type,
                     params=self._node_map[node_id].params,
                     inputs=input_data,
                     outputs=output_data,

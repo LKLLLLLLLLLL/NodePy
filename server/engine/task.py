@@ -42,7 +42,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     graph = None
                     try:
                         file_manager = FileManager()
-                        cache_manager = CacheManager(project_id=project_id)
+                        cache_manager = CacheManager()
                         graph = ProjectExecutor(file_manager=file_manager, cache_manager=cache_manager, topology=topo_graph, user_id=user_id)
                         queue.push_message_sync(
                             Status.IN_PROGRESS, 

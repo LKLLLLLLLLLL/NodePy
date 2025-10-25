@@ -7,10 +7,10 @@ from server.models.exception import NodeParameterError
 @register_node
 class ConstNode(BaseNode):
     """
-    A node to generate a constant value(float, bool, int).
+    A node to generate a constant value(float, int).
     """
-    value: Optional[float | int | str | bool]
-    data_type: Literal["float", "int", "str", "bool"]
+    value: Optional[float | int]
+    data_type: Literal["float", "int"]
 
     @override
     def validate_parameters(self) -> None:
@@ -20,14 +20,7 @@ class ConstNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type must be 'ConstNode'."
             )
-        if self.data_type == "str":
-            if not isinstance(self.value, str):
-                raise NodeParameterError(
-                    node_id=self.id,
-                    err_param_key="value",
-                    err_msg="value must be str when data_type is 'str'."
-                )
-        elif self.data_type == "float":
+        if self.data_type == "float":
             if not isinstance(self.value, float):
                 raise NodeParameterError(
                     node_id=self.id,
@@ -41,13 +34,6 @@ class ConstNode(BaseNode):
                     err_param_key="value",
                     err_msg="value must be int when data_type is 'int'."
                 )
-        elif self.data_type == "bool":
-            if not isinstance(self.value, bool):
-                raise NodeParameterError(
-                    node_id=self.id,
-                    err_param_key="value",
-                    err_msg="value must be bool when data_type is 'bool'."
-                )
         return
 
     @override
@@ -60,8 +46,6 @@ class ConstNode(BaseNode):
             return {"const": Schema(type=Schema.Type.FLOAT)}
         elif self.data_type == "int":
             return {"const": Schema(type=Schema.Type.INT)}
-        elif self.data_type == 'bool':
-            return {"const": Schema(type=Schema.Type.BOOL)}
         else:
             raise TypeError(f"Unsupported data_type: {self.data_type}")
 
