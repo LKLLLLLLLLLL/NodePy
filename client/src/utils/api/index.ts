@@ -17,6 +17,8 @@ export { FileItem } from './models/FileItem';
 export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { Position } from './models/Position';
 export type { Project } from './models/Project';
+export type { ProjectList } from './models/ProjectList';
+export type { ProjectListItem } from './models/ProjectListItem';
 export type { ProjEdge } from './models/ProjEdge';
 export type { ProjNode } from './models/ProjNode';
 export type { ProjNodeError } from './models/ProjNodeError';

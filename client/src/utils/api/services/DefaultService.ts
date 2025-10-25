@@ -7,6 +7,7 @@ import type { DataView } from '../models/DataView';
 import type { DeleteResponse } from '../models/DeleteResponse';
 import type { File } from '../models/File';
 import type { Project } from '../models/Project';
+import type { ProjectList } from '../models/ProjectList';
 import type { TaskResponse } from '../models/TaskResponse';
 import type { UserFileList } from '../models/UserFileList';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -16,10 +17,10 @@ export class DefaultService {
     /**
      * List Projects
      * List all projects for the current user.
-     * @returns Project List of projects retrieved successfully
+     * @returns ProjectList List of projects retrieved successfully
      * @throws ApiError
      */
-    public static listProjectsApiProjectListGet(): CancelablePromise<Array<Project>> {
+    public static listProjectsApiProjectListGet(): CancelablePromise<ProjectList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/project/list',

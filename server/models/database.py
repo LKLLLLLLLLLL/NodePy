@@ -1,8 +1,9 @@
-from sqlalchemy import String, Integer, Column, ForeignKey, Enum, BigInteger, UniqueConstraint, JSON
+from sqlalchemy import String, Integer, Column, ForeignKey, Enum, BigInteger, UniqueConstraint, JSON, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
+from sqlalchemy.sql import func
 from typing import Iterator
 import os
 
@@ -39,6 +40,8 @@ class ProjectRecord(Base):
     name = Column(String, unique=True, index=True, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     workflow = Column(JSON, nullable=False)  # Serialized workflow structure
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
 
 class NodeOutputRecord(Base):
     """

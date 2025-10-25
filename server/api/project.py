@@ -12,6 +12,7 @@ import asyncio
 from server.celery import celery_app
 from server.models.exception import ProjectLockError
 from loguru import logger
+from server.models.project_list import ProjectList, ProjectListItem
 
 """
 The api for nodes runing, reporting and so on,
@@ -22,29 +23,32 @@ router = APIRouter()
     "/list",
     status_code=200,
     responses={
-        200: {"description": "List of projects retrieved successfully", "model": list[Project]},
+        200: {"description": "List of projects retrieved successfully", "model": ProjectList},
         500: {"description": "Internal server error"},
     },
 )
-async def list_projects(db_client: Session = Depends(get_session)) -> list[Project]:
+async def list_projects(db_client: Session = Depends(get_session)) -> ProjectList:
     """
     List all projects for the current user.
     """
     user_id = 1 # for debug
     try:
-        projects = db_client.query(ProjectRecord).filter(ProjectRecord.owner_id == user_id).all()
-        result: list[Project] = []
-        for project in projects:
-            workflow = ProjWorkflow(**project.workflow) if project.workflow is not None else ProjWorkflow.get_empty_workflow() # type: ignore
-            result.append(
-                Project(
-                    project_name=project.name, # type: ignore
-                    project_id=project.id,     # type: ignore
-                    user_id=project.owner_id,  # type: ignore
-                    workflow=workflow,
+        project_records = db_client.query(ProjectRecord).filter(ProjectRecord.owner_id == user_id).all()
+        projects: list[ProjectListItem] = []
+        for project_record in project_records:
+            projects.append(
+                ProjectListItem(
+                    project_id=project_record.id,  # type: ignore
+                    project_name=project_record.name,  # type: ignore
+                    owner=project_record.owner_id,  # type: ignore
+                    created_at=int(project_record.created_at.timestamp() * 1000) if project_record.created_at else None,  # type: ignore
+                    updated_at=int(project_record.updated_at.timestamp() * 1000) if project_record.updated_at else None,  # type: ignore
                 )
             )
-        return result
+        return ProjectList(
+            userid=user_id,
+            projects=projects,
+        )
     except Exception as e:
         logger.exception(f"Error listing projects for user {user_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
@@ -287,7 +291,6 @@ async def sync_project(project: Project, response: Response, db_client: Session 
         db_client.rollback()
         logger.exception(f"Error syncing project {project.project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
 
 @router.websocket("/status/{task_id}")
 async def project_status(task_id: str, websocket: WebSocket) -> None:
