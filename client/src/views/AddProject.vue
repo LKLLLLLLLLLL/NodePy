@@ -1,21 +1,17 @@
 <script lang="ts" setup>
     import {ref} from 'vue';
     import { useProjectStore } from '@/stores/projectStore';
+    import { useModalStore } from '@/stores/modalStore';
 
     const projectStore = useProjectStore();
+    const modalStore = useModalStore();
 
-    function openEditor(id?: string){
-        if(id){
-            const newWindow = window.open('/editor'+'/'+id, '_blank')
-        } 
-        else {
-            const newWindow = window.open('/editor', '_blank')
-        }
-    }
-
-    function onCreateProject(){
+    async function onCreateProject(){
         projectStore.createProject();
-        openEditor();
+        await projectStore.initializeProjects();
+        projectStore.openProject(projectStore.currentProjectId);
+        modalStore.deactivateModal('add-project');
+        modalStore.destroyModal('add-project');
     }
 
 </script>
@@ -24,9 +20,9 @@
         <el-form-item label="Project Name">
             <el-input placeholder="Enter project name" v-model="projectStore.currentProjectName"></el-input>
         </el-form-item>
-        <el-form-item label="Description">
+        <!-- <el-form-item label="Description">
             <el-switch></el-switch>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item>
             <el-button type="primary" @click="onCreateProject">Create Project</el-button>
         </el-form-item>
