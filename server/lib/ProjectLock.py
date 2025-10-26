@@ -4,7 +4,7 @@ import os
 from typing import Optional, Self
 import asyncio
 import time
-from server.models.exception import ProjectLockError
+from server.models.exception import ProjectLockError, ProjLockIdentityError
 
 LOCK_REDIS_URL = os.getenv("REDIS_URL", "") + "/3"
 RETRY_INTERVAL = 0.1  # seconds
@@ -81,11 +81,18 @@ class ProjectLock:
             total_wait += RETRY_INTERVAL
             await asyncio.sleep(RETRY_INTERVAL)
         if not acquired:
-            raise ProjectLockError(f"Project {self._project_id} is already locked.")
+            raise ProjectLockError(f"Project {self._project_id} is already locked.")                
         if identity is not None:
             # clear appointed identity after acquiring the lock
             identity_key = f"project_lock:{self._project_id}:appointed"
             await self._async_conn.delete(identity_key)
+        else:
+            if self._identity is not None:
+                # get the lock, but not satisfy my identity. Because the identity can be expired, it tends that I will never got the right lock, so throw exception.
+                await self.release_async() # release the lock, because the __aexit__ may not be called
+                raise ProjLockIdentityError(
+                    f"Project {self._project_id} lock identity does not match the appointed identity."
+                )
 
     async def release_async(self) -> None:
         """
@@ -179,6 +186,13 @@ class ProjectLock:
             # clear appointed identity after acquiring the lock
             identity_key = f"project_lock:{self._project_id}:appointed"
             self._sync_conn.delete(identity_key)
+        else:
+            if self._identity is not None:
+                # get the lock, but not satisfy my identity. Because the identity can be expired, it tends that I will never got the right lock, so throw exception.
+                self.release_sync() # release the lock, because the __exit__ may not be called
+                raise ProjLockIdentityError(
+                    f"Project {self._project_id} lock identity does not match the appointed identity."
+                )
 
     def release_sync(self) -> None:
         """

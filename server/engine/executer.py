@@ -27,14 +27,12 @@ class ProjectExecutor:
         self._nodes: list[TopoNode] = topology.nodes
         self._edges: list[TopoEdge] = topology.edges
         self._graph: nx.MultiDiGraph = nx.MultiDiGraph()
-        self._graph.add_nodes_from([node.id for node in self._nodes]) # add nodes as indices
+        self._graph.add_nodes_from(node.id for node in self._nodes) # add nodes as indices
         for edge in self._edges:
             self._graph.add_edge(edge.src, edge.tar, src_port=edge.src_port, tar_port=edge.tar_port)
         if not nx.is_directed_acyclic_graph(self._graph):
             raise ValueError("The graph must be a Directed Acyclic Graph (DAG)")
-        self._node_map: dict[str, TopoNode] = {}
-        for node in self._nodes:
-            self._node_map[node.id] = node
+        self._node_map: dict[str, TopoNode] = {node.id: node for node in self._nodes}
         self._node_objects: dict[str, BaseNode] = {}
         self._exec_queue: list[str] = []
         self._stage: Literal["init", "constructed", "static_analyzed", "running", "finished"] = "init"
@@ -113,6 +111,7 @@ class ProjectExecutor:
             # run schema inference
             try:
                 output_schemas = node.infer_schema(input_schemas)
+                # store output schema
                 for tar_port, schema in output_schemas.items():
                     schema_cache[(node_id, tar_port)] = schema
             except Exception as e:
@@ -164,7 +163,7 @@ class ProjectExecutor:
                 input_data[tar_port] = src_data
 
             # 2. search cache
-            cache_data = self.cache_manager.get(
+            cache_data = self.cache_manager.get( 
                 node_type=self._node_map[node_id].type,
                 params=self._node_map[node_id].params,
                 inputs=input_data,

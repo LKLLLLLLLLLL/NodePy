@@ -312,14 +312,29 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                 except SoftTimeLimitExceeded:
                     patch = ProjectPatch(
                         key=["workflow", "error_message"],
-                        value="Execution Error: Task timed out."
+                        value="Error: Task timed out."
                     )
                     if workflow:
                         workflow.apply_patch(patch)
                     queue.push_message_sync(
                         Status.FAILURE,
                         {
-                            "stage": "EXECUTION",
+                            "stage": "UNKNOWN",
+                            "status": "FAILURE",
+                            "patch": [patch.model_dump()]
+                        }
+                    )
+                except Exception as e:
+                    patch = ProjectPatch(
+                        key=["workflow", "error_message"],
+                        value="Error:" + str(e)
+                    )
+                    if workflow:
+                        workflow.apply_patch(patch)
+                    queue.push_message_sync(
+                        Status.FAILURE,
+                        {
+                            "stage": "UNKNOWN",
                             "status": "FAILURE",
                             "patch": [patch.model_dump()]
                         }

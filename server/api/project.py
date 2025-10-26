@@ -10,14 +10,15 @@ from server.lib.ProjectLock import ProjectLock
 from sqlalchemy.orm import Session
 import asyncio
 from server.celery import celery_app
-from server.models.exception import ProjectLockError
+from server.models.exception import ProjectLockError, ProjLockIdentityError
 from loguru import logger
 from server.models.project_list import ProjectList, ProjectListItem
+from celery.result import AsyncResult
 
 """
 The api for nodes runing, reporting and so on,
 """
-router = APIRouter()
+router = APIRouter() 
 
 @router.get(
     "/list",
@@ -301,6 +302,12 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
     is a JSON-encoded string describing stage/status/error. The connection is
     closed with code 1000 when the task finishes successfully, or other close
     codes for errors/timeouts.
+    
+    - 1000: Normal closure when task finishes successfully.
+    - 1011: Internal server error during task execution.
+    - 4400: Task timed out due to inactivity.
+    - 4401: Client closed the connection.
+    - 4409: Project is locked and wait time out.
     """
     await websocket.accept()
 
@@ -308,8 +315,33 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
         async with StreamQueue(task_id) as queue:
             timeout_count = 0
             while True:
+                # 1. Check if task fail
+                task_res = AsyncResult(task_id, app=celery_app)
+                if task_res.failed():
+                    # Because all exceptions are handled and reported via StreamQueue,
+                    # this failed should happen very rarely.
+                    if isinstance(task_res.result, Exception):
+                        try:
+                            raise task_res.result
+                        except ProjectLockError as e:
+                            logger.exception(f"Project lock error for task {task_id}: {e}")
+                            await websocket.close(code=4409, reason=f"Project is locked, and waitting time out. This may be caused by running one project multiple times concurrently. Details: {str(e)}")
+                            break # 4409 for conflict
+                        except ProjLockIdentityError as e:
+                            logger.exception(f"Project lock identity error for task {task_id}: {e}")
+                            await websocket.close(code=4409, reason=f"Project lock identity error: {str(e)}")
+                            break
+                        except Exception as e:
+                            logger.exception(f"Task {task_id} failed with exception: {e}")
+                            await websocket.close(code=1011, reason=f"Task failed with exception: {str(e)}")
+                            break
+                    else:
+                        await websocket.close(code=1011, reason="Task failed.")
+                        break
+                
+                # 2. await messages from both queue and websocket
                 # Create tasks for both queue and websocket
-                read_task = asyncio.create_task(queue.read_message())
+                read_task = asyncio.create_task(queue.read_message(timeout_ms=5*1000))
                 recv_task = asyncio.create_task(websocket.receive_text())
 
                 try:
@@ -327,12 +359,12 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
                 for task in pending:
                     task.cancel()
                 
-                # check if websocket is disconnected
+                # 3. check if websocket is disconnected
                 if websocket.client_state.name != "CONNECTED":
                     celery_app.control.revoke(task_id, terminate=True)
                     break
-                
-                # check if the websocket received a message from client
+
+                # 4. check if the websocket received a message from client
                 if recv_task in done:
                     try:
                         message = recv_task.result()
@@ -347,15 +379,16 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
                         await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")
                         break
                 
-                # check if we received a message from the task
+                # 5. check if received a message from the task
                 if read_task in done:
                     try:
                         status, message = read_task.result()
                         
                         if status == Status.TIMEOUT:
                             timeout_count += 1
-                            if timeout_count >= 3:
+                            if timeout_count >= 12: # 1 minute timeout for one node
                                 celery_app.control.revoke(task_id, terminate=True)
+                                # avoid dead loop for user provided workflow
                                 await websocket.close(code=4400, reason="Task timed out.")
                                 break
                             else:

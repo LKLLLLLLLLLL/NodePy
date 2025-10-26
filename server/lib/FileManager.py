@@ -54,7 +54,7 @@ class FileManager:
         ).filter(
             FileRecord.user_id == user_id
         ).all()
-        return sum([size for (size,) in total])  # type: ignore
+        return sum(size for (size,) in total)  # type: ignore
 
     """
     For unsupport lib, you can use write method like this:
