@@ -67,7 +67,7 @@ watch(() => {
     try {
       console.log('syncProjectApiProjectSyncPost')
       const taskResponse = await DefaultService.syncProjectApiProjectSyncPost(p)
-      console.log(taskResponse, Date.now())
+      console.log(taskResponse)
       if(!taskResponse) return
       const {task_id} = taskResponse
 

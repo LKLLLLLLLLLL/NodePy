@@ -68,7 +68,7 @@ export const parseProject = (p: Project, tar: vueFlowProject) => {
         tar.project_name = p.project_name
         tar.user_id = p.user_id
         tar.workflow.error_message = p.workflow.error_message
-        tar.workflow.edges.value = graphEdges
-        tar.workflow.nodes.value = graphNodes
+        Object.assign(tar.workflow.edges.value, graphEdges)
+        Object.assign(tar.workflow.nodes.value, graphNodes)
     }
 }
