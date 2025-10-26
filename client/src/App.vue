@@ -1,6 +1,6 @@
 <script setup lang = "ts">
     import ControlBar from './components/ControlBar.vue';
-    import Program from './views/Program.vue';
+    import Project from './views/Project.vue';
     import Home from './views/Home.vue';
     import File from './views/File.vue';
     import Login from './views/Login.vue';
@@ -26,7 +26,7 @@
 
 </script>
 <template>
-    <div class = "main-container">
+    <div class = "main-container controller-style">
         <div class = "up-container">
             <ControlBar />
         </div>
@@ -37,6 +37,7 @@
     <ModalManager />
 </template>
 <style scoped lang = "scss">
+@use '@/common/style/global.scss';
     .main-container{
         display: flex;
         flex-direction: column;

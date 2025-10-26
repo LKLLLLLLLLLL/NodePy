@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import Visitor from '@/views/Visitor.vue'
 import Home from '@/views/Home.vue'
 import File from '@/views/File.vue'
-import Program from '@/views/Program.vue'
+import Project from '@/views/Project.vue'
 import Login from '@/views/Login.vue'
 import Example from '@/views/Example.vue'
 import Editor from '@/views/Editor.vue'
@@ -29,9 +29,9 @@ const routes: Array<RouteRecordRaw> = [
         component: File
     },
     {
-        path: '/program',
-        name: 'program',
-        component: Program
+        path: '/project',
+        name: 'project',
+        component: Project
     },
     {
         path: '/login',

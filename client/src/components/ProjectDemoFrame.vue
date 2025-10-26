@@ -1,57 +1,231 @@
 <script lang="ts" setup>
-    import { Plus } from '@element-plus/icons-vue';
-    const props = defineProps<{
-        handleOpenExistingProject?: (id:number)=>void
-        handleCreateNewProject?: ()=>void
-        id: number
-    }>()
+import { Plus, Edit, Delete } from '@element-plus/icons-vue';
+import { useProjectStore } from '@/stores/projectStore';
+import { ElMessage, ElMessageBox } from 'element-plus';
+
+const props = defineProps<{
+    id?: number,
+    title?: string,
+    thumbnail?: string | null,
+    createdAt?: number | string | null,
+    updatedAt?: number | string | null,
+    handleOpenExistingProject?: (id: number) => void,
+    handleCreateNewProject?: () => void,
+}>();
+
+const projectStore = useProjectStore();
+
+function parseDate(v: number | string | null | undefined) {
+    if (!v) return null;
+    const d = typeof v === 'number' ? new Date(v) : new Date(String(v));
+    if (isNaN(d.getTime())) return null;
+    return d;
+}
+
+function formatDate(v: number | string | null | undefined) {
+    const d = parseDate(v);
+    if (!d) return '';
+    return new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+}
+
+function onCardClick() {
+    if (props.id != null && props.id !== 0 && props.handleOpenExistingProject) {
+        props.handleOpenExistingProject(props.id);
+    } else if (props.handleCreateNewProject) {
+        props.handleCreateNewProject();
+    }
+}
+
+async function handleRename() {
+    if (!props.id) return;
+    try{
+        const { value } = await ElMessageBox.prompt('请输入新的项目名称', '重命名项目', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            inputPattern: /\S+/,
+            inputErrorMessage: '名称不能为空'
+        }) as any;
+        const newName = value as string;
+        const ok = await projectStore.renameProject(props.id, newName);
+        if(ok){
+            ElMessage({ type: 'success', message: '重命名成功' });
+            projectStore.initializeProjects();
+        }
+    }
+    catch(e){
+        // cancelled or error
+    }
+}
+
+async function handleDelete() {
+    if (!props.id) return;
+    try{
+        await ElMessageBox.confirm('确定要删除此项目吗？此操作不可恢复。', '删除项目', {
+            confirmButtonText: '删除',
+            cancelButtonText: '取消',
+            type: 'warning'
+        });
+        const ok = await projectStore.deleteProject(props.id);
+        if(ok){
+            ElMessage({ type: 'success', message: '删除成功' });
+            projectStore.initializeProjects();
+        }
+    }
+    catch(e){
+        // cancelled or error
+    }
+}
 </script>
 
 <template>
-    <div class="project-demo-container">
-        <div class="project-demo-picture">
+    <div
+        :class="['project-card', { 'new-card': props.id === 0 && props.handleCreateNewProject, 'placeholder-large': !props.thumbnail && !(props.id === 0 && props.handleCreateNewProject) } ]"
+        role="button"
+        :aria-label="props.title ?? (props.id ? `Project ${props.id}` : 'Create Project')"
+        tabindex="0"
+        @click="onCardClick"
+        @keyup.enter="onCardClick"
+    >
+        <div class="project-thumb">
             <slot name="picture">
-                <div class="default-picture"
-                    @click="props.handleCreateNewProject">
-                    <el-icon 
-                        :size="60" 
-                        color="grey"
-                    >
-                        <Plus />
-                    </el-icon>
+                <div class="thumb-content">
+                    <template v-if="props.thumbnail">
+                        <img :src="props.thumbnail" alt="thumb" class="thumb-img" />
+                    </template>
+                    <template v-else>
+                        <div v-if="props.id === 0 && props.handleCreateNewProject" class="thumb-new">
+                            <el-icon :size="40" color="#2c98da"><Plus/></el-icon>
+                        </div>
+                        <div v-else class="thumb-placeholder-large">{{ (props.title || '').charAt(0) || 'P' }}</div>
+                    </template>
                 </div>
             </slot>
+            <div v-if="props.id !== 0" class="card-actions">
+                <el-button type="text" class="action-btn" @click.stop="handleRename" title="重命名">
+                    <el-icon><Edit/></el-icon>
+                </el-button>
+                <el-button type="text" class="action-btn" @click.stop="handleDelete" title="删除">
+                    <el-icon><Delete/></el-icon>
+                </el-button>
+            </div>
         </div>
-        <div class="'project-demo-info'">
-            <slot name="info">
-            </slot>
+
+        <div class="project-info">
+            <div class="project-title">{{ props.title ?? (props.id ? `Project ${props.id}` : 'New') }}</div>
+            <div v-if="!(props.id === 0 && props.handleCreateNewProject)" class="project-meta">
+                <span class="meta-item">修改: {{ formatDate(props.updatedAt) }}</span>
+                <span class="meta-item">创建: {{ formatDate(props.createdAt) }}</span>
+            </div>
         </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
-    .project-demo-container {
-        width: 240px;
-        height: 150px;
-        border-radius: 16px;
-        display: flex;
-        color: white;
-        background-color: rgb(44, 152, 218);
-        flex-shrink: 0;
-        flex-direction: column;
-    }
-    .project-demo-picture{
-        width: 100%;
-        height: 120px;
-        justify-content: center;
-        align-items: center;
-    }
-    .project-demo-info{
-        width: 100%;
-        height: 30px;
-    }
-    .default-picture{
-        justify-content: center;
-        align-items: center;
-    }
+.project-card{
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 12px;
+    color: #1f2d3d;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 6px 25px rgba(31,45,61,0.08);
+    transition: transform 140ms cubic-bezier(.2,.9,.3,1), box-shadow 140ms cubic-bezier(.2,.9,.3,1);
+}
+.project-card:focus{
+    outline: 2px solid rgba(26,115,190,0.12);
+    outline-offset: 2px;
+}
+.project-card:hover{
+    transform: translateY(-4px) scale(1.015);
+    box-shadow: 0 12px 28px rgba(31,45,61,0.12);
+}
+.project-thumb{
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 */
+    display: block;
+    background: #f6f9fb;
+}
+.thumb-content{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.thumb-content > img.thumb-img{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.card-actions{
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    display: flex;
+    gap: 6px;
+    z-index: 5;
+}
+.action-btn{
+    padding: 4px;
+    color: rgba(16,35,53,0.75);
+}
+.thumb-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+.thumb-placeholder-large{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: #4b5d6a;
+    font-size:48px;
+    font-weight:700;
+}
+.thumb-new{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.project-info{
+    padding: 14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-height: 70px; /* ensure new-card height matches cards with meta */
+}
+.project-title{
+    font-weight:700;
+    font-size:15px;
+    color:#102335;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.project-meta{
+    display:flex;
+    gap:10px;
+    font-size:12px;
+    color:#6b7f8f;
+}
+.new-card{ border: 1px solid rgba(28,128,199,0.06); }
+.meta-item{opacity:0.95}
+
+@media (max-width: 480px){
+    .project-card{ max-width: 100%; }
+}
 </style>

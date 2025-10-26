@@ -210,7 +210,7 @@ const nodeColor = (node: BaseNode) => {
     :connection-mode="ConnectionMode.Strict"
     id="main"
     >
-      <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4" bgColor="rgba(135, 175, 235, 0.05)"/>
+      <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4" bgColor="rgba(245, 247, 250, 0.05)"/>
 
       <MiniMap mask-color="rgba(0,0,0,0.1)" pannable zoomable position="bottom-left" :node-color="nodeColor" class="controller-style set_background_color"/>
 

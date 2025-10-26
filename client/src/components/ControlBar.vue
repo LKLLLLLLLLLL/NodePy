@@ -97,7 +97,7 @@ function handleClickResult(){
 const navItems = [
   { name: 'Home', path: '/home', label: '首页' },
   { name: 'File', path: '/file', label: '文件' },
-  { name: 'Program', path: '/program', label: '程序' },
+  { name: 'Project', path: '/project', label: '项目' },
   { name: 'Example', path: '/example', label: '示例' },
 ]
 
@@ -136,7 +136,7 @@ function handleAvatarClick(){
         </nav>
         <div class="actions">
           <el-button @click="handleClickResult" size="small">结果</el-button>
-          
+
         </div>
         <div class="user-avatar">
           <el-avatar :icon="Avatar" size="small" @click="handleAvatarClick"></el-avatar>

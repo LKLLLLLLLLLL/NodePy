@@ -1,8 +1,7 @@
 <script lang="ts" setup>
     import ProjectDemoFrame from '@/components/ProjectDemoFrame.vue';
     import AddProject from './AddProject.vue';
-    import { ref,onMounted } from 'vue';
-    import { DefaultService } from '../utils/api/services/DefaultService';
+    import { onMounted } from 'vue';
     import { useModalStore } from '@/stores/modalStore';
     import { useProjectStore } from '@/stores/projectStore';
     import { useRouter } from 'vue-router';
@@ -57,49 +56,65 @@
 </script>
 
 <template>
-    <div class="program-container">
-        <el-row :gutter="20" class="demo-row">
-            <el-col 
-                :span="6"
+    <div class="project-container set_background_color">
+        <div class="projects-grid">
+            <!-- Existing projects -->
+            <ProjectDemoFrame
                 v-for="project in projectStore.projectList.projects"
                 :key="project.project_id"
-                class="demo-column"
-            >
-                <ProjectDemoFrame
-                    :id="project.project_id"
-                    @click="()=>handleOpenExistingProject(project.project_id)"
-                >
-                    <template #picture>
-                        picture
-                    </template>
-                    <template #info>
-                        {{ project.project_id }}
-                    </template>
-                </ProjectDemoFrame>
-            </el-col>
-            <el-col :span="6" class="demo-column">
-                <ProjectDemoFrame
-                    :handleCreateNewProject="handleCreateNewProject"
-                    :id="114514"
-                >
-                </ProjectDemoFrame>
-            </el-col>
-        </el-row>
+                :id="project.project_id"
+                :title="project.project_name || `Project ${project.project_id}`"
+                :thumbnail="(project as any).thumbnail"
+                :created-at="project.created_at"
+                :updated-at="project.updated_at"
+                :handleOpenExistingProject="handleOpenExistingProject"
+            />
+
+            <!-- New project card -->
+                    <ProjectDemoFrame
+                        :handleCreateNewProject="handleCreateNewProject"
+                        :title="'Create New'"
+                        :id="0" />
+        </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
-.program-container{
-    min-height: 0;
+.project-container{
     width: 100%;
-    gap: 40px;
-    margin: 20px 20px 20px 20px;
-    flex-shrink: 0;
+    padding: 28px;
+    box-sizing: border-box;
 }
-.demo-column{
-    padding: 30px;
+/* page background is provided by global .set_background_color */
+.projects-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    align-items: start;
+    justify-items: center;
+    padding: 20px 6px;
 }
-.demo-row{
+.thumb-img{
     width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.thumb-placeholder{
+    width: 100%;
+    height: 100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:28px;
+    color: #6b7f8f;
+}
+.title{
+    color: #102335;
+    font-weight:600;
+}
+
+@media (max-width: 640px){
+    .projects-grid{ grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
 }
 </style>

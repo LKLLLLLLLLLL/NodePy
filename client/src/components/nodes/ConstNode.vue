@@ -16,7 +16,7 @@
                         <option v-for="item in data_type_options">{{ item }}</option>
                     </select>
                 </div>
-            </div>            
+            </div>
         </div>
     </div>
 </template>
@@ -66,7 +66,7 @@
             }
         })
     })
-    
+
 </script>
 
 <style lang="scss" scoped>
@@ -78,7 +78,6 @@
             height: 100%;
             width: 100%;
             background: white;
-            box-shadow: 2px 2px 6px 0px #aaa;
             .title {
                 background: #ccc;
                 text-align: left;
@@ -113,9 +112,10 @@
             }
         }
     }
-    
+
 </style>
 
 <style lang="scss">
-    @import '@vue-flow/node-resizer/dist/style.css';
+  @use '../../common/style/global.scss';
+  @import '@vue-flow/node-resizer/dist/style.css';
 </style>
