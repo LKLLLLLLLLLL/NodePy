@@ -54,10 +54,12 @@ onInit((instance) => {
   instance.fitView()
 })
 
-//add, move, modify nodes
-watch(() => {
-  return project.workflow.nodes.value.map((n) => n.data.param)
-}, async (newValue, oldValue) => {
+
+watch([
+  () => project.workflow.nodes.value.length, 
+  () => project.workflow.nodes.value.map(n => JSON.stringify(n.data.param)).join('|'),
+  () => project.workflow.edges.value.length
+], async (newValue, oldValue) => {
   console.log("new: ", newValue, "old: ", oldValue, 'shouldWatch:', shouldWatch.value)
   if(!shouldWatch.value) return
   if(project) {
@@ -93,7 +95,7 @@ watch(() => {
     console.error('project is undefined')
   }
 
-}, {deep: true, immediate: false})
+}, {deep: false, immediate: false})
 onNodeDragStop(async (event: NodeDragEvent) => {
   console.log('节点位置变化:', {
     nodeId: event.node.id,
@@ -130,46 +132,6 @@ onNodeDragStop(async (event: NodeDragEvent) => {
 
     }catch(err) {
       console.error('@@@@@@',err)
-    }
-
-  }else {
-    console.error('project is undefined')
-  }
-
-
-})
-
-watch(() => project.workflow.edges.value.length, async (newValue, oldValue)=> {
-  console.log('边改变了:', project.workflow.edges.value, 'shouldWatch:', shouldWatch.value)
-  if(!shouldWatch.value) return
-
-  if(project) {
-    const p = getProject(project)
-    console.log('@@@@@@@',p)
-
-    try {
-      console.log('syncProjectApiProjectSyncPost')
-      const taskResponse = await DefaultService.syncProjectApiProjectSyncPost(p)
-      console.log(taskResponse)
-      if(!taskResponse) return
-      const {task_id} = taskResponse
-
-      if(task_id) {
-        try {
-          console.log('monitorTask')
-          const messages = await monitorTask(p, task_id)
-          console.log("Done:", messages)
-          parseProject(p, project)
-        }catch(err) {
-          console.error('@@@@@@@@',err)
-        }
-
-      }else {
-        console.error('task_id is undefined')
-      }
-
-    }catch(err) {
-      console.error('@@@@@@@@@',err)
     }
 
   }else {
