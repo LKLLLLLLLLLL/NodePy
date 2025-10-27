@@ -7,6 +7,6 @@
  * it store only the url of the data object.
  */
 export type DataRef = {
-    url: string;
+    data_id: number;
 };
 

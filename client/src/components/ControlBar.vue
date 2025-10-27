@@ -259,9 +259,10 @@ function handleAvatarClick(){
       .nav-link {
         color: #000000;
         text-decoration: none;
-        font-size: 16px;
-        font-weight: 500;
+        font-size: 18px;
+        font-weight: 400;
         padding: 8px 16px;
+        margin: 0 10px;
         border-bottom: 2px solid transparent;
         transition: all 0.3s ease;
 

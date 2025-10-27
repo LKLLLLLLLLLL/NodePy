@@ -42,7 +42,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                 try:
                     graph = None
                     try:
-                        file_manager = FileManager()
+                        file_manager = FileManager(async_db_session=None)  # sync version
                         cache_manager = CacheManager()
                         graph = ProjectExecutor(file_manager=file_manager, cache_manager=cache_manager, topology=topo_graph, user_id=user_id)
                         queue.push_message_sync(
@@ -231,7 +231,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                                 # 2. construct datazip
                                 db_client.flush()
                                 id_data = db_data.id
-                                data_zips[port] = DataRef.from_data_id(str(id_data))
+                                data_zips[port] = DataRef(data_id = id_data) # type: ignore
                             # 3. report to frontend
                             node_index = topo_graph.get_index_by_node_id(node_id)
                             assert node_index is not None
