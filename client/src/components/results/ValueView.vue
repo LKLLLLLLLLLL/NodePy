@@ -1,14 +1,20 @@
 <script lang="ts" setup>
-
+    import { onMounted } from 'vue';
     const props = defineProps<{
-        data: any
+        value: any
     }>()
+
+    onMounted(()=>{
+        console.log(props.value)
+    })
 </script>
 <template>
     <div class = 'value-view-container'>
-        ValueView
-        {{ data }}
+        ValueView:{{ value }}
     </div>
 </template>
 <style scoped lang="scss">
+    .value-view-container{
+        color: black;
+    }
 </style>

@@ -1,45 +1,54 @@
 <script lang="ts" setup>
-    import ChartView from './ChartView.vue';
     import TableView from './TableView.vue';
     import FileView from './FileView.vue';
-    import ImageView from './ImageView.vue';
     import ValueView from './ValueView.vue';
     import { useVueFlow } from '@vue-flow/core';
+    import { DefaultService } from '@/utils/api';
+    import { type DataView } from '@/utils/api';
+    import { ref } from 'vue';
 
-    const {findNode} = useVueFlow('main');
+    const {onNodeClick,findNode} = useVueFlow('main');
 
-    const currentNode = findNode('6045');
+    let url_id = 10086
+    const result = ref<DataView>()
 
-    console.log(currentNode);
+    onNodeClick( async (event) => {
+        // 获取节点完整信息
+        const currentNode = findNode(event.node.id)
+        console.log('完整节点信息:', currentNode)
+        console.log('Data_id:',currentNode?.data.data_out.result.data_id)
+        if(currentNode) url_id = currentNode.data.data_out.result.data_id
+        result.value = await getResult(url_id)
+        console.log(result)
+        console.log(result.value)
+    })
+
+    async function getResult(id: number){
+        console.log('operating by: ',id)
+        const result = await DefaultService.getNodeDataApiDataDataIdGet(id);
+        return result;
+    }
+    
 </script>
 <template>
     <div :style="{width: '100%',height: '100%'}">
         <div class = "result-control">
-            <el-button type='primary'height="100%">按钮</el-button>
-            <el-button type='primary'height="100%">按钮</el-button>
         </div>
         <div class = "result-container">
-            <div v-if="!currentNode">无结果</div>
-            <ChartView v-else-if="currentNode.data.resultType === 'chart'"
-                            :data="currentNode.data"
+            <div v-if="!result">无结果</div>
+            <TableView v-else-if="result.type === 'Table'"
+                            :value="result.value"
                             class = "view-content chart-view">
-            </ChartView>
-            <TableView v-else-if="currentNode.data.resultType === 'table'"
-                            :data="currentNode.data"
-                            class = "view-content table-view">
             </TableView>
-            <FileView  v-else-if="currentNode.data.resultType === 'file'"
-                            :data="currentNode.data"
+            <FileView  v-else-if="result.type === 'File'"
+                            :value="result.value"
                             class = "view-content file-view">
             </FileView>
-            <ImageView v-else-if="currentNode.data.resultType  === 'image'"
-                            :data="currentNode.data"
-                            class = "view-content image-view">
-            </ImageView>
-            <ValueView v-else-if="currentNode.data.resultType  === 'number'
-                            ||currentNode.data.resultType  === 'string'
-                            ||currentNode.data.resultType  === 'boolean'"
-                            :data="currentNode.data"
+            <ValueView v-else-if="result.type === 'int'
+                            ||result.type  === 'str'
+                            ||result.type  === 'bool'
+                            ||result.type  === 'float'"
+                            :value="result.value"
                             class = "view-content value-view">
             </ValueView>
         </div>

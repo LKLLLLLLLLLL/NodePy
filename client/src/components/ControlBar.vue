@@ -9,6 +9,7 @@ import { Avatar, User } from '@element-plus/icons-vue'
 import { RouterLink } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import {useRoute} from 'vue-router';
+import Result from './results/Result.vue';
 
 const route=useRoute()
 const pageStore = usePageStore()
@@ -90,6 +91,7 @@ function handleClickResult(){
             width: modalWidth,
             height: modalHeight
         },
+        component: Result
     })
 }
 
