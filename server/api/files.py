@@ -56,6 +56,8 @@ async def upload_file(project_id: int,
         raise HTTPException(status_code=403, detail=str(e))
     except InsufficientStorageError as e:
         raise HTTPException(status_code=507, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         logger.exception(f"Error uploading file {file.filename}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -99,6 +101,8 @@ async def get_file_content(key: str, async_db_session = Depends(get_async_sessio
         raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         logger.exception(f"Error retrieving file content for key {key}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -130,6 +134,8 @@ async def delete_file(key: str, async_db_session = Depends(get_async_session)) -
         raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         logger.exception(f"Error deleting file with key {key}: {e}")
         raise HTTPException(status_code=500, detail=str(e))

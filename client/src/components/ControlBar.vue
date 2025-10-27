@@ -262,7 +262,7 @@ function handleAvatarClick(){
         font-size: 18px;
         font-weight: 400;
         padding: 8px 16px;
-        margin: 0 10px;
+        margin: 0 0.4%;
         border-bottom: 2px solid transparent;
         transition: all 0.3s ease;
 

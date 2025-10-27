@@ -85,6 +85,8 @@ async def get_project(project_id: int, db_client: Session = Depends(get_session)
             workflow=workflow,
         )
         return project
+    except HTTPException:
+        raise
     except Exception as e:
         logger.exception(f"Error getting project {project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
@@ -160,6 +162,8 @@ async def delete_project(project_id: int, db_client: Session = Depends(get_sessi
     except ProjectLockError:
         db_client.rollback()
         raise HTTPException(status_code=423, detail="Project is locked, it may be being edited by another process")
+    except HTTPException:
+        raise
     except Exception as e:
         db_client.rollback()
         logger.exception(f"Error deleting project {project_id}: {e}")
@@ -199,6 +203,8 @@ async def rename_project(project_id: int, new_name: str, db_client: Session = De
     except ProjectLockError:
         db_client.rollback()
         raise HTTPException(status_code=423, detail="Project is locked, it may be being edited by another process")
+    except HTTPException:
+        raise
     except Exception as e:
         db_client.rollback()
         logger.exception(f"Error renaming project {project_id} to '{new_name}': {e}")
@@ -288,6 +294,8 @@ async def sync_project(project: Project, response: Response, db_client: Session 
     except ProjectLockError:
         db_client.rollback()
         raise HTTPException(status_code=423, detail="Project is locked, it may be being edited by another process")
+    except HTTPException:
+        raise
     except Exception as e:
         db_client.rollback()
         logger.exception(f"Error syncing project {project.project_id}: {e}")

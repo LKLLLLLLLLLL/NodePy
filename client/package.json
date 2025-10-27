@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "gen_api": "ts-node-esm ./scripts/gen_api.ts",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
@@ -43,6 +44,7 @@
     "npm-run-all2": "^8.0.4",
     "openapi-typescript": "^7.10.1",
     "openapi-typescript-codegen": "^0.29.0",
+    "ts-node": "^10.9.1",
     "sass-embedded": "^1.93.2",
     "typescript": "~5.9.0",
     "vite": "^7.1.7",

@@ -38,3 +38,8 @@ uv run task dev
 npm run dev
 ```
 访问http://localhost:5173
+## 快速生成 API 客户端代码
+```bash
+cd client
+npm run gen_api
+```
