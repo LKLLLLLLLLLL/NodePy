@@ -2,6 +2,7 @@
     import {ref} from 'vue';
     import { useProjectStore } from '@/stores/projectStore';
     import { useModalStore } from '@/stores/modalStore';
+    import { onUnmounted } from 'vue';
 
     const projectStore = useProjectStore();
     const modalStore = useModalStore();
@@ -9,14 +10,17 @@
     async function onCreateProject(){
         projectStore.createProject();
         await projectStore.initializeProjects();
-        projectStore.openProject(projectStore.currentProjectId);
-        modalStore.deactivateModal('add-project');
-        modalStore.destroyModal('add-project');
+        modalStore.deactivateModal('create-project');
+        modalStore.destroyModal('create-project');
     }
+
+    onUnmounted(()=>{
+        projectStore.initializeProjects();
+    })
 
 </script>
 <template>
-    <el-form class="add-project-container">
+    <el-form class="create-project-container">
         <el-form-item label="Project Name">
             <el-input placeholder="Enter project name" v-model="projectStore.currentProjectName"></el-input>
         </el-form-item>

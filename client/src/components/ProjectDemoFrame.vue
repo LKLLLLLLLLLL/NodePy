@@ -1,10 +1,12 @@
 <script lang="ts" setup>
 import { Plus, Edit, Delete } from '@element-plus/icons-vue';
 import { useProjectStore } from '@/stores/projectStore';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { useModalStore } from '@/stores/modalStore';
+import DeleteProject from '@/views/DeleteProject.vue';
+import RenameProject from '@/views/RenameProject.vue';
 
 const props = defineProps<{
-    id?: number,
+    id: number,
     title?: string,
     thumbnail?: string | null,
     createdAt?: number | string | null,
@@ -14,6 +16,7 @@ const props = defineProps<{
 }>();
 
 const projectStore = useProjectStore();
+const modalStore = useModalStore();
 
 function parseDate(v: number | string | null | undefined) {
     if (!v) return null;
@@ -36,45 +39,52 @@ function onCardClick() {
     }
 }
 
-async function handleRename() {
-    if (!props.id) return;
-    try{
-        const { value } = await ElMessageBox.prompt('请输入新的项目名称', '重命名项目', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            inputPattern: /\S+/,
-            inputErrorMessage: '名称不能为空'
-        }) as any;
-        const newName = value as string;
-        const ok = await projectStore.renameProject(props.id, newName);
-        if(ok){
-            ElMessage({ type: 'success', message: '重命名成功' });
-            projectStore.initializeProjects();
-        }
-    }
-    catch(e){
-        // cancelled or error
-    }
+async function handleClickDelete(){
+    projectStore.toBeDeleted.id = props.id
+    const modalWidth = 300;
+    const modalHeight = 200;
+    modalStore.createModal({
+        id: 'delete-modal',
+        title: "Delete a project",
+        isActive: true,
+        isDraggable: true,
+        isResizable: false,
+        position: {
+                x: (window.innerWidth - modalWidth) / 2,
+                y: (window.innerHeight - modalHeight) / 2
+        },
+        size:{
+            height: modalHeight,
+            width: modalWidth
+        },
+        component: DeleteProject
+    })
 }
 
-async function handleDelete() {
-    if (!props.id) return;
-    try{
-        await ElMessageBox.confirm('确定要删除此项目吗？此操作不可恢复。', '删除项目', {
-            confirmButtonText: '删除',
-            cancelButtonText: '取消',
-            type: 'warning'
-        });
-        const ok = await projectStore.deleteProject(props.id);
-        if(ok){
-            ElMessage({ type: 'success', message: '删除成功' });
-            projectStore.initializeProjects();
-        }
-    }
-    catch(e){
-        // cancelled or error
-    }
+async function handleClickRename(){
+    await projectStore.getProject(props.id);
+    projectStore.toBeRenamed.id = projectStore.currentProject.project_id;
+    projectStore.toBeRenamed.name = projectStore.currentProject.project_name;
+    const modalWidth = 300;
+    const modalHeight = 400;
+    modalStore.createModal({
+        id: 'rename-modal',
+        title: "Rename a project",
+        isActive: true,
+        isDraggable: true,
+        isResizable: false,
+        position: {
+                x: (window.innerWidth - modalWidth) / 2,
+                y: (window.innerHeight - modalHeight) / 2
+        },
+        size:{
+            height: modalHeight,
+            width: modalWidth
+        },
+        component: RenameProject
+    })
 }
+
 </script>
 
 <template>
@@ -101,10 +111,10 @@ async function handleDelete() {
                 </div>
             </slot>
             <div v-if="props.id !== 0" class="card-actions">
-                <el-button type="text" class="action-btn" @click.stop="handleRename" title="重命名">
+                <el-button type="text" class="action-btn" @click.stop="handleClickRename" title="重命名">
                     <el-icon><Edit/></el-icon>
                 </el-button>
-                <el-button type="text" class="action-btn" @click.stop="handleDelete" title="删除">
+                <el-button type="text" class="action-btn" @click.stop="handleClickDelete" title="删除">
                     <el-icon><Delete/></el-icon>
                 </el-button>
             </div>

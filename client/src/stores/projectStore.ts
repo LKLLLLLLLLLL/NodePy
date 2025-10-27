@@ -4,35 +4,68 @@ import { DefaultService } from '../utils/api/services/DefaultService';
 import { useModalStore } from './modalStore';
 import { useRouter } from 'vue-router';
 import { ApiError } from '@/utils/api';
-import { ElMessage } from 'element-plus';
+import { ElMessage, getPositionDataWithUnit } from 'element-plus';
 import { type ProjectListItem ,type ProjectList,type Project} from '@/utils/api';
 
+const default_pname = "default_name"
+const default_pid = 10086
+const default_uid = 114514
+const default_project = {
+        project_name: default_pname,
+        project_id: default_pid,
+        user_id: default_uid,
+        workflow: {
+            nodes: [],
+            edges: []
+        }
+    }
+const default_delete_pid = 11111111
+const default_delete_pname = 'toBeDeleted'
+const default_rename_pid = 22222222
+const default_rename_pname = 'toBeRenamed'//原名
+
 export const useProjectStore = defineStore('project', () => {
-    const projectList = ref<ProjectList>({userid: 10086,projects: []});
-    const currentProjectName = ref<string>("default_name");
-    const currentProjectId = ref<number>(10086);
-    const currentProject = ref<Project>();
+    const projectList = ref<ProjectList>({userid: default_uid,projects: []});
+    const currentProjectName = ref<string>(default_pname);
+    const currentProjectId = ref<number>(default_pid);
+    const currentProject = ref<Project>(default_project);
+    const toBeDeleted = ref<{name: string,id: number}>({id: default_delete_pid,name: default_delete_pname});
+    const toBeRenamed = ref<{name: string,id: number}>({id: default_rename_pid,name: default_rename_pname});
 
     const modalStore = useModalStore();
 
-    async function openProject(id: number){
-        console.log('Openning project by ID:',id)
-        try{
-            const success = await getProject(id);
-            return success;
-        }
-        catch(error){
-            ElMessage('Unknown error occurred.(open)');
-            return false;
-        }
+    // async function openProject(id: number){
+    //     console.log('Openning project by ID:',id)
+    //     try{
+    //         const success = await getProject(id);
+    //         return success;
+    //     }
+    //     catch(error){
+    //         ElMessage('Unknown error occurred.(open)');
+    //         return false;
+    //     }
+    // }
+
+    function refresh(){
+        currentProject.value = default_project;
+        currentProjectId.value = default_pid;
+        currentProjectName.value = default_pname;
+        toBeDeleted.value = {
+            id: default_delete_pid,
+            name: default_delete_pname
+        };
+        toBeRenamed.value = {
+            id: default_rename_pid,
+            name: default_rename_pname
+        };
     }
+
     async function initializeProjects(){
         console.log('Getting all projects');
         try{
             const response = await DefaultService.listProjectsApiProjectListGet();
-            if(response)ElMessage('获取项目列表成功');
-            projectList.value = response
-            console.log(response);
+            projectList.value = response;
+            refresh();
             return true;
         }
         catch(error){
@@ -55,7 +88,8 @@ export const useProjectStore = defineStore('project', () => {
         try{
             const response = await DefaultService.createProjectApiProjectCreatePost(currentProjectName.value);
             if(response)ElMessage('项目' + currentProjectName.value + '创建成功');
-            currentProjectId.value = response
+            currentProjectId.value = response;
+            initializeProjects();
             return true;
         }
         catch(error){
@@ -87,7 +121,7 @@ export const useProjectStore = defineStore('project', () => {
         try{
             const response = await DefaultService.deleteProjectApiProjectProjectIdDelete(id);
             if(response==null)ElMessage('项目' + id + '删除成功');
-            console.log(response);
+            initializeProjects();
             return true;
         }
         catch(error){
@@ -122,8 +156,7 @@ export const useProjectStore = defineStore('project', () => {
         try{
             const response = await DefaultService.getProjectApiProjectProjectIdGet(id);
             if(response)ElMessage('项目' + id + '获取成功');
-            currentProject.value=response
-            console.log(response);
+            currentProject.value=response;
             return true;
         }
         catch(error){
@@ -155,7 +188,7 @@ export const useProjectStore = defineStore('project', () => {
         try{
             const response = await DefaultService.renameProjectApiProjectRenamePost(id,name);
             ElMessage('项目' + id + '改名成功');
-            console.log(response);
+            initializeProjects();
             return true;
         }
         catch(error){
@@ -187,10 +220,11 @@ export const useProjectStore = defineStore('project', () => {
         currentProjectId,
         currentProjectName,
         currentProject,
-        openProject,
+        toBeDeleted,
+        toBeRenamed,
+        getProject,
         createProject,
         deleteProject,
-        getProject,
         renameProject,
         initializeProjects
     }

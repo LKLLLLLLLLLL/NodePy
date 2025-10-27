@@ -1,6 +1,6 @@
 <script setup lang = "ts">
     import ControlBar from './components/ControlBar.vue';
-    import Project from './views/Project.vue';
+    import Project from './views/ProjectList.vue';
     import Home from './views/Home.vue';
     import File from './views/File.vue';
     import Login from './views/Login.vue';

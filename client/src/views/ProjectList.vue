@@ -1,6 +1,6 @@
 <script lang="ts" setup>
     import ProjectDemoFrame from '@/components/ProjectDemoFrame.vue';
-    import AddProject from './AddProject.vue';
+    import CreateProject from './CreateProject.vue';
     import { onMounted } from 'vue';
     import { useModalStore } from '@/stores/modalStore';
     import { useProjectStore } from '@/stores/projectStore';
@@ -18,12 +18,12 @@
         const modalWidth = 400;
         const modalHeight = 600;
         modalStore.createModal({
-            id: 'add-project',
+            id: 'create-project',
             title: 'Create New Project',
             isActive: true,
             isDraggable: true,
             isResizable: false,
-            component: AddProject,
+            component: CreateProject,
             size: {
                 width: modalWidth,
                 height: modalHeight
@@ -37,15 +37,12 @@
 
     async function handleOpenExistingProject(id:number){
         console.log('Opening existing project...')
-        const success = await projectStore.openProject(id);
-        if(success){
-            const route = router.resolve({
-                name: 'editor',
-                params: { projectId: id }
-            });
+        const route = router.resolve({
+            name: 'editor',
+            params: { projectId: id }
+        });
         window.open(route.href, '_blank');
     }
-}
 
     function handleCreateNewProject(){
         console.log("Adding new project...");
