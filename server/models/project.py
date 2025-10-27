@@ -10,26 +10,26 @@ class ProjNodeError(BaseModel):
     message: list[str] | str
     
     @model_validator(mode="after")
-    def check_error_type(cls) -> Self:
-        if isinstance(cls.params, list):
-            if cls.inputs is not None:
+    def check_error_type(self) -> Self:
+        if isinstance(self.params, list):
+            if self.inputs is not None:
                 raise ValueError("If 'params' is a list, 'inputs' must be None.")
-            if not isinstance(cls.message, list):
+            if not isinstance(self.message, list):
                 raise ValueError("If 'params' is a list, 'message' must be a list.")
-            if len(cls.params) != len(cls.message):
+            if len(self.params) != len(self.message):
                 raise ValueError("Length of 'params' and 'message' must be the same.")
-        elif isinstance(cls.inputs, list):
-            if cls.params is not None:
+        elif isinstance(self.inputs, list):
+            if self.params is not None:
                 raise ValueError("If 'inputs' is a list, 'params' must be None.")
-            if not isinstance(cls.message, list):
+            if not isinstance(self.message, list):
                 raise ValueError("If 'inputs' is a list, 'message' must be a list.")
-            if len(cls.inputs) != len(cls.message):
+            if len(self.inputs) != len(self.message):
                 raise ValueError("Length of 'inputs' and 'message' must be the same.")
         else:
-            if not isinstance(cls.message, str):
+            if not isinstance(self.message, str):
                 raise ValueError("If neither 'params' nor 'inputs' is a list, 'message' must be a string.")
 
-        return cls
+        return self
 
 class ProjNode(BaseModel):
     class Position(BaseModel):

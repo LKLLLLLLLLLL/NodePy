@@ -72,14 +72,14 @@ class StreamQueue:
     def _refresh_ttl_sync(self):
         if self._sync_conn is None:
             raise AssertionError("Must use 'with StreamQueue()' context manager")
-        self._sync_conn.expire(self.stream_name, STREAM_TTL_SECONDS)
+        self._sync_conn.expire(f"{self.stream_name}:stream", STREAM_TTL_SECONDS)
         self._sync_conn.expire(f"{self.stream_name}:sender_finished", STREAM_TTL_SECONDS)
         self._sync_conn.expire(f"{self.stream_name}:reader_finished", STREAM_TTL_SECONDS)
     
     async def _refresh_ttl_async(self):
         if self._async_conn is None:
             raise AssertionError("Must use 'async with StreamQueue()' context manager")
-        await self._async_conn.expire(self.stream_name, STREAM_TTL_SECONDS)
+        await self._async_conn.expire(f"{self.stream_name}:stream", STREAM_TTL_SECONDS)
         await self._async_conn.expire(f"{self.stream_name}:sender_finished", STREAM_TTL_SECONDS)
         await self._async_conn.expire(f"{self.stream_name}:reader_finished", STREAM_TTL_SECONDS)
         
