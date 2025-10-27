@@ -10,6 +10,7 @@
                 <Handle id="const" type="source" :position="Position.Right"/>
                 <div class="value">
                      <input class="nodrag border-radius" v-model="value" @input="onInput"/>
+                     <NodepyNumberInput v-model="value"/>
                 </div>
                 <div class="data_type">
                     <select v-model="data_type" @change="onSelect" class="border-radius nodrag">
@@ -27,6 +28,7 @@
     import { useVueFlow, Position, Handle } from '@vue-flow/core'
     import { NodeResizer } from '@vue-flow/node-resizer'
     import type {ConstNodeData} from '../../types/nodeTypes'
+    import NodepyNumberInput from '../tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
 
 
     let minW = 0
@@ -87,6 +89,19 @@
             .data {
                 position: relative;
                 padding: 5px 0;
+                .value {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    input {
+                        border: 1px solid #ccc;
+                        text-align: center;
+                        height: 24px;
+                        width: 160px;
+                        margin: 0 5px;
+                    }
+                }
                 .data_type {
                     margin-top: 5px;
                     display: flex;
@@ -96,17 +111,6 @@
                         appearance: auto;
                         padding-left: 10px;
                         height: 24px;
-                    }
-                }
-                .value {
-                    display: flex;
-                    justify-content: center;
-                    input {
-                        border: 1px solid #ccc;
-                        text-align: center;
-                        height: 24px;
-                        width: 160px;
-                        margin: 0 5px;
                     }
                 }
             }
