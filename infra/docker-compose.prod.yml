@@ -68,7 +68,7 @@ services:
       - postgres
       - redis
       - minio
-    command: ["uv", "run", "celery", "-A", "server.celery", "worker", "--loglevel=info"]
+    command: ["uv", "run", "celery", "-A", "server.celery", "worker", "--beat", "--loglevel=info"]
 
 volumes:
   postgres_data:

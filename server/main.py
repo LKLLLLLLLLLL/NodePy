@@ -6,15 +6,10 @@ from server.models.database import init_database
 from pathlib import Path
 from .api import router
 import os
-from loguru import logger
-import sys
-
-# config logging system
-logger.remove()  # remove default handler
-logger.add(sys.stdout, level="DEBUG")
-logger.add("/nodepy/logs/server.log", rotation="10 MB", level="DEBUG")
+from server.lib.ApiLoggerMiddleware import ApiLoggerMiddleware
 
 app = FastAPI(title="NodePy API", separate_input_output_schemas=False)
+DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
 # Add CORS middleware
 app.add_middleware(
@@ -30,6 +25,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# add debug middleware
+if DEBUG:
+    app.add_middleware(ApiLoggerMiddleware)
 
 # init database
 init_database()

@@ -6,6 +6,7 @@ from server.models.exception import InsufficientStorageError
 from server.lib.FileManager import FileManager
 from typing import cast, Literal
 import io
+from loguru import logger
 
 """
 Apis for file operations.
@@ -52,6 +53,7 @@ async def upload_file(project_id: int, node_id: str, file: UploadFile = fastapiF
     except InsufficientStorageError as e:
         raise HTTPException(status_code=507, detail=str(e))
     except Exception as e:
+        logger.exception(f"Error uploading file {file.filename}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get(
@@ -94,6 +96,7 @@ async def get_file_content(key: str) -> StreamingResponse:
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
     except Exception as e:
+        logger.exception(f"Error retrieving file content for key {key}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 class DeleteResponse(BaseModel):
@@ -124,6 +127,7 @@ async def delete_file(key: str) -> DeleteResponse:
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
     except Exception as e:
+        logger.exception(f"Error deleting file with key {key}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get(
@@ -143,4 +147,5 @@ async def list_files() -> UserFileList:
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
+        logger.exception(f"Error listing files for user {user_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))

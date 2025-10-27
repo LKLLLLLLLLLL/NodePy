@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from server.models.data import DataView
 from server.models.database import get_session, ProjectRecord, NodeOutputRecord
+from loguru import logger
 
 router = APIRouter()
 
@@ -41,4 +42,5 @@ async def get_node_data(data_id: int) -> DataView:
             )
         return DataView.model_validate(data_record.data)
     except Exception as e:
+        logger.exception(f"Error retrieving node data {data_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))

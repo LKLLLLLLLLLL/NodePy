@@ -5,6 +5,7 @@ from typing import Optional, Self
 import asyncio
 import time
 from server.models.exception import ProjectLockError, ProjLockIdentityError
+from loguru import logger
 
 LOCK_REDIS_URL = os.getenv("REDIS_URL", "") + "/3"
 RETRY_INTERVAL = 0.1  # seconds
@@ -81,6 +82,7 @@ class ProjectLock:
             total_wait += RETRY_INTERVAL
             await asyncio.sleep(RETRY_INTERVAL)
         if not acquired:
+            logger.error(f"Failed to acquire lock for project {self._project_id} within {self._max_block_time} seconds.")
             raise ProjectLockError(f"Project {self._project_id} is already locked.")                
         if identity is not None:
             # clear appointed identity after acquiring the lock
@@ -90,6 +92,7 @@ class ProjectLock:
             if self._identity is not None:
                 # get the lock, but not satisfy my identity. Because the identity can be expired, it tends that I will never got the right lock, so throw exception.
                 await self.release_async() # release the lock, because the __aexit__ may not be called
+                logger.error(f"Project {self._project_id} lock identity does not match the appointed identity.")
                 raise ProjLockIdentityError(
                     f"Project {self._project_id} lock identity does not match the appointed identity."
                 )
@@ -106,15 +109,6 @@ class ProjectLock:
         # delete lock
         lock_key = f"project_lock:{self._project_id}"
         await self._async_conn.delete(lock_key)
-
-    async def set_caller_info_async(self, info: str) -> None:
-        """
-        Set caller info to the lock.
-        """
-        if self._async_conn is None:
-            self._async_conn = await redis.Redis.from_url(LOCK_REDIS_URL)
-        key = f"project_lock:{self._project_id}:info"
-        await self._async_conn.set(key, info)
     
     async def appoint_transfer_async(self, identity: str) -> None:
         """
@@ -181,6 +175,7 @@ class ProjectLock:
             total_wait += RETRY_INTERVAL
             time.sleep(RETRY_INTERVAL)
         if not acquired:
+            logger.error(f"Failed to acquire lock for project {self._project_id} within {self._max_block_time} seconds.")
             raise ProjectLockError(f"Project {self._project_id} is already locked.")
         if identity is not None:
             # clear appointed identity after acquiring the lock
@@ -190,6 +185,7 @@ class ProjectLock:
             if self._identity is not None:
                 # get the lock, but not satisfy my identity. Because the identity can be expired, it tends that I will never got the right lock, so throw exception.
                 self.release_sync() # release the lock, because the __exit__ may not be called
+                logger.error(f"Project {self._project_id} lock identity does not match the appointed identity.")
                 raise ProjLockIdentityError(
                     f"Project {self._project_id} lock identity does not match the appointed identity."
                 )

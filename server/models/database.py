@@ -66,7 +66,7 @@ class FileRecord(Base):
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     node_id = Column(String, nullable=False, index=True) # ID of the node that generated the file
     file_size = Column(BigInteger, nullable=False) # Byte
-    upload_time = Column(String, nullable=False)  # ISO format datetime string
+    last_modify_time = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
     
     __table_args__ = (
         UniqueConstraint('project_id', 'node_id', name='_project_node_uc'),

@@ -4,6 +4,7 @@ from typing import Any
 from server.models.data import Data, DataView
 import hashlib
 import json
+from loguru import logger
 
 CACHE_REDIS_URL = os.getenv("REDIS_URL", "") + "/2"
 CACHE_TTL_SECONDS  = 60 * 60 # 1 hour
@@ -48,7 +49,7 @@ class CacheManager:
             assert isinstance(total, str) and isinstance(hit, str)
             if int(total) % 10 == 0:
                 hit_rate = int(hit) / int(total)
-                print(f"cache_stat:hit_rate: {hit_rate:.2%}")
+                logger.info(f"cache_stat:hit_rate: {hit_rate:.2%}")
 
     def _add_cache_miss_num(self) -> None:
         """Increment the cache miss counter for the project."""
@@ -62,7 +63,7 @@ class CacheManager:
             assert isinstance(total, str) and isinstance(hit, str)
             if int(total) % 10 == 0:
                 hit_rate = int(hit) / int(total)
-                print(f"[cache] hit_rate: {hit_rate:.2%}")
+                logger.info(f"[cache] hit_rate: {hit_rate:.2%}")
         
 
     def get(self, node_type: str, params: dict[str, Any], inputs: dict[str, Data]) -> tuple[dict[str, Data], float] | None:

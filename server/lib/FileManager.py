@@ -9,6 +9,7 @@ from server.celery import celery_app
 import datetime
 from server.models.exception import InsufficientStorageError
 import json
+from loguru import logger
 
 class FileManager:
     """
@@ -37,7 +38,7 @@ class FileManager:
         """ Get a File object by its key """
         db_file = self.db_client.query(FileRecord).filter(FileRecord.file_key == key).first()
         if not db_file:
-            raise IOError("File record not found in database")
+            raise ValueError("File record not found in database")
         if db_file.user_id != self.user_id: # type: ignore
             raise PermissionError("Permission denied to access this file")
         return File(
@@ -130,6 +131,7 @@ class FileManager:
             self.db_client.commit()
         except S3Error as e:
             self.db_client.rollback()
+            logger.exception(f"Failed to upload file to MinIO: {e}")
             raise IOError(f"Failed to upload file to MinIO: {e}")
         except InsufficientStorageError as e:
             raise e
@@ -142,6 +144,7 @@ class FileManager:
                 )
             except Exception:
                 pass
+            logger.exception(f"Failed to write file: {e}")
             raise IOError(f"Failed to write file: {e}")
         return File(key=key, filename=filename, format=format, size=len(content))
     
@@ -167,9 +170,11 @@ class FileManager:
             self.db_client.delete(db_file)
             self.db_client.commit()
         except S3Error as e:
+            logger.exception(f"Failed to delete file from MinIO: {e}")
             self.db_client.rollback()
             raise IOError(f"Failed to delete file from MinIO: {e}")
         except Exception as e:
+            logger.exception(f"Failed to delete file record from database: {e}")
             self.db_client.rollback()
             raise IOError(f"Failed to delete file record from database: {e}")
 
@@ -188,6 +193,7 @@ class FileManager:
             data = response.read()
             return data
         except S3Error as e:
+            logger.exception(f"Failed to read file from MinIO: {e}")
             raise IOError(f"Failed to read file from MinIO: {e}")
     
     def list_file(self, user_id: int) -> UserFileList:
@@ -219,6 +225,7 @@ class FileManager:
                 used_size=self._cal_user_occupy(user_id)
             )
         except Exception as e:
+            logger.exception(f"Failed to list files: {e}")
             raise IOError(f"Failed to list files: {e}")
 
 @celery_app.task
@@ -236,17 +243,17 @@ def cleanup_orphan_files_task():
     )
     # step 1: delete files for invalid node_id
     try:
-        print("Starting cleanup of orphan files...")
+        logger.info("Starting cleanup of orphan files...")
         
         # 1. get all existing node_id from projects
         all_projects = db_client.query(ProjectRecord).all()
         valid_node_ids = set()
         for project in all_projects:
-            if project.graph: # type: ignore
-                graph_data = project.graph
-                if isinstance(graph_data, str):
-                    graph_data = json.loads(graph_data)
-                for node in graph_data.get("nodes", []):
+            if project.workflow: # type: ignore
+                workflow_data = project.workflow
+                if isinstance(workflow_data, str):
+                    workflow_data = json.loads(workflow_data)
+                for node in workflow_data.get("nodes", []):
                     node_id = node.get("id")
                     if node_id:
                         valid_node_ids.add((project.id, node_id))
@@ -256,10 +263,13 @@ def cleanup_orphan_files_task():
         
         orphan_files = []
         for db_file in all_files:
+            modify_time = db_file.last_modify_time
+            if (datetime.datetime.now() - modify_time).total_seconds() < 3600: # 1 hour
+                continue  # skip files modified within the last hour
             if (db_file.project_id, db_file.node_id) not in valid_node_ids:
                 orphan_files.append(db_file)
         if not orphan_files:
-            print("No orphan files found.")
+            logger.info("No orphan files found.")
             return
         
         # 3. delete orphan files from MinIO and database
@@ -268,12 +278,12 @@ def cleanup_orphan_files_task():
                 file_to_delete = file_manager.get_file_by_key(file_record.file_key)
                 file_manager.delete(file_to_delete, user_id=None)  # Admin operation
             except Exception as e:
-                print(f"Failed to delete orphan file {file_record.file_key}: {e}") # type: ignore
+                logger.error(f"Failed to delete orphan file {file_record.file_key}: {e}")
         db_client.commit()
-        
-        print(f"Cleanup completed. Deleted {len(orphan_files)} orphan files.")
+
+        logger.info(f"Cleanup completed. Deleted {len(orphan_files)} orphan files.")
     except Exception as e:
-        print(f"Failed to clean up orphan files: {e}")
+        logger.exception(f"Failed to clean up orphan files: {e}")
 
     # step 2: delete files in MinIO not in database
     try:
@@ -288,7 +298,7 @@ def cleanup_orphan_files_task():
                         object_name=obj.object_name
                     )
                 except Exception as e:
-                    print(f"Failed to delete orphan MinIO file {obj.object_name}: {e}")
-        print("MinIO orphan file cleanup completed.") 
+                    logger.exception(f"Failed to delete orphan MinIO file {obj.object_name}: {e}")
+        logger.info("MinIO orphan file cleanup completed.")
     finally:
         db_client.close()

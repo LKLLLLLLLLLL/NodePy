@@ -352,8 +352,7 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
                 except Exception as e:
                     read_task.cancel()
                     recv_task.cancel()
-                    await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")
-                    break
+                    raise e
                 
                 # Cancel all pending tasks
                 for task in pending:
@@ -376,8 +375,7 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
                     except asyncio.CancelledError:
                         pass
                     except Exception as e:
-                        await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")
-                        break
+                        raise e
                 
                 # 5. check if received a message from the task
                 if read_task in done:
@@ -406,10 +404,9 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
                     except asyncio.CancelledError:
                         pass
                     except Exception as e:
-                        celery_app.control.revoke(task_id, terminate=True)
-                        await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")
-                        break
+                        raise e
     except Exception as e:
+        celery_app.control.revoke(task_id, terminate=True)
         logger.exception(f"Error processing websocket for task {task_id}: {e}")
         try:
             await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")

@@ -10,6 +10,7 @@ from server.models.exception import NodeParameterError, NodeValidationError, Nod
 from typing import Any, Literal
 from server.lib.SreamQueue import StreamQueue, Status
 from celery.exceptions import SoftTimeLimitExceeded
+from loguru import logger
 
 @celery_app.task(
     bind=True,
@@ -247,7 +248,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                                 "status": "IN_PROGRESS",
                                 "node_id": node_id,
                                 "timer": "stop",
-                                "patch": [data_patch.model_dump()] 
+                                "patch": [data_patch.model_dump(), time_patch.model_dump()], 
                                 # frontend has its own timer calculation, ours timer only for save to db
                                 # if user refresh the page, the runningtime will change to the backend calculated one
                             }
@@ -310,6 +311,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     db_client.commit()
 
                 except SoftTimeLimitExceeded:
+                    logger.exception("Task time limit exceeded")
                     patch = ProjectPatch(
                         key=["workflow", "error_message"],
                         value="Error: Task timed out."
@@ -325,6 +327,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                         }
                     )
                 except Exception as e:
+                    logger.exception(f"Error during task execution: {e}")
                     patch = ProjectPatch(
                         key=["workflow", "error_message"],
                         value="Error:" + str(e)
