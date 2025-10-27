@@ -14,7 +14,9 @@ import { getProject, parseProject } from '@/utils/projectConvert'
 import { monitorTask } from '@/utils/task'
 import type { BaseNode } from '@/types/nodeTypes'
 import type { vueFlowProject } from '@/types/vueFlowProject'
+import { useRoute } from 'vue-router'
 
+const {params: {projectId}} = useRoute()
 const project: vueFlowProject = ({
   project_id: -1,
   project_name: "undefined",
@@ -40,13 +42,13 @@ onUnmounted(() => {
 onMounted(async () => {
   try {
     console.log('getProjectApiProjectProjectIdGet')
-    const p = await DefaultService.getProjectApiProjectProjectIdGet(1)
+    const p = await DefaultService.getProjectApiProjectProjectIdGet(Number(projectId))
     console.log(p)
     parseProject(p, project)
     await nextTick()
     shouldWatch.value = true
   }catch(err) {
-    console.error('init error:',err)
+    console.error('init error:', err)
   }
 })
 
@@ -101,7 +103,7 @@ onNodeDragStop(async (event: NodeDragEvent) => {
     nodeId: event.node.id,
     nodeType: event.node.type,
     newPosition: event.node.position,
-  })
+  }, 'listenNodePosition:', listenNodePosition.value)
   if(!listenNodePosition.value || !shouldWatch.value) return
   listenNodePosition.value = false
 
