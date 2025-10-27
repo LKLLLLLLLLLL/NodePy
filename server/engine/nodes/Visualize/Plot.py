@@ -99,7 +99,7 @@ class PlotNode(BaseNode):
         buf = file_manager.get_buffer()
         plt.savefig(buf, format="png")
         plt.close()
-        file = file_manager.write(
+        file = file_manager.write_sync(
             content=buf,
             filename=f"{self.id}_plot.png",
             format="png",

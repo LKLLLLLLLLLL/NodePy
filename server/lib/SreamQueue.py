@@ -71,14 +71,14 @@ class StreamQueue:
     # ======= Helper functions for distributed status management =======
     def _refresh_ttl_sync(self):
         if self._sync_conn is None:
-            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+            raise AssertionError("Must use 'with StreamQueue()' context manager")
         self._sync_conn.expire(self.stream_name, STREAM_TTL_SECONDS)
         self._sync_conn.expire(f"{self.stream_name}:sender_finished", STREAM_TTL_SECONDS)
         self._sync_conn.expire(f"{self.stream_name}:reader_finished", STREAM_TTL_SECONDS)
     
     async def _refresh_ttl_async(self):
         if self._async_conn is None:
-            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+            raise AssertionError("Must use 'async with StreamQueue()' context manager")
         await self._async_conn.expire(self.stream_name, STREAM_TTL_SECONDS)
         await self._async_conn.expire(f"{self.stream_name}:sender_finished", STREAM_TTL_SECONDS)
         await self._async_conn.expire(f"{self.stream_name}:reader_finished", STREAM_TTL_SECONDS)
@@ -86,57 +86,57 @@ class StreamQueue:
     def _finish_sender_sync(self):
         """Mark the sender as finished in sync mode"""
         if self._sync_conn is None:
-            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+            raise AssertionError("Must use 'with StreamQueue()' context manager")
         self._sync_conn.set(f"{self.stream_name}:sender_finished", str(True))
 
     def _is_sender_finished_sync(self) -> bool:
         """Check if the sender is finished in sync mode"""
         if self._sync_conn is None:
-            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+            raise AssertionError("Must use 'with StreamQueue()' context manager")
         return self._sync_conn.get(f"{self.stream_name}:sender_finished") == "True"
     
     async def _finish_sender_async(self):
         """Mark the sender as finished in async mode"""
         if self._async_conn is None:
-            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+            raise AssertionError("Must use 'async with StreamQueue()' context manager")
         await self._async_conn.set(f"{self.stream_name}:sender_finished", str(True))
 
     async def _is_sender_finished_async(self) -> bool:
         """Check if the sender is finished in async mode"""
         if self._async_conn is None:
-            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+            raise AssertionError("Must use 'async with StreamQueue()' context manager")
         val = await self._async_conn.get(f"{self.stream_name}:sender_finished")
         return val == "True"
     
     def _finish_reader_sync(self):
         """Mark the reader as finished in sync mode"""
         if self._sync_conn is None:
-            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+            raise AssertionError("Must use 'with StreamQueue()' context manager")
         self._sync_conn.set(f"{self.stream_name}:reader_finished", str(True))
 
     def _is_reader_finished_sync(self) -> bool:
         """Check if the reader is finished in sync mode"""
         if self._sync_conn is None:
-            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+            raise AssertionError("Must use 'with StreamQueue()' context manager")
         return self._sync_conn.get(f"{self.stream_name}:reader_finished") == "True"
 
     async def _finish_reader_async(self):
         """Mark the reader as finished in async mode"""
         if self._async_conn is None:
-            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+            raise AssertionError("Must use 'async with StreamQueue()' context manager")
         await self._async_conn.set(f"{self.stream_name}:reader_finished", str(True))
 
     async def _is_reader_finished_async(self) -> bool:
         """Check if the reader is finished in async mode"""
         if self._async_conn is None:
-            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+            raise AssertionError("Must use 'async with StreamQueue()' context manager")
         val = await self._async_conn.get(f"{self.stream_name}:reader_finished")
         return val == "True"    
     
     def _try_cleanup_stream_sync(self):
         """Cleanup the stream if both sender and reader are finished (sync mode)"""
         if self._sync_conn is None:
-            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+            raise AssertionError("Must use 'with StreamQueue()' context manager")
         sender_finished = self._sync_conn.get(f"{self.stream_name}:sender_finished") == "True"
         reader_finished = self._sync_conn.get(f"{self.stream_name}:reader_finished") == "True"
         if sender_finished and reader_finished:
@@ -149,7 +149,7 @@ class StreamQueue:
     async def _try_cleanup_stream_async(self):
         """Cleanup the stream if both sender and reader are finished (async mode)"""
         if self._async_conn is None:
-            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+            raise AssertionError("Must use 'async with StreamQueue()' context manager")
         sender_finished = await self._async_conn.get(f"{self.stream_name}:sender_finished") == "True"
         reader_finished = await self._async_conn.get(f"{self.stream_name}:reader_finished") == "True"
         if sender_finished and reader_finished:
@@ -173,7 +173,7 @@ class StreamQueue:
             The ID of the added message
         """
         if self._async_conn is None:
-            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+            raise AssertionError("Must use 'async with StreamQueue()' context manager")
         if await self._is_sender_finished_async():
             raise RuntimeError("Cannot push message to a finished sending stream")
         
@@ -205,7 +205,7 @@ class StreamQueue:
             The message content or None if timeout
         """
         if self._async_conn is None:
-            raise RuntimeError("Must use 'async with StreamQueue()' context manager")
+            raise AssertionError("Must use 'async with StreamQueue()' context manager")
         if await self._is_reader_finished_async():
             raise RuntimeError("Cannot read message from a finished reading stream")
 
@@ -256,7 +256,7 @@ class StreamQueue:
             The ID of the added message
         """
         if self._sync_conn is None:
-            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+            raise AssertionError("Must use 'with StreamQueue()' context manager")
         if self._is_sender_finished_sync():
             raise RuntimeError("Cannot push message to a finished sending stream")
 
@@ -288,7 +288,7 @@ class StreamQueue:
             The message content or None if timeout
         """
         if self._sync_conn is None:
-            raise RuntimeError("Must use 'with StreamQueue()' context manager")
+            raise AssertionError("Must use 'with StreamQueue()' context manager")
         if self._is_reader_finished_sync():
             raise RuntimeError("Cannot read message from a finished reading stream")
 

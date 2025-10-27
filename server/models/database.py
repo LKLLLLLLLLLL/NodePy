@@ -4,23 +4,37 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 from sqlalchemy.sql import func
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from typing import Iterator
 import os
-
+from typing import AsyncIterator
 
 """
 Session management.
 """
+
+# sync engine and session
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 def get_session() -> Iterator[Session]:
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+# async engine and session
+ASYNC_DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
+async_engine = create_async_engine(ASYNC_DATABASE_URL, echo=False, pool_pre_ping=True)
+AsyncSessionLocal = async_sessionmaker(
+    bind=async_engine, 
+    class_=AsyncSession, 
+    expire_on_commit=False
+)
+async def get_async_session() -> AsyncIterator[AsyncSession]:
+    async with AsyncSessionLocal() as session:
+        yield session 
 
 """
 The models used in database.

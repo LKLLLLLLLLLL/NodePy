@@ -6,6 +6,10 @@ import json
 
 
 class ApiLoggerMiddleware(BaseHTTPMiddleware):
+    """
+    A middleware to log API request and response details.
+    Used for debugging.
+    """
     async def dispatch(self, request: Request, call_next):
         # 1. filter non-API requests
         if not request.url.path.startswith(("/api")):
