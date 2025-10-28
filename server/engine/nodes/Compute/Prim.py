@@ -1,4 +1,4 @@
-from ..BaseNode import BaseNode, InPort, OutPort, register_node
+from ..base_node import BaseNode, InPort, OutPort, register_node
 from typing import Literal, override
 from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
 from server.models.data import Data
@@ -9,19 +9,19 @@ This file defines compute nodes between primitive(float, int, str, bool) data.
 """
 
 @register_node
-class NumBinComputeNode(BaseNode):
+class NumberBinOpNode(BaseNode):
     """
     A class for binary compute between two numeric inputs(int or float).
-    """
+    """ 
     op: Literal["ADD", "SUB", "MUL", "DIV", "POW"]
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "NumBinComputeNode":
+        if not self.type == "NumberBinOpNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg ="Node type must be 'NumBinComputeNode'."
+                err_msg ="Node type must be 'NumberBinOpNode'."
             )
 
     @override
@@ -84,7 +84,7 @@ class NumBinComputeNode(BaseNode):
         return {'result': Data(payload=res)}
     
 @register_node
-class NumUnaryComputeNode(BaseNode):
+class NumberUnaryOpNode(BaseNode):
     """
     A node for unary compute on a numeric input(int or float).
     """
@@ -92,11 +92,11 @@ class NumUnaryComputeNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "NumUnaryComputeNode":
+        if not self.type == "NumberUnaryOpNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'NumUnaryComputeNode'."
+                err_msg="Node type must be 'NumberUnaryOpNode'."
             )
 
     @override
@@ -140,7 +140,7 @@ class NumUnaryComputeNode(BaseNode):
         return {'result': Data(payload=res)}
 
 @register_node
-class CmpNode(BaseNode):
+class PrimitiveCompareNode(BaseNode):
     """
     A node for primitive comparison.
     The input must be the type of int, float, str or bool.
@@ -149,11 +149,11 @@ class CmpNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "CmpNode":
+        if not self.type == "PrimitiveCompareNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'CmpNode'."
+                err_msg="Node type must be 'PrimitiveCompareNode'."
             )
 
     @override
@@ -161,7 +161,6 @@ class CmpNode(BaseNode):
         primitive_types = Pattern(types={
             Schema.Type.INT,
             Schema.Type.FLOAT,
-            Schema.Type.STR,
             Schema.Type.BOOL
         })
         return [
@@ -213,18 +212,18 @@ class CmpNode(BaseNode):
         return {'result': Data(payload=res)}
 
 @register_node
-class BoolBinComputeNode(BaseNode):
+class BoolBinOpNode(BaseNode):
     """
     Node to compute binary boolean operations.
     """
     op: Literal["AND", "OR", "XOR", "SUB"]
     
     def validate_parameters(self) -> None:
-        if not self.type == "BoolBinComputeNode":
+        if not self.type == "BoolBinOpNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'BoolBinComputeNode'."
+                err_msg="Node type must be 'BoolBinOpNode'."
             )
 
     @override 
@@ -264,11 +263,12 @@ class BoolBinComputeNode(BaseNode):
         return {'result': Data(payload=res)}
 
 @register_node
-class BoolUnaryComputeNode(BaseNode):
+class BoolUnaryOpNode(BaseNode):
     """
     Node to compute unary boolean operations.
     Only "NOT" is supported.
     """
+    op = Literal["NOT"]
 
     @override
     def validate_parameters(self) -> None:

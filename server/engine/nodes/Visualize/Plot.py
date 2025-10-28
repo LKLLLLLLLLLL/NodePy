@@ -1,4 +1,4 @@
-from ..BaseNode import BaseNode, InPort, OutPort, register_node
+from ..base_node import BaseNode, InPort, OutPort, register_node
 from typing import Literal, override
 from server.models.exception import NodeParameterError
 from server.models.data import Table, Data
@@ -14,8 +14,8 @@ class PlotNode(BaseNode):
     """
     Node to visualize data from input table using matplotlib.
     """
-    x_column: str
-    y_column: str
+    x_col: str
+    y_col: str
     plot_type: Literal["scatter", "line", "bar"]
     title: str | None = None
 
@@ -27,17 +27,17 @@ class PlotNode(BaseNode):
                 err_param_key="type", 
                 err_msg = "Node type must be 'PlotNode'."
             )
-        if self.x_column.strip() == "":
+        if self.x_col.strip() == "":
             raise NodeParameterError(
                 node_id=self.id,
-                err_param_key="x_column",
-                err_msg="x_column cannot be empty."
+                err_param_key="x_col",
+                err_msg="x_col cannot be empty."
             )
-        if self.y_column.strip() == "":
+        if self.y_col.strip() == "":
             raise NodeParameterError(
                 node_id=self.id,
-                err_param_key="y_column",
-                err_msg="y_column cannot be empty."
+                err_param_key="y_col",
+                err_msg="y_col cannot be empty."
             )
         if self.title is not None and self.title.strip() == "":
             raise NodeParameterError(
@@ -57,8 +57,8 @@ class PlotNode(BaseNode):
                 accept=Pattern(
                     types = {Schema.Type.TABLE},
                     table_columns = {
-                        self.x_column: {ColType.INT, ColType.FLOAT, ColType.STR},
-                        self.y_column: {ColType.INT, ColType.FLOAT}
+                        self.x_col: {ColType.INT, ColType.FLOAT, ColType.STR},
+                        self.y_col: {ColType.INT, ColType.FLOAT}
                     }
                 )
             ),
@@ -91,8 +91,8 @@ class PlotNode(BaseNode):
             plt.bar(x_data, y_data)
         if self.title:
             plt.title(self.title)
-        plt.xlabel(self.x_column)
-        plt.ylabel(self.y_column)
+        plt.xlabel(self.x_col)
+        plt.ylabel(self.y_col)
         plt.grid()
         plt.tight_layout()      
         # save to byte stream

@@ -1,4 +1,4 @@
-from ..BaseNode import BaseNode, InPort, OutPort, register_node
+from ..base_node import BaseNode, InPort, OutPort, register_node
 from server.models.exception import NodeParameterError, NodeValidationError
 from server.models.data import Table, Data
 from server.models.schema import Pattern, Schema, generate_default_col_name, check_no_illegal_cols, ColType

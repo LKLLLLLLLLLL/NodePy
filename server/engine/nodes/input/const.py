@@ -1,4 +1,4 @@
-from ..BaseNode import InPort, OutPort, BaseNode, register_node
+from ..base_node import InPort, OutPort, BaseNode, register_node
 from server.models.data import Data
 from server.models.schema import Schema
 from typing import Literal, override

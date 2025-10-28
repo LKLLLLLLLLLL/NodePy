@@ -1,4 +1,4 @@
-from ..BaseNode import BaseNode, register_node
+from ..base_node import BaseNode, register_node
 
 """
 A series of nodes which operate on columns of tables.

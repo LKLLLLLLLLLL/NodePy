@@ -1,4 +1,4 @@
-from ..BaseNode import BaseNode,InPort, OutPort, register_node
+from ..base_node import BaseNode,InPort, OutPort, register_node
 from typing import Literal, override
 from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
 from server.models.data import Table, Data
@@ -21,22 +21,22 @@ Calculate between primitive and table column.
 """
 
 @register_node
-class TabBinPrimNumComputeNode(BaseNode):
+class ColWithNumberBinOpNode(BaseNode):
     """
     Compute binary numeric operation on a table column a primitive number.
     Supported ops: ADD, SUB, MUL, DIV, POW
     """
-    op: Literal["ADD", "SUB", "MUL", "TAB_DIV_PRIM", "PRIM_DIV_TAB", "TAB_POW_PRIM", "PRIM_POW_TAB"]
+    op: Literal["ADD", "SUB", "MUL", "COL_DIV_NUM", "NUM_DIV_COL", "COL_POW_NUM", "NUM_POW_COL"]
     col: str # the column to operate on
     result_col: str | None = None  # if None, use default result col name
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "TabBinPrimNumComputeNode":
+        if not self.type == "ColWithNumberBinOpNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'TabBinPrimNumComputeNode'."
+                err_msg="Node type must be 'ColWithNumberBinOpNode'."
             )
         if self.col.strip() == "":
             raise NodeParameterError(
@@ -126,14 +126,14 @@ class TabBinPrimNumComputeNode(BaseNode):
             df[self.result_col] = series - num
         elif self.op == "MUL":
             df[self.result_col] = series * num
-        elif self.op == "TAB_DIV_PRIM":
+        elif self.op == "COL_DIV_NUM":
             if num == 0:
                 raise NodeExecutionError(
                     node_id=self.id,
                     err_msg="Division by zero error."
                 )
             df[self.result_col] = series / num
-        elif self.op == "PRIM_DIV_TAB":
+        elif self.op == "NUM_DIV_COL":
             # Check for division by zero, but NaN values should be preserved
             if (series == 0).any():
                 raise NodeExecutionError(
@@ -141,9 +141,9 @@ class TabBinPrimNumComputeNode(BaseNode):
                     err_msg="Division by zero error."
                 )
             df[self.result_col] = num / series
-        elif self.op == "TAB_POW_PRIM":
+        elif self.op == "COL_POW_NUM":
             df[self.result_col] = series ** num
-        elif self.op == "PRIM_POW_TAB":
+        elif self.op == "NUM_POW_COL":
             df[self.result_col] = num ** series
         else:
             raise NodeExecutionError(
@@ -156,22 +156,22 @@ class TabBinPrimNumComputeNode(BaseNode):
         return {'table': out_table}
 
 @register_node
-class TabBinPrimBoolComputeNode(BaseNode):
+class ColWithBoolBinOpNode(BaseNode):
     """
     Compute binary boolean operation on a table column a primitive number.
     Supported ops: AND, OR, XOR, SUB
     """
-    op: Literal["AND", "OR", "XOR", "PRIM_SUB_TAB", "TAB_SUB_PRIM"]
+    op: Literal["AND", "OR", "XOR", "NUM_SUB_COL", "COL_SUB_NUM"]
     col: str # the column to operate on
     result_col: str | None = None  # if None, use default result col name
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "TabBinPrimBoolComputeNode":
+        if not self.type == "ColWithBoolBinOpNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'TabBinPrimBoolComputeNode'."
+                err_msg="Node type must be 'ColWithBoolBinOpNode'."
             )
         if self.col.strip() == "":
             raise NodeParameterError(
@@ -255,9 +255,9 @@ class TabBinPrimBoolComputeNode(BaseNode):
             df[self.result_col] = series | boolean
         elif self.op == "XOR":
             df[self.result_col] = series ^ boolean
-        elif self.op == "TAB_SUB_PRIM":
+        elif self.op == "COL_SUB_NUM":
             df[self.result_col] = series & (not boolean)
-        elif self.op == "PRIM_SUB_TAB":
+        elif self.op == "NUM_SUB_COL":
             df[self.result_col] = boolean & ~series
         else:
             raise NodeExecutionError(
@@ -275,7 +275,7 @@ Calculate in one column.
 """
 
 @register_node
-class TabUnaryNumComputeNode(BaseNode):
+class NumberColUnaryOpNode(BaseNode):
     """
     Compute unary numeric operation on a table column.
     Supported ops: ABS, NEG, EXP, LOG, SQRT
@@ -286,11 +286,11 @@ class TabUnaryNumComputeNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "TabUnaryNumComputeNode":
+        if not self.type == "NumberColUnaryOpNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'TabUnaryNumComputeNode'."
+                err_msg="Node type must be 'NumberColUnaryOpNode'.",
             )
         if self.col.strip() == "":
             raise NodeParameterError(
@@ -386,7 +386,7 @@ class TabUnaryNumComputeNode(BaseNode):
         return {'table': out_table}
 
 @register_node
-class TabUnaryBoolComputeNode(BaseNode):
+class BoolColUnaryOpNode(BaseNode):
     """
     Compute unary boolean operation on a table column.
     Supported ops: NOT
@@ -397,11 +397,11 @@ class TabUnaryBoolComputeNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "TabUnaryBoolComputeNode":
+        if not self.type == "BoolColUnaryOpNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'TabUnaryBoolComputeNode'."
+                err_msg="Node type must be 'BoolColUnaryOpNode'.",
             )
         if self.col.strip() == "":
             raise NodeParameterError(
@@ -483,7 +483,7 @@ Calculate between two table columns.
 """
 
 @register_node
-class ColBinNumComputeNode(BaseNode):
+class NumberColWithColUnaryOpNode(BaseNode):
     """
     Compute binary numeric operation on two table columns.
     Supported ops: ADD, SUB, MUL, DIV, POW
@@ -495,11 +495,11 @@ class ColBinNumComputeNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "ColBinNumComputeNode":
+        if not self.type == "NumberColWithColUnaryOpNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'ColBinNumComputeNode'."
+                err_msg="Node type must be 'NumberColWithColUnaryOpNode'.",
             )
         if self.col1.strip() == "":
             raise NodeParameterError(
@@ -628,7 +628,7 @@ class ColBinNumComputeNode(BaseNode):
         return {'table': out_table}
 
 @register_node
-class ColBinBoolComputeNode(BaseNode):
+class BoolColWithColBinOpNode(BaseNode):
     """
     Compute binary boolean operation on two table columns.
     Supported ops: AND, OR, XOR, SUB
@@ -640,11 +640,11 @@ class ColBinBoolComputeNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "ColBinBoolComputeNode":
+        if not self.type == "BoolColWithColBinOpNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'ColBinBoolComputeNode'."
+                err_msg="Node type must be 'BoolColWithColBinOpNode'."
             )
         if self.col1.strip() == "":
             raise NodeParameterError(

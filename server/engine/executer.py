@@ -1,7 +1,7 @@
 import networkx as nx
 from server.models.project import WorkflowTopology, TopoNode, TopoEdge
 from typing import Any, Literal, Callable
-from .nodes.BaseNode import BaseNode
+from .nodes.base_node import BaseNode
 from server.models.data import Schema, Data
 from .nodes.config import GlobalConfig
 from server.lib.CacheManager import CacheManager

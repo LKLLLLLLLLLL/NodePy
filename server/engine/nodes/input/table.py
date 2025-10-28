@@ -1,4 +1,4 @@
-from ..BaseNode import BaseNode, InPort, OutPort, register_node
+from ..base_node import BaseNode, InPort, OutPort, register_node
 from typing import List, Dict, override
 from server.models.exception import NodeParameterError
 from server.models.data import Data

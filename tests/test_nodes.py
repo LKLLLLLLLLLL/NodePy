@@ -25,7 +25,7 @@ from server.engine.nodes.Generate.Table import RandomNode, RangeNode
 from server.engine.nodes.Visualize.WordCloud import WordCloudNode
 from server.engine.nodes.TableProcess.RowProcess import TableFilterNode, TableRowAppendNode, TableSortNode
 from server.engine.nodes.TableProcess.ColProcess import SelectColNode, SplitColNode, JoinColNode, RenameColNode, CopyColNode
-from server.engine.nodes.BaseNode import BaseNode
+from server.engine.nodes.base_node import BaseNode
 
 from server.engine.nodes.GlobalConfig import GlobalConfig
 from server.lib.FileManager import FileManager, File

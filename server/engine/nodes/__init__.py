@@ -12,14 +12,13 @@ Adding new nodes:
 
 import importlib
 from pathlib import Path
+from loguru import logger
+from .base_node import _NODE_REGISTRY
 
 # Files to skip during auto-discovery (infrastructure, not node definitions)
 _SKIP_FILES = {
     '__init__.py',
     'BaseNode.py',
-    'DataType.py', 
-    'Exceptions.py',
-    'GlobalConfig.py',
 }
 
 def _auto_import_nodes():
@@ -57,10 +56,9 @@ def _auto_import_nodes():
                 importlib.import_module(f'.{module_name}', package=__name__)
             except Exception as e:
                 # Log the error but don't fail the entire import process
-                print(f"Warning: Failed to import {module_name}: {e}")
+                logger.warning(f"Failed to import {module_name}: {e}")
 
 # Run auto-discovery when this package is imported
 _auto_import_nodes()
 
-# Note: __all__ is intentionally not defined here
-# The registry pattern doesn't require explicit exports
+logger.info(f"Registered nodes: {list(_NODE_REGISTRY.keys())}")

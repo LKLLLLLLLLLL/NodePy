@@ -1,4 +1,4 @@
-from ..BaseNode import BaseNode, InPort, OutPort, register_node
+from ..base_node import BaseNode, InPort, OutPort, register_node
 from server.models.data import Data
 from server.models.schema import Schema
 from server.models.exception import NodeParameterError
