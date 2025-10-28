@@ -216,7 +216,7 @@ async function handleClickRename(){
     display:flex;
     flex-direction:column;
     gap:6px;
-    min-height: 70px; /* ensure new-card height matches cards with meta */
+    min-height: 75px; /* ensure new-card height matches cards with meta */
 }
 .project-title{
     font-weight:700;

@@ -177,7 +177,7 @@ table:
 表格列与数值二元运算节点，支持对表格中的指定列与一个数值类型(int或float)的输入进行`ADD`, `SUB`, `MUL`, `DIV`, `POW`五种基本运算，将结果存储在新的表格列中。
 
 **参数：**
-- op: 运算类型，类型为str，取值为"ADD", "SUB", "MUL", "COL_DIV_NUM", "NUM_DIV_COL", "COL_POW_NUM", "NUM_POW_COL"。
+- op: 运算类型，类型为str，取值为"ADD", "COL_SUB_NUM", "NUM_SUB_COL", "MUL", "COL_DIV_NUM", "NUM_DIV_COL", "COL_POW_NUM", "NUM_POW_COL"。
 - col: 要操作的表格列名，类型为str，该列必须为数值类型(int或float)。
 - result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
 
@@ -231,7 +231,7 @@ table:
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的结果列。
 
-#### 2.10 NumberColWithColUnaryOpNode
+#### 2.10 NumberColWithColBinOpNode
 表格列与表格列二元运算节点，支持对表格中的两个指定列进行`ADD`, `SUB`, `MUL`, `DIV`, `POW`五种基本运算，将结果存储在新的表格列中。
 
 **参数：**

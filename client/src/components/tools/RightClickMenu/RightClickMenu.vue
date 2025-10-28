@@ -1,230 +1,285 @@
 <script lang="ts" setup>
-
 import { useGraphStore } from '@/stores/graphStore'
-import { ref } from 'vue'
-import { nodeMenuItems } from '@/types/menuTypes'
-import { computed } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { nodeMenuItems, type MenuNode } from '@/types/menuTypes'
 import { useVueFlow } from '@vue-flow/core'
+import SubMenu from './SubMenu.vue'
 
 const graphStore = useGraphStore()
 const { addNode } = graphStore
+
+// 菜单状态
 const showMenu = ref(false)
-const x = ref(0)
-const y = ref(0)
+const menuX = ref(0)
+const menuY = ref(0)
+const menuRoot = ref<HTMLElement | null>(null)
+const openSubmenuIndex = ref<number | null>(null)
+const menuItemRefs = ref<Array<HTMLElement | null>>([])
+const submenuAnchorRect = ref<DOMRect | null>(null)
+const isMenuClosing = ref(false)
+const isMenuOpening = ref(false)
+
+const setMenuItemRef = (el: unknown, idx: number) => {
+  menuItemRefs.value[idx] = (el as HTMLElement) || null
+}
 
 const { onPaneContextMenu, screenToFlowCoordinate } = useVueFlow('main')
 
+// 绑定右键事件
 onPaneContextMenu((e: MouseEvent) => {
-  handleContextmenu(e)
+  showContextMenu(e)
 })
 
-// 计算菜单位置
-const menuLocation = computed(() => {
-  return x.value > window.innerWidth - 330 ? 'left' : 'right'
-})
-
-// 获取叶子节点
-const getLeafItems = (item: any) => {
-  const leafItems: any[] = []
-
-  if (item.children) {
-    item.children.forEach((child: any) => {
-        leafItems.push(child)
-    })
-  }
-
-  return leafItems
-}
-
-// 处理右键点击事件
-const handleContextmenu = (event: MouseEvent) => {
+// 显示右键菜单
+const showContextMenu = (event: MouseEvent) => {
   event.preventDefault()
-
-  x.value = event.clientX
-  y.value = event.clientY
+  menuX.value = event.clientX
+  menuY.value = event.clientY
   showMenu.value = false
+  openSubmenuIndex.value = null
 
-  // 使用 setTimeout 确保 DOM 更新后再显示菜单
-  setTimeout(() => {
+  setTimeout(async () => {
     showMenu.value = true
+    isMenuOpening.value = true
+    await nextTick()
+    menuRoot.value?.focus()
+    // 300ms 后允许通过 mouseleave 关闭菜单
+    setTimeout(() => {
+      isMenuOpening.value = false
+    }, 300)
   }, 10)
 }
 
-// 处理节点选择
-const handleNodeSelect = (nodeType: string) => {
-  console.log('添加节点:', nodeType)
-  
-  // 使用 VueFlow 的坐标转换函数将屏幕坐标转换为画布坐标
-  const flowPosition = screenToFlowCoordinate({
-    x: x.value,
-    y: y.value
-  })
-  
-  // 使用转换后的画布坐标添加节点
-  addNode(nodeType, { 
-    x: flowPosition.x, 
-    y: flowPosition.y 
-  })
-  showMenu.value = false
+// 选择节点
+const selectNode = (nodeType: string) => {
+  const flowPos = screenToFlowCoordinate({ x: menuX.value, y: menuY.value })
+  addNode(nodeType, { x: flowPos.x, y: flowPos.y })
+  hideMenu()
 }
+
+// 处理菜单项点击
+const handleItemClick = (item: MenuNode) => {
+  if (!item.children || item.children.length === 0) {
+    selectNode(item.value)
+  }
+}
+
+// 打开子菜单
+const openSubmenu = (index: number) => {
+  if (nodeMenuItems[index]?.children?.length) {
+    openSubmenuIndex.value = index
+    const el = menuItemRefs.value[index]
+    if (el) {
+      submenuAnchorRect.value = el.getBoundingClientRect()
+    }
+  }
+}
+
+// 隐藏菜单
+const hideMenu = () => {
+  // 菜单打开过程中不关闭（防止立即关闭）
+  if (isMenuOpening.value) return
+
+  if (menuRoot.value && !isMenuClosing.value) {
+    isMenuClosing.value = true
+    menuRoot.value.classList.add('closing')
+    // 等待退出动画完成后再卸载
+    setTimeout(() => {
+      showMenu.value = false
+      openSubmenuIndex.value = null
+      isMenuClosing.value = false
+    }, 120)
+  }
+}
+
+// 子菜单方向
+const submenuDirection = computed(() =>
+  menuX.value > window.innerWidth - 350 ? 'left' : 'right'
+)
+
+// 菜单样式
+const menuStyle = computed(() => {
+  const width = 160
+  let left = menuX.value
+  if (menuX.value > window.innerWidth - width) {
+    left = menuX.value - width
+  }
+  let top = menuY.value
+  const approxHeight = 36 * nodeMenuItems.length
+  if (menuY.value + approxHeight > window.innerHeight) {
+    top = Math.max(8, window.innerHeight - approxHeight - 8)
+  }
+  return `position: fixed; left: ${left}px; top: ${top}px; z-index: 9999; min-width: ${width}px;`
+})
+
+// 全局鼠标监听：检查是否离开菜单和子菜单
+const onGlobalMouseMove = (e: MouseEvent) => {
+  if (!showMenu.value || isMenuClosing.value) return
+
+  const x = e.clientX
+  const y = e.clientY
+
+  // 检查鼠标是否在主菜单内
+  const menuRect = menuRoot.value?.getBoundingClientRect()
+  if (menuRect && x >= menuRect.left && x <= menuRect.right && y >= menuRect.top && y <= menuRect.bottom) {
+    return // 在主菜单内，不关闭
+  }
+
+  // 检查鼠标是否在任何子菜单内
+  const portals = document.querySelectorAll('.submenu-portal')
+  for (let i = 0; i < portals.length; i++) {
+    const portal = portals[i]
+    if (portal) {
+      const portalRect = portal.getBoundingClientRect()
+      if (x >= portalRect.left && x <= portalRect.right && y >= portalRect.top && y <= portalRect.bottom) {
+        return // 在子菜单内，不关闭
+      }
+    }
+  }
+
+  // 都不在，关闭菜单
+  hideMenu()
+}
+
+onMounted(() => {
+  document.addEventListener('mousemove', onGlobalMouseMove)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousemove', onGlobalMouseMove)
+})
 </script>
+
 <template>
-    <!-- 透明激活器，确保菜单在鼠标处弹出 -->
-    <div
-      v-if="showMenu"
-      :style="{
-        position: 'fixed',
-        left: x + 'px',
-        top: y + 'px',
-        width: '1px',
-        height: '1px',
-        zIndex: 9999,
-        pointerEvents: 'none'
-      }"
-      id="menu-activator"
-    ></div>
+  <!-- 菜单容器 -->
+  <div
+    v-if="showMenu"
+    ref="menuRoot"
+    class="context-menu"
+    :style="menuStyle"
+    @keydown.esc="hideMenu"
+    tabindex="-1"
+  >
+    <ul class="menu-list">
+      <li
+        v-for="(item, index) in nodeMenuItems"
+        :key="item.value"
+        class="menu-item"
+        :ref="el => setMenuItemRef(el, index)"
+        @mouseenter="openSubmenu(index)"
+      >
+        <div
+          class="menu-item-content"
+          @click="handleItemClick(item)"
+        >
+          <span class="menu-label">{{ item.label }}</span>
+          <span v-if="item.children?.length" class="submenu-arrow">
+              <svg width="10" height="10" viewBox="0 0 8 8">
+              <path d="M2 1 L6 4 L2 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+          </span>
+        </div>
 
-    <!-- 主菜单 -->
-    <v-menu
-      v-model="showMenu"
-      activator="#menu-activator"
-      absolute
-      :close-on-content-click="false"
-      offset="2"
-      :location="menuLocation"
-    >
-      <v-list density="compact" class="main-menu">
-        <template v-for="(item, index) in nodeMenuItems" :key="item.value">
-          <!-- 有子菜单的项 -->
-          <v-list-item
-            v-if="item.children"
-            :title="item.label"
-            @click.stop
-            class="menu-item parent-item"
-          >
-            <template #append>
-              <v-icon
-                :icon="menuLocation === 'right' ? 'mdi-chevron-right' : 'mdi-chevron-left'"
-                size="x-small"
-              ></v-icon>
-            </template>
-
-            <!-- 二级菜单 -->
-            <v-menu
-              :open-on-focus="false"
-              activator="parent"
-              open-on-hover
-              :location="menuLocation"
-              submenu
-              :close-on-content-click="false"
-              offset="2"
-            >
-              <v-list density="compact" class="submenu">
-                <v-list-item
-                  v-for="(leafItem, leafIndex) in getLeafItems(item)"
-                  :key="leafItem.value"
-                  :title="leafItem.label"
-                  @click="handleNodeSelect(leafItem.value)"
-                  class="leaf-item submenu-item"
-                />
-              </v-list>
-            </v-menu>
-          </v-list-item>
-
-          <!-- 一级叶子节点 -->
-          <v-list-item
-            v-else
-            :title="item.label"
-            @click="handleNodeSelect(item.value)"
-            class="leaf-item parent-item"
-          />
-        </template>
-      </v-list>
-    </v-menu>
+        <!-- 子菜单 -->
+        <SubMenu
+          v-if="item.children?.length && openSubmenuIndex === index"
+          :items="item.children"
+          :direction="submenuDirection"
+          :on-select="selectNode"
+          :anchor-rect="submenuAnchorRect"
+        />
+      </li>
+    </ul>
+  </div>
 </template>
+
 <style scoped lang="scss">
-@use '../../../common/style/global.scss';
-// 主菜单样式
-:deep(.main-menu) {
-  min-width: 160px;
-  padding: 6px 4px !important;
-  border-radius: 12px !important; // 增大圆角
+@use '../../../common/style/global.scss' as *;
 
-  .v-list-item {
-    min-height: 28px !important;
-    margin: 2px 4px !important;
-    border-radius: 6px !important; // 增大菜单项圆角
-    cursor: pointer;
+.context-menu {
+  @include controller-style;
+  padding: 4px 0;
+  box-sizing: border-box;
+  outline: none;
+  // min-width: 120px;
+  width: 10px !important;
+  /* 进入动画：淡入并轻微向下移动 */
+  animation: menu-fade-in 200ms cubic-bezier(.2,.8,.2,1) both;
+}
 
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.06);
-    }
+.context-menu.closing {
+  animation: menu-fade-out 200ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-item {
+  position: relative;
+}
+
+.menu-item-content {
+  padding: 6px 12px 6px 16px;
+  margin: 2px 2px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.menu-item-content:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.menu-label {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.submenu-arrow {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  color: inherit; /* 继承文字颜色 */
+  width: 9px;
+  height: 9px;
+}
+.submenu-arrow svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.submenu-arrow path {
+  stroke: currentColor;
+  opacity: 0.40;
+}
+
+@keyframes menu-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    width: auto;
+    height: auto;
   }
 }
 
-// 父级菜单项样式
-:deep(.parent-item) {
-  margin: 3px 4px !important;
-  background-color: rgba(0, 0, 0, 0.02);
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.08);
+@keyframes menu-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
   }
-}
-
-// 子菜单样式
-:deep(.submenu) {
-  min-width: 160px;
-  padding: 6px 4px !important;
-  border-radius: 12px !important; // 增大圆角
-
-  .v-list-item {
-    min-height: 28px !important;
-    margin: 1px 4px !important;
-    border-radius: 6px !important; // 增大菜单项圆角
-    cursor: pointer;
-
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.06);
-    }
-  }
-}
-
-// 子菜单项样式
-:deep(.submenu-item) {
-  margin: 1px 4px !important;
-}
-
-// 叶子节点样式
-:deep(.leaf-item) {
-  min-height: 28px !important;
-  border-radius: 6px !important; // 增大圆角
-
-  &:hover {
-    background-color: rgba(0, 123, 255, 0.12) !important;
-  }
-}
-
-// 菜单项内容样式
-:deep(.v-list-item__content) {
-  padding: 4px 0 !important;
-}
-
-// 菜单标题样式
-:deep(.v-list-item-title) {
-  font-size: 13px !important;
-  line-height: 1.2 !important;
-  padding: 0 4px;
-}
-
-// 确保子菜单样式正确 - 增大所有菜单容器的圆角
-:deep(.v-menu__content) {
-  border-radius: 16px !important; // 显著增大圆角
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important; // 增强阴影以配合更大的圆角
-  overflow: hidden; // 确保内容不超出圆角边界
-
-  .v-list {
-    background-color: #ffffff;
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
   }
 }
 </style>

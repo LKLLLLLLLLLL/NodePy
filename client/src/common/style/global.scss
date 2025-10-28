@@ -7,9 +7,13 @@ $stress-background-color: white;
   background-color: $background-color
 }
 
-.controller-style {
+@mixin controller-style {
   border-radius: 10px;
   background-color: $stress-background-color;
   overflow: hidden;
   box-shadow: 5px 5px 50px rgba(128, 128, 128, 0.15);
+}
+
+.controller-style {
+    @include controller-style;
 }

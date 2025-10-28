@@ -26,7 +26,7 @@ class ColWithNumberBinOpNode(BaseNode):
     Compute binary numeric operation on a table column a primitive number.
     Supported ops: ADD, SUB, MUL, DIV, POW
     """
-    op: Literal["ADD", "SUB", "MUL", "COL_DIV_NUM", "NUM_DIV_COL", "COL_POW_NUM", "NUM_POW_COL"]
+    op: Literal["ADD", "COL_SUB_NUM", "NUM_SUB_COL", "MUL", "COL_DIV_NUM", "NUM_DIV_COL", "COL_POW_NUM", "NUM_POW_COL"]
     col: str # the column to operate on
     result_col: str | None = None  # if None, use default result col name
 
@@ -122,8 +122,10 @@ class ColWithNumberBinOpNode(BaseNode):
         
         if self.op == "ADD":
             df[self.result_col] = series + num
-        elif self.op == "SUB":
+        elif self.op == "COL_SUB_NUM":
             df[self.result_col] = series - num
+        elif self.op == "NUM_SUB_COL":
+            df[self.result_col] = num - series
         elif self.op == "MUL":
             df[self.result_col] = series * num
         elif self.op == "COL_DIV_NUM":
@@ -483,7 +485,7 @@ Calculate between two table columns.
 """
 
 @register_node
-class NumberColWithColUnaryOpNode(BaseNode):
+class NumberColWithColBinOpNode(BaseNode):
     """
     Compute binary numeric operation on two table columns.
     Supported ops: ADD, SUB, MUL, DIV, POW
@@ -495,11 +497,11 @@ class NumberColWithColUnaryOpNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "NumberColWithColUnaryOpNode":
+        if not self.type == "NumberColWithColBinOpNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'NumberColWithColUnaryOpNode'.",
+                err_msg="Node type must be 'NumberColWithColBinOpNode'.",
             )
         if self.col1.strip() == "":
             raise NodeParameterError(
