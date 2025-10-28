@@ -9,12 +9,12 @@ export const useGraphStore = defineStore('graph', () => {
   const {addNodes} = vueFLowInstance
 
 
-  const addNode = (type: string) => {
+  const addNode = (type: string, position: {x: number, y: number}) => {
     switch(type){
       case 'ConstNode':
         const addedConstNode: Nodetypes.ConstNode = {
           id: Date.now().toString(),
-          position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
+          position,
           type: 'ConstNode',
           data: {
             param: {
@@ -28,7 +28,7 @@ export const useGraphStore = defineStore('graph', () => {
       case 'StringNode':
         const addedStringNode: Nodetypes.StringNode = {
           id: Date.now().toString(),
-          position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
+          position,
           type: 'StringNode',
           data: {
             param: {
@@ -41,7 +41,7 @@ export const useGraphStore = defineStore('graph', () => {
       case 'TableNode':
         const addedTableNode: Nodetypes.TableNode = {
           id: Date.now().toString(),
-          position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
+          position,
           type: 'TableNode',
           data: {
             param: {
@@ -56,7 +56,7 @@ export const useGraphStore = defineStore('graph', () => {
       case 'NumBinComputeNode':
         const addedNumBinComputeNode: Nodetypes.NumBinComputeNode = {
           id: Date.now().toString(),
-          position: { x: 100, y: 100 + Math.floor(Math.random() * 101 - 50)},
+          position,
           type: 'NumBinComputeNode',
           data: {
             param: {
