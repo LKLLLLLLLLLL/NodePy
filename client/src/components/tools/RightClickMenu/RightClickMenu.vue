@@ -4,16 +4,24 @@ import { useGraphStore } from '@/stores/graphStore'
 import { ref } from 'vue'
 import { nodeMenuItems } from '@/types/menuTypes'
 import { computed } from 'vue'
+import { useVueFlow } from '@vue-flow/core'
 
 const graphStore = useGraphStore()
 const { addNode } = graphStore
-    const showMenu = ref(false)
-    const x = ref(0)
-    const y = ref(0)
+const showMenu = ref(false)
+const x = ref(0)
+const y = ref(0)
+
+const { onPaneContextMenu, screenToFlowCoordinate, viewport } = useVueFlow('main')
+
+onPaneContextMenu((e: MouseEvent) => {
+  console.log('右键菜单事件:', e)
+  handleContextmenu(e)
+})
 
 // 计算菜单位置
 const menuLocation = computed(() => {
-  return x.value > window.innerWidth / 2 ? 'left' : 'right'
+  return x.value > window.innerWidth -330 ? 'left' : 'right'
 })
 
 // 获取叶子节点（扁平化处理三级菜单）
@@ -49,10 +57,25 @@ const handleContextmenu = (event: MouseEvent) => {
   }, 10)
 }
 
-// 处理节点选择
+// 处理节点选择 - 修正坐标转换
 const handleNodeSelect = (nodeType: string) => {
   console.log('添加节点:', nodeType)
-  addNode(nodeType)
+  
+  // 使用 VueFlow 的坐标转换函数将屏幕坐标转换为画布坐标
+  const flowPosition = screenToFlowCoordinate({
+    x: x.value,
+    y: y.value
+  })
+  
+  console.log('屏幕坐标:', { x: x.value, y: y.value })
+  console.log('画布坐标:', flowPosition)
+  console.log('视口信息:', viewport.value)
+  
+  // 使用转换后的画布坐标添加节点
+  addNode(nodeType, { 
+    x: flowPosition.x, 
+    y: flowPosition.y 
+  })
   showMenu.value = false
 }
 </script>
@@ -131,6 +154,7 @@ const handleNodeSelect = (nodeType: string) => {
     </v-menu>
 </template>
 <style scoped lang="scss">
+@use '../../../common/style/global.scss';
 // 主菜单样式
 :deep(.main-menu) {
   min-width: 160px;
