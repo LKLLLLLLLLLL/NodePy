@@ -1,10 +1,11 @@
 <script lang='ts' setup>
-import { ref, onMounted, computed, watch, nextTick, onUnmounted } from 'vue'
+import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import { VueFlow, useVueFlow, ConnectionMode } from '@vue-flow/core'
 import type { NodeDragEvent } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import { Controls } from '@vue-flow/controls'
+import RightClickMenu from './tools/RightClickMenu/RightClickMenu.vue'
 import ConstNode from './nodes/ConstNode.vue'
 import StringNode from './nodes/StringNode.vue'
 import TableNode from './nodes/TableNode.vue'
@@ -26,7 +27,7 @@ const project: vueFlowProject = ({
     edges: ref([])
   }
 })
-const { onConnect, onInit, onNodeDragStop, addEdges, onEdgesChange } = useVueFlow('main')
+const { onConnect, onInit, onNodeDragStop, addEdges, onPaneContextMenu  } = useVueFlow('main')
 const shouldWatch = ref(false)
 const listenNodePosition = ref(true)
 const intervalId = setInterval(() => {
@@ -55,7 +56,6 @@ onMounted(async () => {
 onInit((instance) => {
   instance.fitView()
 })
-
 
 watch([
   () => project.workflow.nodes.value.length, 
@@ -140,7 +140,6 @@ onNodeDragStop(async (event: NodeDragEvent) => {
     console.error('project is undefined')
   }
 
-
 })
 
 onConnect((connection) => {
@@ -163,41 +162,45 @@ const nodeColor = (node: BaseNode) => {
   }
 }
 
-
 </script>
 
 <template>
-  <div class="box">
-    <VueFlow
-    v-model:nodes="project.workflow.nodes.value"
-    v-model:edges="project.workflow.edges.value"
-    :connection-mode="ConnectionMode.Strict"
-    id="main"
-    >
-      <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4" bgColor="rgba(245, 247, 250, 0.05)"/>
+  <div class="graphLayout">
+    <div class="vueFlow">
+      <VueFlow
+      v-model:nodes="project.workflow.nodes.value"
+      v-model:edges="project.workflow.edges.value"
+      :connection-mode="ConnectionMode.Strict"
+      id="main"
+      >
+        <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4" bgColor="rgba(245, 247, 250, 0.05)"/>
 
-      <MiniMap mask-color="rgba(0,0,0,0.1)" pannable zoomable position="bottom-left" :node-color="nodeColor" class="controller-style set_background_color"/>
+        <MiniMap mask-color="rgba(0,0,0,0.1)" pannable zoomable position="bottom-left" :node-color="nodeColor" class="controller-style set_background_color"/>
 
-      <Controls position="bottom-right"/>
+        <Controls position="bottom-right"/>
 
 
-      <template #node-ConstNode="ConstNodeProps">
-        <ConstNode v-bind="ConstNodeProps"/>
-      </template>
+        <template #node-ConstNode="ConstNodeProps">
+          <ConstNode v-bind="ConstNodeProps"/>
+        </template>
 
-      <template #node-StringNode="StringNodeProps">
-        <StringNode v-bind="StringNodeProps"/>
-      </template>
+        <template #node-StringNode="StringNodeProps">
+          <StringNode v-bind="StringNodeProps"/>
+        </template>
 
-      <template #node-TableNode="TableNodeProps">
-        <TableNode v-bind="TableNodeProps"/>
-      </template>
+        <template #node-TableNode="TableNodeProps">
+          <TableNode v-bind="TableNodeProps"/>
+        </template>
 
-      <template #node-NumBinComputeNode="NumBinComputeNodeProps">
-        <NumBinComputeNode v-bind="NumBinComputeNodeProps" />
-      </template>
+        <template #node-NumBinComputeNode="NumBinComputeNodeProps">
+          <NumBinComputeNode v-bind="NumBinComputeNodeProps" />
+        </template>
 
-    </VueFlow>
+      </VueFlow>
+    </div>
+    <div>
+      <RightClickMenu />
+    </div>
   </div>
 </template>
 
@@ -232,7 +235,11 @@ const nodeColor = (node: BaseNode) => {
 
 <style lang="scss" scoped>
 @use '../common/style/global.scss';
-  .box {
+  .graphLayout {
     flex: 1;
+    .vueFlow {
+      width: 100%;
+      height: 100%;
+    }
   }
 </style>

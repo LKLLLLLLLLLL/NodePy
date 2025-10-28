@@ -9,7 +9,7 @@ export function usePointerLock(params: { onMove: (movement: Position) => void })
   const isLocked: Ref<boolean> = ref(false)
 
   const handleLockChange = () => {
-    isLocked.value = document.pointerLockElement !== null;
+    isLocked.value = document.pointerLockElement !== null
   }
 
   const handleMove = (e: PointerEvent) => {
@@ -19,7 +19,7 @@ export function usePointerLock(params: { onMove: (movement: Position) => void })
 
   const handlePointerUp = () => {
     document.exitPointerLock()
-    document.removeEventListener("pointermove", handleMove);
+    document.removeEventListener("pointermove", handleMove)
   }
 
   onMounted(() => {
@@ -34,7 +34,7 @@ export function usePointerLock(params: { onMove: (movement: Position) => void })
 
   const requestLock = (element: HTMLElement) => {
     element.requestPointerLock()
-    document.addEventListener("pointermove", handleMove);
+    document.addEventListener("pointermove", handleMove)
   }
 
   return {

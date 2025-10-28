@@ -18,12 +18,12 @@
 
 <script lang="ts" setup>
     import {computed} from 'vue'
-    import { usePointerLock } from './usePointerLock';
-    import type { NumberFieldProps } from './NumberFieldProps';
+    import { usePointerLock } from './usePointerLock'
+    import type { NumberFieldProps } from './NumberFieldProps'
 
     const props = withDefaults(defineProps<NumberFieldProps>(), {
         denominator: 1,
-        scale: 2,
+        scale: 0,
     })
 
     const model = defineModel<number>()
@@ -37,18 +37,18 @@
 
 
     function normalize(number: number, denominator: number) {
-      const frac = denominator / 1;
-      return Math.ceil(frac * number) / frac;
+      const frac = denominator / 1
+      return Math.ceil(frac * number) / frac
     }
 
     function update(relative: number) {
-      if (model.value === undefined) return;
+      if (model.value === undefined) return
     
       const step = 1 / local.value.denominator;
-      const newValue = normalize(model.value + (relative * step), local.value.denominator);
-      const min = props.min ?? Number.NEGATIVE_INFINITY;
-      const max = props.max ?? Number.POSITIVE_INFINITY;
-      model.value = Math.min(Math.max(newValue, min), max);
+      const newValue = normalize(model.value + (relative * step), local.value.denominator)
+      const min = props.min ?? Number.NEGATIVE_INFINITY
+      const max = props.max ?? Number.POSITIVE_INFINITY
+      model.value = Math.min(Math.max(newValue, min), max)
     }
 
 
@@ -57,7 +57,7 @@
     });
 
     function handlePointerDown(e: PointerEvent) {
-      requestLock(e.currentTarget as HTMLElement);
+      requestLock(e.currentTarget as HTMLElement)
     }
 </script>
 

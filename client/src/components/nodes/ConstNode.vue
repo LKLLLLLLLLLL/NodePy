@@ -4,7 +4,7 @@
             <NodeResizer :min-height="minH" :min-width="minW" :max-height="maxH" :max-width="maxW" :isVisible="false"/>
         </div>
 
-        <div class="innerContent nodes-style">
+        <div class="innerContent nodes-style" :class="{'nodes-selected': selected}">
             <div class="title nodes-topchild-border-radius">ConstNode</div>
             <div class="data">
                 <Handle id="const" type="source" :position="Position.Right"/>
@@ -72,7 +72,7 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/style/global.scss';
+    @use '../../common/style/global.scss' as *;
     .ConstNodeLayout {
         height: 100%;
         width: 100%;
