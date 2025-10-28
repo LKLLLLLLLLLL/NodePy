@@ -93,6 +93,18 @@ table:
 | Alice    | 30  | 70000.0 | False     |
 | Bob      | 35  | 80000.0 | True      |
 
+#### 1.5 TableFromCSVNode
+从CSV文件加载表格节点，可以读取上传的CSV文件并将其转换为Table类型。
+
+**参数：**
+无
+
+**输入：**
+- csv_file: 输入的CSV文件，类型为File，格式为CSV。
+
+**输出：**
+- table: 输出的表格，类型为Table。
+
 ### 2. 计算节点(Compute)
 #### 2.1 NumberBinOpNode
 二元数值运算节点，支持对两个数值类型(int或float)的输入进行`ADD`, `SUB`, `MUL`, `DIV`, `POW`五种基本运算。
@@ -263,7 +275,7 @@ table:
 - table: 输入的表格，类型为Table。
 
 **输出：**
-- plot: 输出的图形，类型为File。
+- plot: 输出的图形，类型为File，格式为PNG。
 
 ### 4. 字符串处理节点(StringProcess)
 
@@ -285,3 +297,15 @@ TODO
 
 **输出：**
 - file: 输出的文件对象，类型为File。
+
+#### 6.2 DisplayNode
+文件显示节点，支持显示File类型的文件内容，并允许用户下载该文件。
+
+**参数：**
+无
+
+**输入：**
+- file: 输入的文件对象，类型为File。
+
+**输出：**
+无

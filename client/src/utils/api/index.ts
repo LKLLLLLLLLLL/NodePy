@@ -14,6 +14,7 @@ export { DataView } from './models/DataView';
 export type { DeleteResponse } from './models/DeleteResponse';
 export { File } from './models/File';
 export { FileItem } from './models/FileItem';
+export { FileSchema } from './models/FileSchema';
 export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { Position } from './models/Position';
 export type { Project } from './models/Project';
