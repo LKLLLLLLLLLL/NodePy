@@ -6,6 +6,7 @@ from server.models.schema import (
     Pattern,
     Schema,
     ColType,
+    FileSchema
 )
 import matplotlib.pyplot as plt
 
@@ -69,7 +70,10 @@ class PlotNode(BaseNode):
     @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         return {
-            "plot": Schema(type=Schema.Type.FILE)
+            "plot": Schema(
+                type=Schema.Type.FILE,
+                file=FileSchema(format="png")
+            )
         }
 
     @override

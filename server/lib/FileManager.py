@@ -473,6 +473,47 @@ class FileManager:
             logger.exception(f"Failed to list files: {e}")
             raise IOError(f"Failed to list files: {e}")
     
+    def check_file_exists_sync(self, file: File) -> bool:
+        """ 
+        Check if a file exists
+        This will check both database and MinIO
+        """
+        if self.db_client is None:
+            raise AssertionError("Synchronous DB client is not initialized")
+        db_file = self.db_client.query(FileRecord).filter(FileRecord.file_key == file.key).first()
+        if not db_file:
+            return False
+        try:
+            self.minio_client.stat_object(
+                bucket_name=self.bucket,
+                object_name=file.key
+            )
+            return True
+        except S3Error:
+            return False
+    
+    async def check_file_exists_async(self, file: File) -> bool:
+        """ 
+        Check if a file exists
+        This will check both database and MinIO
+        """
+        if self.async_db_client is None:
+            raise AssertionError("Asynchronous DB client is not initialized")
+        stmt = select(FileRecord).where(FileRecord.file_key == file.key)
+        result = await self.async_db_client.execute(stmt)
+        db_file = result.scalars().first()
+        if not db_file:
+            return False
+        try:
+            await asyncio.to_thread(
+                self.minio_client.stat_object,
+                bucket_name=self.bucket,
+                object_name=file.key
+            )
+            return True
+        except S3Error:
+            return False
+    
 @celery_app.task
 def cleanup_orphan_files_task():
     """

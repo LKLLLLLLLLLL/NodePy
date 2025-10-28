@@ -3,7 +3,10 @@ from enum import Enum
 from typing_extensions import Self
 from pandas.api import types as ptypes
 import pandas
-from typing import Optional, ClassVar, Any
+from typing import Optional, ClassVar, Any, Literal
+from server.models.data import File
+from server.lib.FileManager import FileManager
+from io import StringIO
 
 """
 This file defined schema passed between nodes during static analysis stage.
@@ -142,7 +145,34 @@ def generate_default_col_name(id: str, annotation: str) -> str:
         base_name = base_name + "-"
     return base_name
 
+class FileSchema(BaseModel):
+    """
+    The schema of File data, including file format and other metadata.
+    """
+    format: Literal["csv", "png", "jpg", "pdf"]
+    col_types: Optional[dict[str, ColType]] = None  # only for csv files
+    
+    def __hash__(self) -> int:
+        return hash((self.format, frozenset(self.col_types.items()) if self.col_types else None))
 
+    def to_dict(self) -> dict[str, Any]:
+        return super().model_dump()
+    
+    @classmethod
+    def from_file(cls, file: File, file_manager: FileManager) -> "FileSchema":
+        if file.format == "csv":
+            file_content = file_manager.read_sync(file=file, user_id=None)
+            df = pandas.read_csv(StringIO(file_content.decode('utf-8')))
+            col_types = {}
+            for col in df.columns:
+                dtype = df[col].dtype
+                col_type = ColType.from_ptype(dtype)
+                col_types[col] = col_type
+            return FileSchema(format="csv", col_types=col_types)
+        else:
+            return FileSchema(format=file.format)
+
+    
 class Schema(BaseModel):
     class Type(str, Enum):
         TABLE = "Table"
@@ -154,6 +184,7 @@ class Schema(BaseModel):
 
     type: Type
     tab: Optional[TableSchema] = None  # not None if type is TABLE
+    file: Optional[FileSchema] = None  # not None if type is FILE
 
     @model_validator(mode="after")
     def verify(self) -> Self:
@@ -161,14 +192,21 @@ class Schema(BaseModel):
             raise ValueError("TableSchema must be provided when type is TABLE.")
         if self.type != self.Type.TABLE and self.tab is not None:
             raise ValueError("TableSchema must be None when type is not TABLE.")
+        if self.type == self.Type.FILE and self.file is None:
+            raise ValueError("FileSchema must be provided when type is FILE.")
+        if self.type != self.Type.FILE and self.file is not None:
+            raise ValueError("FileSchema must be None when type is not FILE.")
         return self
 
     def __hash__(self) -> int:
-        if self.type != self.Type.TABLE:
-            return hash(self.type)
-        else:
+        if self.type == self.Type.TABLE:
             assert self.tab is not None
             return hash((self.type, self.tab))
+        elif self.type == self.Type.FILE:
+            assert self.file is not None
+            return hash((self.type, self.file))
+        else:
+            return hash(self.type)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, ColType):
@@ -187,9 +225,12 @@ class Schema(BaseModel):
         elif isinstance(other, Schema):
             if self.type != other.type:
                 return False
-            if self.type == self.Type.TABLE:
+            elif self.type == self.Type.TABLE:
                 assert self.tab is not None and other.tab is not None
                 return self.tab == other.tab
+            elif self.type == self.Type.FILE:
+                assert self.file is not None and other.file is not None
+                return self.file == other.file
             return True
         else:
             raise NotImplementedError(f"Cannot compare Schema with {type(other)}")
@@ -206,6 +247,9 @@ class Schema(BaseModel):
         if self.type == self.Type.TABLE:
             assert self.tab is not None
             result["value"] = self.tab.to_dict()
+        elif self.type == self.Type.FILE:
+            assert self.file is not None
+            result["value"] = self.file.to_dict()
         return result
 
 
@@ -217,11 +261,14 @@ class Pattern(BaseModel):
 
     types: set[Schema.Type]
     table_columns: dict[str, set[ColType]] | None = None  # only for TABLE type
+    file_formats: set[Literal["csv", "png", "jpg", "pdf"]] | None = None  # only for FILE type
 
     @model_validator(mode="after")
     def verify(self) -> Self:
         if Schema.Type.TABLE not in self.types and self.table_columns is not None:
             raise ValueError("table_columns can only be set if TABLE is in types.")
+        if Schema.Type.FILE not in self.types and self.file_formats is not None:
+            raise ValueError("file_format can only be set if FILE is in types.")
         return self
 
     def __contains__(self, schema: Schema) -> bool:
@@ -236,4 +283,9 @@ class Pattern(BaseModel):
                     return False
                 if schema.tab.col_types[col] not in col_types:
                     return False
+        if schema.type == Schema.Type.FILE and self.file_formats is not None:
+            if schema.file is None:
+                return False
+            if schema.file.format not in self.file_formats:
+                return False
         return True
