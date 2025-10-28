@@ -9,11 +9,11 @@
             <div class="data">
                 <Handle id="const" type="source" :position="Position.Right" :class="`${data_type}-handle-color`"/>
                 <div class="value">
-                     <input class="nodrag border-radius" v-model="value" @input="onInput"/>
+                     <input class="nodrag border-radius" v-model="value"/>
                      <NodepyNumberInput v-model="value"/>
                 </div>
                 <div class="data_type">
-                    <select v-model="data_type" @change="onSelect" class="border-radius nodrag">
+                    <select v-model="data_type" class="border-radius nodrag">
                         <option v-for="item in data_type_options">{{ item }}</option>
                     </select>
                 </div>
@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-    import {ref, onMounted, nextTick } from 'vue'
+    import {ref, onMounted, nextTick, watch } from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { useVueFlow, Position, Handle } from '@vue-flow/core'
     import { NodeResizer } from '@vue-flow/node-resizer'
@@ -43,17 +43,11 @@
     const data_type_options = ['int', 'float']
 
 
-    const onInput = (e?: Event) => {
-        const v = value.value
-        props.data.param.value = Number(v)
-    }
-
-    const onSelect = (e?: Event) => {
+    watch([value, data_type], (newValue, oldValue) => {
         props.data.param.data_type = data_type.value
         const v = value.value
         props.data.param.value = Number(v)
-    }
-
+    })
 
     onMounted(()=> {
         nextTick(() => {

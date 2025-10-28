@@ -1,5 +1,5 @@
 import type {Node} from '@vue-flow/core'
-import type { ProjNode } from '@/utils/api'
+import type { ProjNode, File } from '@/utils/api'
 
 
 export type AbstractNode = Omit<Node, 'data' | 'type'>
@@ -22,6 +22,17 @@ export type ConstNodeData = BaseData & {
 }
 export interface ConstNode extends BaseNode<ConstNodeData>{
     type: 'ConstNode'
+}
+
+
+export interface BoolNodeParam{
+    value: boolean
+}
+export type BoolNodeData = BaseData & {
+    param: BoolNodeParam
+}
+export interface BoolNode extends BaseNode<BoolNodeData>{
+    type: 'BoolNode'
 }
 
 
@@ -48,172 +59,163 @@ export interface TableNode extends BaseNode<TableNodeData>{
 }
 
 
+export interface TableFromCSVNodeParam {}
+export type TableFromCSVNodeData = BaseData & {
+    param: TableFromCSVNodeParam
+}
+export interface TableFromCSVNode extends BaseNode<TableFromCSVNodeData>{
+    type: 'TableFromCSVNode'
+}
+
+
 /**************  Compute Nodes  ****************/
-const NumBinOpList = ['ADD', 'SUB', 'MUL', 'DIV', 'POW'] as const
-export interface NumBinComputeNodeParam {
+export const NumBinOpList = ['ADD', 'SUB', 'MUL', 'DIV', 'POW'] as const
+export interface NumberBinOpNodeParam {
     op: typeof NumBinOpList[number]
 }
-export type NumBinComputeNodeData = BaseData & {
-    param: NumBinComputeNodeParam
+export type NumberBinOpNodeData = BaseData & {
+    param: NumberBinOpNodeParam
 }
-export interface NumBinComputeNode extends BaseNode<NumBinComputeNodeData> {
-    type: 'NumBinComputeNode'
+export interface NumberBinOpNode extends BaseNode<NumberBinOpNodeData> {
+    type: 'NumberBinOpNode'
 }
 
 
-const NumUnaryOpList = ['NEG', 'ABS', 'SQRT'] as const
-export interface NumUnaryComputeNodeParam {
+export const NumUnaryOpList = ['NEG', 'ABS', 'SQRT'] as const
+export interface NumberUnaryOpNodeParam {
     op: typeof NumUnaryOpList[number]
 }
-export type NumUnaryComputeNodeData = BaseData & {
-    param: NumUnaryComputeNodeParam
+export type NumberUnaryOpNodeData = BaseData & {
+    param: NumberUnaryOpNodeParam
 }
-export interface NumUnaryComputeNode extends BaseNode<NumUnaryComputeNodeData>{
-    type: 'NumUnaryComputeNode'
+export interface NumberUnaryOpNode extends BaseNode<NumberUnaryOpNodeData>{
+    type: 'NumberUnaryOpNode'
 }
 
 
-const CmpOpList = ['LT', 'LE', 'EQ', 'NE', 'GE', 'GT'] as const
-export interface CmpNodeParam {
+export const CmpOpList = ['LT', 'LE', 'EQ', 'NE', 'GE', 'GT'] as const
+export interface PrimitiveCompareNodeParam {
     op : typeof CmpOpList[number]
 }
-export type CmpNodeData = BaseData & {
-    param: CmpNodeParam
+export type PrimitiveCompareNodeData = BaseData & {
+    param: PrimitiveCompareNodeParam
 }
-export interface CmpNode extends BaseNode<CmpNodeData>{
-    type: 'CmpNode'
+export interface PrimitiveCompareNode extends BaseNode<PrimitiveCompareNodeData>{
+    type: 'PrimitiveCompareNode'
 }
 
 
-const BoolBinOpList = ['AND', 'OR', 'XOR', 'SUB'] as const
-export interface BoolBinComputeNodeParam {
+export const BoolBinOpList = ['AND', 'OR', 'XOR', 'SUB'] as const
+export interface BoolBinOpNodeParam {
     op : typeof BoolBinOpList[number]
 }
-export type BoolBinComputeNodeData = BaseData & {
-    param: BoolBinComputeNodeParam
+export type BoolBinOpNodeData = BaseData & {
+    param: BoolBinOpNodeParam
 }
-export interface BoolBinComputeNode extends BaseNode<BoolBinComputeNodeData>{
-    type: 'BoolBinComputeNode'
+export interface BoolBinOpNode extends BaseNode<BoolBinOpNodeData>{
+    type: 'BoolBinOpNode'
 }
 
-
-export interface BoolUnaryComputeNode extends BaseNode{
+export interface BoolUnaryOpNodeParam {
+    op: 'NOT'
+}
+export type BoolUnaryOpNodeData = BaseData & {
+    param: BoolUnaryOpNodeParam
+}
+export interface BoolUnaryOpNode extends BaseNode{
     type: 'BoolNotNode'
 }
 
 
-// CLIP AND SUBSTRING NODES
-// export interface ClipOrSubStringNodeParam {
-//     start?: number
-//     end?: number
-//     op: 'CLIP' | 'SUBSTRING'
-//     input?: string
-//     result?: string
-// }
-// export interface ClipOrSubStringNode extends ComputeNode{
-//     data: ClipOrSubStringNodeParam
-//     type: 'ClipOrSubStringNode'
-// }
-
-
-export interface StripStringNodeParam {
-    chars: string
-}
-export type StripStringNodeData = BaseData & {
-    param: StripStringNodeParam
-}
-export interface StripStringNode extends BaseNode<StripStringNodeData>{
-    type: 'StripStringNode'
-}
-
-
-export interface ReplaceStringNodeParam {
-    old: string
-    new: string
-}
-export type ReplaceStringNodeData = BaseData & {
-    param: StripStringNodeParam
-}
-export interface ReplaceStringNode extends BaseNode<ReplaceStringNodeData>{
-    type: 'ReplaceStringNode'
-}
-
-
-// UPPER AND LOWER NODES
-// export interface UpperOrLowerStringNodeParam {
-//     op: 'UPPER' | 'LOWER'
-//     input?: string
-//     result?: string
-// }
-// export interface UpperOrLowerStringNode extends ComputeNode{
-//     data: UpperOrLowerStringNodeParam
-//     type: 'UpperOrLowerStringNode'
-// }
-
-
-// TableAppendStringNode / TablePrependStringNode
-// export interface TableAppendOrPrependStringNodeParam {
-//     column: string
-//     result_col: string
-//     op: 'APPEND' | 'PREPEND'
-//     input: {
-//         table_input?: TableNodeParam
-//         value_input?: string
-//     }
-//     result?: TableNodeParam
-// }
-// export interface TableAppendOrPrependStringNode extends ComputeNode{
-//     data: TableAppendOrPrependStringNodeParam
-//     type: 'TableAppendOrPrependStringNode'
-// }
-
-
-// TableContainsStringNode / TableStartWithStringNode / TableEndWithStringNode
-// const StringOneInputMethodList = ['CONTAIN', 'STARTWITH', 'ENDWITH'] as const
-// export interface TableOneInputStringMethodNodeParam {
-//     column: string
-//     result_col: string
-//     op: typeof StringOneInputMethodList[number]
-//     input: {
-//         table?: TableNodeParam
-//         value_input?: string
-//     }
-//     result?: TableNodeParam
-// }
-// export interface TableOneInputStringMethodNode extends ComputeNode{
-//     data: TableOneInputStringMethodNodeParam
-//     type: 'TableOneInputStringMethodNode'
-// }
-
-
-export interface TableStringLengthNodeParam {
-    column: string
+export const ColWithNumberBinOpList = ['ADD', 'COL_SUB_NUM', 'NUM_SUB_COL', 'MUL', 'COL_DIV_NUM', 'NUM_DIV_COL', 'COL_POW_NUM', 'NUM_POW_COL'] as const
+export interface ColWithNumberBinOpNodeParam {
+    op: typeof ColWithNumberBinOpList[number],
+    col: string,
     result_col?: string
 }
-export type TableStringLengthNodeData = BaseData & {
-    param: StripStringNodeParam
+export type ColWithNumberBinOpNodeData = BaseData & {
+    param: ColWithNumberBinOpNodeParam
 }
-export interface TableStringLengthNode extends BaseNode<TableStringLengthNodeData>{
-    type: 'TableStringLengthNode'
+export interface ColWithNumberBinOpNode extends BaseNode<ColWithNumberBinOpNodeData>{
+    type: 'ColWithNumberBinOpNode'
 }
 
 
-export interface TableReplaceStringNodeParam {
-    column: string
+export const ColWithBoolBinOpList = ['AND', 'OR', 'XOR', 'NUM_SUB_COL', 'COL_SUB_NUM'] as const
+export interface ColWithBoolBinOpNodeParam {
+    op: typeof ColWithBoolBinOpList[number],
+    col: string,
     result_col?: string
 }
-export type TableReplaceStringNodeData = BaseData & {
-    param: StripStringNodeParam
+export type ColWithBoolBinOpNodeData = BaseData & {
+    param: ColWithBoolBinOpNodeParam
 }
-export interface TableReplaceStringNode extends BaseNode<TableReplaceStringNodeData>{
-    type: 'TableReplaceStringNode'
+export interface ColWithBoolBinOpNode extends BaseNode<ColWithBoolBinOpNodeData>{
+    type: 'ColWithBoolBinOpNode'
+}
+
+
+export const NumberColUnaryOpList = ['ABS', 'NEG', 'EXP', 'LOG', 'SQRT'] as const
+export interface NumberColUnaryOpNodeParam {
+    op: typeof NumberColUnaryOpList[number],
+    col: string,
+    result_col?: string
+}
+export type NumberColUnaryOpNodeData = BaseData & {
+    param: NumberColUnaryOpNodeParam
+}
+export interface NumberColUnaryOpNode extends BaseNode<NumberColUnaryOpNodeData>{
+    type: 'NumberColUnaryOpNode'
+}
+
+
+export interface BoolColUnaryOpNodeParam {
+    op: 'NOT'
+    col: string
+    result_col?: string
+}
+export type BoolColUnaryOpNodeData = BaseData & {
+    param: BoolColUnaryOpNodeParam
+}
+export interface BoolColUnaryOpNode extends BaseNode<BoolColUnaryOpNodeData>{
+    type: 'BoolColUnaryOpNode'
+}
+
+
+export const NumberColWithColBinOpList = NumBinOpList
+export interface NumberColWithColBinOpNodeParam {
+    op: typeof NumberColWithColBinOpList[number],
+    col1: string,
+    col2: string,
+    result_col?: string
+}
+export type NumberColWithColBinOpNodeData = BaseData & {
+    param: NumberColWithColBinOpNodeParam
+}
+export interface NumberColWithColBinOpNode extends BaseNode<NumberColWithColBinOpNodeData>{
+    type: 'NumberColWithColBinOpNode'
+}
+
+
+export const BoolColWithColBinOpList = BoolBinOpList
+export interface BoolColWithColBinOpNodeParam {
+    op: typeof BoolColWithColBinOpList[number],
+    col1: string,
+    col2: string,
+    result_col?: string
+}
+export type BoolColWithColBinOpNodeData = BaseData & {
+    param: BoolColWithColBinOpNodeParam
+}
+export interface BoolColWithColBinOpNode extends BaseNode<BoolColWithColBinOpNodeData>{
+    type: 'BoolColWithColBinOpNode'
 }
 
 
 /*********************  Visualize Nodes  **************************/
 export interface PlotNodeParam {
-    x_column: string
-    y_column: string
+    x_col: string
+    y_col: string
     plot_type: 'scatter' | 'line' | 'bar'
     title?: string
 }
@@ -222,4 +224,31 @@ export type PlotNodeData = BaseData & {
 }
 export interface PlotNode extends BaseNode<PlotNodeData>{
     type: 'PlotNode'
+}
+
+
+/*********************  StringProcess Nodes  **************************/
+
+
+/*********************  TableProcess Nodes  **************************/
+
+
+/*********************  File Nodes  **************************/
+export interface UploadNodeParam {
+    file: File
+}
+export type UploadNodeData = BaseData & {
+    param: UploadNodeParam
+}
+export interface UploadNode extends BaseNode<UploadNodeData>{
+    type: 'UploadNode'
+}
+
+
+export interface DisplayNodeParam {}
+export type DisplayNodeData = BaseData & {
+    param: DisplayNodeParam
+}
+export interface DisplayNode extends BaseNode<DisplayNodeData>{
+    type: 'DisplayNode'
 }

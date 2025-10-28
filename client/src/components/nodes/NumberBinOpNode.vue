@@ -11,7 +11,7 @@
                 <Handle id="result" type="source" :position="Position.Right"/>
                 <div class="op">
                     <select v-model="selected_op" @change="onSelect" class="border-radius nodrag">
-                        <option v-for="item in op">{{ item }}</option>
+                        <option v-for="item in NumBinOpList">{{ item }}</option>
                     </select>
                 </div>
             </div>
@@ -24,17 +24,17 @@
     import type { NodeProps } from '@vue-flow/core'
     import { useVueFlow, Position, Handle } from '@vue-flow/core'
     import { NodeResizer } from '@vue-flow/node-resizer'
-    import type {NumBinComputeNodeData} from '../../types/nodeTypes'
+    import type {NumberBinOpNodeData} from '../../types/nodeTypes'
+    import { NumBinOpList } from '../../types/nodeTypes'
 
 
     let minW = 0
     let minH = 0
     let maxW = 0
     let maxH = 0
-    const props = defineProps<NodeProps<NumBinComputeNodeData>>()
+    const props = defineProps<NodeProps<NumberBinOpNodeData>>()
     const { viewport } = useVueFlow()
     const info = ref()
-    const op = ['ADD', 'SUB', 'MUL', 'DIV', 'POW']
     const selected_op = ref(props.data.param.op)
 
 
