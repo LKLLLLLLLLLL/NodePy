@@ -1,11 +1,12 @@
 <script lang='ts' setup>
 import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue'
-import { VueFlow, useVueFlow, ConnectionMode } from '@vue-flow/core'
+import { VueFlow, useVueFlow, ConnectionMode, Panel } from '@vue-flow/core'
 import type { NodeDragEvent } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import { Controls } from '@vue-flow/controls'
 import RightClickMenu from './tools/RightClickMenu/RightClickMenu.vue'
+import Result from './results/Result.vue'
 import ConstNode from './nodes/ConstNode.vue'
 import StringNode from './nodes/StringNode.vue'
 import TableNode from './nodes/TableNode.vue'
@@ -16,7 +17,10 @@ import { monitorTask } from '@/utils/task'
 import type { BaseNode } from '@/types/nodeTypes'
 import type { vueFlowProject } from '@/types/vueFlowProject'
 import { useRoute } from 'vue-router'
+import { useModalStore } from '@/stores/modalStore'
 
+
+const modalStore = useModalStore()
 const {params: {projectId}} = useRoute()
 const project: vueFlowProject = ({
   project_id: -1,
@@ -162,6 +166,31 @@ const nodeColor = (node: BaseNode) => {
   }
 }
 
+const handleClickResult = () => {
+    const marginRight = 20;
+    const modalWidth = 600;
+    const modalHeight = 800;
+    const xPosition = window.innerWidth - modalWidth - marginRight;
+    const yPosition = 75;
+
+    modalStore.createModal({
+        id: 'result',
+        title: '结果查看',
+        isActive: true,
+        isDraggable: false,
+        isResizable: false,
+        position:{
+            x: xPosition,
+            y: yPosition
+        },
+        size: {
+            width: modalWidth,
+            height: modalHeight
+        },
+        component: Result
+    })
+}
+
 </script>
 
 <template>
@@ -178,6 +207,10 @@ const nodeColor = (node: BaseNode) => {
         <MiniMap mask-color="rgba(0,0,0,0.1)" pannable zoomable position="bottom-left" :node-color="nodeColor" class="controller-style set_background_color"/>
 
         <Controls position="bottom-right"/>
+
+        <Panel position="top-right">
+          <button @click="handleClickResult">result</button>
+        </Panel>
 
 
         <template #node-ConstNode="ConstNodeProps">

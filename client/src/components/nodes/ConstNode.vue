@@ -7,7 +7,7 @@
         <div class="innerContent nodes-style" :class="{'nodes-selected': selected}">
             <div class="title nodes-topchild-border-radius">ConstNode</div>
             <div class="data">
-                <Handle id="const" type="source" :position="Position.Right"/>
+                <Handle id="const" type="source" :position="Position.Right" :class="`${data_type}-handle-color`"/>
                 <div class="value">
                      <input class="nodrag border-radius" v-model="value" @input="onInput"/>
                      <NodepyNumberInput v-model="value"/>
@@ -73,6 +73,7 @@
 
 <style lang="scss" scoped>
     @use '../../common/style/global.scss' as *;
+    @use '../../common/style/node.scss' as *;
     .ConstNodeLayout {
         height: 100%;
         width: 100%;
@@ -120,6 +121,5 @@
 </style>
 
 <style lang="scss">
-  @use '../../common/style/global.scss';
   @import '@vue-flow/node-resizer/dist/style.css';
 </style>

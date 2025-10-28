@@ -34,8 +34,6 @@
     const props = defineProps<NodeProps<NumBinComputeNodeData>>()
     const { viewport } = useVueFlow()
     const info = ref()
-    const x = ref()
-    const y = ref()
     const op = ['ADD', 'SUB', 'MUL', 'DIV', 'POW']
     const selected_op = ref(props.data.param.op)
 
@@ -63,6 +61,7 @@
 
 <style lang="scss" scoped>
     @use '../../common/style/global.scss' as *;
+    @use '../../common/style/node.scss' as *;
     .NumBinComputeNodeLayout {
         height: 100%;
         width: 100%;
@@ -70,7 +69,6 @@
             height: 100%;
             width: 100%;
             background: white;
-            // box-shadow: 2px 2px 6px 0px #aaa;
             .title {
                 background: #ccc;
                 text-align: left;

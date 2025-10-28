@@ -2,26 +2,14 @@ $stress-color: #108efe;
 $background-color: rgb(245, 247, 250);
 $stress-background-color: white;
 
+
 .set_background_color { // set the background color to the unified color
   background-color: $background-color
 }
 
 .controller-style {
   border-radius: 10px;
-  background-color: $background-color;
+  background-color: $stress-background-color;
   overflow: hidden;
   box-shadow: 5px 5px 50px rgba(128, 128, 128, 0.15);
-}
-
-.nodes-style {
-  border-radius: 9px;
-  // overflow: hidden;
-  box-shadow: 5px 2px 15px rgba(128, 128, 128, 0.1);
-}
-.nodes-topchild-border-radius {
-  border-radius: 9px 9px 0 0;
-}
-
-.nodes-selected {
-  outline: 2px solid $stress-color;
 }

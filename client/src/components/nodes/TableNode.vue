@@ -6,7 +6,7 @@
         <div class="innerContent nodes-style" :class="{'nodes-selected': selected}">
             <div class="title nodes-topchild-border-radius">TableNode</div>
             <div class="data">
-                <Handle id="table" type="source" :position="Position.Right"/>
+                <Handle id="table" type="source" :position="Position.Right" class="table-handle-color"/>
                 渲染表格的地方
             </div>
         </div>
@@ -48,6 +48,7 @@
 
 <style lang="scss" scoped>
     @use '../../common/style/global.scss' as *;
+    @use '../../common/style/node.scss' as *;
     .TableNodeLayout{
         height: 100%;
         width: 100%;

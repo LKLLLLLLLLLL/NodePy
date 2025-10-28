@@ -1,5 +1,4 @@
 import { useVueFlow } from "@vue-flow/core"
-import { ref } from "vue"
 import { defineStore } from 'pinia'
 import type * as Nodetypes from '../types/nodeTypes'
 
@@ -73,5 +72,5 @@ export const useGraphStore = defineStore('graph', () => {
   }
 
 
-  return {vueFLowInstance, addNode}
+  return {addNode}
 })

@@ -6,7 +6,7 @@
         <div class="innerContent nodes-style" :class="{'nodes-selected': selected}">
             <div class="title nodes-topchild-border-radius">StringNode</div>
             <div class="data">
-                <Handle id="string" type="source" :position="Position.Right"/>
+                <Handle id="string" type="source" :position="Position.Right" class="str-handle-color"/>
                 <el-input class="input nodrag" v-model="value" @input="onInput"/>
             </div>
         </div>
@@ -54,6 +54,7 @@
 
 <style lang="scss" scoped>
     @use '../../common/style/global.scss' as *;
+    @use '../../common/style/node.scss' as *;
     .StringNodeLayout{
         height: 100%;
         width: 100%;

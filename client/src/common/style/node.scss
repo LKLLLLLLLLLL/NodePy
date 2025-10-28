@@ -1,0 +1,44 @@
+@use 'global.scss' as *;
+$int-color: #1c6bbf;
+$float-color: #ecbc00;
+$str-color: green;
+$table-color: pink;
+$file-color: brown;
+$default-type-color: gray;
+
+
+.nodes-style {
+  border-radius: 9px;
+  box-shadow: 5px 2px 15px rgba(128, 128, 128, 0.1);
+}
+.nodes-topchild-border-radius {
+  border-radius: 9px 9px 0 0;
+}
+
+.nodes-selected {
+  outline: 2px solid $stress-color;
+}
+
+.int-handle-color {
+  background: $int-color;
+}
+
+.float-handle-color {
+  background: $float-color;
+}
+
+.str-handle-color {
+  background: $str-color;
+}
+
+.table-handle-color {
+  background: $table-color;
+}
+
+.file-handle-color {
+  background: $file-color;
+}
+
+.default-type-handle-color {
+  background: $default-type-color;
+}
