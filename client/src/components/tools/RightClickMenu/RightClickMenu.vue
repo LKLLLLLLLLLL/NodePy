@@ -12,31 +12,24 @@ const showMenu = ref(false)
 const x = ref(0)
 const y = ref(0)
 
-const { onPaneContextMenu, screenToFlowCoordinate, viewport } = useVueFlow('main')
+const { onPaneContextMenu, screenToFlowCoordinate } = useVueFlow('main')
 
 onPaneContextMenu((e: MouseEvent) => {
-  console.log('右键菜单事件:', e)
   handleContextmenu(e)
 })
 
 // 计算菜单位置
 const menuLocation = computed(() => {
-  return x.value > window.innerWidth -330 ? 'left' : 'right'
+  return x.value > window.innerWidth - 330 ? 'left' : 'right'
 })
 
-// 获取叶子节点（扁平化处理三级菜单）
+// 获取叶子节点
 const getLeafItems = (item: any) => {
   const leafItems: any[] = []
 
   if (item.children) {
     item.children.forEach((child: any) => {
-      if (child.children) {
-        // 如果有三级菜单，将其扁平化到二级
-        leafItems.push(...child.children)
-      } else {
-        // 直接是叶子节点
         leafItems.push(child)
-      }
     })
   }
 
@@ -57,7 +50,7 @@ const handleContextmenu = (event: MouseEvent) => {
   }, 10)
 }
 
-// 处理节点选择 - 修正坐标转换
+// 处理节点选择
 const handleNodeSelect = (nodeType: string) => {
   console.log('添加节点:', nodeType)
   
@@ -66,10 +59,6 @@ const handleNodeSelect = (nodeType: string) => {
     x: x.value,
     y: y.value
   })
-  
-  console.log('屏幕坐标:', { x: x.value, y: y.value })
-  console.log('画布坐标:', flowPosition)
-  console.log('视口信息:', viewport.value)
   
   // 使用转换后的画布坐标添加节点
   addNode(nodeType, { 
