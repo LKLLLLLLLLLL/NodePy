@@ -1,8 +1,10 @@
 <script lang="ts" setup>
     import { useVueFlow } from '@vue-flow/core';
     import { DefaultService } from '@/utils/api';
-    import Result from './results/Result.vue';
+    import Result from '../results/Result.vue'
     import { useModalStore } from '@/stores/modalStore';
+    import { autoCaptureMinimapAndSave } from './GraphCapture/minimapCapture';
+    import { autoCaptureDetailedAndSave } from './GraphCapture/detailedCapture';
 
     const modalStore = useModalStore();
 
@@ -10,7 +12,7 @@
         id: string
     }>();
 
-    const {zoomIn,zoomOut,fitView} = useVueFlow('main');
+    const {zoomIn,zoomOut,fitView,vueFlowRef} = useVueFlow('main');
 
     function handleZoomIn(){
         console.log("zoom-in")
@@ -30,6 +32,7 @@
         const now_id = Number(id);
         const project = await DefaultService.getProjectApiProjectProjectIdGet(now_id);
         await DefaultService.syncProjectApiProjectSyncPost(project);
+        autoCaptureDetailedAndSave(vueFlowRef.value,id);
     }
 
     function handleShowResult(){
