@@ -4,9 +4,8 @@ import { VueFlow, useVueFlow, ConnectionMode, Panel } from '@vue-flow/core'
 import type { NodeDragEvent } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
-import { Controls } from '@vue-flow/controls'
-import RightClickMenu from './tools/RightClickMenu/RightClickMenu.vue'
-import Result from './results/Result.vue'
+import RightClickMenu from './tools/RightClickMenu.vue'
+import GraphControls from './tools/GraphControls.vue'
 import ConstNode from './nodes/ConstNode.vue'
 import StringNode from './nodes/StringNode.vue'
 import TableNode from './nodes/TableNode.vue'
@@ -166,31 +165,6 @@ const nodeColor = (node: BaseNode) => {
   }
 }
 
-const handleClickResult = () => {
-    const marginRight = 20;
-    const modalWidth = 600;
-    const modalHeight = 800;
-    const xPosition = window.innerWidth - modalWidth - marginRight;
-    const yPosition = 75;
-
-    modalStore.createModal({
-        id: 'result',
-        title: '结果查看',
-        isActive: true,
-        isDraggable: false,
-        isResizable: false,
-        position:{
-            x: xPosition,
-            y: yPosition
-        },
-        size: {
-            width: modalWidth,
-            height: modalHeight
-        },
-        component: Result
-    })
-}
-
 </script>
 
 <template>
@@ -206,10 +180,8 @@ const handleClickResult = () => {
 
         <MiniMap mask-color="rgba(0,0,0,0.1)" pannable zoomable position="bottom-left" :node-color="nodeColor" class="controller-style set_background_color"/>
 
-        <Controls position="bottom-right"/>
-
-        <Panel position="top-right">
-          <button @click="handleClickResult">result</button>
+        <Panel position="bottom-center">
+          <GraphControls :id="`${projectId}`"/>
         </Panel>
 
 
