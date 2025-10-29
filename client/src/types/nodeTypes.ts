@@ -2,6 +2,16 @@ import type {Node} from '@vue-flow/core'
 import type { ProjNode, File } from '@/utils/api'
 
 
+export const dataTypeColor = {
+    int: '#1c6bbf',
+    float: '#ecbc00',
+    str: 'green',
+    table: 'pink',
+    file: 'brown',
+    default: 'gray'
+}
+
+
 export type AbstractNode = Omit<Node, 'data' | 'type'>
 
 export type BaseData = Omit<ProjNode, 'id' | 'type' | 'position'>

@@ -6,6 +6,8 @@ import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import RightClickMenu from './tools/RightClickMenu/RightClickMenu.vue'
 import GraphControls from './tools/GraphControls.vue'
+import NodePyEdge from './NodePyEdge.vue'
+import NodePyConnectionLine from './NodePyConnectionLine.vue'
 import ConstNode from './nodes/ConstNode.vue'
 import StringNode from './nodes/StringNode.vue'
 import TableNode from './nodes/TableNode.vue'
@@ -29,7 +31,7 @@ const project: vueFlowProject = ({
   },
   updated_at: 0
 })
-const { onConnect, onInit, onNodeDragStop, addEdges, onPaneContextMenu  } = useVueFlow('main')
+const { onConnect, onInit, onNodeDragStop, addEdges } = useVueFlow('main')
 const shouldWatch = ref(false)
 const listenNodePosition = ref(true)
 const intervalId = setInterval(() => {
@@ -145,7 +147,15 @@ onNodeDragStop(async (event: NodeDragEvent) => {
 })
 
 onConnect((connection) => {
-  addEdges(connection)
+  const addedEdge = {
+    id: Date.now().toString(),
+    source: connection.source,
+    sourceHandle: connection.sourceHandle,
+    target: connection.target,
+    targetHandle: connection.targetHandle,
+    type: "NodePyEdge"
+  }
+  addEdges(addedEdge)
 })
 
 
@@ -175,7 +185,7 @@ const nodeColor = (node: BaseNode) => {
       :connection-mode="ConnectionMode.Strict"
       id="main"
       >
-        <!-- <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4" bgColor="rgba(245, 247, 250, 0.05)"/> -->
+
         <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4"/>
 
         <MiniMap mask-color="rgba(0,0,0,0.1)" pannable zoomable position="bottom-left" :node-color="nodeColor" class="controller-style set_background_color"/>
@@ -184,6 +194,14 @@ const nodeColor = (node: BaseNode) => {
           <GraphControls :id="`${projectId}`"/>
         </Panel>
 
+
+        <template #edge-NodePyEdge="NodePyEdgeProps">
+          <NodePyEdge v-bind="NodePyEdgeProps"/>
+        </template>
+
+        <template #connection-line="ConnectionLineProps">
+          <NodePyConnectionLine v-bind="ConnectionLineProps"/>
+        </template>
 
         <template #node-ConstNode="ConstNodeProps">
           <ConstNode v-bind="ConstNodeProps"/>
@@ -230,6 +248,16 @@ const nodeColor = (node: BaseNode) => {
 
 .vue-flow__pane {
     cursor: default !important;
+}
+
+.vue-flow__panel {
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 20px;
+}
+
+.vue-flow__minimap {
+  margin-left: 20px;
 }
 
 /* Remove white border bottom in minimap */
