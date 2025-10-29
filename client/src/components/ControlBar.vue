@@ -149,7 +149,7 @@ function handleAvatarClick(){
       left: 50%;
       transform: translateX(-50%);
       font-size: 14px;
-      font-weight: 300;
+      font-weight: 400;
     }
 
     .actions {

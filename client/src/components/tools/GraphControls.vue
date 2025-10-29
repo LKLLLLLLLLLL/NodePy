@@ -1,17 +1,26 @@
 <script lang="ts" setup>
     import { useVueFlow } from '@vue-flow/core';
     import { DefaultService } from '@/utils/api';
-    import {computed, ref} from 'vue'
+    import {ref} from 'vue'
     import Result from '../results/Result.vue'
     import { useModalStore } from '@/stores/modalStore';
-    import { autoCaptureMinimapAndSave } from './GraphCapture/minimapCapture';
+    // import { autoCaptureMinimapAndSave } from './GraphCapture/minimapCapture';
     import { autoCaptureDetailedAndSave } from './GraphCapture/detailedCapture';
-    import {Aim, FullScreen, Lock, Notebook, Upload, View, ZoomIn, ZoomOut,Hide} from '@element-plus/icons-vue'
+    import SvgIcon from '@jamescoyle/vue-icon';
+    import { mdiMagnifyPlusOutline, mdiMagnifyMinusOutline, mdiCrosshairsGps, mdiEyeOutline, mdiEyeOff, mdiSync } from '@mdi/js'
 
     const modalStore = useModalStore();
 
+        // 定义各个按钮要使用的 mdi 路径
+        const mdiZoomIn = mdiMagnifyPlusOutline;
+        const mdiZoomOut = mdiMagnifyMinusOutline;
+        const mdiFitView = mdiCrosshairsGps;
+        const mdiView = mdiEyeOutline;
+        const mdiHide = mdiEyeOff;
+        const mdiUploadIcon = mdiSync;
+
     const showResult = ref<boolean>(false)
-    
+
     const props = defineProps<{
         id: string
     }>();
@@ -41,7 +50,7 @@
 
     function handleShowResult(){
         const result_modal = modalStore.findModal('result');
-    
+
         if(!result_modal){
             const marginRight = 20;
             const modalWidth = 600;
@@ -66,7 +75,7 @@
                 component: Result
             });
             showResult.value = true;
-        } 
+        }
         else if(result_modal.isActive){
             modalStore.deactivateModal('result');
             showResult.value = false;
@@ -77,26 +86,102 @@
         }
     }
 
-    function handleAnnotate(){
-
+    function animateButton(e: MouseEvent){
+        const el = (e.currentTarget as HTMLElement | null);
+        if(!el) return;
+        el.classList.add('clicked');
+        el.addEventListener('animationend', () => {
+            el.classList.remove('clicked');
+        }, { once: true });
     }
+
 
 </script>
 <template>
     <div class="graph-controls-container">
-        <el-button @click="handleZoomIn" :icon="ZoomIn"></el-button>
-        <el-button @click="handleZoomOut" :icon="ZoomOut"></el-button>
-        <el-button @click="handleFitView" :icon="Aim"></el-button>
-        <el-button @click="handleShowResult" v-if="!showResult" :icon="View"></el-button>
-        <el-button @click="handleShowResult" v-else :icon="Hide"></el-button>
-        <el-button @click="handleForcedSync(props.id)" :icon="Upload"></el-button>
-        <el-button @click="handleAnnotate" :icon="Notebook"></el-button>
+        <div class="graph-controls-left">
+            <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleZoomIn();}" aria-label="Zoom in">
+                <SvgIcon type="mdi" :path="mdiZoomIn" class="btn-icon zoom" />
+            </button>
+
+            <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleZoomOut();}" aria-label="Zoom out">
+                <SvgIcon type="mdi" :path="mdiZoomOut" class="btn-icon zoom" />
+            </button>
+
+            <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleFitView();}" aria-label="Fit view">
+                <SvgIcon type="mdi" :path="mdiFitView" class="btn-icon" />
+            </button>
+        </div>
+
+        <div class="graph-controls-right">
+            <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleForcedSync(props.id); }" aria-label="Sync project">
+                <SvgIcon type="mdi" :path="mdiUploadIcon" class="btn-icon" />
+            </button>
+            <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleShowResult(); }" aria-label="Toggle result">
+                <SvgIcon type="mdi" :path="showResult ? mdiHide : mdiView" class="btn-icon" />
+            </button>
+        </div>
     </div>
 </template>
 <style lang="scss" scoped>
+@use "../../common/style/global.scss" as *;
     .graph-controls-container{
         display: flex;
         flex-direction: row;
-        background-color: grey;
+        width: 100vw;
+        padding-left: 230px;
+        padding-right: 10px;
+        // gap: 8px;
+        align-items: center;
+        background-color: transparent;
+    }
+
+    .graph-controls-left{
+        @include controller-style;
+        display: flex;
+        padding: 3px 5px;
+        flex-direction: row;
+        gap: 4px;
+        margin-left: 8px;
+    }
+
+    .graph-controls-right{
+        @include controller-style;
+        display: flex;
+        flex-direction: row;
+        padding: 3px 5px;
+        gap: 4px;
+        margin-left: auto;
+        margin-right: 8px;
+    }
+
+    .gc-btn{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px 5px;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    .zoom { // zoom icon looks smaller, so enlarge it a bit
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    .btn-icon{
+        width: 24px;
+        height: 24px;
+        display: inline-block;
+    }
+
+    .gc-btn.clicked{
+        animation: clickGray 200ms ease;
+    }
+
+    @keyframes clickGray {
+        0%   { background-color: transparent; }
+        40%  { background-color: rgba(128,128,128,0.35); }
+        100% { background-color: transparent; }
     }
 </style>
