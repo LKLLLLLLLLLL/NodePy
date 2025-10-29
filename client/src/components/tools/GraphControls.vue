@@ -7,6 +7,8 @@
     import { autoCaptureMinimap } from './GraphCapture/minimapCapture';
     import { autoCaptureDetailed, saveDetailedScreenshot } from './GraphCapture/detailedCapture';
     import {Aim, FullScreen, Lock, Notebook, Upload, View, ZoomIn, ZoomOut,Hide} from '@element-plus/icons-vue'
+    import SvgIcon from '@jamescoyle/vue-icon'
+    import {mdiMagnifyPlusOutline,mdiMagnifyMinusOutline,mdiCrosshairsGps,mdiEyeOutline,mdiEyeOff,mdiSync} from '@mdi/js'
 
     const modalStore = useModalStore();
 
