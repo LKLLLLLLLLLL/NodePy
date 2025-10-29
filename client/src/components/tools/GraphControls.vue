@@ -6,9 +6,15 @@
     import { useModalStore } from '@/stores/modalStore';
     import { autoCaptureDetailed } from './GraphCapture/detailedCapture';
     import SvgIcon from '@jamescoyle/vue-icon'
-    import {mdiMagnifyPlusOutline,mdiMagnifyMinusOutline,mdiCrosshairsGps,mdiEyeOutline,mdiEyeOff,mdiSync} from '@mdi/js'
-
+    import {mdiMagnifyPlusOutline,mdiMagnifyMinusOutline,mdiCrosshairsGps,mdiEyeOutline,mdiEyeOff,mdiContentSave} from '@mdi/js'
+    import { autoCaptureMinimap } from './GraphCapture/minimapCapture';
     const modalStore = useModalStore();
+
+    const select = 0
+    function captureGraph(vue:any){
+        if(select == 0)return autoCaptureMinimap(vue)
+        else return autoCaptureDetailed(vue)
+    }
 
     // 定义各个按钮要使用的 mdi 路径
     const mdiZoomIn: string = mdiMagnifyPlusOutline;
@@ -16,7 +22,7 @@
     const mdiFitView: string = mdiCrosshairsGps;
     const mdiView: string = mdiEyeOutline;
     const mdiHide: string = mdiEyeOff;
-    const mdiUploadIcon: string = mdiSync;
+    const mdiUploadIcon: string = mdiContentSave;
 
     const showResult = ref<boolean>(false)
 
@@ -43,8 +49,18 @@
     async function handleForcedSync(id: string){
         const now_id = Number(id);
         const project = await DefaultService.getProjectApiProjectProjectIdGet(now_id);
-        project.thumb = await autoCaptureDetailed(vueFlowRef.value);
-        project.updated_at = Number(Date.now.toString());
+        const thumbBase64 = await captureGraph(vueFlowRef.value);
+        if (thumbBase64) {
+            // 确保是纯 Base64，不带 data URL 前缀
+            const pureBase64 = thumbBase64.startsWith('data:image')
+                ? thumbBase64.split(',')[1]
+                : thumbBase64;
+
+            project.thumb = pureBase64;
+        } else {
+            project.thumb = null;
+        }
+        project.updated_at = Math.floor(Date.now() / 1000);
         await DefaultService.syncProjectApiProjectSyncPost(project);
     }
 
@@ -116,6 +132,8 @@
                 <SvgIcon type="mdi" :path="mdiZoomOut" class="btn-icon zoom" />
             </button>
 
+            <div class="divider"></div>
+
             <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleFitView();}" aria-label="Fit view">
                 <SvgIcon type="mdi" :path="mdiFitView" class="btn-icon" />
             </button>
@@ -125,6 +143,7 @@
             <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleForcedSync(props.id); }" aria-label="Sync project">
                 <SvgIcon type="mdi" :path="mdiUploadIcon" class="btn-icon" />
             </button>
+            <div class="divider"></div>
             <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleShowResult(); }" aria-label="Toggle result">
                 <SvgIcon type="mdi" :path="showResult ? mdiHide : mdiView" class="btn-icon" />
             </button>
@@ -163,12 +182,20 @@
         margin-right: 8px;
     }
 
+    .divider{
+        width: 1px;
+        height: 26px;
+        margin: 5px 1px;
+        background-color: rgba(0, 0, 0, 0.1);
+        // margin: 0 4px;
+    }
+
     .gc-btn{
         display: inline-flex;
         align-items: center;
         justify-content: center;
         padding: 5px 5px;
-        border-radius: 10px;
+        border-radius: 8px;
         cursor: pointer;
     }
 
@@ -181,6 +208,7 @@
         width: 24px;
         height: 24px;
         display: inline-block;
+        color: rgba(0, 0, 0, 0.75);
     }
 
     .gc-btn.clicked{

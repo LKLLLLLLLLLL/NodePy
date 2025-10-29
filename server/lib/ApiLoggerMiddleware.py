@@ -3,7 +3,13 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 from loguru import logger
 import json
+import re
 
+
+def skip_thumb(input: str) -> str:
+    # Skip the "thumb" field in the input string
+    pattern = r'"thumb":\s*"(.*?)"'
+    return re.sub(pattern, '"thumb": "<base64 thumb>"', input)
 
 class ApiLoggerMiddleware(BaseHTTPMiddleware):
     """
@@ -20,11 +26,12 @@ class ApiLoggerMiddleware(BaseHTTPMiddleware):
         body = await request.body()
         body_content = None
         if body:
+            body = skip_thumb(body.decode(errors="ignore"))
             try:
                 body_content = json.loads(body)
                 headers["Content-Type"] = "application/json"
             except json.JSONDecodeError:
-                body_content = body.decode(errors="ignore")[:500]
+                body_content = body[:500]
         logger.debug(
             "\n"
             f"REQUEST: {request.method} {request.url} \n"
@@ -58,10 +65,11 @@ class ApiLoggerMiddleware(BaseHTTPMiddleware):
 
             content_type = response.headers.get("content-type", "")
             if "application/json" in content_type and response_body:
+                response_body = skip_thumb(response_body.decode(errors="ignore")).encode()
                 try:
                     response_body_content = json.loads(response_body)
                 except json.JSONDecodeError:
-                    response_body_content = response_body.decode(errors="ignore")[:500]
+                    response_body_content = response_body[:500]
         logger.debug(
             "\n"
             f"RESPONSE: {response.status_code} for {request.method} {request.url}\n"
