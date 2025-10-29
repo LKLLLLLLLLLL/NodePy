@@ -59,7 +59,8 @@ export const parseProject = (p: Project, tar: vueFlowProject) => {
             source: e.src,
             sourceHandle: e.src_port,
             target: e.tar,
-            targetHandle: e.tar_port
+            targetHandle: e.tar_port,
+            type: "custom"
         }
     })
 

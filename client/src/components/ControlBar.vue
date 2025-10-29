@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import {useModalStore} from "@/stores/modalStore";
-import { useProjectStore } from "@/stores/projectStore";
+// import {useModalStore} from "@/stores/modalStore";
+// import { useProjectStore } from "@/stores/projectStore";
 import { DefaultService } from "@/utils/api";
-import { Avatar, User } from '@element-plus/icons-vue'
-import { ref,computed, onMounted,watch } from "vue";
+import { Avatar } from '@element-plus/icons-vue'
+import { ref,computed, watch } from "vue";
 import { type Project } from "@/utils/api";
 import { RouterLink } from 'vue-router';
 import {useRoute} from 'vue-router';
@@ -20,7 +20,7 @@ const showProjectName = computed(()=>{
 })
 
 async function getProjectName(){
-  if(showProjectName){
+  if(showProjectName.value){
     console.log(route.params.projectId)
     project.value = await DefaultService.getProjectApiProjectProjectIdGet(Number(route.params.projectId))
     console.log(project.value)
@@ -74,7 +74,7 @@ function handleAvatarClick(){
           </RouterLink>
         </nav>
 
-        <div v-else>
+        <div v-else class="project-name">
           <h2>{{ projectName }}</h2>
         </div>
 
@@ -92,13 +92,12 @@ function handleAvatarClick(){
   height: 100%;
   width: 100%;
   color: black;
-  position: relative;
   box-shadow: 0 0px 15px rgba(128, 128, 128, 0.1);
 
   .control-content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    // justify-content: space-between;
     width: 100%;
     height: 100%;
     padding: 0 20px;
@@ -109,6 +108,7 @@ function handleAvatarClick(){
       flex-shrink: 0;
       height: 90%;
       margin-left: 15px;
+      position: absolute;
 
       .logo {
         height: 100%;
@@ -144,6 +144,14 @@ function handleAvatarClick(){
       }
     }
 
+    .project-name {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      font-weight: 300;
+    }
+
     .actions {
       display: flex;
       align-items: center;
@@ -156,6 +164,8 @@ function handleAvatarClick(){
       margin-left: 20px;
       margin-right: 15px;
       cursor: pointer;
+      position: absolute;
+      right: 0px;
     }
   }
 }
