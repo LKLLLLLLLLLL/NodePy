@@ -17,7 +17,7 @@ const openSubmenuIndex = ref<number | null>(null)
 const menuItemRefs = ref<Array<HTMLElement | null>>([])
 const submenuAnchorRect = ref<DOMRect | null>(null)
 const isMenuClosing = ref(false)
-const isMenuOpening = ref(false)
+const isMenuJustOpened = ref(false) // 用于防止打开即触发子菜单
 
 const setMenuItemRef = (el: unknown, idx: number) => {
   menuItemRefs.value[idx] = (el as HTMLElement) || null
@@ -40,13 +40,13 @@ const showContextMenu = (event: MouseEvent) => {
 
   setTimeout(async () => {
     showMenu.value = true
-    isMenuOpening.value = true
+    isMenuJustOpened.value = true
     await nextTick()
     menuRoot.value?.focus()
-    // 300ms 后允许通过 mouseleave 关闭菜单
+    // 200ms 后允许触发子菜单，防止打开即触发
     setTimeout(() => {
-      isMenuOpening.value = false
-    }, 300)
+      isMenuJustOpened.value = false
+    }, 200)
   }, 10)
 }
 
@@ -66,6 +66,9 @@ const handleItemClick = (item: MenuNode) => {
 
 // 打开子菜单
 const openSubmenu = (index: number) => {
+  // 菜单刚打开时不响应子菜单触发
+  if (isMenuJustOpened.value) return
+
   if (nodeMenuItems[index]?.children?.length) {
     openSubmenuIndex.value = index
     const el = menuItemRefs.value[index]
@@ -77,9 +80,6 @@ const openSubmenu = (index: number) => {
 
 // 隐藏菜单
 const hideMenu = () => {
-  // 菜单打开过程中不关闭（防止立即关闭）
-  if (isMenuOpening.value) return
-
   if (menuRoot.value && !isMenuClosing.value) {
     isMenuClosing.value = true
     menuRoot.value.classList.add('closing')
@@ -112,41 +112,38 @@ const menuStyle = computed(() => {
   return `position: fixed; left: ${left}px; top: ${top}px; z-index: 9999; min-width: ${width}px;`
 })
 
-// 全局鼠标监听：检查是否离开菜单和子菜单
-const onGlobalMouseMove = (e: MouseEvent) => {
+// 全局点击监听：点击菜单外才关闭菜单
+const onGlobalClick = (e: MouseEvent) => {
   if (!showMenu.value || isMenuClosing.value) return
 
-  const x = e.clientX
-  const y = e.clientY
-
-  // 检查鼠标是否在主菜单内
+  // 检查点击是否在主菜单内
   const menuRect = menuRoot.value?.getBoundingClientRect()
-  if (menuRect && x >= menuRect.left && x <= menuRect.right && y >= menuRect.top && y <= menuRect.bottom) {
+  if (menuRect && e.clientX >= menuRect.left && e.clientX <= menuRect.right && e.clientY >= menuRect.top && e.clientY <= menuRect.bottom) {
     return // 在主菜单内，不关闭
   }
 
-  // 检查鼠标是否在任何子菜单内
+  // 检查点击是否在任何子菜单内
   const portals = document.querySelectorAll('.submenu-portal')
   for (let i = 0; i < portals.length; i++) {
     const portal = portals[i]
     if (portal) {
       const portalRect = portal.getBoundingClientRect()
-      if (x >= portalRect.left && x <= portalRect.right && y >= portalRect.top && y <= portalRect.bottom) {
+      if (e.clientX >= portalRect.left && e.clientX <= portalRect.right && e.clientY >= portalRect.top && e.clientY <= portalRect.bottom) {
         return // 在子菜单内，不关闭
       }
     }
   }
 
-  // 都不在，关闭菜单
+  // 点击在菜单外，关闭菜单
   hideMenu()
 }
 
 onMounted(() => {
-  document.addEventListener('mousemove', onGlobalMouseMove)
+  document.addEventListener('click', onGlobalClick)
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('mousemove', onGlobalMouseMove)
+  document.removeEventListener('click', onGlobalClick)
 })
 </script>
 
@@ -201,14 +198,12 @@ onBeforeUnmount(() => {
   padding: 4px 0;
   box-sizing: border-box;
   outline: none;
-  // min-width: 120px;
-  width: 10px !important;
   /* 进入动画：淡入并轻微向下移动 */
   animation: menu-fade-in 200ms cubic-bezier(.2,.8,.2,1) both;
 }
 
 .context-menu.closing {
-  animation: menu-fade-out 200ms cubic-bezier(.2,.8,.2,1) both;
+  animation: menu-fade-out 150ms cubic-bezier(.2,.8,.2,1) both;
 }
 
 .menu-list {
@@ -222,14 +217,14 @@ onBeforeUnmount(() => {
 }
 
 .menu-item-content {
-  padding: 6px 12px 6px 16px;
-  margin: 2px 2px;
+  padding: 6px 12px;
+  margin: 0;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-radius: 8px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.15s ease;
 }
 
 .menu-item-content:hover {

@@ -15,19 +15,18 @@ const props = defineProps<Props>()
 const left = ref<number>(0)
 const top = ref<number>(0)
 const estimatedWidth = 150 // 估算宽度，用于边界修正
-const isClosing = ref(false)
 
 const computePosition = () => {
   const rect = props.anchorRect
   if (!rect) return
-  const offset = 0 // 改为 0，让子菜单紧贴主菜单，无间隔
+  const offset = 0 // 子菜单紧贴主菜单，无间隔
   if (props.direction === 'right') {
     left.value = rect.right + offset
   } else {
     left.value = rect.left - estimatedWidth - offset
   }
   // 优化 top：对齐父项顶端
-  top.value = rect.top - 7
+  top.value = rect.top - 4
 
   // 边界修正
   const winW = window.innerWidth
@@ -37,13 +36,7 @@ const computePosition = () => {
   if (top.value + 48 * props.items.length > winH - 8) top.value = Math.max(8, winH - 48 * props.items.length - 8)
 }
 
-watch(() => props.anchorRect, (rect) => {
-  if (rect) {
-    isClosing.value = false
-  } else if (props.anchorRect === null && !isClosing.value) {
-    // anchorRect 变为 null，表示应该关闭子菜单
-    isClosing.value = true
-  }
+watch(() => props.anchorRect, () => {
   computePosition()
 }, { immediate: true })
 
@@ -61,7 +54,7 @@ defineEmits<{
   <teleport to="body">
     <transition name="fade">
       <ul
-        v-if="props.anchorRect && !isClosing"
+        v-if="props.anchorRect"
         class="submenu-portal"
         :class="props.direction"
         :style="{ position: 'fixed', left: left + 'px', top: top + 'px', minWidth: estimatedWidth + 'px', zIndex: 20000 }">
@@ -89,22 +82,22 @@ defineEmits<{
   background-color: $stress-background-color;
   overflow: visible; // 确保子菜单可以显示
   /* 进入动画：淡入 + 向左平移 */
-  animation: submenu-fade-in-right 120ms cubic-bezier(.2,.8,.2,1) both;
+  animation: submenu-fade-in-right 150ms cubic-bezier(.2,.8,.2,1) both;
 }
 
 .submenu-portal.left {
   transform-origin: right top;
   /* 左侧显示时使用相反方向的平移动画 */
-  animation: submenu-fade-in-left 120ms cubic-bezier(.2,.8,.2,1) both;
+  animation: submenu-fade-in-left 150ms cubic-bezier(.2,.8,.2,1) both;
 }
 
 .submenu-item {
-  padding: 6px 14px;
+  padding: 6px 12px;
   cursor: pointer;
-  margin: 2px 2px;
+  margin: 0;
   font-size: 14px;
   border-radius: 8px;
-  transition: background-color 0.20s ease;
+  transition: background-color 0.150s ease;
 }
 
 .submenu-item:hover {
@@ -114,7 +107,7 @@ defineEmits<{
 @keyframes submenu-fade-in-right {
   from {
     opacity: 0;
-    transform: translateX(-7px);
+    transform: translateX(-5px);
   }
   to {
     opacity: 1;
@@ -125,7 +118,7 @@ defineEmits<{
 @keyframes submenu-fade-in-left {
   from {
     opacity: 0;
-    transform: translateX(7px);
+    transform: translateX(5px);
   }
   to {
     opacity: 1;
@@ -140,7 +133,7 @@ defineEmits<{
   }
   to {
     opacity: 0;
-    transform: translateX(-7px);
+    transform: translateX(-5px);
   }
 }
 
@@ -151,7 +144,7 @@ defineEmits<{
   }
   to {
     opacity: 0;
-    transform: translateX(7px);
+    transform: translateX(5px);
   }
 }
 

@@ -89,17 +89,17 @@ function handleAvatarClick(){
     .nav-bar {
       display: flex;
       align-items: center;
-      gap: 32px;
+      gap: 40px;
       flex: 1;
       justify-content: center;
 
       .nav-link {
         color: #000000;
         text-decoration: none;
-        font-size: 18px;
-        font-weight: 400;
+        font-size: 16px;
+        font-weight: 500;
         padding: 8px 16px;
-        margin: 0 0.4%;
+        margin: 0 0;
         border-bottom: 2px solid transparent;
         transition: all 0.3s ease;
 
