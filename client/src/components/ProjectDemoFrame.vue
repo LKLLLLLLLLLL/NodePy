@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import {computed} from 'vue';
 import { Plus, Edit, Delete } from '@element-plus/icons-vue';
 import { useProjectStore } from '@/stores/projectStore';
 import { useModalStore } from '@/stores/modalStore';
@@ -8,12 +9,25 @@ import RenameProject from '@/views/RenameProject.vue';
 const props = defineProps<{
     id: number,
     title?: string,
-    thumbnail?: string | null,
-    createdAt?: number | string | null,
-    updatedAt?: number | string | null,
+    thumb?: string | null,
+    created_at?: number | string | null,
+    updated_at?: number | string | null,
     handleOpenExistingProject?: (id: number) => void,
     handleCreateNewProject?: () => void,
 }>();
+
+// 计算属性：将 Base64 转换为完整的 Data URL
+const thumbSrc = computed(() => {
+    if (!props.thumb) return null
+    
+    // 如果已经是 Data URL，直接返回
+    if (props.thumb.startsWith('data:image')) {
+        return props.thumb
+    }
+    
+    // 如果是纯 Base64，添加前缀
+    return `data:image/png;base64,${props.thumb}`
+})
 
 const projectStore = useProjectStore();
 const modalStore = useModalStore();
@@ -89,7 +103,7 @@ async function handleClickRename(){
 
 <template>
     <div
-        :class="['project-card', { 'new-card': props.id === 0 && props.handleCreateNewProject, 'placeholder-large': !props.thumbnail && !(props.id === 0 && props.handleCreateNewProject) } ]"
+        :class="['project-card', { 'new-card': props.id === 0 && props.handleCreateNewProject, 'placeholder-large': !props.thumb && !(props.id === 0 && props.handleCreateNewProject) } ]"
         role="button"
         :aria-label="props.title ?? (props.id ? `Project ${props.id}` : 'Create Project')"
         tabindex="0"
@@ -99,8 +113,8 @@ async function handleClickRename(){
         <div class="project-thumb">
             <slot name="picture">
                 <div class="thumb-content">
-                    <template v-if="props.thumbnail">
-                        <img :src="props.thumbnail" alt="thumb" class="thumb-img" />
+                    <template v-if="thumbSrc">
+                        <img :src="thumbSrc" alt="thumb" class="thumb-img" />
                     </template>
                     <template v-else>
                         <div v-if="props.id === 0 && props.handleCreateNewProject" class="thumb-new">
@@ -123,8 +137,8 @@ async function handleClickRename(){
         <div class="project-info">
             <div class="project-title">{{ props.title ?? (props.id ? `Project ${props.id}` : 'New') }}</div>
             <div v-if="!(props.id === 0 && props.handleCreateNewProject)" class="project-meta">
-                <span class="meta-item">修改: {{ formatDate(props.updatedAt) }}</span>
-                <span class="meta-item">创建: {{ formatDate(props.createdAt) }}</span>
+                <span class="meta-item">修改: {{ formatDate(props.updated_at) }}</span>
+                <span class="meta-item">创建: {{ formatDate(props.created_at) }}</span>
             </div>
         </div>
     </div>

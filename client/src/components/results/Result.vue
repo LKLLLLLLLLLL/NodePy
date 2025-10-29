@@ -4,13 +4,15 @@
     import ValueView from './ValueView.vue';
     import { useVueFlow } from '@vue-flow/core';
     import { DefaultService } from '@/utils/api';
-    import { type DataView } from '@/utils/api';
+    import { DataView } from '@/utils/api';
     import { ref } from 'vue';
 
     const {onNodeClick,findNode} = useVueFlow('main');
 
     let url_id = 10086
     const result = ref<DataView>()
+
+    const resultCache = new Map<Number,DataView>();
 
     onNodeClick( async (event) => {
         // 获取节点完整信息
@@ -19,14 +21,17 @@
         console.log('Data_id:',currentNode?.data.data_out.result.data_id)
         if(currentNode) url_id = currentNode.data.data_out.result.data_id
         result.value = await getResult(url_id)
-        console.log(result)
-        console.log(result.value)
     })
 
     async function getResult(id: number){
-        console.log('operating by: ',id)
-        const result = await DefaultService.getNodeDataApiDataDataIdGet(id);
-        return result;
+        const cacheResult = resultCache.get(id);
+        if(cacheResult) return cacheResult
+        else{
+            console.log('operating by: ',id)
+            const result = await DefaultService.getNodeDataApiDataDataIdGet(id);
+            resultCache.set(id,result)
+            return result;
+        }
     }
     
 </script>

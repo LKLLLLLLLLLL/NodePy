@@ -61,9 +61,9 @@
                 :key="project.project_id"
                 :id="project.project_id"
                 :title="project.project_name || `Project ${project.project_id}`"
-                :thumbnail="(project as any).thumbnail"
-                :created-at="project.created_at"
-                :updated-at="project.updated_at"
+                :thumb="(project as any).thumb"
+                :created_at="project.created_at"
+                :updated_at="project.updated_at"
                 :handleOpenExistingProject="handleOpenExistingProject"
             />
 
