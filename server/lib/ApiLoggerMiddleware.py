@@ -26,12 +26,12 @@ class ApiLoggerMiddleware(BaseHTTPMiddleware):
         body = await request.body()
         body_content = None
         if body:
-            body = skip_thumb(body.decode(errors="ignore"))
+            body_skipped = skip_thumb(body.decode(errors="ignore"))
             try:
-                body_content = json.loads(body)
+                body_content = json.loads(body_skipped)
                 headers["Content-Type"] = "application/json"
             except json.JSONDecodeError:
-                body_content = body[:500]
+                body_content = body_skipped[:500]
         logger.debug(
             "\n"
             f"REQUEST: {request.method} {request.url} \n"
@@ -65,11 +65,11 @@ class ApiLoggerMiddleware(BaseHTTPMiddleware):
 
             content_type = response.headers.get("content-type", "")
             if "application/json" in content_type and response_body:
-                response_body = skip_thumb(response_body.decode(errors="ignore")).encode()
+                response_body_skipped = skip_thumb(response_body.decode(errors="ignore")).encode()
                 try:
-                    response_body_content = json.loads(response_body)
+                    response_body_content = json.loads(response_body_skipped)
                 except json.JSONDecodeError:
-                    response_body_content = response_body[:500]
+                    response_body_content = response_body_skipped[:500]
         logger.debug(
             "\n"
             f"RESPONSE: {response.status_code} for {request.method} {request.url}\n"

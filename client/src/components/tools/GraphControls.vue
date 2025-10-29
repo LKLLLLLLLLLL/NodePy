@@ -156,7 +156,7 @@
         display: flex;
         flex-direction: row;
         width: 100vw;
-        padding-left: 230px;
+        padding-left: 240px;
         padding-right: 10px;
         // gap: 8px;
         align-items: center;
@@ -184,7 +184,7 @@
 
     .divider{
         width: 1px;
-        height: 26px;
+        height: 24px;
         margin: 5px 1px;
         background-color: rgba(0, 0, 0, 0.1);
         // margin: 0 4px;
