@@ -1,8 +1,6 @@
 import type { Project, ProjEdge, ProjNode } from './api'
 import type { vueFlowProject } from '@/types/vueFlowProject'
-import {ref} from 'vue'
-import type { Edge } from '@vue-flow/core'
-import type { BaseNode } from '@/types/nodeTypes'
+
 
 export const getProject = (p: vueFlowProject): Project => {
     const graphNodes: ProjNode[] = p.workflow.nodes.value.map(n => {
@@ -34,7 +32,9 @@ export const getProject = (p: vueFlowProject): Project => {
             error_message: p.workflow.error_message,
             nodes: graphNodes,
             edges: graphEdges
-        }
+        },
+        updated_at: p.updated_at,
+        thumb: p.thumb
     }
 }
 
@@ -70,5 +70,7 @@ export const parseProject = (p: Project, tar: vueFlowProject) => {
         tar.workflow.error_message = p.workflow.error_message
         tar.workflow.edges.value = graphEdges
         tar.workflow.nodes.value = graphNodes
+        tar.updated_at = p.updated_at
+        tar.thumb = p.thumb
     }
 }

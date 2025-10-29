@@ -10,14 +10,15 @@ import { type ProjectListItem ,type ProjectList,type Project} from '@/utils/api'
 const default_pname = "default_name"
 const default_pid = 10086
 const default_uid = 114514
-const default_project = {
+const default_project: Project = {
         project_name: default_pname,
         project_id: default_pid,
         user_id: default_uid,
         workflow: {
             nodes: [],
             edges: []
-        }
+        },
+        updated_at: 0
     }
 const default_delete_pid = 11111111
 const default_delete_pname = 'toBeDeleted'

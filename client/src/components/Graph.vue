@@ -26,7 +26,8 @@ const project: vueFlowProject = ({
   workflow: {
     nodes: ref([]),
     edges: ref([])
-  }
+  },
+  updated_at: 0
 })
 const { onConnect, onInit, onNodeDragStop, addEdges, onPaneContextMenu  } = useVueFlow('main')
 const shouldWatch = ref(false)
