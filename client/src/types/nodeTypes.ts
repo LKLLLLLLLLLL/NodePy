@@ -6,8 +6,9 @@ export const dataTypeColor = {
     int: '#1c6bbf',
     float: '#ecbc00',
     str: 'green',
-    table: 'pink',
-    file: 'brown',
+    bool: 'purple',
+    Table: 'pink',
+    File: 'brown',
     default: 'gray'
 }
 

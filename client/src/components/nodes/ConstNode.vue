@@ -2,7 +2,7 @@
     <div class="ConstNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="title nodes-topchild-border-radius">ConstNode</div>
         <div class="data">
-            <Handle id="const" type="source" :position="Position.Right" :class="`${data_type}-handle-color`"/>
+            <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             <div class="value">
                  <NodepyNumberInput v-model="value" class="nodrag"/>
             </div>
@@ -16,18 +16,19 @@
 </template>
 
 <script lang="ts" setup>
-    import {ref, watch } from 'vue'
+    import {ref, watch, computed } from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import type {ConstNodeData} from '../../types/nodeTypes'
+    import type { Type } from '@/utils/api'
     import NodepyNumberInput from '../tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
 
 
     const props = defineProps<NodeProps<ConstNodeData>>()
     const value = ref(props.data.param.value)
     const data_type = ref(props.data.param.data_type)
+    const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
     const data_type_options = ['int', 'float']
-
 
     watch([value, data_type], (newValue, oldValue) => {
         props.data.param.data_type = data_type.value

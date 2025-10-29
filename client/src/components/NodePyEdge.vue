@@ -1,11 +1,22 @@
 <script setup lang="ts">
-import type { EdgeProps } from '@vue-flow/core'
-import { BezierEdge } from '@vue-flow/core'
+import { useVueFlow, type EdgeProps, BezierEdge } from '@vue-flow/core'
 import { dataTypeColor } from '@/types/nodeTypes'
+import {computed} from 'vue'
+import type { BaseNode } from '@/types/nodeTypes'
 
 
 const props = defineProps<EdgeProps>()
-console.log('NodePyEdge props:', props)
+const {findNode} = useVueFlow('main')
+const sourceNode = computed(():BaseNode|undefined => {
+    return findNode(props.source)
+})
+const strokeColor = computed(() => {
+    if(sourceNode.value) {
+        const dataType = sourceNode.value.data.schema_out?.[props.sourceHandleId as string]?.type || 'default'
+        return dataTypeColor[dataType]
+    }
+    return 'default'
+})
 
 </script>
 
@@ -19,6 +30,6 @@ console.log('NodePyEdge props:', props)
       :source-position="sourcePosition"
       :target-position="targetPosition"
       :curvature="0.1"
-      :style="{ stroke: '#1c6bbf', strokeWidth: 3 }"
+      :style="{ stroke: strokeColor, strokeWidth: 3 }"
   />
 </template>

@@ -32,7 +32,6 @@ export async function monitorTask(project: Project, task_id: string): Promise<an
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data)
       messages.push(message)
-      console.log("WS:", message)
       const patch = message.patch as any[]
       if(patch && patch.length > 0) {
         patch.forEach(p => {

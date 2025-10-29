@@ -3,7 +3,7 @@
         <path
             class="vue-flow__connection" 
             fill="none" 
-            :stroke="`#1c6bbf`"
+            :stroke="strokeColor"
             :stroke-width="3"
             :d="pathData"
          />
@@ -14,6 +14,7 @@
     import { computed } from 'vue'
     import { useConnection, getBezierPath, type Position, useVueFlow } from '@vue-flow/core'
     import { dataTypeColor } from '@/types/nodeTypes'
+    import type { BaseNode } from '@/types/nodeTypes'
 
     const { startHandle } = useConnection()
     const {findNode} = useVueFlow('main')
@@ -28,11 +29,18 @@
             curvature: 0.1
         })[0]
     )
-    console.log(startHandle)
-    const strokeColor = computed(() => {
-        if(startHandle.value) {
-            
+    const startNode = computed(():BaseNode|undefined|null => {
+        if(startHandle.value?.nodeId) {
+            return findNode(startHandle.value.nodeId) 
         }
+        return null
+    })
+    const strokeColor = computed(() => {
+        if(startNode.value) {
+            const dataType = startNode.value.data.schema_out?.[startHandle.value?.id as string]?.type || 'default'
+            return dataTypeColor[dataType]
+        }
+        return 'default'
     })
     const props = defineProps({
       sourceX: {
