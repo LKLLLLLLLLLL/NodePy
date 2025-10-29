@@ -195,7 +195,7 @@ onBeforeUnmount(() => {
 
 .context-menu {
   @include controller-style;
-  padding: 4px 0;
+  padding: 4px 4px;
   box-sizing: border-box;
   outline: none;
   /* 进入动画：淡入并轻微向下移动 */

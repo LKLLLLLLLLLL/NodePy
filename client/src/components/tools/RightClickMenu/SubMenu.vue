@@ -19,7 +19,7 @@ const estimatedWidth = 150 // 估算宽度，用于边界修正
 const computePosition = () => {
   const rect = props.anchorRect
   if (!rect) return
-  const offset = 0 // 子菜单紧贴主菜单，无间隔
+  const offset = 4 // 子菜单紧贴主菜单，无间隔
   if (props.direction === 'right') {
     left.value = rect.right + offset
   } else {
@@ -78,7 +78,7 @@ defineEmits<{
   @include controller-style;
   list-style: none;
   margin: 0;
-  padding: 4px 0;
+  padding: 4px 4px;
   background-color: $stress-background-color;
   overflow: visible; // 确保子菜单可以显示
   /* 进入动画：淡入 + 向左平移 */

@@ -151,6 +151,7 @@ export class DefaultService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
+                400: `Invalid thumbnail data`,
                 403: `User has no access to this project`,
                 404: `Project not found`,
                 422: `Validation Error`,

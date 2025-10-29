@@ -26,7 +26,7 @@ class FileItem(BaseModel):
     filename: str
     format: Literal["png", "jpg", "pdf", "csv"]
     size: int  # file size in bytes
-    modified_at: str  # ISO format datetime string
+    modified_at: int  # timestamp in milliseconds
     project_name: str
 
 class UserFileList(BaseModel):

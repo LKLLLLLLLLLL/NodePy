@@ -133,6 +133,9 @@ class Project(BaseModel):
     project_name: str
     project_id: int
     user_id: int
+    updated_at: int # timestamp in milliseconds
+
+    thumb: str | None = None  # base64 encoded thumbnail image
 
     workflow: ProjWorkflow
     def to_topo(self) -> WorkflowTopology:

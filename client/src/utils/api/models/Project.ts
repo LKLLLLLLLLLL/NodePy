@@ -10,6 +10,8 @@ export type Project = {
     project_name: string;
     project_id: number;
     user_id: number;
+    updated_at: number;
+    thumb?: (string | null);
     workflow: ProjWorkflow;
 };
 

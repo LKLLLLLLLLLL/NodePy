@@ -417,14 +417,18 @@ class FileManager:
                 # query project name
                 project = self.db_client.query(ProjectRecord).filter(ProjectRecord.id == db_file.project_id).first()
                 project_name = project.name if project else ""
-                file_items.append(FileItem(
-                    key=db_file.file_key, # type: ignore
-                    filename=db_file.filename, # type: ignore
-                    format=cast(Literal["png", "jpg", "pdf", "csv"], db_file.format),
-                    size=db_file.file_size, # type: ignore
-                    modified_at=db_file.last_modify_time, # type: ignore
-                    project_name=project_name # type: ignore
-                ))
+                file_items.append(
+                    FileItem(
+                        key=db_file.file_key,  # type: ignore
+                        filename=db_file.filename,  # type: ignore
+                        format=cast(
+                            Literal["png", "jpg", "pdf", "csv"], db_file.format
+                        ),
+                        size=db_file.file_size,  # type: ignore
+                        modified_at=int(db_file.last_modify_time.timestamp() * 1000),  # type: ignore
+                        project_name=project_name,  # type: ignore
+                    )
+                )
             return UserFileList(
                 user_id=user_id,
                 files=file_items,
@@ -460,7 +464,7 @@ class FileManager:
                     filename=db_file.filename, # type: ignore
                     format=cast(Literal["png", "jpg", "pdf", "csv"], db_file.format),
                     size=db_file.file_size, # type: ignore
-                    modified_at=db_file.last_modify_time, # type: ignore
+                    modified_at=int(db_file.last_modify_time.timestamp() * 1000), # type: ignore
                     project_name=project_name # type: ignore
                 ))
             return UserFileList(

@@ -14,6 +14,8 @@ from server.models.exception import ProjectLockError, ProjLockIdentityError
 from loguru import logger
 from server.models.project_list import ProjectList, ProjectListItem
 from celery.result import AsyncResult
+import base64
+import binascii
 
 """
 The api for nodes runing, reporting and so on,
@@ -44,6 +46,7 @@ async def list_projects(db_client: Session = Depends(get_session)) -> ProjectLis
                     owner=project_record.owner_id,  # type: ignore
                     created_at=int(project_record.created_at.timestamp() * 1000) if project_record.created_at else None,  # type: ignore
                     updated_at=int(project_record.updated_at.timestamp() * 1000) if project_record.updated_at else None,  # type: ignore
+                    thumb=base64.b64encode(project_record.thumb).decode('utf-8') if project_record.thumb else None  # type: ignore
                 )
             )
         return ProjectList(
@@ -83,6 +86,8 @@ async def get_project(project_id: int, db_client: Session = Depends(get_session)
             project_id=project.id,     # type: ignore
             user_id=project.owner_id,  # type: ignore
             workflow=workflow,
+            updated_at=int(project.updated_at.timestamp() * 1000) if project.updated_at else None,  # type: ignore
+            thumb=base64.b64encode(project.thumb).decode('utf-8') if project.thumb else None  # type: ignore
         )
         return project
     except HTTPException:
@@ -119,7 +124,8 @@ async def create_project(project_name: str, db_client: Session = Depends(get_ses
         new_project = ProjectRecord(
             name=project_name,
             owner_id=user_id,
-            workflow=ProjWorkflow.get_empty_workflow().model_dump()
+            workflow=ProjWorkflow.get_empty_workflow().model_dump(),
+            thumb=None
         )
         db_client.add(new_project)
         db_client.commit()
@@ -220,6 +226,7 @@ class TaskResponse(BaseModel):
     responses={
         204: {"description": "No execution needed, project synced", "model": None},
         202: {"description": "Task accepted and running", "model": TaskResponse},
+        400: {"description": "Invalid thumbnail data"},
         403: {"description": "User has no access to this project"},
         404: {"description": "Project not found"},
         423: {"description": "Project is locked, it may be being edited by another process"},
@@ -256,7 +263,9 @@ async def sync_project(project: Project, response: Response, db_client: Session 
                     project_name=project_record.name, # type: ignore
                     project_id=project_record.id,     # type: ignore
                     user_id=project_record.owner_id,  # type: ignore
-                    workflow=ProjWorkflow(**project_record.workflow) # type: ignore
+                    workflow=ProjWorkflow(**project_record.workflow), # type: ignore
+                    thumb=base64.b64encode(project_record.thumb).decode('utf-8') if project_record.thumb else None,  # type: ignore
+                    updated_at=int(project_record.updated_at.timestamp() * 1000) if project_record.updated_at else None,  # type: ignore
                 )
 
                 # 4. compare the compare the topo model to decide whether to run
@@ -276,6 +285,8 @@ async def sync_project(project: Project, response: Response, db_client: Session 
                     # only save the cleansed workflow, running results will be updated after execution
                     new_project.cleanse()
                     project_record.workflow = new_project.workflow.model_dump() # type: ignore
+                # 6. save thumbnail
+                project_record.thumb = base64.b64decode(new_project.thumb) if new_project.thumb else None # type: ignore
             finally:
                 db_client.commit()
 
@@ -291,6 +302,10 @@ async def sync_project(project: Project, response: Response, db_client: Session 
             response.status_code = 202  # Accepted
             await lock.appoint_transfer_async(task.id)
             return TaskResponse(task_id=task.id)
+    except binascii.Error as e:
+        db_client.rollback()
+        logger.error(f"Error decoding thumb for project {project.project_id}: {e}")
+        raise HTTPException(status_code=400, detail="Invalid thumbnail data")
     except ProjectLockError:
         db_client.rollback()
         raise HTTPException(status_code=423, detail="Project is locked, it may be being edited by another process")

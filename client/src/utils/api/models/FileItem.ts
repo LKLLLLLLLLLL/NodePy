@@ -10,7 +10,7 @@ export type FileItem = {
     filename: string;
     format: FileItem.format;
     size: number;
-    modified_at: string;
+    modified_at: number;
     project_name: string;
 };
 export namespace FileItem {
