@@ -1,24 +1,22 @@
 <script lang="ts" setup>
-    import { useVueFlow, VueFlow } from '@vue-flow/core';
+    import { useVueFlow } from '@vue-flow/core';
     import { DefaultService } from '@/utils/api';
     import {ref} from 'vue'
     import Result from '../results/Result.vue'
     import { useModalStore } from '@/stores/modalStore';
-    import { autoCaptureMinimap } from './GraphCapture/minimapCapture';
-    import { autoCaptureDetailed, saveDetailedScreenshot } from './GraphCapture/detailedCapture';
-    import {Aim, FullScreen, Lock, Notebook, Upload, View, ZoomIn, ZoomOut,Hide} from '@element-plus/icons-vue'
+    import { autoCaptureDetailed } from './GraphCapture/detailedCapture';
     import SvgIcon from '@jamescoyle/vue-icon'
     import {mdiMagnifyPlusOutline,mdiMagnifyMinusOutline,mdiCrosshairsGps,mdiEyeOutline,mdiEyeOff,mdiSync} from '@mdi/js'
 
     const modalStore = useModalStore();
 
     // 定义各个按钮要使用的 mdi 路径
-    const mdiZoomIn = mdiMagnifyPlusOutline;
-    const mdiZoomOut = mdiMagnifyMinusOutline;
-    const mdiFitView = mdiCrosshairsGps;
-    const mdiView = mdiEyeOutline;
-    const mdiHide = mdiEyeOff;
-    const mdiUploadIcon = mdiSync;
+    const mdiZoomIn: string = mdiMagnifyPlusOutline;
+    const mdiZoomOut: string = mdiMagnifyMinusOutline;
+    const mdiFitView: string = mdiCrosshairsGps;
+    const mdiView: string = mdiEyeOutline;
+    const mdiHide: string = mdiEyeOff;
+    const mdiUploadIcon: string = mdiSync;
 
     const showResult = ref<boolean>(false)
 
