@@ -1,11 +1,37 @@
 <script lang="ts" setup>
 import {useModalStore} from "@/stores/modalStore";
+import { useProjectStore } from "@/stores/projectStore";
+import { DefaultService } from "@/utils/api";
 import { Avatar, User } from '@element-plus/icons-vue'
+import { ref,computed, onMounted,watch } from "vue";
+import { type Project } from "@/utils/api";
 import { RouterLink } from 'vue-router';
 import {useRoute} from 'vue-router';
 
 
-const route=useRoute()
+const route = useRoute()
+
+const default_pname = 'default_pname'
+const project = ref<Project>()
+const projectName = ref<string>(default_pname)
+const showProjectName = computed(()=>{
+  if(route.params.projectId)return true
+  else return false
+})
+
+async function getProjectName(){
+  if(showProjectName){
+    console.log(route.params.projectId)
+    project.value = await DefaultService.getProjectApiProjectProjectIdGet(Number(route.params.projectId))
+    console.log(project.value)
+    return project.value.project_name
+  }
+    return default_pname
+}
+
+watch(()=>route.params.projectId,async ()=>{
+  projectName.value = await getProjectName();
+})
 
 // 导航项
 const navItems = [
@@ -36,7 +62,7 @@ function handleAvatarClick(){
         <div class="logo-container">
           <img src="../../public/logo-trans.png" alt="Logo" class="logo"/>
         </div>
-        <nav class="nav-bar">
+        <nav class="nav-bar" v-if="!showProjectName">
           <RouterLink
             v-for="item in navItems"
             :key="item.path"
@@ -47,6 +73,10 @@ function handleAvatarClick(){
             {{ item.label }}
           </RouterLink>
         </nav>
+
+        <div v-else>
+          <h2>{{ projectName }}</h2>
+        </div>
 
         <div class="user-avatar">
           <el-avatar :icon="Avatar" size="small" @click="handleAvatarClick"></el-avatar>
@@ -89,17 +119,17 @@ function handleAvatarClick(){
     .nav-bar {
       display: flex;
       align-items: center;
-      gap: 40px;
+      gap: 32px;
       flex: 1;
       justify-content: center;
 
       .nav-link {
         color: #000000;
         text-decoration: none;
-        font-size: 16px;
-        font-weight: 500;
+        font-size: 18px;
+        font-weight: 400;
         padding: 8px 16px;
-        margin: 0 0;
+        margin: 0 0.4%;
         border-bottom: 2px solid transparent;
         transition: all 0.3s ease;
 

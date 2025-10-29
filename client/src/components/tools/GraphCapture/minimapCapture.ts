@@ -346,7 +346,7 @@ export const saveScreenshot = (imageData: string, projectId: string): void => {
   try {
     const link = document.createElement('a')
     link.href = imageData
-    link.download = `flow-diagram-${projectId}-${Date.now()}.png`
+    link.download = `minimap-capture-${projectId}-${Date.now()}.png`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)

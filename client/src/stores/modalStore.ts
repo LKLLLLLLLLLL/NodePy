@@ -5,8 +5,12 @@ let baseZIndex = 1000;
 export const useModalStore = defineStore('modal', () => {
     const modals = ref<ModalInstance[]>([]);
 
+    function findModal(id: string){
+        return modals.value.find(m => m.id === id);
+    }
+    
     function createModal(modal:ModalInstance){
-        if(modals.value.find(m => m.id === modal.id)){
+        if(findModal(modal.id)){
             activateModal(modal.id);
             return;
         }
@@ -36,46 +40,46 @@ export const useModalStore = defineStore('modal', () => {
     }
 
     function activateModal(id:string){
-        const modal = modals.value.find(modal => modal.id === id);
+        const modal = findModal(id);
         if(modal){
             modal.isActive = true;
         }
     }
 
     function deactivateModal(id:string){
-        const modal = modals.value.find(modal => modal.id === id);
+        const modal = findModal(id);
         if(modal){
             modal.isActive = false;
         }
     }
 
     function updateModalInfo(id:string,info:Partial<ModalInstance>){
-        const modal = modals.value.find(modal => modal.id === id);
+        const modal = findModal(id);
         if(modal){
             Object.assign(modal,info);
         }
     }
 
     function bringToFront(id:string){
-        const modal = modals.value.find(modal => modal.id === id);
+        const modal = findModal(id);
         if(modal){
             modal.zIndex = baseZIndex++;
         }
     }
 
     function updateModalPosition(id:string,position:{x:number,y:number}){
-        const modal = modals.value.find(modal => modal.id === id);
+        const modal = findModal(id);
         if(modal){
             modal.position = position;
         }
     }
 
     function updateModalSize(id:string,size:{width:number,height:number}){
-        const modal = modals.value.find(modal => modal.id === id);
+        const modal = findModal(id);
         if(modal){
             modal.size = size;
         }
     }
 
-    return { modals, createModal, destroyModal, activateModal, deactivateModal, updateModalInfo , bringToFront, updateModalPosition, updateModalSize };
+    return { modals, findModal, createModal, destroyModal, activateModal, deactivateModal, updateModalInfo , bringToFront, updateModalPosition, updateModalSize };
 });
