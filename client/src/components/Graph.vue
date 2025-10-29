@@ -59,7 +59,7 @@ onInit((instance) => {
 })
 
 watch([
-  () => project.workflow.nodes.value.length, 
+  () => project.workflow.nodes.value.length,
   () => project.workflow.nodes.value.map(n => JSON.stringify(n.data.param)).join('|'),
   () => project.workflow.edges.value.length
 ], async (newValue, oldValue) => {
@@ -174,7 +174,8 @@ const nodeColor = (node: BaseNode) => {
       :connection-mode="ConnectionMode.Strict"
       id="main"
       >
-        <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4" bgColor="rgba(245, 247, 250, 0.05)"/>
+        <!-- <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4" bgColor="rgba(245, 247, 250, 0.05)"/> -->
+        <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4"/>
 
         <MiniMap mask-color="rgba(0,0,0,0.1)" pannable zoomable position="bottom-left" :node-color="nodeColor" class="controller-style set_background_color"/>
 
@@ -221,32 +222,35 @@ const nodeColor = (node: BaseNode) => {
 @import '@vue-flow/controls/dist/style.css';
 
 .vue-flow__handle {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
 }
 
 .vue-flow__pane {
-  cursor: default !important;
+    cursor: default !important;
 }
 
 /* Remove white border bottom in minimap */
 .vue-flow__minimap > svg,
 .vue-flow__minimap svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 </style>
 
 <style lang="scss" scoped>
-@use '../common/style/global.scss';
-  .graphLayout {
+@use '../common/style/global.scss' as *;
+.graphLayout {
     flex: 1;
     .vueFlow {
-      width: 100%;
-      height: 100%;
+        width: 100%;
+        height: 100%;
     }
-  }
+}
+.vue-flow__background {
+    background-color: $mix-background-color;
+}
 </style>

@@ -15,7 +15,7 @@ Session management.
 
 # sync engine and session
 DATABASE_URL = os.getenv("DATABASE_URL", "")
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, pool_size=20, max_overflow=40, pool_timeout=30)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def get_session() -> Iterator[Session]:
     db = SessionLocal()
@@ -64,7 +64,9 @@ class NodeOutputRecord(Base):
     __tablename__ = "data"
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    project_id = Column(
+        Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
     node_id = Column(String, nullable=False, index=True) # reference the node id in project.graph.nodes[i].id
     port = Column(String, nullable=False)  # output port name
     data = Column(JSON, nullable=False)  # Arbitrary JSON data

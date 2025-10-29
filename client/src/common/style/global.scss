@@ -1,7 +1,17 @@
 $stress-color: #108efe;
-$background-color: rgb(245, 247, 250);
+$bg-color-r: 245;
+$bg-color-g: 247;
+$bg-color-b: 250;
+$background-color: rgb($bg-color-r, $bg-color-g, $bg-color-b);
 $stress-background-color: white;
 
+// compute background color with some transparency
+$target-a: 0.05;
+$mixed-color: white;
+$computed-r: ($bg-color-r - red($mixed-color) * (1 - $target-a)) / $target-a;
+$computed-g: ($bg-color-g - green($mixed-color) * (1 - $target-a)) / $target-a;
+$computed-b: ($bg-color-b - blue($mixed-color) * (1 - $target-a)) / $target-a;
+$mix-background-color: rgba($computed-r, $computed-g, $computed-b, $target-a);
 
 .set_background_color { // set the background color to the unified color
   background-color: $background-color
