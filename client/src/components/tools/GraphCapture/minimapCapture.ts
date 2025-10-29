@@ -330,8 +330,11 @@ export const captureMiniMap = async (vueFlowRef: any): Promise<string | null> =>
         }
       }
     }
-    
-    return imageData
+    if (imageData) {
+      const base64String = imageData.replace(/^data:image\/\w+;base64,/, '')
+      return base64String
+    }
+    return null
     
   } catch (error) {
     console.error('小地图截图失败:', error)
@@ -342,7 +345,7 @@ export const captureMiniMap = async (vueFlowRef: any): Promise<string | null> =>
 /**
  * 保存截图到本地
  */
-export const saveScreenshot = (imageData: string, projectId: string): void => {
+export const saveMinimapScreenshot = (imageData: string, projectId: string): void => {
   try {
     const link = document.createElement('a')
     link.href = imageData
@@ -357,19 +360,21 @@ export const saveScreenshot = (imageData: string, projectId: string): void => {
 }
 
 /**
- * 自动截图并保存
+ * 自动截图并返回 Base64 字符串
  */
-export const autoCaptureMinimapAndSave = async (vueFlowRef: any, projectId: string): Promise<void> => {
+export const autoCaptureMinimap = async (vueFlowRef: any): Promise<string | null> => {
   try {
     console.log('开始自动截图...')
-    const imageData = await captureMiniMap(vueFlowRef)
-    if (imageData) {
-      saveScreenshot(imageData, projectId)
-      console.log('自动截图完成')
+    const base64String = await captureMiniMap(vueFlowRef)
+    if (base64String) {
+      console.log('自动截图完成，Base64 字符串长度:', base64String.length)
+      return base64String
     } else {
-      console.error('截图失败，返回的imageData为null')
+      console.error('截图失败，返回的 Base64 为 null')
+      return null
     }
   } catch (error) {
     console.error('自动截图失败:', error)
+    return null
   }
 }

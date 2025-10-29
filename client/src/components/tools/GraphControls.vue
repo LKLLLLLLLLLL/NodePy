@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-    import { useVueFlow } from '@vue-flow/core';
+    import { useVueFlow, VueFlow } from '@vue-flow/core';
     import { DefaultService } from '@/utils/api';
     import {computed, ref} from 'vue'
     import Result from '../results/Result.vue'
     import { useModalStore } from '@/stores/modalStore';
-    import { autoCaptureMinimapAndSave } from './GraphCapture/minimapCapture';
-    import { autoCaptureDetailedAndSave } from './GraphCapture/detailedCapture';
+    import { autoCaptureMinimap } from './GraphCapture/minimapCapture';
+    import { autoCaptureDetailed, saveDetailedScreenshot } from './GraphCapture/detailedCapture';
     import {Aim, FullScreen, Lock, Notebook, Upload, View, ZoomIn, ZoomOut,Hide} from '@element-plus/icons-vue'
 
     const modalStore = useModalStore();
@@ -35,8 +35,9 @@
     async function handleForcedSync(id: string){
         const now_id = Number(id);
         const project = await DefaultService.getProjectApiProjectProjectIdGet(now_id);
+        project.thumb = await autoCaptureDetailed(vueFlowRef.value);
+        project.updated_at = Number(Date.now.toString());
         await DefaultService.syncProjectApiProjectSyncPost(project);
-        autoCaptureDetailedAndSave(vueFlowRef.value,id);
     }
 
     function handleShowResult(){
@@ -54,12 +55,20 @@
                 title: '结果查看',
                 isActive: true,
                 isDraggable: false,
-                isResizable: false,
+                isResizable: true,
                 position:{
                     x: xPosition,
                     y: yPosition
                 },
                 size: {
+                    width: modalWidth,
+                    height: modalHeight
+                },
+                maxSize: {
+                    width: 1000,
+                    height: modalHeight
+                },
+                minSize: {
                     width: modalWidth,
                     height: modalHeight
                 },

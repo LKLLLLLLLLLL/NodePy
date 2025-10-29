@@ -362,7 +362,7 @@ const captureFlowWithViewport = async (vueFlowContainer: HTMLElement): Promise<s
 /**
  * 完整流程图截图功能 - 纯白背景，只显示节点和边，所有节点居中显示
  */
-export const captureCleanFlow = async (vueFlowRef: any): Promise<string | null> => {
+export const captureDetailed = async (vueFlowRef: any): Promise<string | null> => {
   if (!vueFlowRef) {
     console.error('未找到VueFlow容器')
     return null
@@ -439,8 +439,13 @@ export const captureCleanFlow = async (vueFlowRef: any): Promise<string | null> 
         }
       }
     }
+
+    if (imageData) {
+      const base64String = imageData.replace(/^data:image\/\w+;base64,/, '')
+      return base64String
+    }
     
-    return imageData
+    return null
     
   } catch (error) {
     console.error('完整流程图截图失败:', error)
@@ -451,7 +456,7 @@ export const captureCleanFlow = async (vueFlowRef: any): Promise<string | null> 
 /**
  * 保存截图到本地
  */
-export const saveCleanScreenshot = (imageData: string, projectId: string): void => {
+export const saveDetailedScreenshot = (imageData: string, projectId: string): void => {
   try {
     const link = document.createElement('a')
     link.href = imageData
@@ -466,19 +471,21 @@ export const saveCleanScreenshot = (imageData: string, projectId: string): void 
 }
 
 /**
- * 自动截图完整流程图并保存 - 纯白背景，只显示节点和边，所有节点居中显示
+ * 自动截图并返回 Base64 字符串
  */
-export const autoCaptureDetailedAndSave = async (vueFlowRef: any, projectId: string): Promise<void> => {
+export const autoCaptureDetailed = async (vueFlowRef: any): Promise<string | null> => {
   try {
-    console.log('开始自动后台截图...')
-    const imageData = await captureCleanFlow(vueFlowRef)
-    if (imageData) {
-      saveCleanScreenshot(imageData, projectId)
-      console.log('自动后台截图完成')
+    console.log('开始自动截图...')
+    const base64String = await captureDetailed(vueFlowRef)
+    if (base64String) {
+      console.log('自动截图完成，Base64 字符串长度:', base64String.length)
+      return base64String
     } else {
-      console.error('后台截图失败，返回的imageData为null')
+      console.error('截图失败，返回的 Base64 为 null')
+      return null
     }
   } catch (error) {
-    console.error('自动后台截图失败:', error)
+    console.error('自动截图失败:', error)
+    return null
   }
 }

@@ -76,50 +76,77 @@
         let newHeight = resizeStartSize.value.height;
         const newPosition = { ...resizeStartModalPosition.value };
 
+        // 获取最大最小限制
+        const maxWidth = props.modal.maxSize?.width ?? Number.MAX_SAFE_INTEGER;
+        const maxHeight = props.modal.maxSize?.height ?? Number.MAX_SAFE_INTEGER;
+        const minWidth = props.modal.minSize?.width ?? 100;
+        const minHeight = props.modal.minSize?.height ?? 100;
+
         // 根据调整方向计算新尺寸和位置
         switch(resizeDirection.value) {
             case 'right':
-                newWidth = Math.max(100, resizeStartSize.value.width + deltaX);
+                newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width + deltaX));
                 break;
             case 'left':
-                newWidth = Math.max(100, resizeStartSize.value.width - deltaX);
-                newPosition.x = resizeStartModalPosition.value.x + deltaX;
+                newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width - deltaX));
+                // 只有当宽度实际改变时才更新位置
+                if (newWidth !== resizeStartSize.value.width) {
+                    newPosition.x = resizeStartModalPosition.value.x + (resizeStartSize.value.width - newWidth);
+                }
                 break;
             case 'bottom':
-                newHeight = Math.max(100, resizeStartSize.value.height + deltaY);
+                newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height + deltaY));
                 break;
             case 'top':
-                newHeight = Math.max(100, resizeStartSize.value.height - deltaY);
-                newPosition.y = resizeStartModalPosition.value.y + deltaY;
+                newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height - deltaY));
+                // 只有当高度实际改变时才更新位置
+                if (newHeight !== resizeStartSize.value.height) {
+                    newPosition.y = resizeStartModalPosition.value.y + (resizeStartSize.value.height - newHeight);
+                }
                 break;
             case 'top-right':
-                newWidth = Math.max(100, resizeStartSize.value.width + deltaX);
-                newHeight = Math.max(100, resizeStartSize.value.height - deltaY);
-                newPosition.y = resizeStartModalPosition.value.y + deltaY;
+                newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width + deltaX));
+                newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height - deltaY));
+                // 只有当高度实际改变时才更新位置
+                if (newHeight !== resizeStartSize.value.height) {
+                    newPosition.y = resizeStartModalPosition.value.y + (resizeStartSize.value.height - newHeight);
+                }
                 break;
             case 'bottom-right':
-                newWidth = Math.max(100, resizeStartSize.value.width + deltaX);
-                newHeight = Math.max(100, resizeStartSize.value.height + deltaY);
+                newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width + deltaX));
+                newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height + deltaY));
                 break;
             case 'bottom-left':
-                newWidth = Math.max(100, resizeStartSize.value.width - deltaX);
-                newHeight = Math.max(100, resizeStartSize.value.height + deltaY);
-                newPosition.x = resizeStartModalPosition.value.x + deltaX;
+                newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width - deltaX));
+                newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height + deltaY));
+                // 只有当宽度实际改变时才更新位置
+                if (newWidth !== resizeStartSize.value.width) {
+                    newPosition.x = resizeStartModalPosition.value.x + (resizeStartSize.value.width - newWidth);
+                }
                 break;
             case 'top-left':
-                newWidth = Math.max(100, resizeStartSize.value.width - deltaX);
-                newHeight = Math.max(100, resizeStartSize.value.height - deltaY);
-                newPosition.x = resizeStartModalPosition.value.x + deltaX;
-                newPosition.y = resizeStartModalPosition.value.y + deltaY;
+                newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width - deltaX));
+                newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height - deltaY));
+                // 只有当宽度和高度实际改变时才更新位置
+                if (newWidth !== resizeStartSize.value.width) {
+                    newPosition.x = resizeStartModalPosition.value.x + (resizeStartSize.value.width - newWidth);
+                }
+                if (newHeight !== resizeStartSize.value.height) {
+                    newPosition.y = resizeStartModalPosition.value.y + (resizeStartSize.value.height - newHeight);
+                }
                 break;
         }
 
-        modalStore.updateModalSize(props.modal.id, {
-            width: newWidth,
-            height: newHeight
-        });
+        // 只有当尺寸实际改变时才更新
+        if (newWidth !== props.modal.size?.width || newHeight !== props.modal.size?.height) {
+            modalStore.updateModalSize(props.modal.id, {
+                width: newWidth,
+                height: newHeight
+            });
+        }
 
-        if (newPosition.x !== resizeStartModalPosition.value.x || newPosition.y !== resizeStartModalPosition.value.y) {
+        // 只有当位置实际改变时才更新
+        if (newPosition.x !== props.modal.position.x || newPosition.y !== props.modal.position.y) {
             modalStore.updateModalPosition(props.modal.id, newPosition);
         }
     };
@@ -160,6 +187,7 @@
         event.preventDefault();
         event.stopPropagation(); // 防止触发拖动事件
     };
+
 </script>
 <template>
     <div class = "modal-container controller-style" v-if="modal.isActive"
@@ -174,14 +202,14 @@
             maxWidth: modal.maxSize?.width ? modal.maxSize.width + 'px' : 'none',
             maxHeight: modal.maxSize?.height ? modal.maxSize.height + 'px' : 'none'
         }">
-        <div class="resize-handle resize-handle-right" @mousedown="startResize($event, 'right')"></div>
-        <div class="resize-handle resize-handle-bottom" @mousedown="startResize($event, 'bottom')"></div>
+        <!-- <div class="resize-handle resize-handle-right" @mousedown="startResize($event, 'right')"></div> -->
+        <!-- <div class="resize-handle resize-handle-bottom" @mousedown="startResize($event, 'bottom')"></div> -->
         <div class="resize-handle resize-handle-left" @mousedown="startResize($event, 'left')"></div>
-        <div class="resize-handle resize-handle-top" @mousedown="startResize($event, 'top')"></div>
-        <div class="resize-handle resize-handle-top-right" @mousedown="startResize($event, 'top-right')"></div>
+        <!-- <div class="resize-handle resize-handle-top" @mousedown="startResize($event, 'top')"></div> -->
+        <!-- <div class="resize-handle resize-handle-top-right" @mousedown="startResize($event, 'top-right')"></div>
         <div class="resize-handle resize-handle-bottom-right" @mousedown="startResize($event, 'bottom-right')"></div>
         <div class="resize-handle resize-handle-bottom-left" @mousedown="startResize($event, 'bottom-left')"></div>
-        <div class="resize-handle resize-handle-top-left" @mousedown="startResize($event, 'top-left')"></div>
+        <div class="resize-handle resize-handle-top-left" @mousedown="startResize($event, 'top-left')"></div> -->
         <div class = "modal-head" @mousedown="startDrag" >
             <div class = "modal-title-id-container">
                 <div class="modal-title-container">
@@ -264,74 +292,74 @@
         align-items: center;
         flex: 1;
     }
-    // /* 调整大小手柄样式 */
-    // .resize-handle {
-    //     position: absolute;
-    //     z-index: 10;
-    //     background: transparent;
-    // }
+    /* 调整大小手柄样式 */
+    .resize-handle {
+        position: absolute;
+        z-index: 10;
+        background: transparent;
+    }
 
-    // .resize-handle-right, .resize-handle-left {
-    //     width: 6px;
-    //     height: 100%;
-    //     top: 0;
-    //     cursor: ew-resize;
-    // }
+    .resize-handle-right, .resize-handle-left {
+        width: 6px;
+        height: 100%;
+        top: 0;
+        cursor: ew-resize;
+    }
 
-    // .resize-handle-right {
-    //     right: -3px;
-    // }
+    .resize-handle-right {
+        right: -3px;
+    }
 
-    // .resize-handle-left {
-    //     left: -3px;
-    // }
+    .resize-handle-left {
+        left: -3px;
+    }
 
-    // .resize-handle-top, .resize-handle-bottom {
-    //     width: 100%;
-    //     height: 6px;
-    //     left: 0;
-    //     cursor: ns-resize;
-    // }
+    .resize-handle-top, .resize-handle-bottom {
+        width: 100%;
+        height: 6px;
+        left: 0;
+        cursor: ns-resize;
+    }
 
-    // .resize-handle-top {
-    //     top: -3px;
-    // }
+    .resize-handle-top {
+        top: -3px;
+    }
 
-    // .resize-handle-bottom {
-    //     bottom: -3px;
-    // }
+    .resize-handle-bottom {
+        bottom: -3px;
+    }
 
-    // .resize-handle-top-right, .resize-handle-bottom-right,
-    // .resize-handle-bottom-left, .resize-handle-top-left {
-    //     width: 12px;
-    //     height: 12px;
-    //     background: #585858;
-    //     border: 1px solid #fff;
-    // }
+    .resize-handle-top-right, .resize-handle-bottom-right,
+    .resize-handle-bottom-left, .resize-handle-top-left {
+        width: 12px;
+        height: 12px;
+        background: #585858;
+        border: 1px solid #fff;
+    }
 
-    // .resize-handle-top-right {
-    //     top: -6px;
-    //     right: -6px;
-    //     cursor: ne-resize;
-    // }
+    .resize-handle-top-right {
+        top: -6px;
+        right: -6px;
+        cursor: ne-resize;
+    }
 
-    // .resize-handle-bottom-right {
-    //     bottom: -6px;
-    //     right: -6px;
-    //     cursor: se-resize;
-    // }
+    .resize-handle-bottom-right {
+        bottom: -6px;
+        right: -6px;
+        cursor: se-resize;
+    }
 
-    // .resize-handle-bottom-left {
-    //     bottom: -6px;
-    //     left: -6px;
-    //     cursor: sw-resize;
-    // }
+    .resize-handle-bottom-left {
+        bottom: -6px;
+        left: -6px;
+        cursor: sw-resize;
+    }
 
-    // .resize-handle-top-left {
-    //     top: -6px;
-    //     left: -6px;
-    //     cursor: nw-resize;
-    // }
+    .resize-handle-top-left {
+        top: -6px;
+        left: -6px;
+        cursor: nw-resize;
+    }
 </style>
 
 <style lang="scss" scoped>
