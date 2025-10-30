@@ -64,6 +64,12 @@ class BatchStripNode(BaseNode):
                     types={Schema.Type.TABLE}, table_columns={self.col: {ColType.STR}}
                 ),
                 optional=False,
+            ),
+            InPort(
+                name="strip_chars",
+                description="Characters to strip from both ends of the string. If not provided, whitespace is stripped.",
+                accept=Pattern(types={Schema.Type.STR}),
+                optional=True,
             )
         ], [
             OutPort(
@@ -82,8 +88,16 @@ class BatchStripNode(BaseNode):
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         input_table = input["input"].payload
         assert isinstance(input_table, Table)
+        strip_chars: str | None
+        if input.get("strip_chars") is not None:
+            assert isinstance(input["strip_chars"].payload, str)
+            strip_chars = input["strip_chars"].payload
+        elif self.strip_chars is not None:
+            strip_chars = self.strip_chars
+        else:
+            strip_chars = None
         df = input_table.df
-        df[self.result_col] = df[self.col].astype(str).str.strip(self.strip_chars)
+        df[self.result_col] = df[self.col].astype(str).str.strip(strip_chars)
         output_data = Data.from_df(df)
         return {"output": output_data}
 

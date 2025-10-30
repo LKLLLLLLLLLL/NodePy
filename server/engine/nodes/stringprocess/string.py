@@ -1,5 +1,5 @@
 from ..base_node import BaseNode, InPort, OutPort, register_node
-from server.models.exception import NodeParameterError
+from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
 from server.models.data import Data
 from server.models.schema import (
     Pattern,
@@ -35,6 +35,12 @@ class StripNode(BaseNode):
                 description="Input string to be stripped.",
                 accept=Pattern(types={Schema.Type.STR}),
                 optional=False
+            ),
+            InPort(
+                name="strip_chars",
+                description="Characters to be stripped from both ends of the string. If not provided, whitespace will be stripped.",
+                accept=Pattern(types={Schema.Type.STR}),
+                optional=True
             )
         ], [
             OutPort(
@@ -51,7 +57,15 @@ class StripNode(BaseNode):
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         input_str = input["input"].payload
         assert isinstance(input_str, str)
-        res = input_str.strip(self.strip_chars)
+        strip_chars: str | None
+        if input.get("strip_chars") is not None:
+            assert isinstance(input['strip_chars'].payload, str)
+            strip_chars = input['strip_chars'].payload
+        elif self.strip_chars is not None:
+            strip_chars = self.strip_chars
+        else:
+            strip_chars = None
+        res = input_str.strip(strip_chars)
         return {"output": Data(payload=res)}
 
 @register_node
@@ -70,12 +84,6 @@ class SliceNode(BaseNode):
                 err_param_key="type",
                 err_msg = "Node type must be 'SliceNode'."
             )
-        if self.start is None and self.end is None:
-            raise NodeParameterError(
-                node_id = self.id,
-                err_param_key="start/end",
-                err_msg = "At least one of start or end must be specified."
-            )
 
     @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
@@ -85,6 +93,18 @@ class SliceNode(BaseNode):
                 description="Input string to be sliced.",
                 accept=Pattern(types={Schema.Type.STR}),
                 optional=False
+            ),
+            InPort(
+                name="start",
+                description="Start index for slicing.",
+                accept=Pattern(types={Schema.Type.INT}),
+                optional=True
+            ),
+            InPort(
+                name="end",
+                description="End index for slicing.",
+                accept=Pattern(types={Schema.Type.INT}),
+                optional=True
             )
         ], [
             OutPort(
@@ -95,13 +115,41 @@ class SliceNode(BaseNode):
 
     @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
+        if self.start is not None and self.end is not None:
+            if input_schemas.get("start") is None and input_schemas.get("end") is None:
+                raise NodeValidationError(
+                    node_id = self.id,
+                    err_inputs=["start", "end"],
+                    err_msg = "Either both start and end parameters or both start and end inputs must be provided."
+                )
         return {"output": Schema(type=Schema.Type.STR)}
 
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         input_str = input["input"].payload
         assert isinstance(input_str, str)
-        res = input_str[self.start:self.end]
+        start: int
+        if input.get("start") is not None:
+            assert isinstance(input['start'].payload, int)
+            start = input['start'].payload
+        elif self.start is not None:
+            start = self.start
+        else:
+            start = 0
+        end: int
+        if input.get("end") is not None:
+            assert isinstance(input['end'].payload, int)
+            end = input['end'].payload
+        elif self.end is not None:
+            end = self.end
+        else:
+            end = len(input_str)
+        if start < 0 or end > len(input_str) or start > end:
+            raise NodeExecutionError(
+                node_id = self.id,
+                err_msg = f"Slicing indices out of range: start={start}, end={end}, string length={len(input_str)}."
+            )
+        res = input_str[start:end]
         return {"output": Data(payload=res)}
 
 @register_node
@@ -109,8 +157,8 @@ class ReplaceNode(BaseNode):
     """
     Node to replace occurrences of a substring with another substring in a string.
     """
-    old: str
-    new: str
+    old: str | None
+    new: str | None
     
     @override
     def validate_parameters(self) -> None:
@@ -120,12 +168,13 @@ class ReplaceNode(BaseNode):
                 err_param_key="type",
                 err_msg = "Node type must be 'ReplaceNode'."
             )
-        if not isinstance(self.old, str) or not isinstance(self.new, str):
-            raise NodeParameterError(
-                node_id = self.id,
-                err_param_key="old/new",
-                err_msg = "Both old and new must be strings."
-            )
+        if self.old is not None and self.new is not None:
+            if self.old == self.new:
+                raise NodeParameterError(
+                    node_id = self.id,
+                    err_param_key="old/new",
+                    err_msg = "Old and new substrings for replacement cannot be the same."
+                )
 
     @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
@@ -135,6 +184,18 @@ class ReplaceNode(BaseNode):
                 description="Input string for replacement.",
                 accept=Pattern(types={Schema.Type.STR}),
                 optional=False
+            ),
+            InPort(
+                name="old",
+                description="Substring to be replaced.",
+                accept=Pattern(types={Schema.Type.STR}),
+                optional=True
+            ),
+            InPort(
+                name="new",
+                description="Substring to replace with.",
+                accept=Pattern(types={Schema.Type.STR}),
+                optional=True
             )
         ], [
             OutPort(
@@ -145,13 +206,42 @@ class ReplaceNode(BaseNode):
 
     @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
+        if self.old is None and input_schemas.get("old") is None:
+            raise NodeValidationError(
+                node_id = self.id,
+                err_msg = "Old substring for replacement must be provided."
+            )
+        if self.new is None and input_schemas.get("new") is None:
+            raise NodeValidationError(
+                node_id = self.id,
+                err_msg = "New substring for replacement must be provided."
+            )
         return {"output": Schema(type=Schema.Type.STR)}
 
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         input_str = input["input"].payload
         assert isinstance(input_str, str)
-        res = input_str.replace(self.old, self.new)
+        old: str
+        if input.get("old") is not None:
+            assert isinstance(input['old'].payload, str)
+            old = input['old'].payload
+        else:
+            assert self.old is not None
+            old = self.old
+        new: str
+        if input.get("new") is not None:
+            assert isinstance(input['new'].payload, str)
+            new = input['new'].payload
+        else:
+            assert self.new is not None
+            new = self.new
+        if old == new:
+            raise NodeExecutionError(
+                node_id = self.id,
+                err_msg = "Old and new substrings for replacement cannot be the same."
+            )
+        res = input_str.replace(old, new)
         return {"output": Data(payload=res)}
 
 @register_node
