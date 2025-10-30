@@ -1,20 +1,36 @@
 <script lang="ts" setup>
+    import { ref, watch } from 'vue'
     import { useVueFlow } from '@vue-flow/core';
-    import { DefaultService } from '@/utils/api';
-    import {ref} from 'vue'
-    import Result from '../results/Result.vue'
     import { useModalStore } from '@/stores/modalStore';
+    import { useGraphStore } from '@/stores/graphStore';
+
     import { autoCaptureDetailed } from './GraphCapture/detailedCapture';
+    import { autoCaptureMinimap } from './GraphCapture/minimapCapture';
+    import { DefaultService, type Project } from '@/utils/api';
+    import { getProject } from '@/utils/projectConvert';
+    import { syncProject } from '@/utils/network';
+
+    import Result from '../results/Result.vue'
     import SvgIcon from '@jamescoyle/vue-icon'
     import {mdiMagnifyPlusOutline,mdiMagnifyMinusOutline,mdiCrosshairsGps,mdiEyeOutline,mdiEyeOff,mdiContentSave} from '@mdi/js'
-    import { autoCaptureMinimap } from './GraphCapture/minimapCapture';
-    const modalStore = useModalStore();
 
+    //stores
+    const modalStore = useModalStore();
+    const graphStore = useGraphStore();
+
+    //@ts-ignore
+    //project sync
+    const project: Project = getProject(graphStore.project); 
     const select = 0
-    function captureGraph(vue:any){
-        if(select == 0)return autoCaptureMinimap(vue)
-        else return autoCaptureDetailed(vue)
-    }
+
+    //result modal
+    const marginRight = 25;
+    const marginTop = 75;
+    const marginBottom = 75;
+    const modalWidth = ref<number>(300);
+    const modalHeight = ref<number>(window.innerHeight - marginTop - marginBottom);
+    const xPosition = ref<number>(window.innerWidth - modalWidth.value - marginRight);
+    const yPosition = ref<number>(marginTop);
 
     // 定义各个按钮要使用的 mdi 路径
     const mdiZoomIn: string = mdiMagnifyPlusOutline;
@@ -24,13 +40,44 @@
     const mdiHide: string = mdiEyeOff;
     const mdiUploadIcon: string = mdiContentSave;
 
+    //showResult
     const showResult = ref<boolean>(false)
 
-    const props = defineProps<{
-        id: string
-    }>();
+    watch(()=>{
+        return modalStore.findModal('result')?.isActive
+    },(newValue)=>{
+        if(newValue==undefined){
+            showResult.value = false
+        }
+        else{
+            if(newValue)showResult.value = true;
+            else showResult.value = false
+        }
+    },{immediate: true});
+
+    watch(()=>{
+        return {
+            x:window.innerWidth,
+            y:window.innerHeight
+        }
+    },()=>{
+        const resultModal = modalStore.findModal('result')
+        if(resultModal){
+            modalWidth.value = resultModal.size.width;
+            modalHeight.value = window.innerHeight-marginBottom-marginTop;
+            xPosition.value = window.innerWidth - modalWidth.value - marginRight;
+            yPosition.value = marginTop;
+            modalStore.updateModalPosition('result',{x: xPosition.value, y: yPosition.value})
+            modalStore.updateModalSize('result',{width: modalWidth.value,height: modalHeight.value})
+        }
+    },{immediate:true})
 
     const {zoomIn,zoomOut,fitView,vueFlowRef} = useVueFlow('main');
+
+    function captureGraph(vue:any){
+        if(select == 0)return autoCaptureMinimap(vue)
+        else return autoCaptureDetailed(vue)
+    }
 
     function handleZoomIn(){
         console.log("zoom-in")
@@ -46,9 +93,7 @@
         fitView();
     }
 
-    async function handleForcedSync(id: string){
-        const now_id = Number(id);
-        const project = await DefaultService.getProjectApiProjectProjectIdGet(now_id);
+    async function handleForcedSync(){
         const thumbBase64 = await captureGraph(vueFlowRef.value);
         if (thumbBase64) {
             // 确保是纯 Base64，不带 data URL 前缀
@@ -61,18 +106,13 @@
             project.thumb = null;
         }
         project.updated_at = Math.floor(Date.now() / 1000);
-        await DefaultService.syncProjectApiProjectSyncPost(project);
+        await syncProject(project);
     }
 
     function handleShowResult(){
         const result_modal = modalStore.findModal('result');
 
         if(!result_modal){
-            const marginRight = 20;
-            const modalWidth = 600;
-            const modalHeight = 800;
-            const xPosition = window.innerWidth - modalWidth - marginRight;
-            const yPosition = 75;
 
             modalStore.createModal({
                 id: 'result',
@@ -81,32 +121,21 @@
                 isDraggable: false,
                 isResizable: true,
                 position:{
-                    x: xPosition,
-                    y: yPosition
+                    x: xPosition.value,
+                    y: yPosition.value
                 },
                 size: {
-                    width: modalWidth,
-                    height: modalHeight
-                },
-                maxSize: {
-                    width: 1000,
-                    height: modalHeight
-                },
-                minSize: {
-                    width: modalWidth,
-                    height: modalHeight
+                    width: modalWidth.value,
+                    height: modalHeight.value
                 },
                 component: Result
             });
-            showResult.value = true;
         }
         else if(result_modal.isActive){
             modalStore.deactivateModal('result');
-            showResult.value = false;
         }
         else {
             modalStore.activateModal('result');
-            showResult.value = true;
         }
     }
 
@@ -141,7 +170,7 @@
 
         <div class="graph-controls-right">
             <div class="gc-btn-container">
-                <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleForcedSync(props.id); }" aria-label="Sync project">
+                <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleForcedSync(); }" aria-label="Sync project">
                     <SvgIcon type="mdi" :path="mdiUploadIcon" class="btn-icon" />
                     <div class="gc-btn-text">同步</div>
                 </button>
@@ -179,9 +208,11 @@
     }
 
     .graph-controls-right{
+        @include controller-style;
         display: flex;
         flex-direction: row;
-        gap: 10px;
+        padding: 3px 5px;
+        gap: 4px;
         margin-left: auto;
         margin-right: 8px;
     }
@@ -191,14 +222,7 @@
         height: 24px;
         margin: 5px 1px;
         background-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .gc-btn-container{
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 3px 5px;
-        @include controller-style;
+        // margin: 0 4px;
     }
 
     .gc-btn{
@@ -208,11 +232,6 @@
         padding: 5px 5px;
         border-radius: 8px;
         cursor: pointer;
-        .gc-btn-text{
-            margin-left: 4px;
-            font-size: 18px;
-            color: rgba(0, 0, 0, 0.75);
-        }
     }
 
     .zoom { // zoom icon looks smaller, so enlarge it a bit

@@ -7,30 +7,14 @@ import { ref,computed, watch } from "vue";
 import { type Project } from "@/utils/api";
 import { RouterLink } from 'vue-router';
 import {useRoute} from 'vue-router';
+import { useGraphStore } from "@/stores/graphStore";
 
-
+const graphStore = useGraphStore()
 const route = useRoute()
 
-const default_pname = 'default_pname'
-const project = ref<Project>()
-const projectName = ref<string>(default_pname)
 const showProjectName = computed(()=>{
   if(route.params.projectId)return true
   else return false
-})
-
-async function getProjectName(){
-  if(showProjectName.value){
-    console.log(route.params.projectId)
-    project.value = await DefaultService.getProjectApiProjectProjectIdGet(Number(route.params.projectId))
-    console.log(project.value)
-    return project.value.project_name
-  }
-    return default_pname
-}
-
-watch(()=>route.params.projectId,async ()=>{
-  projectName.value = await getProjectName();
 })
 
 // 导航项
@@ -75,7 +59,7 @@ function handleAvatarClick(){
         </nav>
 
         <div v-else class="project-name">
-          <h2>{{ projectName }}</h2>
+          <h2>{{ graphStore.project.project_name }}</h2>
         </div>
 
         <div class="user-avatar">
