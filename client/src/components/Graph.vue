@@ -5,8 +5,10 @@ import type { NodeDragEvent } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import { useGraphStore } from '@/stores/graphStore'
+import { syncProject } from '@/utils/network'
 import RightClickMenu from './tools/RightClickMenu/RightClickMenu.vue'
 import GraphControls from './tools/GraphControls.vue'
+import GraphInfo from './GraphInfo.vue'
 import NodePyEdge from './NodePyEdge.vue'
 import NodePyConnectionLine from './NodePyConnectionLine.vue'
 import ConstNode from './nodes/ConstNode.vue'
@@ -30,6 +32,8 @@ const intervalId = setInterval(() => {
 }, 30000)
 const nodes = computed(() => graphStore.project.workflow.nodes)
 const edges = computed(() => graphStore.project.workflow.edges)
+const is_syncing = ref(false)
+const sync_errmsg = ref('')
 
 
 onUnmounted(() => {
@@ -65,28 +69,15 @@ watch([
     console.log('@',p)
 
     try {
-      console.log('syncProjectApiProjectSyncPost')
-      const taskResponse = await DefaultService.syncProjectApiProjectSyncPost(p)
-      console.log(taskResponse)
-      if(!taskResponse) return
-      const {task_id} = taskResponse
-
-      if(task_id) {
-        try {
-          console.log('monitorTask')
-          const messages = await monitorTask(p, task_id)
-          console.log("Done:", messages)
-          parseProject(p, graphStore.project)
-        }catch(err) {
-          console.error('@@',err)
-        }
-
-      }else {
-        console.error('task_id is undefined')
-      }
-
+      is_syncing.value = true
+      const res = await syncProject(p)
+      console.log('syncProject response:', res)
+      parseProject(p, graphStore.project)
     }catch(err) {
-      console.error('@@@',err)
+      console.error('@@', err)
+      sync_errmsg.value = err instanceof Error ? err.message : String(err)
+    }finally {
+      is_syncing.value = false
     }
 
   }else {
@@ -105,31 +96,18 @@ onNodeDragStop(async (event: NodeDragEvent) => {
 
   if(graphStore.project) {
     const p = getProject(graphStore.project)
-    console.log('@@@@',p)
+    console.log('@@@',p)
 
     try {
-      console.log('syncProjectApiProjectSyncPost')
-      const taskResponse = await DefaultService.syncProjectApiProjectSyncPost(p)
-      console.log(taskResponse)
-      if(!taskResponse) return
-      const {task_id} = taskResponse
-
-      if(task_id) {
-        try {
-          console.log('monitorTask')
-          const messages = await monitorTask(p, task_id)
-          console.log("Done:", messages)
-          parseProject(p, graphStore.project)
-        }catch(err) {
-          console.error('@@@@@',err)
-        }
-
-      }else {
-        console.error('task_id is undefined')
-      }
-
+      is_syncing.value = true
+      const res = await syncProject(p)
+      console.log('syncProject response:', res)
+      parseProject(p, graphStore.project)
     }catch(err) {
-      console.error('@@@@@@',err)
+      console.error('@@@@',err)
+      sync_errmsg.value = err instanceof Error ? err.message : String(err)
+    }finally {
+      is_syncing.value = false
     }
 
   }else {
@@ -184,6 +162,10 @@ const nodeColor = (node: BaseNode) => {
 
         <Panel position="bottom-center">
           <GraphControls :id="`${projectId}`"/>
+        </Panel>
+
+        <Panel position="top-left">
+          <GraphInfo :is_syncing="is_syncing" :sync_errmsg="sync_errmsg"/>
         </Panel>
 
 
