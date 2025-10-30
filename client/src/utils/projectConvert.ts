@@ -3,7 +3,7 @@ import type { vueFlowProject } from '@/types/vueFlowProject'
 
 
 export const getProject = (p: vueFlowProject): Project => {
-    const graphNodes: ProjNode[] = p.workflow.nodes.value.map(n => {
+    const graphNodes: ProjNode[] = p.workflow.nodes.map(n => {
         return {
             id: n.id,
             position: n.position,
@@ -15,7 +15,7 @@ export const getProject = (p: vueFlowProject): Project => {
             error: n.data.error
         }
     })
-    const graphEdges:ProjEdge[] = p.workflow.edges.value.map(e => {
+    const graphEdges:ProjEdge[] = p.workflow.edges.map(e => {
         return {
             id: e.id,
             src: e.source,
@@ -69,8 +69,8 @@ export const parseProject = (p: Project, tar: vueFlowProject) => {
         tar.project_name = p.project_name
         tar.user_id = p.user_id
         tar.workflow.error_message = p.workflow.error_message
-        tar.workflow.edges.value = graphEdges
-        tar.workflow.nodes.value = graphNodes
+        tar.workflow.edges = graphEdges
+        tar.workflow.nodes = graphNodes
         tar.updated_at = p.updated_at
         tar.thumb = p.thumb
     }

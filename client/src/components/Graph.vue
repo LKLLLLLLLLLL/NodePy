@@ -1,9 +1,10 @@
 <script lang='ts' setup>
-import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue'
+import { ref, onMounted, watch, nextTick, onUnmounted, computed } from 'vue'
 import { VueFlow, useVueFlow, ConnectionMode, Panel } from '@vue-flow/core'
 import type { NodeDragEvent } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
+import { useGraphStore } from '@/stores/graphStore'
 import RightClickMenu from './tools/RightClickMenu/RightClickMenu.vue'
 import GraphControls from './tools/GraphControls.vue'
 import NodePyEdge from './NodePyEdge.vue'
@@ -16,21 +17,10 @@ import { DefaultService } from '@/utils/api'
 import { getProject, parseProject } from '@/utils/projectConvert'
 import { monitorTask } from '@/utils/task'
 import type { BaseNode } from '@/types/nodeTypes'
-import type { vueFlowProject } from '@/types/vueFlowProject'
 import { useRoute } from 'vue-router'
 
-
+const graphStore = useGraphStore()
 const {params: {projectId}} = useRoute()
-const project: vueFlowProject = ({
-  project_id: -1,
-  project_name: "undefined",
-  user_id: -1,
-  workflow: {
-    nodes: ref([]),
-    edges: ref([])
-  },
-  updated_at: 0
-})
 const { onConnect, onInit, onNodeDragStop, addEdges } = useVueFlow('main')
 const shouldWatch = ref(false)
 const listenNodePosition = ref(true)
@@ -38,6 +28,8 @@ const intervalId = setInterval(() => {
   listenNodePosition.value = true
   console.log('监听节点位置开始...')
 }, 30000)
+const nodes = computed(() => graphStore.project.workflow.nodes)
+const edges = computed(() => graphStore.project.workflow.edges)
 
 
 onUnmounted(() => {
@@ -49,7 +41,7 @@ onMounted(async () => {
     console.log('getProjectApiProjectProjectIdGet')
     const p = await DefaultService.getProjectApiProjectProjectIdGet(Number(projectId))
     console.log(p)
-    parseProject(p, project)
+    parseProject(p, graphStore.project)
     await nextTick()
     shouldWatch.value = true
   }catch(err) {
@@ -62,14 +54,14 @@ onInit((instance) => {
 })
 
 watch([
-  () => project.workflow.nodes.value.length,
-  () => project.workflow.nodes.value.map(n => JSON.stringify(n.data.param)).join('|'),
-  () => project.workflow.edges.value.length
+  () => nodes.value.length, // @ts-ignore
+  () => nodes.value.map(n => JSON.stringify(n.data.param)).join('|'),
+  () => edges.value.length
 ], async (newValue, oldValue) => {
   console.log("new: ", newValue, "old: ", oldValue, 'shouldWatch:', shouldWatch.value)
   if(!shouldWatch.value) return
-  if(project) {
-    const p = getProject(project)
+  if(graphStore.project) {
+    const p = getProject(graphStore.project)
     console.log('@',p)
 
     try {
@@ -84,7 +76,7 @@ watch([
           console.log('monitorTask')
           const messages = await monitorTask(p, task_id)
           console.log("Done:", messages)
-          parseProject(p, project)
+          parseProject(p, graphStore.project)
         }catch(err) {
           console.error('@@',err)
         }
@@ -111,8 +103,8 @@ onNodeDragStop(async (event: NodeDragEvent) => {
   if(!listenNodePosition.value || !shouldWatch.value) return
   listenNodePosition.value = false
 
-  if(project) {
-    const p = getProject(project)
+  if(graphStore.project) {
+    const p = getProject(graphStore.project)
     console.log('@@@@',p)
 
     try {
@@ -127,7 +119,7 @@ onNodeDragStop(async (event: NodeDragEvent) => {
           console.log('monitorTask')
           const messages = await monitorTask(p, task_id)
           console.log("Done:", messages)
-          parseProject(p, project)
+          parseProject(p, graphStore.project)
         }catch(err) {
           console.error('@@@@@',err)
         }
@@ -180,8 +172,8 @@ const nodeColor = (node: BaseNode) => {
   <div class="graphLayout">
     <div class="vueFlow">
       <VueFlow
-      v-model:nodes="project.workflow.nodes.value"
-      v-model:edges="project.workflow.edges.value"
+      v-model:nodes="graphStore.project.workflow.nodes"
+      v-model:edges="graphStore.project.workflow.edges"
       :connection-mode="ConnectionMode.Strict"
       id="main"
       >

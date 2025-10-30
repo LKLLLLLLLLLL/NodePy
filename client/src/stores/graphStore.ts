@@ -1,11 +1,24 @@
 import { useVueFlow } from "@vue-flow/core"
 import { defineStore } from 'pinia'
 import type * as Nodetypes from '../types/nodeTypes'
+import type { vueFlowProject } from "@/types/vueFlowProject"
+import {ref} from 'vue'
 
 
 export const useGraphStore = defineStore('graph', () => {
   const vueFLowInstance = useVueFlow('main')
   const {addNodes} = vueFLowInstance
+
+  const project = ref<vueFlowProject>({
+    project_id: -1,
+    project_name: "undefined",
+    user_id: -1,
+    workflow: {
+      nodes: [],
+      edges: []
+    },
+    updated_at: 0
+  })
 
 
   const addNode = (type: string, position: {x: number, y: number}) => {
@@ -72,5 +85,5 @@ export const useGraphStore = defineStore('graph', () => {
   }
 
 
-  return {addNode}
+  return {addNode, project}
 })
