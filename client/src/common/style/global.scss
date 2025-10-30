@@ -1,6 +1,10 @@
-$stress-color: #108efe;
 @use "sass:color";
 @use "sass:math";
+$stress-color: #108efe;
+/* expose SASS variable as a runtime CSS custom property so components can use it */
+:root {
+  --stress-color: #{$stress-color};
+}
 $bg-color-r: 245;
 $bg-color-g: 247;
 $bg-color-b: 250;
@@ -23,7 +27,7 @@ $mix-background-color: rgba($computed-r, $computed-g, $computed-b, $target-a);
   border-radius: 10px;
   background-color: $stress-background-color;
   overflow: hidden;
-  box-shadow: 5px 5px 50px rgba(128, 128, 128, 0.15);
+  box-shadow: 5px 5px 50px rgba(128, 128, 128, 0.12);
 }
 
 .controller-style {

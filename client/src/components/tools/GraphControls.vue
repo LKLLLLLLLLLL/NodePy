@@ -140,13 +140,19 @@
         </div>
 
         <div class="graph-controls-right">
-            <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleForcedSync(props.id); }" aria-label="Sync project">
-                <SvgIcon type="mdi" :path="mdiUploadIcon" class="btn-icon" />
-            </button>
-            <div class="divider"></div>
-            <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleShowResult(); }" aria-label="Toggle result">
-                <SvgIcon type="mdi" :path="showResult ? mdiHide : mdiView" class="btn-icon" />
-            </button>
+            <div class="gc-btn-container">
+                <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleForcedSync(props.id); }" aria-label="Sync project">
+                    <SvgIcon type="mdi" :path="mdiUploadIcon" class="btn-icon" />
+                    <div class="gc-btn-text">同步</div>
+                </button>
+            </div>
+            <!-- <div class="divider"></div> -->
+            <div class="gc-btn-container">
+                <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleShowResult(); }" aria-label="Toggle result">
+                    <SvgIcon type="mdi" :path="showResult ? mdiHide : mdiView" class="btn-icon" />
+                    <div class="gc-btn-text">{{ showResult ? '隐藏结果' : '查看结果' }}</div>
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -173,11 +179,9 @@
     }
 
     .graph-controls-right{
-        @include controller-style;
         display: flex;
         flex-direction: row;
-        padding: 3px 5px;
-        gap: 4px;
+        gap: 10px;
         margin-left: auto;
         margin-right: 8px;
     }
@@ -187,7 +191,14 @@
         height: 24px;
         margin: 5px 1px;
         background-color: rgba(0, 0, 0, 0.1);
-        // margin: 0 4px;
+    }
+
+    .gc-btn-container{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3px 5px;
+        @include controller-style;
     }
 
     .gc-btn{
@@ -197,6 +208,11 @@
         padding: 5px 5px;
         border-radius: 8px;
         cursor: pointer;
+        .gc-btn-text{
+            margin-left: 4px;
+            font-size: 18px;
+            color: rgba(0, 0, 0, 0.75);
+        }
     }
 
     .zoom { // zoom icon looks smaller, so enlarge it a bit

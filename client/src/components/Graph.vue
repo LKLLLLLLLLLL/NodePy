@@ -165,7 +165,7 @@ const nodeColor = (node: BaseNode) => {
         </Panel>
 
         <Panel position="top-left">
-          <GraphInfo :is_syncing="is_syncing" :sync_errmsg="sync_errmsg"/>
+          <GraphInfo :is_syncing="is_syncing" :syncing_err_msg="sync_errmsg"/>
         </Panel>
 
 
