@@ -43,6 +43,7 @@
         denominator: 1,
         scale: 0,
     })
+    const emit = defineEmits(['updateValue'])
     const model = defineModel<number>()
     const local =  computed(() => {
         return {
@@ -72,8 +73,9 @@
 
 
     const { requestLock, hasDragged } = usePointerLock({
-      onMove: relative => update(relative.x)
-    });
+      onMove: relative => update(relative.x),
+      onDragEnd: () => {emit('updateValue')}
+    })
 
     const handlePointerDown = (e: PointerEvent) => {
       requestLock(e.currentTarget as HTMLElement)
@@ -104,6 +106,7 @@
             model.value = Math.min(Math.max(normalize(n, local.value.denominator), min), max)
         }
         isEditing.value = false
+        emit('updateValue')
     }
 
 </script>

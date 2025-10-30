@@ -4,7 +4,7 @@
         <div class="data">
             <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             <div class="value">
-                 <NodepyNumberInput v-model="value" class="nodrag"/>
+                 <NodepyNumberInput v-model="value" class="nodrag" @update-value="onUpdateValue"/>
             </div>
             <div class="data_type">
                 <select v-model="data_type" class="border-radius nodrag">
@@ -30,10 +30,16 @@
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
     const data_type_options = ['int', 'float']
 
-    watch([value, data_type], (newValue, oldValue) => {
+    watch(data_type, (newValue, oldValue) => {
         props.data.param.data_type = data_type.value
         props.data.param.value = Number(value.value)
     })
+
+
+    const onUpdateValue = () => {
+        props.data.param.data_type = data_type.value
+        props.data.param.value = Number(value.value)        
+    }
 
 </script>
 

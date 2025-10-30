@@ -5,7 +5,7 @@ export interface Position {
   y: number
 }
 
-export function usePointerLock(params: { onMove: (movement: Position) => void }) {
+export function usePointerLock(params: { onMove: (movement: Position) => void, onDragEnd?: () => void }) {
   const isLocked: Ref<boolean> = ref(false)
   const hasDragged = ref(false)
 
@@ -27,6 +27,9 @@ export function usePointerLock(params: { onMove: (movement: Position) => void })
   const handlePointerUp = () => {
     document.exitPointerLock()
     document.removeEventListener("pointermove", handleMove)
+    if(params.onDragEnd) {
+      params.onDragEnd()
+    }
   }
 
   onMounted(() => {
