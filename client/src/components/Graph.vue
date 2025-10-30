@@ -17,7 +17,6 @@ import TableNode from './nodes/TableNode.vue'
 import NumberBinOpNode from './nodes/NumberBinOpNode.vue'
 import { DefaultService } from '@/utils/api'
 import { getProject, parseProject } from '@/utils/projectConvert'
-import { monitorTask } from '@/utils/task'
 import type { BaseNode } from '@/types/nodeTypes'
 import { useRoute } from 'vue-router'
 
@@ -32,8 +31,6 @@ const intervalId = setInterval(() => {
 }, 30000)
 const nodes = computed(() => graphStore.project.workflow.nodes)
 const edges = computed(() => graphStore.project.workflow.edges)
-const is_syncing = ref(false)
-const sync_errmsg = ref('')
 
 
 onUnmounted(() => {
@@ -69,15 +66,11 @@ watch([
     console.log('@',p)
 
     try {
-      is_syncing.value = true
-      const res = await syncProject(p)
-      console.log('syncProject response:', res)
+      const res = await syncProject(p, graphStore)
+      console.log('syncProject response:', res, res === p)
       parseProject(p, graphStore.project)
     }catch(err) {
       console.error('@@', err)
-      sync_errmsg.value = err instanceof Error ? err.message : String(err)
-    }finally {
-      is_syncing.value = false
     }
 
   }else {
@@ -99,15 +92,11 @@ onNodeDragStop(async (event: NodeDragEvent) => {
     console.log('@@@',p)
 
     try {
-      is_syncing.value = true
-      const res = await syncProject(p)
-      console.log('syncProject response:', res)
+      const res = await syncProject(p, graphStore)
+      console.log('syncProject response:', res, res === p)
       parseProject(p, graphStore.project)
     }catch(err) {
       console.error('@@@@',err)
-      sync_errmsg.value = err instanceof Error ? err.message : String(err)
-    }finally {
-      is_syncing.value = false
     }
 
   }else {
@@ -165,7 +154,7 @@ const nodeColor = (node: BaseNode) => {
         </Panel>
 
         <Panel position="top-left">
-          <GraphInfo :is_syncing="is_syncing" :syncing_err_msg="sync_errmsg"/>
+          <GraphInfo :is_syncing="graphStore.is_syncing" :syncing_err_msg="graphStore.syncing_err_msg"/>
         </Panel>
 
 

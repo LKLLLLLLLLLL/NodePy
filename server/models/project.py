@@ -126,6 +126,26 @@ class ProjWorkflow(BaseModel):
         else:
             setattr(target, last_key, patch.value)
 
+    def generate_del_error_patches(self) -> list["ProjectPatch"]:
+        result = []
+        # 1. del error_message
+        result.append(ProjectPatch(key=["workflow", "error_message"], value=None))
+        # 2. del node errors
+        for node in self.nodes:
+            if node.error is not None:
+                result.append(
+                    ProjectPatch(
+                        key=[
+                            "workflow",
+                            "nodes",
+                            self.nodes.index(node),
+                            "error",
+                        ],
+                        value=None,
+                    )
+                )
+        return result
+
 class Project(BaseModel):
     """
     A unified data structure for all data for a project.

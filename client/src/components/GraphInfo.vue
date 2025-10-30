@@ -23,56 +23,85 @@
 <template>
     <div class="graph-info-container">
         <div class="update-status-block">
-            <div class="gi-is-syncing" v-if="is_syncing">
+            <div class="gi-is-syncing" v-if="is_syncing" style="margin-left: 25px;">
                 <span>同步中...</span>
             </div>
-            <div class="gi-syncing-err-msg" v-else-if="syncing_err_msg">
-                <span class="error-message">Sync Error: {{ syncing_err_msg }}</span>
+            <div class="gi-syncing-err-msg error-message" v-else-if="syncing_err_msg">
+                <svg-icon type="mdi" :path=mdiWarn></svg-icon>
+                <div>同步失败: {{ syncing_err_msg }}</div>
             </div>
             <div class="gi-last-sync-time" v-else>
-                <div class="gi-sync-success"><svg-icon type="mdi" :path="mdiSuccess"></svg-icon><div>同步成功</div></div>
-                <div>上次同步 {{ lastSyncTime ? new Date(lastSyncTime).toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : 'N/A' }}</div>
+                <div class="gi-sync-success success-message">
+                    <svg-icon type="mdi" :path="mdiSuccess"></svg-icon>
+                    <div>已同步到云端</div>
+                </div>
+
+            </div>
+            <div style="margin-left: 24px;">上次同步 {{ lastSyncTime ? new Date(lastSyncTime).toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : 'N/A' }}
             </div>
         </div>
         <div class="workflow-status-block">
-            <div class="gi-workflow-status-normal" v-if="!proj_err_msg">
-                <span>Workflow Status: Normal</span>
+            <div class="gi-workflow-status-normal success-message" v-if="!proj_err_msg">
+                <svg-icon type="mdi" :path="mdiSuccess"></svg-icon>
+                <div>未在节点图中检测到问题</div>
             </div>
-            <div class="gi-workflow-status-error error" v-else>
-                <svg-icon type="mdi" :path=mdiWarn></svg-icon><div class="error-message">Error({{ proj_err_msg }})</div>
+            <div class="gi-workflow-status-error error-message" v-else>
+                <svg-icon type="mdi" :path=mdiWarn></svg-icon>
+                <div>节点图运行失败：</div>
+            </div>
+            <div class="gi-workflow-error-message error-message" v-if="proj_err_msg" style="margin-left: 26px;">
+                {{ proj_err_msg }}
             </div>
         </div>
     </div>
 </template>
 <style lang="scss" scoped>
+@use "../common/style/global.scss" as *;
 .graph-info-container {
     // background-color: rgba(255, 255, 255, 0.9);
     color: rgba(0, 0, 0, 0.3);
-    font-size: 20px;
+    font-size: 14px;
     // font-weight: 800;
-    padding: 10px;
+    padding: 10px 10px;
+    margin-left: 10px;
     .gi-workflow-status-error{
         display: flex;
-        height: 20px;
         align-items: center;
     }
     .gi-sync-success {
         display: flex;
         align-items: center;
-        margin-bottom: 5px;
+    }
+    .gi-workflow-status-normal {
+        display: flex;
+        align-items: center;
+    }
+    .gi-syncing-err-msg {
+        display: flex;
+        align-items: center;
     }
     svg {
-        height: 20px;
-        width: 20px;
+        height: 18px;
+        width: 18px;
         vertical-align: middle;
         margin-right: 5px;
     }
     .update-status-block {
-        margin: 10px;
+        padding: 0px 0px;
+        height: 50px;
     }
     .workflow-status-block {
-        margin: 10px;
+        padding: 0px 0px;
+        height: 50px;
     }
+
+    // .error-message {
+    //     color: rgba(249, 103, 103, 0.6);
+    // }
+
+    // .success-message {
+    //     color: rgba(69, 149, 69, 0.6);
+    // }
 }
 
 </style>

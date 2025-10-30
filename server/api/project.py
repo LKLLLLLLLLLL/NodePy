@@ -16,6 +16,7 @@ from server.models.project_list import ProjectList, ProjectListItem
 from celery.result import AsyncResult
 import base64
 import binascii
+import time
 
 """
 The api for nodes runing, reporting and so on,
@@ -243,6 +244,8 @@ async def sync_project(project: Project, response: Response, db_client: Session 
     user_id = 1  # for debug
     project_id = project.project_id
     new_project = project
+    
+    time.sleep(2)
     try:
         async with ProjectLock(project_id=project.project_id, max_block_time=5.0, identity=None) as lock:            
             need_exec: bool = True

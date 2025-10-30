@@ -8,7 +8,6 @@ import {ref} from 'vue'
 export const useGraphStore = defineStore('graph', () => {
   const vueFLowInstance = useVueFlow('main')
   const {addNodes} = vueFLowInstance
-
   const project = ref<vueFlowProject>({
     project_id: -1,
     project_name: "undefined",
@@ -19,6 +18,8 @@ export const useGraphStore = defineStore('graph', () => {
     },
     updated_at: 0
   })
+  const is_syncing = ref(false)
+  const syncing_err_msg = ref('')
 
 
   const addNode = (type: string, position: {x: number, y: number}) => {
@@ -85,5 +86,5 @@ export const useGraphStore = defineStore('graph', () => {
   }
 
 
-  return {addNode, project}
+  return {addNode, project, is_syncing, syncing_err_msg}
 })

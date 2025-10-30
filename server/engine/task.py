@@ -37,10 +37,22 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                 if project_record.workflow is None:
                     raise ValueError("Project workflow is empty")
                 workflow = ProjWorkflow(**project_record.workflow)  # type: ignore
+                
+                # 1. remove all error messages from previous runs
+                patches = workflow.generate_del_error_patches()
+                for patch in patches:
+                    workflow.apply_patch(patch)
+                    queue.push_message_sync(
+                        Status.IN_PROGRESS,
+                        {"stage": "CLEANUP",
+                            "status": "IN_PROGRESS",
+                            "patch": [patch.model_dump()]
+                        }
+                    )
 
-                # 1. Validate data model
                 try:
                     graph = None
+                    # 2. Validate data model
                     try:
                         file_manager = FileManager(async_db_session=None)  # sync version
                         cache_manager = CacheManager()
@@ -52,7 +64,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     except Exception as e:
                         patch = ProjectPatch(
                                     key=["workflow", "error_message"], 
-                                    value="Validation Error:" + str(e)
+                                    value="Validation Error: " + str(e)
                                 )
                         queue.push_message_sync(
                             Status.FAILURE,
@@ -65,7 +77,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                         workflow.apply_patch(patch)
                         raise
 
-                    # 2. Construct nodes
+                    # 3. Construct nodes
                     assert graph is not None
                     has_exception = False
                     def construct_reporter(node_id: str, status: Literal["success", "error"], exception: Exception | None) -> bool:
@@ -105,7 +117,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             has_exception = True
                             patch = ProjectPatch(
                                 key=["workflow", "error_message"],
-                                value="Construction Error:" + str(e)
+                                value="Construction Error: " + str(e)
                             )
                             queue.push_message_sync(
                                 Status.IN_PROGRESS,
@@ -130,7 +142,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             {"stage": "CONSTRUCTION", "status": "SUCCESS"}
                         )
 
-                    # 3. Static analysis
+                    # 4. Static analysis
                     assert graph is not None
                     def anl_reporter(node_id: str, status: Literal["success", "error"], result: dict[str, Any] | Exception) -> bool:
                         nonlocal has_exception
@@ -180,7 +192,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             has_exception = True
                             patch = ProjectPatch(
                                         key=["workflow", "error_message"],
-                                        value="Static Analysis Error:" + str(e)
+                                        value="Static Analysis Error: " + str(e)
                                     )
                             queue.push_message_sync(
                                 Status.IN_PROGRESS, 
@@ -202,7 +214,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     else:
                         queue.push_message_sync(Status.IN_PROGRESS, {"stage": "STATIC_ANALYSIS", "status": "SUCCESS"})
 
-                    # 4. Execute graph
+                    # 5. Execute graph
                     assert graph is not None
                     def exec_before_reporter(node_id: str) -> None: # for timer in frontend
                         meta = {
@@ -306,7 +318,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     else:
                         queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "SUCCESS"})
 
-                    # 5. Finalize and save workflow
+                    # 6. Finalize and save workflow
                     project_record.workflow = workflow.model_dump() # type: ignore
                     db_client.commit()
 
@@ -330,7 +342,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     logger.exception(f"Error during task execution: {e}")
                     patch = ProjectPatch(
                         key=["workflow", "error_message"],
-                        value="Error:" + str(e)
+                        value="Error: " + str(e)
                     )
                     if workflow:
                         workflow.apply_patch(patch)
