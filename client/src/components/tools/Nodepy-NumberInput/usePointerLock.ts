@@ -7,13 +7,20 @@ export interface Position {
 
 export function usePointerLock(params: { onMove: (movement: Position) => void }) {
   const isLocked: Ref<boolean> = ref(false)
+  const hasDragged = ref(false)
 
   const handleLockChange = () => {
     isLocked.value = document.pointerLockElement !== null
+    if (isLocked.value) {
+      hasDragged.value = false
+    }
   }
 
   const handleMove = (e: PointerEvent) => {
     if (!isLocked.value) return
+    if (e.movementX !== 0 || e.movementY !== 0) {
+      hasDragged.value = true
+    }
     params.onMove({ x: e.movementX, y: e.movementY })
   }
 
@@ -39,6 +46,7 @@ export function usePointerLock(params: { onMove: (movement: Position) => void })
 
   return {
     isLocked,
+    hasDragged,
     requestLock,
   }
 }

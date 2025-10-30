@@ -9,7 +9,7 @@
                 </span>
             </button>
         </div>
-        <div v-if="!isEditing" class="value" @pointerdown="handlePointerDown" @click="startEdit">
+        <div v-if="!isEditing" class="value" @pointerdown="handlePointerDown" @click="handleValueClick">
             <span>{{ (model ?? 0).toFixed(local.fixed) }}</span>
         </div>
         <div class="value-input" v-else>
@@ -71,12 +71,19 @@
     }
 
 
-    const { requestLock } = usePointerLock({
+    const { requestLock, hasDragged } = usePointerLock({
       onMove: relative => update(relative.x)
     });
 
     const handlePointerDown = (e: PointerEvent) => {
       requestLock(e.currentTarget as HTMLElement)
+    }
+
+    const handleValueClick = () => {
+        if(!hasDragged.value) {
+            startEdit()
+        }
+        hasDragged.value = false
     }
 
     const startEdit = () => {
