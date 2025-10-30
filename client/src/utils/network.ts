@@ -18,7 +18,10 @@ export const syncProject = (p: Project, graphStore: any) => {
                         console.log('WS:', messages)
                         resolve(p)
                     }catch(err) {
-                        graphStore.syncing_err_msg = err instanceof Error ? err.message : String(err)
+                        const errMsg = err && typeof err === 'object' && 'message' in err
+                          ? String(err.message)
+                          : '无法连接到服务器，请检查网络或联系管理员。';
+                        graphStore.syncing_err_msg = errMsg;
                         reject(err)
                     }
                 }else {
@@ -29,7 +32,10 @@ export const syncProject = (p: Project, graphStore: any) => {
                 resolve(p)
             }
         }catch(err) {
-            graphStore.syncing_err_msg = err instanceof Error ? err.message : String(err)
+            const errMsg = err && typeof err === 'object' && 'message' in err
+              ? String(err.message)
+              : '无法连接到服务器，请检查网络或联系管理员。';
+            graphStore.syncing_err_msg = errMsg;
             reject(err)
         }finally {
             graphStore.is_syncing = false

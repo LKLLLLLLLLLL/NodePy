@@ -20,7 +20,7 @@
 
     //@ts-ignore
     //project sync
-    const project: Project = getProject(graphStore.project); 
+    const project: Project = getProject(graphStore.project);
     const select = 0
 
     //result modal
@@ -106,7 +106,7 @@
             project.thumb = null;
         }
         project.updated_at = Math.floor(Date.now() / 1000);
-        await syncProject(project);
+        await syncProject(project, graphStore);
     }
 
     function handleShowResult(){
@@ -208,11 +208,9 @@
     }
 
     .graph-controls-right{
-        @include controller-style;
         display: flex;
         flex-direction: row;
-        padding: 3px 5px;
-        gap: 4px;
+        gap: 10px;
         margin-left: auto;
         margin-right: 8px;
     }
@@ -222,7 +220,14 @@
         height: 24px;
         margin: 5px 1px;
         background-color: rgba(0, 0, 0, 0.1);
-        // margin: 0 4px;
+    }
+
+    .gc-btn-container{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3px 5px;
+        @include controller-style;
     }
 
     .gc-btn{
@@ -232,6 +237,11 @@
         padding: 5px 5px;
         border-radius: 8px;
         cursor: pointer;
+        .gc-btn-text{
+            margin-left: 4px;
+            font-size: 16px;
+            color: rgba(0, 0, 0, 0.75);
+        }
     }
 
     .zoom { // zoom icon looks smaller, so enlarge it a bit

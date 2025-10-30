@@ -75,8 +75,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             }
                         )
                         workflow.apply_patch(patch)
-                        raise
-
+                        return  # stop execution if validation failed
                     # 3. Construct nodes
                     assert graph is not None
                     has_exception = False
