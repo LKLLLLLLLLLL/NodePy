@@ -191,7 +191,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped lang="scss">
-@use '../../../common/style/global.scss' as *;
+@use '../../common/global.scss' as *;
 
 .context-menu {
   @include controller-style;

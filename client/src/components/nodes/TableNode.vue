@@ -20,8 +20,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/style/global.scss' as *;
-    @use '../../common/style/node.scss' as *;
+    @use '../../common/global.scss' as *;
+    @use '../../common/node.scss' as *;
     .TableNodeLayout{
         height: 100%;
         width: 100%;

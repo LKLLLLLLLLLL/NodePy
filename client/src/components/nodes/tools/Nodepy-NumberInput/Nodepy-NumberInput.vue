@@ -112,8 +112,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../../common/style/global.scss';
-    @use '../../../common/style/node.scss';
+    @use '../../../../common/global.scss';
+    @use '../../../../common/node.scss';
     .NodepyNumberInputLayout {
         width: 100%;
         outline: 1px solid #ccc;

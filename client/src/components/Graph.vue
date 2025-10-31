@@ -6,8 +6,8 @@ import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import { useGraphStore } from '@/stores/graphStore'
 import { syncProject } from '@/utils/network'
-import RightClickMenu from './tools/RightClickMenu/RightClickMenu.vue'
-import GraphControls from './tools/GraphControls.vue'
+import RightClickMenu from './RightClickMenu/RightClickMenu.vue'
+import GraphControls from './GraphControls.vue'
 import GraphInfo from './GraphInfo.vue'
 import NodePyEdge from './NodePyEdge.vue'
 import NodePyConnectionLine from './NodePyConnectionLine.vue'
@@ -234,7 +234,7 @@ const nodeColor = (node: BaseNode) => {
 </style>
 
 <style lang="scss" scoped>
-@use '../common/style/global.scss' as *;
+@use '../common/global.scss' as *;
 .graphLayout {
     flex: 1;
     .vueFlow {

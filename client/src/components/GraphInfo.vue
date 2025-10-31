@@ -4,7 +4,7 @@
     import { useGraphStore } from '@/stores/graphStore';
     import SvgIcon from '@jamescoyle/vue-icon';
     import { mdiAlertCircleOutline, mdiCheckCircleOutline } from '@mdi/js';
-    import Loading from './tools/Loading.vue';
+    import Loading from './Loading.vue';
 
     const mdiWarn = mdiAlertCircleOutline;
     const mdiSuccess = mdiCheckCircleOutline;
@@ -56,7 +56,7 @@
     </div>
 </template>
 <style lang="scss" scoped>
-@use "../common/style/global.scss" as *;
+@use "../common/global.scss" as *;
 .graph-info-container {
     // background-color: rgba(255, 255, 255, 0.9);
     color: rgba(0, 0, 0, 0.3);

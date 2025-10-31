@@ -363,5 +363,5 @@
 </style>
 
 <style lang="scss" scoped>
-@use '../common/style/global.scss';
+@use '../common/global.scss';
 </style>

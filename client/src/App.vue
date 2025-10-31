@@ -37,7 +37,7 @@
     <ModalManager />
 </template>
 <style scoped lang = "scss">
-@use '@/common/style/global.scss';
+@use '@/common/global.scss';
     .main-container{
         display: flex;
         flex-direction: column;

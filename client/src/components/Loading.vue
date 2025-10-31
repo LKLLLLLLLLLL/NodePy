@@ -78,7 +78,7 @@ const ariaLabel = computed(() => props.ariaLabel);
 </script>
 
 <style lang="scss" scoped>
-@use "../../common/style/global.scss" as *;
+@use "../common/global.scss" as *;
 .spinner {
   display: inline-flex;
   align-items: center;

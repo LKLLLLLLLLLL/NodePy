@@ -157,7 +157,7 @@ function handleAvatarClick(){
 </style>
 
 <style lang="scss" scoped>
-@use '../common/style/global.scss';
+@use '../common/global.scss';
   .box {
     flex: 1;
   }

@@ -18,7 +18,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import type {StringNodeData} from '../../types/nodeTypes'
-    import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
+    import NodepyStringInput from './tools/Nodepy-StringInput.vue'
 
 
     const props = defineProps<NodeProps<StringNodeData>>()
@@ -32,8 +32,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/style/global.scss' as *;
-    @use '../../common/style/node.scss' as *;
+    @use '../../common/global.scss' as *;
+    @use '../../common/node.scss' as *;
     .StringNodeLayout{
         height: 100%;
         width: 200px;

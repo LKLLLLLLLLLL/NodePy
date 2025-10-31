@@ -72,7 +72,7 @@ defineEmits<{
 </template>
 
 <style lang="scss">
-@use '../../../common/style/global.scss' as *;
+@use '../../common/global.scss' as *;
 
 .submenu-portal {
   @include controller-style;

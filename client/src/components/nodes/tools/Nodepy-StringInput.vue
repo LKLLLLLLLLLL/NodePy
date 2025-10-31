@@ -53,8 +53,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/style/global.scss';
-    @use '../../common/style/node.scss';
+    @use '../../../common/global.scss';
+    @use '../../../common/node.scss';
     .NodePyStringInputLayout {
         width: 100%;
         height: 100%;

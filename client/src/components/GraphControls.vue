@@ -10,7 +10,7 @@
     import { getProject } from '@/utils/projectConvert';
     import { syncProject } from '@/utils/network';
 
-    import Result from '../results/Result.vue'
+    import Result from './results/Result.vue'
     import SvgIcon from '@jamescoyle/vue-icon'
     import {mdiMagnifyPlusOutline,mdiMagnifyMinusOutline,mdiCrosshairsGps,mdiEyeOutline,mdiEyeOff,mdiContentSave} from '@mdi/js'
 
@@ -186,7 +186,7 @@
     </div>
 </template>
 <style lang="scss" scoped>
-@use "../../common/style/global.scss" as *;
+@use "../common/global.scss" as *;
     .graph-controls-container{
         display: flex;
         flex-direction: row;
