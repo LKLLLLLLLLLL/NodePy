@@ -27,6 +27,7 @@ dependencies = [
 dev = [
     "pygments>=2.19.2",
     "pytest>=8.4.2",
+    "stats-code>=0.1.1",
     "taskipy>=1.13.0",
 ]
 
