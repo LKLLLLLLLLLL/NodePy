@@ -5,7 +5,7 @@ import type { NodeDragEvent } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import { useGraphStore } from '@/stores/graphStore'
-import { syncProject } from '@/utils/network'
+import { syncProject, syncProjectUiState } from '@/utils/network'
 import RightClickMenu from '../RightClickMenu/RightClickMenu.vue'
 import GraphControls from './GraphControls.vue'
 import GraphInfo from './GraphInfo.vue'
@@ -16,7 +16,7 @@ import StringNode from '../nodes/StringNode.vue'
 import TableNode from '../nodes/TableNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
 import { DefaultService } from '@/utils/api'
-import { getProject, parseProject } from '@/utils/projectConvert'
+import { getProject, initVueFlowProject, writeBackVueFLowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { useRoute } from 'vue-router'
 
@@ -41,8 +41,8 @@ onMounted(async () => {
   try {
     console.log('getProjectApiProjectProjectIdGet')
     const p = await DefaultService.getProjectApiProjectProjectIdGet(Number(projectId))
-    console.log(p)
-    parseProject(p, graphStore.project)
+    initVueFlowProject(p, graphStore.project)
+    console.log(graphStore.project)
     await nextTick()
     shouldWatch.value = true
   }catch(err) {
@@ -63,14 +63,13 @@ watch([
   if(!shouldWatch.value) return
   if(graphStore.project) {
     const p = getProject(graphStore.project)
-    console.log('@',p)
 
     try {
       const res = await syncProject(p, graphStore)
       console.log('syncProject response:', res, res === p)
-      parseProject(p, graphStore.project)
+      writeBackVueFLowProject(res, graphStore.project)
     }catch(err) {
-      console.error('@@', err)
+      console.error('@', err)
     }
 
   }else {
@@ -89,14 +88,12 @@ onNodeDragStop(async (event: NodeDragEvent) => {
 
   if(graphStore.project) {
     const p = getProject(graphStore.project)
-    console.log('@@@',p)
 
     try {
-      const res = await syncProject(p, graphStore)
-      console.log('syncProject response:', res, res === p)
-      parseProject(p, graphStore.project)
+      const res = await syncProjectUiState(p, graphStore)
+      console.log('syncProjectUiState response:', res)
     }catch(err) {
-      console.error('@@@@',err)
+      console.error('@@',err)
     }
 
   }else {

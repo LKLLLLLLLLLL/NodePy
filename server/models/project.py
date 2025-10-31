@@ -125,7 +125,7 @@ class ProjWorkflow(BaseModel):
     def generate_del_error_patches(self) -> list["ProjWorkflowPatch"]:
         result = []
         # 1. del error_message
-        result.append(ProjWorkflowPatch(key=["workflow", "error_message"], value=None))
+        result.append(ProjWorkflowPatch(key=["error_message"], value=None))
         # 2. del node errors
         for node in self.nodes:
             if node.error is not None:

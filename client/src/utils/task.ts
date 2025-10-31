@@ -18,9 +18,6 @@ function setDeep<O extends Record<string, any>>(
 
 export async function monitorTask(project: Project, task_id: string): Promise<any[]> {
   const messages: any[] = []
-  let closeCode: number | undefined
-  let closeReason: string | undefined
-  let wasClean: boolean | undefined
 
   await new Promise<void>((resolve, reject) => {
     const ws = new WebSocket(`ws://localhost:8000/api/project/status/${task_id}`)
@@ -35,19 +32,14 @@ export async function monitorTask(project: Project, task_id: string): Promise<an
       const patch = message.patch as any[]
       if(patch && patch.length > 0) {
         patch.forEach(p => {
-          setDeep(project, p.key, p.value)
+          setDeep(project.workflow, p.key, p.value)
         })
       }
     }
 
     ws.onclose = (event) => {
       clearTimeout(timeoutId)
-
-      closeCode = event.code
-      closeReason = event.reason
-      wasClean = event.wasClean
       console.log(`WebSocket 关闭: code=${event.code}, reason=${event.reason}, wasClean=${event.wasClean}`)
-
       resolve()
     }
 

@@ -1,7 +1,7 @@
 <template>
     <div class="NodepyNumberInputLayout nodes-innertool-border-radius">
         <div class="left-arrow">
-            <button @click="update(-1)" @pointerdown="handlePointerDown" type="button">
+            <button @click="onClick(-1)" type="button">
                 <span>
                     <svg width="10" height="12" viewBox="0 0 8 8">
                         <path d="M6 1 L2 4 L6 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -23,7 +23,7 @@
             />
         </div>
         <div class="right-arrow">
-            <button @click="update(1)" @pointerdown="handlePointerDown" type="button">
+            <button @click="onClick(1)" type="button">
                 <span>
                     <svg width="10" height="12" viewBox="0 0 8 8">
                         <path d="M2 1 L6 4 L2 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -56,6 +56,11 @@
     const inputEl = ref<HTMLInputElement>()
 
 
+    const onClick = (n: number) => {
+        update(n)
+        emit('updateValue')
+    }
+
     const normalize = (number: number, denominator: number) => {
       const frac = denominator / 1
       return Math.ceil(frac * number) / frac
@@ -70,7 +75,6 @@
       const max = props.max ?? Number.POSITIVE_INFINITY
       model.value = Math.min(Math.max(newValue, min), max)
     }
-
 
     const { requestLock, hasDragged } = usePointerLock({
       onMove: relative => update(relative.x),
