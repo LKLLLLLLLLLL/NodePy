@@ -3,7 +3,12 @@
         <div class="title nodes-topchild-border-radius">StringNode</div>
         <div class="data">
             <Handle id="string" type="source" :position="Position.Right" class="str-handle-color"/>
-            <el-input class="input nodrag" v-model="value" @input="onInput"/>
+            <NodepyStringInput 
+                v-model="value" 
+                :disabled="false" 
+                @update-value="onUpdateValue" 
+                class="nodrag"
+            />
         </div>
     </div>
 </template>
@@ -13,13 +18,14 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import type {StringNodeData} from '../../types/nodeTypes'
+    import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
 
 
     const props = defineProps<NodeProps<StringNodeData>>()
     const value = ref(props.data.param.value)
 
 
-    const onInput = (e?: Event) => {
+    const onUpdateValue = (e?: Event) => {
         props.data.param.value = value.value
     }
 
@@ -30,7 +36,7 @@
     @use '../../common/style/node.scss' as *;
     .StringNodeLayout{
         height: 100%;
-        width: 100%;
+        width: 200px;
         background: white;
         .title {
             background: #ccc;
@@ -38,7 +44,7 @@
             padding-left: 8px;
         }
         .data {
-            padding: 10px 0;
+            padding: 10px 20px;
             position: relative;
             display: flex;
             justify-content: center;
