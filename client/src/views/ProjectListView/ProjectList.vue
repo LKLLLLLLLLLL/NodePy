@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-    import ProjectDemoFrame from '@/components/ProjectDemoFrame.vue';
+    import ProjectDemoFrame from './ProjectDemoFrame.vue';
     import CreateProject from './CreateProject.vue';
     import { onMounted } from 'vue';
     import { useModalStore } from '@/stores/modalStore';

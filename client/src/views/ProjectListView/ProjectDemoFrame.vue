@@ -3,8 +3,8 @@ import {computed} from 'vue';
 import { Plus, Edit, Delete } from '@element-plus/icons-vue';
 import { useProjectStore } from '@/stores/projectStore';
 import { useModalStore } from '@/stores/modalStore';
-import DeleteProject from '@/views/DeleteProject.vue';
-import RenameProject from '@/views/RenameProject.vue';
+import DeleteProject from './DeleteProject.vue';
+import RenameProject from './RenameProject.vue';
 
 const props = defineProps<{
     id: number,

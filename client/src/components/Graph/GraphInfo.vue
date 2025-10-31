@@ -56,7 +56,7 @@
     </div>
 </template>
 <style lang="scss" scoped>
-@use "../common/global.scss" as *;
+@use "../../common/global.scss" as *;
 .graph-info-container {
     // background-color: rgba(255, 255, 255, 0.9);
     color: rgba(0, 0, 0, 0.3);

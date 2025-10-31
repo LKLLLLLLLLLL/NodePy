@@ -6,15 +6,15 @@ import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import { useGraphStore } from '@/stores/graphStore'
 import { syncProject } from '@/utils/network'
-import RightClickMenu from './RightClickMenu/RightClickMenu.vue'
+import RightClickMenu from '../RightClickMenu/RightClickMenu.vue'
 import GraphControls from './GraphControls.vue'
 import GraphInfo from './GraphInfo.vue'
-import NodePyEdge from './NodePyEdge.vue'
-import NodePyConnectionLine from './NodePyConnectionLine.vue'
-import ConstNode from './nodes/ConstNode.vue'
-import StringNode from './nodes/StringNode.vue'
-import TableNode from './nodes/TableNode.vue'
-import NumberBinOpNode from './nodes/NumberBinOpNode.vue'
+import NodePyEdge from '../NodePyEdge.vue'
+import NodePyConnectionLine from '../NodePyConnectionLine.vue'
+import ConstNode from '../nodes/ConstNode.vue'
+import StringNode from '../nodes/StringNode.vue'
+import TableNode from '../nodes/TableNode.vue'
+import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
 import { DefaultService } from '@/utils/api'
 import { getProject, parseProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
@@ -234,7 +234,7 @@ const nodeColor = (node: BaseNode) => {
 </style>
 
 <style lang="scss" scoped>
-@use '../common/global.scss' as *;
+@use '../../common/global.scss' as *;
 .graphLayout {
     flex: 1;
     .vueFlow {
