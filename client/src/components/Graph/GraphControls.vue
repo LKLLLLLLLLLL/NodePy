@@ -55,22 +55,38 @@
         }
     },{immediate: true});
 
-    watch(()=>{
+    // 在 GraphControls.vue 中修复watch
+    watch(() => {
         return {
-            x:window.innerWidth,
-            y:window.innerHeight
+            width: window.innerWidth,
+            height: window.innerHeight
         }
-    },()=>{
+    }, () => {
         const resultModal = modalStore.findModal('result')
-        if(resultModal){
-            modalWidth.value = resultModal.size.width;
-            modalHeight.value = window.innerHeight-marginBottom-marginTop;
-            xPosition.value = window.innerWidth - modalWidth.value - marginRight;
-            yPosition.value = marginTop;
-            modalStore.updateModalPosition('result',{x: xPosition.value, y: yPosition.value})
-            modalStore.updateModalSize('result',{width: modalWidth.value,height: modalHeight.value})
+        if (resultModal && resultModal.isActive) {
+            // 使用当前store中的宽度，或者默认值
+            const currentWidth = resultModal.size?.width || modalWidth.value
+            const constrainedWidth = Math.min(currentWidth, window.innerWidth - marginRight * 2)
+        
+            const constrainedHeight = Math.min(
+                window.innerHeight - marginTop - marginBottom,
+                resultModal.maxSize?.height || Number.MAX_SAFE_INTEGER
+            )
+        
+            // 计算约束后的位置
+            const newX = Math.max(0, window.innerWidth - constrainedWidth - marginRight)
+            const newY = Math.max(0, marginTop)
+        
+            modalStore.updateModalSize('result', {
+                width: constrainedWidth,
+                height: constrainedHeight
+            })
+            modalStore.updateModalPosition('result', {
+                x: newX, 
+                y: newY
+            })
         }
-    },{immediate:true})
+    }, { immediate: true })
 
     const {zoomIn,zoomOut,fitView,vueFlowRef} = useVueFlow('main');
 
