@@ -32,13 +32,11 @@ class ProjNodeError(BaseModel):
         return self
 
 class ProjNode(BaseModel):
-    class Position(BaseModel):
-        x: float
-        y: float
-
+    """
+    Store the node topological state and running results.
+    """
     id: str
     type: str
-    position: Position
     param: dict[str, Any]
     
     runningtime: float | None = None  # in ms
@@ -107,13 +105,11 @@ class ProjWorkflow(BaseModel):
                 node.runningtime = other_node.runningtime
         self.error_message = other.error_message
 
-    def apply_patch(self, patch: 'ProjectPatch') -> None:
+    def apply_patch(self, patch: 'ProjWorkflowPatch') -> None:
         """
         Apply a patch to the workflow.
         """
-        if patch.key[0] != "workflow":
-            return
-        workflow_key = patch.key[1:]
+        workflow_key = patch.key
         target: Any = self
         for key in workflow_key[:-1]:
             if isinstance(key, int):
@@ -126,17 +122,16 @@ class ProjWorkflow(BaseModel):
         else:
             setattr(target, last_key, patch.value)
 
-    def generate_del_error_patches(self) -> list["ProjectPatch"]:
+    def generate_del_error_patches(self) -> list["ProjWorkflowPatch"]:
         result = []
         # 1. del error_message
-        result.append(ProjectPatch(key=["workflow", "error_message"], value=None))
+        result.append(ProjWorkflowPatch(key=["workflow", "error_message"], value=None))
         # 2. del node errors
         for node in self.nodes:
             if node.error is not None:
                 result.append(
-                    ProjectPatch(
+                    ProjWorkflowPatch(
                         key=[
-                            "workflow",
                             "nodes",
                             self.nodes.index(node),
                             "error",
@@ -146,10 +141,32 @@ class ProjWorkflow(BaseModel):
                 )
         return result
 
+class ProjUIState(BaseModel):
+    """
+    The UI state of the project, e.g., node positions.
+    The index of nodes is correspond to the index in workflow.
+    """
+    class Position(BaseModel):
+        id: str
+        x: float
+        y: float
+
+    nodes: list[Position]
+    
+    @classmethod
+    def get_empty_ui_state(cls) -> "ProjUIState":
+        return cls(
+            nodes=[],
+        )
+
 class Project(BaseModel):
     """
     A unified data structure for all data for a project.
     """
+    model_config = {
+        "validate_assignment": True
+    }
+
     project_name: str
     project_id: int
     user_id: int
@@ -158,34 +175,31 @@ class Project(BaseModel):
     thumb: str | None = None  # base64 encoded thumbnail image
 
     workflow: ProjWorkflow
+    ui_state: ProjUIState
+    
+    @model_validator(mode="after")
+    def validate_workflow_vs_ui(self) -> Self:
+        workflow_nodes = self.workflow.nodes
+        ui_state_nodes = self.ui_state.nodes
+        workflow_node_ids = {node.id for node in workflow_nodes}
+        ui_state_node_ids = {node.id for node in ui_state_nodes}
+        if workflow_node_ids != ui_state_node_ids:
+            raise ValueError("Node IDs in workflow and ui_state do not match.")
+        return self
+
     def to_topo(self) -> WorkflowTopology:
         """Convert to WorkflowTopology"""
         return self.workflow.to_topo(project_id=self.project_id)
 
-    def cleanse(self) -> "Project":
-        """
-        Remove unreliable data from frontend before saving to database.
-        Waiting to be overwritten by backend execution results.
-        """
-        self.workflow.cleanse()
-        return self
-    
-    def merge_run_results_from(self, other: "Project") -> None:
-        """
-        Merge running results from another project instance.
-        Matching is done by node id.
-        """
-        self.workflow.merge_run_results_from(other.workflow)
+    # def cleanse(self) -> "Project":
+    #     """
+    #     Remove unreliable data from frontend before saving to database.
+    #     Waiting to be overwritten by backend execution results.
+    #     """
+    #     self.workflow.cleanse()
+    #     return self
 
-    def apply_patch(self, patch: 'ProjectPatch') -> None:
-        """
-        Apply a patch to the project.
-        """
-        if patch.key[0] != "workflow":
-            return
-        self.workflow.apply_patch(patch)
-
-class ProjectPatch(BaseModel):
+class ProjWorkflowPatch(BaseModel):
     """
     A data structure for patching project.
     

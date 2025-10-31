@@ -3,7 +3,7 @@ from server.lib.FileManager import FileManager
 from server.lib.CacheManager import CacheManager
 from server.lib.ProjectLock import ProjectLock
 from server.models.data import Data
-from server.models.project import WorkflowTopology, ProjectPatch, DataRef, ProjNodeError, ProjWorkflow
+from server.models.project import WorkflowTopology, ProjWorkflowPatch, DataRef, ProjNodeError, ProjWorkflow
 from server.models.database import NodeOutputRecord, ProjectRecord, DatabaseTransaction
 from .executer import ProjectExecutor
 from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
@@ -27,7 +27,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
     task_id = self.request.id
     
     # lock to prevent concurrent runs on the same project
-    with ProjectLock(project_id=project_id, max_block_time=30.0, identity=task_id):  # wait up to 30 seconds to acquire lock
+    with ProjectLock(project_id=project_id, max_block_time=30.0, identity=task_id, scope="workflow"):  # wait up to 30 seconds to acquire lock
         with StreamQueue(task_id) as queue:
             with DatabaseTransaction() as db_client:
                 # 0. get old workflow from db
@@ -62,8 +62,8 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             {"stage": "VALIDATION", "status": "SUCCESS"}
                         )
                     except Exception as e:
-                        patch = ProjectPatch(
-                                    key=["workflow", "error_message"], 
+                        patch = ProjWorkflowPatch(
+                                    key=["error_message"], 
                                     value="Validation Error: " + str(e)
                                 )
                         queue.push_message_sync(
@@ -97,8 +97,8 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             has_exception = True
                             node_index = topo_graph.get_index_by_node_id(e.node_id)
                             assert node_index is not None
-                            patch = ProjectPatch(
-                                key=["workflow", "nodes", node_index, "error"],
+                            patch = ProjWorkflowPatch(
+                                key=["nodes", node_index, "error"],
                                 value=ProjNodeError(
                                     params=e.err_param_keys, inputs=None, message=e.err_msgs
                                 ),
@@ -114,8 +114,8 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             workflow.apply_patch(patch)
                         except Exception as e:
                             has_exception = True
-                            patch = ProjectPatch(
-                                key=["workflow", "error_message"],
+                            patch = ProjWorkflowPatch(
+                                key=["error_message"],
                                 value="Construction Error: " + str(e)
                             )
                             queue.push_message_sync(
@@ -150,8 +150,8 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             output_schemas = result
                             node_index = topo_graph.get_index_by_node_id(node_id)
                             assert node_index is not None
-                            patch = ProjectPatch(
-                                key=["workflow", "nodes", node_index, "schema_out"],
+                            patch = ProjWorkflowPatch(
+                                key=["nodes", node_index, "schema_out"],
                                 value=output_schemas
                             )
                             queue.push_message_sync(
@@ -172,8 +172,8 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             has_exception = True
                             node_index = topo_graph.get_index_by_node_id(e.node_id)
                             assert node_index is not None
-                            patch = ProjectPatch(
-                                        key=["workflow", "nodes", node_index, "error"],
+                            patch = ProjWorkflowPatch(
+                                        key=["nodes", node_index, "error"],
                                         value=ProjNodeError(
                                             params=None, inputs=e.err_inputs, message=e.err_msgs
                                         ),
@@ -189,8 +189,8 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             workflow.apply_patch(patch)
                         except Exception as e:
                             has_exception = True
-                            patch = ProjectPatch(
-                                        key=["workflow", "error_message"],
+                            patch = ProjWorkflowPatch(
+                                        key=["error_message"],
                                         value="Static Analysis Error: " + str(e)
                                     )
                             queue.push_message_sync(
@@ -246,12 +246,12 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             # 3. report to frontend
                             node_index = topo_graph.get_index_by_node_id(node_id)
                             assert node_index is not None
-                            data_patch = ProjectPatch(
-                                key = ["workflow", "nodes", node_index, "data_out"],
+                            data_patch = ProjWorkflowPatch(
+                                key = ["nodes", node_index, "data_out"],
                                 value = data_zips
                             )
-                            time_patch = ProjectPatch(
-                                key = ["workflow", "nodes", node_index, "runningtime"],
+                            time_patch = ProjWorkflowPatch(
+                                key = ["nodes", node_index, "runningtime"],
                                 value = running_time
                             )
                             meta = {
@@ -275,8 +275,8 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             has_exception = True
                             node_index = topo_graph.get_index_by_node_id(e.node_id)
                             assert node_index is not None
-                            patch = ProjectPatch(
-                                key=["workflow", "nodes", node_index, "error"],
+                            patch = ProjWorkflowPatch(
+                                key=["nodes", node_index, "error"],
                                 value=ProjNodeError(
                                     params=None, inputs=None, message=e.err_msg
                                 ),
@@ -293,8 +293,8 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             return True
                         except Exception as e:
                             has_exception = True
-                            patch = ProjectPatch(
-                                key=["workflow", "error_message"],
+                            patch = ProjWorkflowPatch(
+                                key=["error_message"],
                                 value="Execution Error:" + str(e)
                             )
                             queue.push_message_sync(
@@ -323,8 +323,8 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
 
                 except SoftTimeLimitExceeded:
                     logger.exception("Task time limit exceeded")
-                    patch = ProjectPatch(
-                        key=["workflow", "error_message"],
+                    patch = ProjWorkflowPatch(
+                        key=["error_message"],
                         value="Error: Task timed out."
                     )
                     if workflow:
@@ -339,8 +339,8 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     )
                 except Exception as e:
                     logger.exception(f"Error during task execution: {e}")
-                    patch = ProjectPatch(
-                        key=["workflow", "error_message"],
+                    patch = ProjWorkflowPatch(
+                        key=["error_message"],
                         value="Error: " + str(e)
                     )
                     if workflow:

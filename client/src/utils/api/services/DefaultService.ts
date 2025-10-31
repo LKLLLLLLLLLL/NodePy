@@ -8,6 +8,7 @@ import type { DeleteResponse } from '../models/DeleteResponse';
 import type { File } from '../models/File';
 import type { Project } from '../models/Project';
 import type { ProjectList } from '../models/ProjectList';
+import type { ProjUIState } from '../models/ProjUIState';
 import type { TaskResponse } from '../models/TaskResponse';
 import type { UserFileList } from '../models/UserFileList';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -129,6 +130,31 @@ export class DefaultService {
                 422: `Validation Error`,
                 423: `Project is locked, it may be being edited by another process`,
                 500: `Internal server error`,
+            },
+        });
+    }
+    /**
+     * Sync Project Ui
+     * Only save the ui of a project. Make sure the ui_state corresponds to the workflow in last sync.
+     * @param projectId
+     * @param requestBody
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static syncProjectUiApiProjectSyncUiPost(
+        projectId: number,
+        requestBody: ProjUIState,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/project/sync_ui',
+            query: {
+                'project_id': projectId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
             },
         });
     }

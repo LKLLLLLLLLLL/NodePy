@@ -268,7 +268,7 @@ class BoolUnaryOpNode(BaseNode):
     Node to compute unary boolean operations.
     Only "NOT" is supported.
     """
-    op = Literal["NOT"]
+    op: Literal["NOT"]
 
     @override
     def validate_parameters(self) -> None:

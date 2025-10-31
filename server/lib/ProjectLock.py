@@ -1,7 +1,7 @@
 import redis.asyncio as redis
 import redis as redis_sync
 import os
-from typing import Optional, Self
+from typing import Optional, Self, Literal
 import asyncio
 import time
 from server.models.exception import ProjectLockError, ProjLockIdentityError
@@ -15,7 +15,12 @@ class ProjectLock:
     """
     This class handles project locking to prevent concurrent modifications.
     """
-    def __init__(self, project_id: int, identity: str | None, max_block_time: float | None) -> None:
+    def __init__(self, 
+                 project_id: int, 
+                 identity: str | None, 
+                 max_block_time: float | None,
+                 scope: Literal["workflow", "ui_state", "all"]
+    ) -> None:
         """
         If max_block_time is None, wait indefinitely.
         If identity is provided, you will get the lock first to the identity-satisfied lock releaser.
@@ -25,7 +30,17 @@ class ProjectLock:
         self._project_id = project_id
         self._identity = identity
         self._max_block_time = max_block_time or float("inf")
+        self._scope: Literal["workflow", "ui_state", "all"] = scope
 
+    @staticmethod
+    def _get_lock_key(project_id: int, scope: Literal["workflow", "ui_state", "all"]) -> list[str]:
+        keys = []
+        if scope in ["workflow", "all"]:
+            keys.append(f"project_lock:{project_id}:workflow")
+        if scope in ["ui_state", "all"]:
+            keys.append(f"project_lock:{project_id}:ui_state")
+        return keys
+    
     # ====================== async methods ====================== 
     async def __aenter__(self) -> Self:
         """
@@ -44,11 +59,13 @@ class ProjectLock:
             self._async_conn = None
 
     @staticmethod
-    async def is_locked_async(project_id: int) -> bool:
+    async def is_locked_async(project_id: int, scope: Literal["workflow", "ui_state", "all"]) -> bool:
         async with redis.Redis.from_url(LOCK_REDIS_URL) as conn:
-            lock_key = f"project_lock:{project_id}"
-            exists = await conn.exists(lock_key)
-            return exists == 1
+            lock_key = ProjectLock._get_lock_key(project_id, scope)
+            exists = False
+            for key in lock_key:
+                exists = exists or bool(await conn.exists(key))
+            return exists
     
     async def lock_async(self) -> None:
         """
@@ -56,7 +73,7 @@ class ProjectLock:
         """
         if self._async_conn is None:
             self._async_conn = await redis.Redis.from_url(LOCK_REDIS_URL)
-        lock_key = f"project_lock:{self._project_id}"
+        lock_keys = ProjectLock._get_lock_key(self._project_id, self._scope)
         identity_key = f"project_lock:{self._project_id}:appointed"
         total_wait = 0.0
         acquired = False
@@ -74,10 +91,15 @@ class ProjectLock:
                     continue  # wait for appointed identity to acquire the lock
             async with self._async_conn.pipeline() as pipe:
                 pipe.multi()
-                pipe.set(lock_key, "locked", nx=True)
+                for key in lock_keys:
+                    pipe.set(key, "locked", nx=True)
                 results = await pipe.execute()
-                if results and results[0]:
+                if results and all(results):
                     acquired = True
+                else:
+                    for i, result in enumerate(results):
+                        if result:
+                            await self._async_conn.debug_object(lock_keys[i])
                     break
             total_wait += RETRY_INTERVAL
             await asyncio.sleep(RETRY_INTERVAL)
@@ -107,8 +129,9 @@ class ProjectLock:
         key = f"project_lock:{self._project_id}:info"
         await self._async_conn.delete(key)
         # delete lock
-        lock_key = f"project_lock:{self._project_id}"
-        await self._async_conn.delete(lock_key)
+        lock_keys = ProjectLock._get_lock_key(self._project_id, self._scope)
+        for key in lock_keys:
+            await self._async_conn.delete(key)
     
     async def appoint_transfer_async(self, identity: str) -> None:
         """
@@ -139,9 +162,11 @@ class ProjectLock:
     @staticmethod
     def is_locked_sync(project_id: int) -> bool:
         with redis_sync.Redis.from_url(LOCK_REDIS_URL) as conn:
-            lock_key = f"project_lock:{project_id}"
-            exists = conn.exists(lock_key)
-            return exists == 1
+            lock_keys = ProjectLock._get_lock_key(project_id, "all")
+            exists = False
+            for key in lock_keys:
+                exists = exists or bool(conn.exists(key))
+            return exists
     
     def lock_sync(self) -> None:
         """
@@ -149,7 +174,7 @@ class ProjectLock:
         """
         if self._sync_conn is None:
             self._sync_conn = redis_sync.Redis.from_url(LOCK_REDIS_URL)
-        lock_key = f"project_lock:{self._project_id}"
+        lock_keys = ProjectLock._get_lock_key(self._project_id, self._scope)
         identity_key = f"project_lock:{self._project_id}:appointed"
         total_wait = 0.0
         acquired = False
@@ -167,10 +192,15 @@ class ProjectLock:
                     continue  # wait for appointed identity to acquire the lock
             with self._sync_conn.pipeline() as pipe:
                 pipe.multi()
-                pipe.set(lock_key, "locked", nx=True)
+                for key in lock_keys:
+                    pipe.set(key, "locked", nx=True)
                 results = pipe.execute()
-                if results and results[0]:
+                if results and all(results):
                     acquired = True
+                else:
+                    for i, result in enumerate(results):
+                        if result:
+                            self._sync_conn.debug_object(lock_keys[i])
                     break
             total_wait += RETRY_INTERVAL
             time.sleep(RETRY_INTERVAL)
@@ -200,8 +230,9 @@ class ProjectLock:
         key = f"project_lock:{self._project_id}:info"
         self._sync_conn.delete(key)
         # delete lock
-        lock_key = f"project_lock:{self._project_id}"
-        self._sync_conn.delete(lock_key)
+        lock_keys = ProjectLock._get_lock_key(self._project_id, self._scope)
+        for key in lock_keys:
+            self._sync_conn.delete(key)
 
     def appoint_transfer_sync(self, identity: str) -> None:
         """
