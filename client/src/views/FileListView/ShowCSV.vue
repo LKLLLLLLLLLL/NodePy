@@ -1,9 +1,11 @@
 <script lang="ts" setup>
+    const props = defineProps<{
+        csv: any
+    }>()
 </script>
 <template>
-    <div>
-        File View
-    </div>
+    
 </template>
 <style lang="scss" scoped>
+
 </style>
