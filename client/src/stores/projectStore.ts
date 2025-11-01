@@ -2,17 +2,18 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { DefaultService } from '../utils/api/services/DefaultService';
 import { useModalStore } from './modalStore';
-import { useRouter } from 'vue-router';
 import { ApiError } from '@/utils/api';
-import { ElMessage, getPositionDataWithUnit } from 'element-plus';
-import { type ProjectListItem , type ProjectList, type Project, type ProjUIState} from '@/utils/api';
+import { ElMessage } from 'element-plus';
+import { type ProjectList, type Project, type ProjUIState } from '@/utils/api';
 
-const default_pname = "default_name"
-const default_pid = 10086
-const default_uid = 114514
-const default_updated = 0
-const default_puistate = {nodes: []}
-const default_project: Project = {
+export const useProjectStore = defineStore('project', () => {
+
+    const default_pname: string = "default_name"
+    const default_pid: number = 10086
+    const default_uid: number = 114514
+    const default_updated: number = 0
+    const default_puistate: ProjUIState = {nodes: []}
+    const default_project: Project = {
         project_name: default_pname,
         project_id: default_pid,
         user_id: default_uid,
@@ -23,12 +24,12 @@ const default_project: Project = {
         updated_at: default_updated,
         ui_state: default_puistate
     }
-const default_delete_pid = 11111111
-const default_delete_pname = 'toBeDeleted'
-const default_rename_pid = 22222222
-const default_rename_pname = 'toBeRenamed'//原名
 
-export const useProjectStore = defineStore('project', () => {
+    const default_delete_pid: number = 11111111
+    const default_delete_pname: string = 'toBeDeleted'
+    const default_rename_pid: number = 22222222
+    const default_rename_pname: string = 'toBeRenamed'//原名
+
     const projectList = ref<ProjectList>({userid: default_uid,projects: []});
     const currentProjectName = ref<string>(default_pname);
     const currentProjectId = ref<number>(default_pid);

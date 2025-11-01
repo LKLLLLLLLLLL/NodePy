@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref,markRaw } from 'vue';
 import type { ModalInstance } from '@/types/modalType';
+
 let baseZIndex = 1000;
+
 export const useModalStore = defineStore('modal', () => {
     const modals = ref<ModalInstance[]>([]);
 

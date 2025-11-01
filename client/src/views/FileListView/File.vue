@@ -1,24 +1,28 @@
 <script lang="ts" setup>
+    import {ref,onMounted} from 'vue';
+    import { useFileStore } from '@/stores/fileStore';
     import { useModalStore } from '@/stores/modalStore';
-    const modalStore = useModalStore();
+    import FileDemoFrame from './FileDemoFrame.vue';
+    import { FileItem } from '@/utils/api';
 
-    function handlePreview(){
-        modalStore.createModal({
-            id: 'file-preview',
-            title: 'flie-preview',
-            isActive: true,
-            isResizable: false,
-            isDraggable: true,
-            position:{
-                x: 400,
-                y: 400
-            },
-            size:{
-                width: 400,
-                height: 600
-            }
-        })
+    const modalStore = useModalStore();
+    const fileStore = useFileStore();
+
+    const default_file: FileItem ={
+        key: '123',
+        filename: 'lkllll',
+        format: FileItem.format.PNG,
+        size: 100,
+        modified_at: 2077,
+        project_name: 'default'
     }
+
+    onMounted(()=>{
+        fileStore.initializeFiles();
+        console.log(fileStore.userFileList);
+        console.log(fileStore.userFileList.files)
+    })
+
 </script>
 <template>
     <div class="fileview-container">
@@ -28,10 +32,19 @@
         <div class="middle-container">
             <div class="file-controlbar">
                 我是文件控制栏
-                <el-button @click="handlePreview" type=primary></el-button>
             </div>
             <div class="filelist-container">
-                我是文件列表
+                <div class="filelist"
+                    v-for="file in fileStore.userFileList.files"
+                    :key="file.key"
+                >
+                    <FileDemoFrame :file="file">
+                    </FileDemoFrame>
+                </div>
+                <FileDemoFrame :file="default_file">
+                </FileDemoFrame>
+                <FileDemoFrame :file="fileStore.default_file">
+                </FileDemoFrame>
             </div>
         </div>
         <div class="right-container">
