@@ -36,7 +36,7 @@
     @use '../../common/node.scss' as *;
     .StringNodeLayout{
         height: 100%;
-        width: 200px;
+        width: $node-width;
         background: white;
         .title {
             background: #ccc;

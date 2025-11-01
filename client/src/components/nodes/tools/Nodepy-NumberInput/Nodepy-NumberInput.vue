@@ -1,5 +1,5 @@
 <template>
-    <div class="NodepyNumberInputLayout nodes-innertool-border-radius">
+    <div class="NodepyNumberInputLayout nodes-innertool-border-radius" :style="{width: width, height: height}">
         <div class="left-arrow">
             <button @click="onClick(-1)" type="button">
                 <span>
@@ -42,6 +42,8 @@
     const props = withDefaults(defineProps<NumberFieldProps>(), {
         denominator: 1,
         scale: 0,
+        width: '100%',
+        height: '100%'
     })
     const emit = defineEmits(['updateValue'])
     const model = defineModel<number>()
@@ -119,17 +121,20 @@
     @use '../../../../common/global.scss';
     @use '../../../../common/node.scss';
     .NodepyNumberInputLayout {
-        width: 100%;
-        outline: 1px solid #ccc;
         display: flex;
         justify-content: center;
         align-items: center;
+        overflow: hidden;
+        border: 1.5px solid #ccc;
         .left-arrow {
             width: 20px;
-            background: #eee;
+            background: #ddd;
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+        .left-arrow:hover {
+            background: #ccc;
         }
         .value {
             width: 100%;
@@ -145,10 +150,13 @@
         }
         .right-arrow {
             width: 20px;
-            background: #eee;
+            background: #ddd;
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+        .right-arrow:hover {
+            background: #ccc;
         }
     }
 </style>

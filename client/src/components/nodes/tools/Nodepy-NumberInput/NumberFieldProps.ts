@@ -5,4 +5,6 @@ export interface NumberFieldProps {
   min?: number
   denominator?: number
   scale?: number
+  width?: string
+  height?: string
 }

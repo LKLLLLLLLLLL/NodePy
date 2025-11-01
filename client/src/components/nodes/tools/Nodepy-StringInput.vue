@@ -2,6 +2,7 @@
     <div 
         class="NodePyStringInputLayout nodes-innertool-border-radius" 
         :class="{disabled: disabled}"
+        :style="{width: width, height: height}"
     >
         <input 
             ref="inputEl"
@@ -24,6 +25,14 @@
         disabled: {
             type: Boolean,
             default: false
+        },
+        height: {
+            type: String,
+            default: '100%'
+        },
+        width: {
+            type: String,
+            default: '100%'
         }
     })
     const editText = ref(model.value)
@@ -56,9 +65,7 @@
     @use '../../../common/global.scss';
     @use '../../../common/node.scss';
     .NodePyStringInputLayout {
-        width: 100%;
-        height: 100%;
-        outline: 1px solid #ccc;
+        border: 1.5px solid #ccc;
         input {
             width: 100%;
             text-align: center;

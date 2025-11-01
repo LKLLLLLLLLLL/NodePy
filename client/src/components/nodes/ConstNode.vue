@@ -7,37 +7,42 @@
                  <NodepyNumberInput v-model="value" class="nodrag" @update-value="onUpdateValue"/>
             </div>
             <div class="data_type">
-                <select v-model="data_type" class="border-radius nodrag">
-                    <option v-for="item in data_type_options">{{ item }}</option>
-                </select>
+                <NodepySelectFew 
+                    :options="data_type_options" 
+                    :select-max-num="1" 
+                    :defualt-selected="defaultSelected"
+                    @select-change="onSelectChange"
+                    item-width="90px"
+                    class="nodrag"
+                />
             </div>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-    import {ref, watch, computed } from 'vue'
+    import {ref, computed } from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import type {ConstNodeData} from '../../types/nodeTypes'
     import type { Type } from '@/utils/api'
     import NodepyNumberInput from './tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
+    import NodepySelectFew from './tools/Nodepy-selectFew.vue'
 
 
     const props = defineProps<NodeProps<ConstNodeData>>()
     const value = ref(props.data.param.value)
-    const data_type = ref(props.data.param.data_type)
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
     const data_type_options = ['int', 'float']
+    const defaultSelected = [data_type_options.indexOf(props.data.param.data_type)]
 
-    watch(data_type, (newValue, oldValue) => {
-        props.data.param.data_type = data_type.value
-        props.data.param.value = Number(value.value)
-    })
 
+    const onSelectChange = (e: any) => {
+        const data_type = data_type_options[e.value[0]] as 'int' | 'float'
+        props.data.param.data_type = data_type
+    }
 
     const onUpdateValue = () => {
-        props.data.param.data_type = data_type.value
         props.data.param.value = Number(value.value)        
     }
 
@@ -49,7 +54,7 @@
 
     .ConstNodeLayout {
         height: 100%;
-        width: 200px;
+        width: $node-width;
         background: white;
         .title {
             background: #ccc;
@@ -68,15 +73,10 @@
                 padding: 0 10px;
             }
             .data_type {
-                margin-top: 5px;
                 display: flex;
                 justify-content: center;
-                select {
-                    border: 1px solid #ccc;
-                    appearance: auto;
-                    padding-left: 10px;
-                    height: 24px;
-                }
+                margin-top: 5px;
+                padding: 0 10px;
             }
         }    
     }
