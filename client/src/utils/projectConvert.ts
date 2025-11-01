@@ -89,19 +89,11 @@ export const initVueFlowProject = (p: Project, vp: vueFlowProject) => {
     vp.thumb = p.thumb
 }
 
-export const getUiState = (vp: vueFlowProject):ProjUIState => {
-    return {
-        nodes: vp.workflow.nodes.map(n => {
-            return {
-                id: n.id,
-                x: n.position.x,
-                y: n.position.y
-            }
-        })
-    }
-}
-
 export const writeBackVueFLowProject = (p: Project, vp: vueFlowProject) => {
+    if(vp.workflow.nodes.length !== p.workflow.nodes.length) {
+        console.log('vp length:', vp.workflow.nodes.length, 'p length:', p.workflow.nodes.length, 'p is out of date')
+        return
+    }
     for(let i = 0; i < p.workflow.nodes.length; i++) {  //@ts-ignore
         vp.workflow.nodes[i].data.data_out = p.workflow.nodes[i]?.data_out  //@ts-ignore
         vp.workflow.nodes[i].data.error = p.workflow.nodes[i]?.error    //@ts-ignore
