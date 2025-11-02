@@ -65,17 +65,12 @@
     @use '../../../common/node.scss';
     .NodePySelectFewLayout {
         display: inline-flex;
-        background: #ccc;
         border: 1.5px solid #ccc;
         overflow: hidden;
         .item {
             text-align: center;
             padding: 0 5px;
             background: #fff;
-            margin-left: 1.5px;
-        }
-        .item:first-child {
-            margin-left: 0;
         }
         .item:hover:not(.selected) {
             background: #ccc;

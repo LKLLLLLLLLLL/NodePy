@@ -1,13 +1,11 @@
 <template>
     <div class="NodepyNumberInputLayout nodes-innertool-border-radius" :style="{width: width, height: height}">
-        <div class="left-arrow">
-            <button @click="onClick(-1)" type="button">
-                <span>
-                    <svg width="10" height="12" viewBox="0 0 8 8">
-                        <path d="M6 1 L2 4 L6 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </span>
-            </button>
+        <div class="left-arrow" @click="onClick(-1)">
+            <span>
+                <svg width="10" height="12" viewBox="0 0 8 8">
+                    <path d="M6 1 L2 4 L6 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
         </div>
         <div v-if="!isEditing" class="value" @pointerdown="handlePointerDown" @click="handleValueClick">
             <span>{{ (model ?? 0).toFixed(local.fixed) }}</span>
@@ -22,14 +20,12 @@
             type="text"
             />
         </div>
-        <div class="right-arrow">
-            <button @click="onClick(1)" type="button">
-                <span>
-                    <svg width="10" height="12" viewBox="0 0 8 8">
-                        <path d="M2 1 L6 4 L2 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </span>
-            </button>
+        <div class="right-arrow" @click="onClick(1)">
+            <span>
+                <svg width="10" height="12" viewBox="0 0 8 8">
+                    <path d="M2 1 L6 4 L2 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
         </div>
     </div>
 </template>

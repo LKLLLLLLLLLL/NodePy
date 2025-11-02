@@ -1,6 +1,6 @@
 <template>
     <div class="ConstNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="title nodes-topchild-border-radius">ConstNode</div>
+        <div class="title nodes-topchild-border-radius">常量节点</div>
         <div class="data">
             <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             <div class="value">

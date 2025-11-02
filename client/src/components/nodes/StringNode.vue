@@ -1,6 +1,6 @@
 <template>
     <div class="StringNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="title nodes-topchild-border-radius">StringNode</div>
+        <div class="title nodes-topchild-border-radius">字符串节点</div>
         <div class="data">
             <Handle id="string" type="source" :position="Position.Right" class="str-handle-color"/>
             <NodepyStringInput 
@@ -46,13 +46,7 @@
         .data {
             padding: 10px 20px;
             position: relative;
-            display: flex;
-            justify-content: center;
-            .input {
-                width: 90%;
-                height: 20px !important;
-            }
-        }    
+        }
     }
 </style>
 
