@@ -10,11 +10,10 @@
     }>()
 
     const content =computed(()=>fileStore.currentContent)
-    
 </script>
 <template>
-    <div class="pdf">
-
+    <div class="img">
+        <img src="content"></img>
     </div>
 </template>
 <style lang="scss" scoped>

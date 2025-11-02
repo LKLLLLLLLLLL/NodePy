@@ -20,7 +20,7 @@
     onMounted(()=>{
         fileStore.initializeFiles();
         console.log(fileStore.userFileList);
-        console.log(fileStore.userFileList.files)
+        console.log(fileStore.userFileList.files);
     })
 
 </script>
@@ -43,8 +43,8 @@
                 </div>
                 <FileDemoFrame :file="default_file">
                 </FileDemoFrame>
-                <FileDemoFrame :file="fileStore.default_file">
-                </FileDemoFrame>
+                <!-- <FileDemoFrame :file="fileStore.default_file">
+                </FileDemoFrame> -->
             </div>
         </div>
         <div class="right-container">

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref,computed } from 'vue';
 import { ApiError, FileItem, type UserFileList, type Body_upload_file_api_files_upload__project_id__post} from '@/utils/api';
 import { DefaultService } from '@/utils/api';
 import { ElMessage } from 'element-plus';
@@ -35,16 +35,122 @@ export const useFileStore = defineStore('file', () => {
         project_name: default_pname
     }
 
+    //single file related info
     const userFileList = ref<UserFileList>(default_ufilelist);
     const userFiles = ref<FileItem[]>(default_files);
     const totalSize = ref<number>(default_totalsize);
     const usedSize = ref<number>(default_usedsize);
 
+    //function related info
     const currentFile = ref<FileItem>(default_file);
     const currentKey = ref<string>(default_key);
-    const currentContent = ref<string>(default_content)
+    const currentContent = ref<any>(default_content);
 
-    function refresh(){
+    //cache default
+    const default_cachesize = 20;//20 files
+
+    //cache info
+    const fileContentCache = ref(new Map<string,CacheItem>());
+    const cacheMaxSize = ref<number>(default_cachesize);
+
+    //cache struture
+    interface CacheItem{
+        content: any,
+        hitCount: number,
+        lastHitTime: number
+    }
+
+    //cache functions
+    const getCacheStatus = computed(()=>{
+        let hitSum = 0;
+        let mostHit = {key: default_key, count: 0}
+        fileContentCache.value.forEach((item: CacheItem, key: string) => {
+            hitSum += item.hitCount;
+            if (item.hitCount > mostHit.count) {
+                mostHit = { key: key, count: item.hitCount };
+            }
+        });
+        return{
+            size: fileContentCache.value.size,
+            hitSum: hitSum,
+            mostHit: mostHit
+        }
+    })
+
+    function refreshCache(){
+        fileContentCache.value.clear();
+    }
+
+    function addCacheContent(key: string,content: any){
+        if(hitCacheContent(key)){
+            updateCacheContent(key,content);
+        }
+        else{
+            if(fileContentCache.value.size>=cacheMaxSize.value){
+                replaceLeastRecentlyUsed(key,content)
+            }
+            else{
+                const toBeAdded: CacheItem ={
+                    content: content,
+                    hitCount: 1,
+                    lastHitTime: Date.now()
+                }
+                fileContentCache.value.set(key,toBeAdded)
+            }
+        }  
+    }
+
+    function updateCacheContent(key: string,content: any){
+        const cacheItem = fileContentCache.value.get(key);
+        if(cacheItem){
+            cacheItem.content=content;
+            cacheItem.lastHitTime=Date.now();
+            cacheItem.hitCount++;
+        }
+    }
+
+    function removeCacheContent(key: string){
+        if(hitCacheContent(key)){
+            fileContentCache.value.delete(key);
+        }
+    }
+    
+    async function getCacheContent(key: string){
+        const cacheItem = fileContentCache.value.get(key);
+        if(!cacheItem){
+            await getFileContent(key);
+            addCacheContent(key,currentContent)
+        }
+        const cacheItem_after = fileContentCache.value.get(key) as CacheItem;
+            cacheItem_after.hitCount++;
+            cacheItem_after.lastHitTime = Date.now();
+            return cacheItem_after.content;
+    }
+    
+    function hitCacheContent(key: string){
+        return fileContentCache.value.has(key);
+    }
+
+    function replaceLeastRecentlyUsed(key: string,content: any){
+        let leastHitKey: string = '';
+        let minHitCount = Infinity;
+        let earliestHitTime = Infinity;
+        
+        fileContentCache.value.forEach((item: CacheItem, key: string) => {
+            if (item.hitCount < minHitCount || (item.hitCount === minHitCount && item.lastHitTime < earliestHitTime)) {
+                leastHitKey = key;
+                minHitCount = item.hitCount;
+                earliestHitTime = item.lastHitTime;
+            }
+        });
+
+        removeCacheContent(leastHitKey);
+        addCacheContent(key,content);
+
+    }
+
+    //file functions
+    function refreshFile(){
         userFiles.value = default_files;
         totalSize.value = default_totalsize;
         usedSize.value = default_usedsize;
@@ -52,11 +158,22 @@ export const useFileStore = defineStore('file', () => {
         currentKey.value = default_key;
     }
 
+    function changeCurrentFile(file: FileItem){
+        currentFile.value = file;
+    }
+
+    function getCurrentFile(){
+        return currentFile.value
+    }
+
     async function initializeFiles(){
         try{
+            ElMessage('正在获取文件列表')
             const response = await DefaultService.listFilesApiFilesListGet();
+            ElMessage('获取文件列表成功')
             userFileList.value = response;
-            refresh();
+            refreshFile();
+            refreshCache();
         }
         catch(error){
             if(error instanceof ApiError){
@@ -94,8 +211,9 @@ export const useFileStore = defineStore('file', () => {
 
     async function uploadFile(pid: number,nodeid: string,formData: Body_upload_file_api_files_upload__project_id__post){
         try{
-            const response = await DefaultService.uploadFileApiFilesUploadProjectIdPost(pid,nodeid,formData)
+            const response = await DefaultService.uploadFileApiFilesUploadProjectIdPost(pid,nodeid,formData);
             ElMessage('文件上传成功');
+            await getUserFileList();
         }
         catch(error){
             if(error instanceof ApiError){
@@ -125,6 +243,7 @@ export const useFileStore = defineStore('file', () => {
             const response = await DefaultService.getFileContentApiFilesKeyGet(key);
             currentContent.value = response;
             ElMessage('获取文件内容成功');
+            return currentContent.value
         }
         catch(error){
             if(error instanceof ApiError){
@@ -150,7 +269,8 @@ export const useFileStore = defineStore('file', () => {
         try{
             const response = await DefaultService.deleteFileApiFilesKeyDelete(key)
             ElMessage('删除文件成功');
-            initializeFiles();
+            removeCacheContent(key);
+            await getUserFileList();
         }
         catch(error){
             if(error instanceof ApiError){
@@ -175,10 +295,19 @@ export const useFileStore = defineStore('file', () => {
     return{
         default_file,
         userFileList,
+        currentContent,
+        changeCurrentFile,
+        getCurrentFile,
         initializeFiles,
         getUserFileList,
         uploadFile,
         getFileContent,
-        deleteFile
+        deleteFile,
+        getCacheStatus,
+        refreshCache,
+        addCacheContent,
+        updateCacheContent,
+        removeCacheContent,
+        getCacheContent,
     }
 })

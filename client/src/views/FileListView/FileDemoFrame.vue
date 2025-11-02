@@ -37,8 +37,11 @@
         })
     }
 
-    async function handlePreview(key: string){
-        await fileStore.getFileContent(key);
+    async function handlePreview(file :any){
+        fileStore.changeCurrentFile(file);
+        const content = await fileStore.getFileContent(file.key);
+        fileStore.addCacheContent(file.key,content);
+        console.log(fileStore.getCacheStatus)
         modalStore.createModal({
             id: 'file-preview',
             title: 'flie-preview',
@@ -78,13 +81,13 @@
             </div>
         </div>
         <div class="file-right">
-            <el-button @click="handlePreview(file.key)">预览</el-button>
+            <el-button @click="handlePreview(file)">预览</el-button>
             <el-button @click="handleDelete(file.key)">删除</el-button>
         </div>
     </div>
-    <div class="file-container-new" v-else @click="handleUpload">
+    <!-- <div class="file-container-new" v-else @click="handleUpload">
         <el-icon><Plus></Plus></el-icon>
-    </div>
+    </div> -->
 </template>
 <style lang="scss" scoped>
     .file-container{
