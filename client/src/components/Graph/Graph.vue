@@ -16,6 +16,7 @@ import StringNode from '../nodes/StringNode.vue'
 import TableNode from '../nodes/TableNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
 import { DefaultService } from '@/utils/api'
+import { TaskCancelledError } from '@/utils/task'
 import { getProject, initVueFlowProject, writeBackVueFLowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { useRoute } from 'vue-router'
@@ -69,7 +70,11 @@ watch([
       console.log('syncProject response:', res, res === p)
       writeBackVueFLowProject(res, graphStore.project)
     }catch(err) {
-      console.error('@', err)
+      if(err instanceof TaskCancelledError) {
+        console.log(err)
+      }else {
+        console.error('@', err)
+      }
     }
 
   }else {
