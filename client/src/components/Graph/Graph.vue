@@ -130,6 +130,16 @@ const nodeColor = (node: BaseNode) => {
   }
 }
 
+const isValidConnection = (connection: any) => {
+  if(connection.source === connection.target) return false
+  if(connection.target && connection.targetHandle) {
+    const existingConnections = edges.value.filter(e => e.target === connection.target && e.targetHandle === connection.targetHandle)
+    if(existingConnections.length > 0) return false
+  }
+
+  return true
+}
+
 </script>
 
 <template>
@@ -139,6 +149,7 @@ const nodeColor = (node: BaseNode) => {
       v-model:nodes="graphStore.project.workflow.nodes"
       v-model:edges="graphStore.project.workflow.edges"
       :connection-mode="ConnectionMode.Strict"
+      :is-valid-connection="isValidConnection"
       id="main"
       >
 

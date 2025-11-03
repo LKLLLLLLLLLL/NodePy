@@ -10,7 +10,8 @@
                     :options="op"
                     :default-selected="defaultSelected"
                     @select-change="onSelectChange"
-                    width="80px"
+                    width="100%"
+                    class="nodrag"
                 />
             </div>
         </div>
@@ -55,12 +56,11 @@
             padding-left: 8px;
         }
         .data {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             position: relative;
             padding: 10px 0;
             .op {
+                display: flex;
+                justify-content: center;
                 padding: 0 10px;
             }
         }

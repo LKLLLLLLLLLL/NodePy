@@ -3,12 +3,14 @@
         <div class="title nodes-topchild-border-radius">字符串节点</div>
         <div class="data">
             <Handle id="string" type="source" :position="Position.Right" class="str-handle-color"/>
-            <NodepyStringInput 
-                v-model="value" 
-                :disabled="false" 
-                @update-value="onUpdateValue" 
-                class="nodrag"
-            />
+            <div class="value">
+                <NodepyStringInput 
+                    v-model="value" 
+                    :disabled="false" 
+                    @update-value="onUpdateValue" 
+                    class="nodrag"
+                />
+            </div>
         </div>
     </div>
 </template>
@@ -44,8 +46,11 @@
             padding-left: 8px;
         }
         .data {
-            padding: 10px 20px;
+            padding: 5px 0;
             position: relative;
+            .value {
+                padding: 0 10px;
+            }
         }
     }
 </style>
