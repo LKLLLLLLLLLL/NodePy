@@ -2,19 +2,34 @@ import * as service from '@/utils/api/services/DefaultService'
 import { taskManager, TaskCancelledError } from './task'
 import type { Project, TaskResponse } from './api'
 import { Mutex } from 'async-mutex'
+import { autoCaptureMinimap } from '@/utils/GraphCapture/minimapCapture'
+import { useVueFlow } from '@vue-flow/core'
+import { getProject, writeBackVueFLowProject } from './projectConvert'
 
 
 const mutex = new Mutex()
+const {vueFlowRef} = useVueFlow('main')
 
 
-export const syncProject = (p: Project, graphStore: any) => {
+const syncProject = (p: Project, graphStore: any) => {
     return new Promise<Project>(async (resolve, reject) => {
         let taskResponse: TaskResponse | undefined
+        try {
+            p.thumb = await autoCaptureMinimap(vueFlowRef.value)
+        }catch(err) {
+            const errMsg = err && typeof err === 'object' && 'message' in err
+            ? String(err.message)
+            : '无法连接到服务器，请检查网络或联系管理员。'
+            graphStore.syncing_err_msg = errMsg
+            reject(err)
+        }
+        
 
         const release = await mutex.acquire()
         p.updated_at = Date.now()
         graphStore.is_syncing = true
         graphStore.syncing_err_msg= ''
+        
 
         try {
             if (taskManager.hasActiveTask()) {
@@ -61,7 +76,7 @@ export const syncProject = (p: Project, graphStore: any) => {
     })
 }
 
-export const syncProjectUiState = (p: Project, graphStore: any) => {
+const syncProjectUiState = (p: Project, graphStore: any) => {
     return new Promise<any>(async (resolve, reject) => {
         try {
             p.updated_at = Date.now()
@@ -81,4 +96,33 @@ export const syncProjectUiState = (p: Project, graphStore: any) => {
             graphStore.is_syncing = false
         }
     })
+}
+
+export const sync = async(graphStore: any) => {
+    const p = getProject(graphStore.project)
+
+    try {
+      const res = await syncProject(p, graphStore)
+      console.log('syncProject response:', res, res === p)
+      writeBackVueFLowProject(res, graphStore.project)
+    }catch(err) {
+      if(err instanceof TaskCancelledError) {
+        console.log(err)
+      }else {
+        console.error('@', err)
+      }
+    }
+
+}
+
+export const syncUiState = async(graphStore: any) => {
+    const p = getProject(graphStore.project)
+
+    try {
+      const res = await syncProjectUiState(p, graphStore)
+      console.log('syncProjectUiState response:', res)
+    }catch(err) {
+      console.error('@@',err)
+    }
+
 }

@@ -7,7 +7,7 @@ import { MiniMap } from '@vue-flow/minimap'
 import { useGraphStore } from '@/stores/graphStore'
 import { useResultStore } from '@/stores/resultStore'
 import { useModalStore } from '@/stores/modalStore'
-import { syncProject, syncProjectUiState } from '@/utils/network'
+import { sync, syncUiState } from '@/utils/network'
 import RightClickMenu from '../RightClickMenu/RightClickMenu.vue'
 import GraphControls from './GraphControls.vue'
 import GraphInfo from './GraphInfo.vue'
@@ -18,8 +18,7 @@ import StringNode from '../nodes/StringNode.vue'
 import TableNode from '../nodes/TableNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
 import { DefaultService } from '@/utils/api'
-import { TaskCancelledError } from '@/utils/task'
-import { getProject, initVueFlowProject, writeBackVueFLowProject } from '@/utils/projectConvert'
+import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { useRoute } from 'vue-router'
 
@@ -68,20 +67,7 @@ watch([
   console.log("new: ", newValue, "old: ", oldValue, 'shouldWatch:', shouldWatch.value)
   if(!shouldWatch.value) return
   if(graphStore.project) {
-    const p = getProject(graphStore.project)
-
-    try {
-      const res = await syncProject(p, graphStore)
-      console.log('syncProject response:', res, res === p)
-      writeBackVueFLowProject(res, graphStore.project)
-    }catch(err) {
-      if(err instanceof TaskCancelledError) {
-        console.log(err)
-      }else {
-        console.error('@', err)
-      }
-    }
-
+    sync(graphStore)
   }else {
     console.error('project is undefined')
   }
@@ -97,15 +83,7 @@ onNodeDragStop(async (event: NodeDragEvent) => {
   listenNodePosition.value = false
 
   if(graphStore.project) {
-    const p = getProject(graphStore.project)
-
-    try {
-      const res = await syncProjectUiState(p, graphStore)
-      console.log('syncProjectUiState response:', res)
-    }catch(err) {
-      console.error('@@',err)
-    }
-
+    syncUiState(graphStore)
   }else {
     console.error('project is undefined')
   }
@@ -131,15 +109,15 @@ onConnect((connection) => {
     // 获取节点完整信息
     resultStore.refresh();
     const currentNode = findNode(event.node.id);
-    console.log('完整节点信息:', currentNode);
-    console.log('data.param:',currentNode?.data.param);
-    console.log('data.out:',currentNode?.data.data_out);
-    console.log('currentInfo:',resultStore.currentInfo)
-    console.log('是否存在result:',currentNode?.data.data_out.result)
-    console.log('currentResult:',resultStore.currentResult)
+    // console.log('完整节点信息:', currentNode);
+    // console.log('data.param:',currentNode?.data.param);
+    // console.log('data.out:',currentNode?.data.data_out);
+    // console.log('currentInfo:',resultStore.currentInfo)
+    // console.log('是否存在result:',currentNode?.data.data_out.result)
+    // console.log('currentResult:',resultStore.currentResult)
     if(!currentNode?.data.data_out.result){
       resultStore.currentInfo = currentNode?.data.param
-      console.log('没有result,有currentInfo:',resultStore.currentInfo)
+      // console.log('没有result,有currentInfo:',resultStore.currentInfo)
     }
     if(currentNode) url_id.value = currentNode.data.data_out.result.data_id;
     resultStore.currentResult = await resultStore.getResultCacheContent(url_id.value);
@@ -150,7 +128,7 @@ onConnect((connection) => {
     else{
       modalStore.activateModal('result');
     }
-    console.log(resultStore.cacheStatus);
+    // console.log(resultStore.cacheStatus);
   })
 
 
