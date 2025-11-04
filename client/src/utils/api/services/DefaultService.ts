@@ -221,6 +221,21 @@ export class DefaultService {
         });
     }
     /**
+     * List Files
+     * @returns UserFileList List of files for the user
+     * @throws ApiError
+     */
+    public static listFilesApiFilesListGet(): CancelablePromise<UserFileList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/files/list',
+            errors: {
+                404: `Not Found`,
+                500: `Internal Server Error`,
+            },
+        });
+    }
+    /**
      * Get File Content
      * Get the content of a file by its key and project id.
      * The project id is used to verify the access permission.
@@ -269,21 +284,6 @@ export class DefaultService {
                 403: `Forbidden - not allowed to access this file`,
                 404: `File not found`,
                 422: `Validation Error`,
-                500: `Internal Server Error`,
-            },
-        });
-    }
-    /**
-     * List Files
-     * @returns UserFileList List of files for the user
-     * @throws ApiError
-     */
-    public static listFilesApiFilesListGet(): CancelablePromise<UserFileList> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/files/list',
-            errors: {
-                404: `Not Found`,
                 500: `Internal Server Error`,
             },
         });

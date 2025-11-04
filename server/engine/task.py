@@ -40,7 +40,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
 
     def _signal_handler(signum, frame):
         """Signal handler for SIGTERM"""
-        logger.info(f"Received signal {signum} for task {task_id}")
+        logger.debug(f"Received signal {signum} for task {task_id}")
         with _revoke_lock:
             _revoke_flags[task_id] = True
     # Set up signal handler for graceful termination
@@ -52,7 +52,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
         """Check if task has been revoked using multiple methods"""
         with _revoke_lock:
             if _revoke_flags.get(task_id, False):
-                logger.info(f"Task {task_id} revoked via signal")
+                logger.debug(f"Task {task_id} revoked via signal")
                 raise RevokeException()
 
     # lock to prevent concurrent runs on the same project
@@ -353,7 +353,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     # 6. Finalize and save workflow
                     project_record.workflow = workflow.model_dump() # type: ignore
                     db_client.commit()
-                    logger.info(f"Task {task_id} completed successfully")
+                    logger.debug(f"Task {task_id} completed successfully")
 
                 except SoftTimeLimitExceeded:
                     logger.exception("Task time limit exceeded")
@@ -372,7 +372,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                         }
                     )
                 except RevokeException:
-                    logger.info("Task revoked")
+                    logger.debug("Task revoked")
                     patch = ProjWorkflowPatch(
                         key=["error_message"],
                         value="Error: Task was revoked."
@@ -404,7 +404,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                         }
                     )
                 finally:
-                    logger.info(f"Task {task_id} finalized")
+                    logger.debug(f"Task {task_id} finalized")
                     project_record.workflow = workflow.model_dump() # type: ignore
                     if db_client.is_active:
                         db_client.commit()  # Commit the error state to the DB
@@ -420,7 +420,7 @@ async def revoke_project_task(task_id: str, timeout: float = 30) -> None:
             celery_app.control.revoke(
                 task_id, terminate=True, signal=signal.SIGTERM
             )
-            logger.debug(f"Task {task_id} terminated (STARTED/RETRY state)")
+            logger.debug(f"Task {task_id} terminated")
             break
         else:
             await asyncio.sleep(0.5)
