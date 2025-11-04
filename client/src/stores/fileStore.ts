@@ -168,9 +168,7 @@ export const useFileStore = defineStore('file', () => {
 
     async function initializeFiles(){
         try{
-            ElMessage('正在获取文件列表')
             const response = await DefaultService.listFilesApiFilesListGet();
-            ElMessage('获取文件列表成功')
             userFileList.value = response;
             refreshFile();
             refreshCache();
@@ -193,7 +191,6 @@ export const useFileStore = defineStore('file', () => {
         try{
             const response = await DefaultService.listFilesApiFilesListGet();
             userFileList.value = response;
-            ElMessage('获取文件列表成功');
         }
         catch(error){
             if(error instanceof ApiError){

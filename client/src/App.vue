@@ -1,33 +1,13 @@
 <script setup lang = "ts">
     import ControlBar from './components/ControlBar.vue';
-    import Project from './views/ProjectListView/ProjectList.vue';
-    import Home from './views/Home.vue';
-    import File from './views/FileListView/File.vue';
-    import Login from './views/Login.vue';
-    import Example from './views/Example.vue';
-    import Visitor from './views/Visitor.vue';
-    import Editor from './views/Editor.vue';
-    import { RouterView } from 'vue-router';
-    import { usePageStore } from './stores/pageStore';
-    import { computed } from 'vue';
+    import { useRoute,RouterView } from 'vue-router';
 
-    // const pageComponents = {
-    //     Program,
-    //     Home,
-    //     File,
-    //     Login,
-    //     Example,
-    //     Visitor,
-    //     Editor
-    // }
-
-    // const pageStore = usePageStore();
-    // const currentPage = computed(() => pageStore.currentPage);
+    const route = useRoute();
 
 </script>
 <template>
     <div class = "main-container controller-style">
-        <div class = "up-container">
+        <div class = "up-container" v-if="route.path!='/login'">
             <ControlBar />
         </div>
         <div class = "down-container">
@@ -45,6 +25,7 @@
         min-width: 1000px;
         height: 100vh;
         min-height: 800px;
+        overflow: auto;
     }
     .up-container{
         top: 0;
@@ -58,6 +39,7 @@
         display: flex;
         flex: 1;
         min-height: 0;
+        overflow: auto;
     }
 </style>
 <!-- <style lang = "scss">

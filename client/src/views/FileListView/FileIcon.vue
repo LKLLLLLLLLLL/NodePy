@@ -21,12 +21,23 @@
     </div>
 </template>
 <style lang="scss" scoped>
+    @use '../../common/global.scss' as *;
+    
     .fileicon-container{
         width: 50px;
         height: 50px;
         display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: $mix-background-color;
+        border-radius: 8px;
+        padding: 4px;
     }
+    
     .fileicon{
-        flex: 1;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 6px;
     }
 </style>

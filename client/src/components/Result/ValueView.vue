@@ -4,9 +4,6 @@
         value: any
     }>()
 
-    onMounted(()=>{
-        console.log(props.value)
-    })
 </script>
 <template>
     <div class = 'value-view-container'>

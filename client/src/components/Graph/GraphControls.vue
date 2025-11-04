@@ -5,11 +5,9 @@
     import { useGraphStore } from '@/stores/graphStore';
     import { useResultStore } from '@/stores/resultStore';
 
-    import { autoCaptureDetailed } from './GraphCapture/detailedCapture';
-    import { autoCaptureMinimap } from './GraphCapture/minimapCapture';
     import { DefaultService, type Project } from '@/utils/api';
     import { getProject } from '@/utils/projectConvert';
-    import { syncProject } from '@/utils/network';
+    import { sync } from '@/utils/network';
 
     import Result from '../Result/Result.vue'
     import SvgIcon from '@jamescoyle/vue-icon'
@@ -19,8 +17,6 @@
     const modalStore = useModalStore();
     const graphStore = useGraphStore();
     const resultStore = useResultStore();
-
-    const select = 0
 
     // 定义各个按钮要使用的 mdi 路径
     const mdiZoomIn: string = mdiMagnifyPlusOutline;
@@ -80,11 +76,6 @@
 
     const {zoomIn,zoomOut,fitView,vueFlowRef} = useVueFlow('main');
 
-    function captureGraph(vue:any){
-        if(select == 0)return autoCaptureMinimap(vue)
-        else return autoCaptureDetailed(vue)
-    }
-
     function handleZoomIn(){
         console.log("zoom-in")
         zoomIn();
@@ -100,9 +91,7 @@
     }
 
     async function handleForcedSync(){
-        //@ts-ignore
-        const project: Project = getProject(graphStore.project);
-        await syncProject(project, graphStore);
+        await sync(graphStore);
     }
 
     function handleShowResult(){

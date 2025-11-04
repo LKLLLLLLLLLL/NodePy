@@ -3,6 +3,7 @@ import { taskManager, TaskCancelledError } from './task'
 import type { Project, TaskResponse } from './api'
 import { Mutex } from 'async-mutex'
 import { autoCaptureMinimap } from '@/utils/GraphCapture/minimapCapture'
+import { autoCaptureDetailed } from './GraphCapture/detailedCapture'
 import { useVueFlow } from '@vue-flow/core'
 import { getProject, writeBackVueFLowProject } from './projectConvert'
 
@@ -15,7 +16,18 @@ const syncProject = (p: Project, graphStore: any) => {
     return new Promise<Project>(async (resolve, reject) => {
         let taskResponse: TaskResponse | undefined
         try {
-            p.thumb = await autoCaptureMinimap(vueFlowRef.value)
+            const thumbBase64 = await autoCaptureMinimap(vueFlowRef.value)
+            if (thumbBase64) {
+                // 确保是纯 Base64，不带 data URL 前缀
+                const pureBase64 = thumbBase64.startsWith('data:image')
+                    ? thumbBase64.split(',')[1]
+                    : thumbBase64;
+
+                p.thumb = pureBase64;
+            }
+            else{
+                p.thumb = null
+            }
         }catch(err) {
             const errMsg = err && typeof err === 'object' && 'message' in err
             ? String(err.message)

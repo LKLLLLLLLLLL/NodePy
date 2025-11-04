@@ -66,18 +66,18 @@
         <div class="file-left">
             <FileIcon :format="file.format"></FileIcon>
             <div class="filename-container">
-                文件名：{{ file.filename }}
+                {{ file.filename }}
             </div>
         </div>
         <div class="file-middle">
             <div class="fileinfo filepname-container">
-                所属项目：{{ file.project_name }}
+                {{ file.project_name }}
             </div>
             <div class="fileinfo filesize-container">
-                文件大小：{{ file.size }}MB
+                {{ file.size }}MB
             </div>
             <div class="fileinfo filemodifiedat-container">
-                上次修改：{{ file.modified_at }}
+                {{ file.modified_at }}
             </div>
         </div>
         <div class="file-right">
@@ -90,45 +90,91 @@
     </div> -->
 </template>
 <style lang="scss" scoped>
+    @use '../../common/global.scss' as *;
+    
     .file-container{
         display: flex;
         flex-direction: row;
         height: 75px;
-        background-color: white;
-        border-radius: 8px;
-        border: 2px solid black;
+        background-color: $stress-background-color;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        padding: 0 16px;
+        align-items: center;
+        @include controller-style;
+        
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 5px 8px 60px rgba(128, 128, 128, 0.15);
+            transition: all 0.3s ease;
+        }
     }
+    
     .file-left{
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         width: 200px;
+        gap: 16px;
     }
+    
     .file-middle{
         flex: 1;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-end;
+        gap: 32px;
     }
+    
     .file-right{
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-end;
         width: 200px;
+        gap: 8px;
     }
+    
     .fileinfo{
-        width: 200px;
+        color: #4a5568;
+        font-size: 14px;
     }
+    
+    .filepname-container{
+        width: 200px;
+        text-align: center;
+    }
+    
+    .filesize-container{
+        width: 120px;
+        text-align: center;
+    }
+    
+    .filemodifiedat-container{
+        width: 200px;
+        text-align: center;
+    }
+    
     .filename-container{
         flex: 1;
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 16px;
     }
+    
     .file-container-new{
         display: flex;
         align-items: center;
         justify-content: center;
         height: 75px;
-        background-color: white;
-        border-radius: 8px;
-        border: 2px solid black;
+        background-color: $stress-background-color;
+        border-radius: 10px;
+        border: 2px dashed $stress-color;
+        cursor: pointer;
+        @include controller-style;
+        
+        &:hover {
+            background-color: rgba($stress-color, 0.05);
+            transition: all 0.3s ease;
+        }
     }
 </style>

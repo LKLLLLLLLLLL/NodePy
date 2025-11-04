@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from server.models.project import Project, ProjUIState, ProjWorkflow
 from server.models.database import ProjectRecord
 import base64
+from loguru import logger
 
 
 async def get_project_by_id(
@@ -19,7 +20,7 @@ async def get_project_by_id(
         project_id=project_record.id,  # type: ignore
         user_id=project_record.owner_id,  # type: ignore
         updated_at=int(project_record.updated_at.timestamp() * 1000),  # type: ignore
-        thumb=project_record.thumb.decode("utf-8") if project_record.thumb else None,  # type: ignore
+        thumb=base64.b64encode(project_record.thumb).decode("utf-8") if project_record.thumb else None,  # type: ignore
         workflow=workflow,
         ui_state=ui_state,
     )
