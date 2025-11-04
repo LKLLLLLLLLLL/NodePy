@@ -7,10 +7,10 @@
     }>()
 
     const iconPath = {
-        [FileItem.format.CSV]: '../../../public/CSV.png',
-        [FileItem.format.JPG]: '../../../public/JPG.png',
-        [FileItem.format.PDF]: '../../../public/PDF.png',
-        [FileItem.format.PNG]: '../../../public/PNG.png'
+        [FileItem.format.CSV]: `${import.meta.env.BASE_URL}CSV.png`,
+        [FileItem.format.JPG]: `${import.meta.env.BASE_URL}JPG.png`,
+        [FileItem.format.PDF]: `${import.meta.env.BASE_URL}PDF.png`,
+        [FileItem.format.PNG]: `${import.meta.env.BASE_URL}PNG.png`
     };
 
     const currentIconPath = computed(()=>iconPath[props.format]);

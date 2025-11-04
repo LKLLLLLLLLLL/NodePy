@@ -1,9 +1,17 @@
 <script setup lang = "ts">
     import type { ModalInstance }  from './types/modalType';
     import { useModalStore } from './stores/modalStore';
-    import { Teleport } from 'vue';
+    import { Teleport,onMounted } from 'vue';
     import Modal from './components/Modal.vue';
+    import { useResultStore } from './stores/resultStore';
     const modalStore = useModalStore();
+    const resultStore = useResultStore();
+
+    onMounted(()=>{
+        resultStore.createResultModal();
+        modalStore.deactivateModal('result');
+    })
+
 </script>
 <template>
     <Teleport to="body">

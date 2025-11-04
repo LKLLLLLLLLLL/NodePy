@@ -3,6 +3,7 @@
     import { useVueFlow } from '@vue-flow/core';
     import { useModalStore } from '@/stores/modalStore';
     import { useGraphStore } from '@/stores/graphStore';
+    import { useResultStore } from '@/stores/resultStore';
 
     import { autoCaptureDetailed } from './GraphCapture/detailedCapture';
     import { autoCaptureMinimap } from './GraphCapture/minimapCapture';
@@ -17,20 +18,12 @@
     //stores
     const modalStore = useModalStore();
     const graphStore = useGraphStore();
+    const resultStore = useResultStore();
 
     //@ts-ignore
     //project sync
     const project: Project = getProject(graphStore.project);
     const select = 0
-
-    //result modal
-    const marginRight = 25;
-    const marginTop = 75;
-    const marginBottom = 75;
-    const modalWidth = ref<number>(300);
-    const modalHeight = ref<number>(window.innerHeight - marginTop - marginBottom);
-    const xPosition = ref<number>(window.innerWidth - modalWidth.value - marginRight);
-    const yPosition = ref<number>(marginTop);
 
     // 定义各个按钮要使用的 mdi 路径
     const mdiZoomIn: string = mdiMagnifyPlusOutline;
@@ -65,17 +58,17 @@
         const resultModal = modalStore.findModal('result')
         if (resultModal && resultModal.isActive) {
             // 使用当前store中的宽度，或者默认值
-            const currentWidth = resultModal.size?.width || modalWidth.value
-            const constrainedWidth = Math.min(currentWidth, window.innerWidth - marginRight * 2)
+            const currentWidth = resultModal.size?.width || resultStore.modalWidth
+            const constrainedWidth = Math.min(currentWidth, window.innerWidth - resultStore.marginRight * 2)
         
             const constrainedHeight = Math.min(
-                window.innerHeight - marginTop - marginBottom,
+                window.innerHeight - resultStore.marginTop - resultStore.marginBottom,
                 resultModal.maxSize?.height || Number.MAX_SAFE_INTEGER
             )
         
             // 计算约束后的位置
-            const newX = Math.max(0, window.innerWidth - constrainedWidth - marginRight)
-            const newY = Math.max(0, marginTop)
+            const newX = Math.max(0, window.innerWidth - constrainedWidth - resultStore.marginRight)
+            const newY = Math.max(0, resultStore.marginTop)
         
             modalStore.updateModalSize('result', {
                 width: constrainedWidth,
@@ -129,23 +122,8 @@
         const result_modal = modalStore.findModal('result');
 
         if(!result_modal){
-
-            modalStore.createModal({
-                id: 'result',
-                title: '结果查看',
-                isActive: true,
-                isDraggable: false,
-                isResizable: true,
-                position:{
-                    x: xPosition.value,
-                    y: yPosition.value
-                },
-                size: {
-                    width: modalWidth.value,
-                    height: modalHeight.value
-                },
-                component: Result
-            });
+            resultStore.createResultModal();
+            modalStore.activateModal('result');
         }
         else if(result_modal.isActive){
             modalStore.deactivateModal('result');

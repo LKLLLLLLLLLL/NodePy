@@ -2,37 +2,11 @@
     import TableView from './TableView.vue';
     import FileView from './FileView.vue';
     import ValueView from './ValueView.vue';
-    import { useVueFlow } from '@vue-flow/core';
-    import { DefaultService } from '@/utils/api';
-    import { DataView } from '@/utils/api';
-    import { ref } from 'vue';
+    import NodeInfo from './NodeInfo.vue';
+    import { ref,computed } from 'vue';
+    import { useResultStore } from '@/stores/resultStore';
 
-    const {onNodeClick,findNode} = useVueFlow('main');
-
-    let url_id = 10086
-    const result = ref<DataView>()
-
-    const resultCache = new Map<Number,DataView>();
-
-    onNodeClick( async (event) => {
-        // 获取节点完整信息
-        const currentNode = findNode(event.node.id)
-        console.log('完整节点信息:', currentNode)
-        console.log('Data_id:',currentNode?.data.data_out.result.data_id)
-        if(currentNode) url_id = currentNode.data.data_out.result.data_id
-        result.value = await getResult(url_id)
-    })
-
-    async function getResult(id: number){
-        const cacheResult = resultCache.get(id);
-        if(cacheResult) return cacheResult
-        else{
-            console.log('operating by: ',id)
-            const result = await DefaultService.getNodeDataApiDataDataIdGet(id);
-            resultCache.set(id,result)
-            return result;
-        }
-    }
+    const resultStore = useResultStore();
     
 </script>
 <template>
@@ -40,22 +14,27 @@
         <div class = "result-control">
         </div>
         <div class = "result-container">
-            <div v-if="!result">无结果</div>
-            <TableView v-else-if="result.type === 'Table'"
-                            :value="result.value"
+            <div class="if-result" v-if="resultStore.currentResult!=resultStore.default_dataview">
+                <TableView v-if="resultStore.currentResult.type === 'Table'"
+                            :value="resultStore.currentResult.value"
                             class = "view-content chart-view">
-            </TableView>
-            <FileView  v-else-if="result.type === 'File'"
-                            :value="result.value"
+                </TableView>
+                <FileView  v-else-if="resultStore.currentResult.type === 'File'"
+                            :value="resultStore.currentResult.value"
                             class = "view-content file-view">
-            </FileView>
-            <ValueView v-else-if="result.type === 'int'
-                            ||result.type  === 'str'
-                            ||result.type  === 'bool'
-                            ||result.type  === 'float'"
-                            :value="result.value"
+                </FileView>
+                <ValueView v-else-if="resultStore.currentResult.type === 'int'
+                            ||resultStore.currentResult.type  === 'str'
+                            ||resultStore.currentResult.type  === 'bool'
+                            ||resultStore.currentResult.type  === 'float'"
+                            :value="resultStore.currentResult.value"
                             class = "view-content value-view">
-            </ValueView>
+                </ValueView>
+            </div>
+            <div class="if-info" v-if="resultStore.currentInfo!=resultStore.default_info">
+                <NodeInfo :data="resultStore.currentInfo">
+                </NodeInfo>
+            </div>
         </div>
     </div>
 </template>

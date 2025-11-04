@@ -5,6 +5,8 @@ import type { NodeDragEvent } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import { useGraphStore } from '@/stores/graphStore'
+import { useResultStore } from '@/stores/resultStore'
+import { useModalStore } from '@/stores/modalStore'
 import { syncProject, syncProjectUiState } from '@/utils/network'
 import RightClickMenu from '../RightClickMenu/RightClickMenu.vue'
 import GraphControls from './GraphControls.vue'
@@ -21,9 +23,12 @@ import { getProject, initVueFlowProject, writeBackVueFLowProject } from '@/utils
 import type { BaseNode } from '@/types/nodeTypes'
 import { useRoute } from 'vue-router'
 
+const resultStore = useResultStore();
+const modalStore = useModalStore();
 const graphStore = useGraphStore()
+
 const {params: {projectId}} = useRoute()
-const { onConnect, onInit, onNodeDragStop, addEdges } = useVueFlow('main')
+const { onNodeClick,findNode,onConnect, onInit, onNodeDragStop, addEdges } = useVueFlow('main')
 const shouldWatch = ref(false)
 const listenNodePosition = ref(true)
 const intervalId = setInterval(() => {
@@ -118,6 +123,35 @@ onConnect((connection) => {
   }
   addEdges(addedEdge)
 })
+
+  const default_url_id: number = 12306
+  const url_id = ref<number>(default_url_id)
+    
+  onNodeClick( async (event) => {
+    // 获取节点完整信息
+    resultStore.refresh();
+    const currentNode = findNode(event.node.id);
+    console.log('完整节点信息:', currentNode);
+    console.log('data.param:',currentNode?.data.param);
+    console.log('data.out:',currentNode?.data.data_out);
+    console.log('currentInfo:',resultStore.currentInfo)
+    console.log('是否存在result:',currentNode?.data.data_out.result)
+    console.log('currentResult:',resultStore.currentResult)
+    if(!currentNode?.data.data_out.result){
+      resultStore.currentInfo = currentNode?.data.param
+      console.log('没有result,有currentInfo:',resultStore.currentInfo)
+    }
+    if(currentNode) url_id.value = currentNode.data.data_out.result.data_id;
+    resultStore.currentResult = await resultStore.getResultCacheContent(url_id.value);
+    if(modalStore.findModal('result')==undefined){
+      resultStore.createResultModal();
+      modalStore.activateModal('result')
+    }
+    else{
+      modalStore.activateModal('result');
+    }
+    console.log(resultStore.cacheStatus);
+  })
 
 
 const nodeColor = (node: BaseNode) => {

@@ -50,11 +50,11 @@ export const useFileStore = defineStore('file', () => {
     const default_cachesize = 20;//20 files
 
     //cache info
-    const fileContentCache = ref(new Map<string,CacheItem>());
+    const fileContentCache = ref(new Map<string,FileCacheItem>());
     const cacheMaxSize = ref<number>(default_cachesize);
 
     //cache struture
-    interface CacheItem{
+    interface FileCacheItem{
         content: any,
         hitCount: number,
         lastHitTime: number
@@ -64,7 +64,7 @@ export const useFileStore = defineStore('file', () => {
     const getCacheStatus = computed(()=>{
         let hitSum = 0;
         let mostHit = {key: default_key, count: 0}
-        fileContentCache.value.forEach((item: CacheItem, key: string) => {
+        fileContentCache.value.forEach((item: FileCacheItem, key: string) => {
             hitSum += item.hitCount;
             if (item.hitCount > mostHit.count) {
                 mostHit = { key: key, count: item.hitCount };
@@ -87,10 +87,10 @@ export const useFileStore = defineStore('file', () => {
         }
         else{
             if(fileContentCache.value.size>=cacheMaxSize.value){
-                replaceLeastRecentlyUsed(key,content)
+                replaceLeastFrequentlyUsed(key,content)
             }
             else{
-                const toBeAdded: CacheItem ={
+                const toBeAdded: FileCacheItem ={
                     content: content,
                     hitCount: 1,
                     lastHitTime: Date.now()
@@ -121,7 +121,7 @@ export const useFileStore = defineStore('file', () => {
             await getFileContent(key);
             addCacheContent(key,currentContent)
         }
-        const cacheItem_after = fileContentCache.value.get(key) as CacheItem;
+        const cacheItem_after = fileContentCache.value.get(key) as FileCacheItem;
             cacheItem_after.hitCount++;
             cacheItem_after.lastHitTime = Date.now();
             return cacheItem_after.content;
@@ -131,12 +131,12 @@ export const useFileStore = defineStore('file', () => {
         return fileContentCache.value.has(key);
     }
 
-    function replaceLeastRecentlyUsed(key: string,content: any){
+    function replaceLeastFrequentlyUsed(key: string,content: any){
         let leastHitKey: string = '';
         let minHitCount = Infinity;
         let earliestHitTime = Infinity;
         
-        fileContentCache.value.forEach((item: CacheItem, key: string) => {
+        fileContentCache.value.forEach((item: FileCacheItem, key: string) => {
             if (item.hitCount < minHitCount || (item.hitCount === minHitCount && item.lastHitTime < earliestHitTime)) {
                 leastHitKey = key;
                 minHitCount = item.hitCount;
