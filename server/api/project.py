@@ -6,7 +6,7 @@ from server.models.database import get_async_session, ProjectRecord, UserRecord
 from server.lib.utils import get_project_by_id, set_project_record
 from celery.app.task import Task as CeleryTask
 from typing import cast
-from server.lib.SreamQueue import StreamQueue, Status
+from server.lib.StreamQueue import StreamQueue, Status
 from server.lib.ProjectLock import ProjectLock
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

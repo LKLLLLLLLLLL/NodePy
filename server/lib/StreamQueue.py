@@ -238,6 +238,7 @@ class StreamQueue:
     async def close(self):
         """Async: Close the Redis connection"""
         assert self._async_conn
+        await self._refresh_ttl_async()
         await self._try_cleanup_stream_async()
         await self._async_conn.close()
         self._async_conn = None
@@ -322,6 +323,7 @@ class StreamQueue:
     def close_sync(self):
         """Sync: Close the Redis connection"""
         assert self._sync_conn
+        self._refresh_ttl_sync()
         self._try_cleanup_stream_sync()
         self._sync_conn.close()
         self._sync_conn = None

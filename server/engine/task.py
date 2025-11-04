@@ -8,7 +8,7 @@ from server.models.database import NodeOutputRecord, ProjectRecord, DatabaseTran
 from .executer import ProjectExecutor
 from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
 from typing import Any, Literal
-from server.lib.SreamQueue import StreamQueue, Status
+from server.lib.StreamQueue import StreamQueue, Status
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.result import AsyncResult
 from loguru import logger
