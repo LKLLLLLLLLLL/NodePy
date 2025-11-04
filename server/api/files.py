@@ -63,6 +63,27 @@ async def upload_file(project_id: int,
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get(
+    "/list",
+    responses={
+        200: {"description": "List of files for the user", "model": UserFileList},
+        404: {"description": "Not Found"},
+        500: {"description": "Internal Server Error"},
+    },
+)
+async def list_files(async_db_session=Depends(get_async_session)) -> UserFileList:
+    logger.debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    user_id = 1  # for debug
+    try:
+        file_manager = FileManager(async_db_session=async_db_session)
+        user_file_list = await file_manager.list_file_async(user_id=user_id)
+        return user_file_list
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.exception(f"Error listing files for user {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get(
     "/{key}",
     responses={
         200: {
@@ -138,24 +159,4 @@ async def delete_file(key: str, async_db_session = Depends(get_async_session)) -
         raise
     except Exception as e:
         logger.exception(f"Error deleting file with key {key}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get(
-    "/list",
-    responses={
-        200: {"description": "List of files for the user", "model": UserFileList},
-        404: {"description": "Not Found"},
-        500: {"description": "Internal Server Error"},
-    },
-)
-async def list_files(async_db_session = Depends(get_async_session)) -> UserFileList:
-    user_id = 1  # for debug
-    try:
-        file_manager = FileManager(async_db_session=async_db_session)
-        user_file_list = await file_manager.list_file_async(user_id=user_id)
-        return user_file_list
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        logger.exception(f"Error listing files for user {user_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))

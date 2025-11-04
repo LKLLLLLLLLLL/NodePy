@@ -36,7 +36,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
     logger.debug(f"Task start: {self.request.id}")
     topo_graph = WorkflowTopology(**topo_graph_dict)
     project_id = topo_graph.project_id
-    task_id = self.request.idw
+    task_id = self.request.id
 
     def _signal_handler(signum, frame):
         """Signal handler for SIGTERM"""

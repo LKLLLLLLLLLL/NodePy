@@ -61,4 +61,4 @@ def _auto_import_nodes():
 # Run auto-discovery when this package is imported
 _auto_import_nodes()
 
-logger.info(f"Registered nodes: {list(_NODE_REGISTRY.keys())}")
+logger.info(f"Registered {len(list(_NODE_REGISTRY.keys()))} nodes: {list(_NODE_REGISTRY.keys())}")
