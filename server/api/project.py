@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, WebSocket, Response, Depends
 from pydantic import BaseModel
 from server.models.project import Project, ProjWorkflow, ProjUIState
-from server.engine.task import execute_project_task
+from server.engine.task import execute_project_task, revoke_project_task
 from server.models.database import get_async_session, ProjectRecord, UserRecord
 from server.lib.utils import get_project_by_id, set_project_record
 from celery.app.task import Task as CeleryTask
@@ -385,7 +385,7 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
                 
                 # 3. check if websocket is disconnected
                 if websocket.client_state.name != "CONNECTED":
-                    celery_app.control.revoke(task_id, terminate=True)
+                    await revoke_project_task(task_id)
                     break
 
                 # 4. check if the websocket received a message from client
@@ -394,7 +394,7 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
                         message = recv_task.result()
                         # Client sent a message (usually means disconnect)
                         if message is not None:
-                            celery_app.control.revoke(task_id, terminate=True)
+                            await revoke_project_task(task_id)
                             await websocket.close(code=4401, reason="Client closed the connection.")
                             break
                     except asyncio.CancelledError:
@@ -410,7 +410,7 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
                         if status == Status.TIMEOUT:
                             timeout_count += 1
                             if timeout_count >= 12: # 1 minute timeout for one node
-                                celery_app.control.revoke(task_id, terminate=True)
+                                await revoke_project_task(task_id)
                                 # avoid dead loop for user provided workflow
                                 await websocket.close(code=4400, reason="Task timed out.")
                                 break
@@ -431,7 +431,7 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
                     except Exception as e:
                         raise e
     except Exception as e:
-        celery_app.control.revoke(task_id, terminate=True)
+        await revoke_project_task(task_id)
         logger.exception(f"Error processing websocket for task {task_id}: {e}")
         try:
             await websocket.close(code=1011, reason=f"Internal server error: {str(e)}")

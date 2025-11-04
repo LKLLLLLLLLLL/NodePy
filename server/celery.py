@@ -24,6 +24,11 @@ celery_app.conf.update(
     worker_max_tasks_per_child=100,  # Restart worker after 100 tasks (prevent memory leaks)
     worker_send_task_events=True,  # Send task events
     include=["server.engine.task"],  # Explicitly include task modules
+
+    task_acks_late=True,  # 任务完成后才确认,避免任务丢失
+    task_reject_on_worker_lost=True,  # Worker 崩溃时重新排队任务
+    broker_connection_retry_on_startup=True,  # 启动时重试连接
+    worker_pool_restarts=True,  # 允许 worker pool 重启
 )
 
 celery_app.conf.beat_schedule = {

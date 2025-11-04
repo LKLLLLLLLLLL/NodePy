@@ -9,7 +9,7 @@ from loguru import logger
 
 LOCK_REDIS_URL = os.getenv("REDIS_URL", "") + "/3"
 RETRY_INTERVAL = 0.1  # seconds
-APPOINTED_LOCK_EXPIRY = 60  # seconds
+APPOINTED_LOCK_EXPIRY = 30  # seconds
 
 class ProjectLock:
     """
@@ -40,7 +40,7 @@ class ProjectLock:
         if scope in ["ui_state", "all"]:
             keys.append(f"project_lock:{project_id}:ui_state")
         return keys
-    
+
     # ====================== async methods ====================== 
     async def __aenter__(self) -> Self:
         """
@@ -96,11 +96,11 @@ class ProjectLock:
                 results = await pipe.execute()
                 if results and all(results):
                     acquired = True
+                    break
                 else:
                     for i, result in enumerate(results):
                         if result:
-                            await self._async_conn.debug_object(lock_keys[i])
-                    break
+                            await self._async_conn.delete(lock_keys[i])
             total_wait += RETRY_INTERVAL
             await asyncio.sleep(RETRY_INTERVAL)
         if not acquired:
@@ -125,9 +125,6 @@ class ProjectLock:
         """
         if self._async_conn is None:
             self._async_conn = await redis.Redis.from_url(LOCK_REDIS_URL)
-        # delete caller info
-        key = f"project_lock:{self._project_id}:info"
-        await self._async_conn.delete(key)
         # delete lock
         lock_keys = ProjectLock._get_lock_key(self._project_id, self._scope)
         for key in lock_keys:
@@ -197,11 +194,11 @@ class ProjectLock:
                 results = pipe.execute()
                 if results and all(results):
                     acquired = True
+                    break
                 else:
                     for i, result in enumerate(results):
                         if result:
-                            self._sync_conn.debug_object(lock_keys[i])
-                    break
+                            self._sync_conn.delete(lock_keys[i])
             total_wait += RETRY_INTERVAL
             time.sleep(RETRY_INTERVAL)
         if not acquired:
@@ -226,9 +223,6 @@ class ProjectLock:
         """
         if self._sync_conn is None:
             self._sync_conn = redis_sync.Redis.from_url(LOCK_REDIS_URL)
-        # delete caller info
-        key = f"project_lock:{self._project_id}:info"
-        self._sync_conn.delete(key)
         # delete lock
         lock_keys = ProjectLock._get_lock_key(self._project_id, self._scope)
         for key in lock_keys:

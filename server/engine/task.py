@@ -10,7 +10,18 @@ from server.models.exception import NodeParameterError, NodeValidationError, Nod
 from typing import Any, Literal
 from server.lib.SreamQueue import StreamQueue, Status
 from celery.exceptions import SoftTimeLimitExceeded
+from celery.result import AsyncResult
 from loguru import logger
+import signal
+import threading
+import asyncio
+
+class RevokeException(Exception):
+    pass
+
+# Thread-safe flag for revocation
+_revoke_flags = {}
+_revoke_lock = threading.Lock()
 
 @celery_app.task(
     bind=True,
@@ -22,10 +33,28 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
     Celery task to execute a node graph with real-time updates via Redis Streams.
     Uses StreamQueue (sync version) to handle state reporting.
     """
+    logger.debug(f"Task start: {self.request.id}")
     topo_graph = WorkflowTopology(**topo_graph_dict)
     project_id = topo_graph.project_id
-    task_id = self.request.id
-    
+    task_id = self.request.idw
+
+    def _signal_handler(signum, frame):
+        """Signal handler for SIGTERM"""
+        logger.info(f"Received signal {signum} for task {task_id}")
+        with _revoke_lock:
+            _revoke_flags[task_id] = True
+    # Set up signal handler for graceful termination
+    signal.signal(signal.SIGTERM, _signal_handler)
+    # Initialize revoke flag for this task
+    with _revoke_lock:
+        _revoke_flags[task_id] = False
+    def check_revoke() -> None:
+        """Check if task has been revoked using multiple methods"""
+        with _revoke_lock:
+            if _revoke_flags.get(task_id, False):
+                logger.info(f"Task {task_id} revoked via signal")
+                raise RevokeException()
+
     # lock to prevent concurrent runs on the same project
     with ProjectLock(project_id=project_id, max_block_time=30.0, identity=task_id, scope="workflow"):  # wait up to 30 seconds to acquire lock
         with StreamQueue(task_id) as queue:
@@ -80,6 +109,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     assert graph is not None
                     has_exception = False
                     def construct_reporter(node_id: str, status: Literal["success", "error"], exception: Exception | None) -> bool:
+                        check_revoke()
                         nonlocal has_exception
                         if status == "success":
                             meta = {
@@ -144,6 +174,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     # 4. Static analysis
                     assert graph is not None
                     def anl_reporter(node_id: str, status: Literal["success", "error"], result: dict[str, Any] | Exception) -> bool:
+                        check_revoke()
                         nonlocal has_exception
                         if status == "success":
                             assert isinstance(result, dict)
@@ -216,6 +247,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     # 5. Execute graph
                     assert graph is not None
                     def exec_before_reporter(node_id: str) -> None: # for timer in frontend
+                        check_revoke()
                         meta = {
                             "stage": "EXECUTION",
                             "status": "IN_PROGRESS",
@@ -308,6 +340,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             workflow.apply_patch(patch)
                             return True
                     graph.execute(callbefore=exec_before_reporter, callafter=exec_after_reporter)
+                    # time.sleep(5)  # for debug
                     if has_exception:
                         queue.push_message_sync(
                             Status.FAILURE, 
@@ -320,12 +353,29 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     # 6. Finalize and save workflow
                     project_record.workflow = workflow.model_dump() # type: ignore
                     db_client.commit()
+                    logger.info(f"Task {task_id} completed successfully")
 
                 except SoftTimeLimitExceeded:
                     logger.exception("Task time limit exceeded")
                     patch = ProjWorkflowPatch(
                         key=["error_message"],
                         value="Error: Task timed out."
+                    )
+                    if workflow:
+                        workflow.apply_patch(patch)
+                    queue.push_message_sync(
+                        Status.FAILURE,
+                        {
+                            "stage": "UNKNOWN",
+                            "status": "FAILURE",
+                            "patch": [patch.model_dump()]
+                        }
+                    )
+                except RevokeException:
+                    logger.info("Task revoked")
+                    patch = ProjWorkflowPatch(
+                        key=["error_message"],
+                        value="Error: Task was revoked."
                     )
                     if workflow:
                         workflow.apply_patch(patch)
@@ -354,6 +404,24 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                         }
                     )
                 finally:
+                    logger.info(f"Task {task_id} finalized")
                     project_record.workflow = workflow.model_dump() # type: ignore
                     if db_client.is_active:
                         db_client.commit()  # Commit the error state to the DB
+
+async def revoke_project_task(task_id: str, timeout: float = 30) -> None:
+    """
+    Wrapper to revoke a task only it has been started.
+    """
+    total_wait = 0.0
+    while total_wait < timeout:
+        task_result = AsyncResult(task_id, app=celery_app)
+        if task_result.state != "PENDING":
+            celery_app.control.revoke(
+                task_id, terminate=True, signal=signal.SIGTERM
+            )
+            logger.debug(f"Task {task_id} terminated (STARTED/RETRY state)")
+            break
+        else:
+            await asyncio.sleep(0.5)
+            total_wait += 0.5
