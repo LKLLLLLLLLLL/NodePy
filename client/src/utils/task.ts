@@ -27,8 +27,9 @@ export class TaskCancelledError extends Error {
 class TaskManager {
   private currentTaskId: string | null = null
   private currentWebSocket: WebSocket | null = null
-  private cancelCurrentTask: (() => void) | null = null
+  private cancelCurrentTask: (() => Promise<void>) | null = null
   private timeoutId: number | null = null
+  private isOpen: Promise<void> | null = null
 
   monitorTask(project: Project, task_id: string): Promise<any[]> {
     return this.createCancellableTask(project, task_id)
@@ -38,9 +39,10 @@ class TaskManager {
     return new Promise((resolve, reject) => {
       const messages: any[] = []
       
-      this.cancelCurrentTask = () => {
+      this.cancelCurrentTask = async () => {
         if (this.currentWebSocket) {
           try {
+            await this.isOpen
             this.currentWebSocket.send('')
           }catch(err) {
             console.log('WebSocket 可能已经关闭:', err)
@@ -96,9 +98,14 @@ class TaskManager {
         reject(error)
       }
 
-      ws.onopen = () => {
-        console.log(`WebSocket 连接已建立, 任务ID: ${task_id}`)
-      }
+
+      this.isOpen =  new Promise<void>((resolve, reject) => {
+        ws.onopen = () => {
+          console.log(`WebSocket 连接已建立, 任务ID: ${task_id}`)
+          resolve()
+        }
+      })
+
     })
   }
 
@@ -112,9 +119,9 @@ class TaskManager {
     }
   }
 
-  cancel(): void {
+  async cancel(): Promise<void> {
     if (this.cancelCurrentTask) {
-      this.cancelCurrentTask()
+      await this.cancelCurrentTask()
     }
   }
 

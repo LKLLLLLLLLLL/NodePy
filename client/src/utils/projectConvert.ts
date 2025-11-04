@@ -1,6 +1,10 @@
 import type { BaseNode } from '@/types/nodeTypes'
-import type { Project, ProjUIState } from './api'
+import type { Project } from './api'
 import type { vueFlowProject } from '@/types/vueFlowProject'
+import { useVueFlow } from '@vue-flow/core'
+
+
+const {setNodes, setEdges} = useVueFlow('main')
 
 
 export const getProject = (vp: vueFlowProject): Project => {
@@ -83,8 +87,8 @@ export const initVueFlowProject = (p: Project, vp: vueFlowProject) => {
     vp.project_name = p.project_name
     vp.user_id = p.user_id
     vp.workflow.error_message = p.workflow.error_message
-    vp.workflow.edges = edges
-    vp.workflow.nodes = nodes
+    setNodes(nodes)
+    setEdges(edges)
     vp.updated_at = p.updated_at
     vp.thumb = p.thumb
 }

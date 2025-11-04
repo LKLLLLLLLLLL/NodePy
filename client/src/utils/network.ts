@@ -18,7 +18,7 @@ export const syncProject = (p: Project, graphStore: any) => {
 
         try {
             if (taskManager.hasActiveTask()) {
-                taskManager.cancel()
+                await taskManager.cancel()
             }
             taskResponse = await service.DefaultService.syncProjectApiProjectSyncPost(p)
         }catch(err) {
