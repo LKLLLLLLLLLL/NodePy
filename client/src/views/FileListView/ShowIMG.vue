@@ -13,7 +13,7 @@
 </script>
 <template>
     <div class="img">
-        <img src="content"></img>
+        <!-- <img src="content"></img> -->
     </div>
 </template>
 <style lang="scss" scoped>
