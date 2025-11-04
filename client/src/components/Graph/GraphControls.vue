@@ -20,9 +20,6 @@
     const graphStore = useGraphStore();
     const resultStore = useResultStore();
 
-    //@ts-ignore
-    //project sync
-    const project: Project = getProject(graphStore.project);
     const select = 0
 
     // 定义各个按钮要使用的 mdi 路径
@@ -103,18 +100,8 @@
     }
 
     async function handleForcedSync(){
-        const thumbBase64 = await captureGraph(vueFlowRef.value);
-        if (thumbBase64) {
-            // 确保是纯 Base64，不带 data URL 前缀
-            const pureBase64 = thumbBase64.startsWith('data:image')
-                ? thumbBase64.split(',')[1]
-                : thumbBase64;
-
-            project.thumb = pureBase64;
-        } else {
-            project.thumb = null;
-        }
-        project.updated_at = Math.floor(Date.now() / 1000);
+        //@ts-ignore
+        const project: Project = getProject(graphStore.project);
         await syncProject(project, graphStore);
     }
 

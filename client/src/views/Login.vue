@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 </script>
 <template>
-    <div>
+    <div class='login-container'>
         Login View
     </div>
 </template>
