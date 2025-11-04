@@ -43,9 +43,8 @@ class TaskManager {
           try {
             this.currentWebSocket.send('')
           }catch(err) {
-            console.error('WebSocket 可能已经关闭:', err)
+            console.log('WebSocket 可能已经关闭:', err)
           }
-          this.currentWebSocket.close()
           this.currentWebSocket = null
         }
         if (this.timeoutId) {
@@ -82,7 +81,7 @@ class TaskManager {
           clearTimeout(this.timeoutId)
           this.timeoutId = null
         }
-        console.log(`WebSocket 关闭: code=${event.code}, reason=${event.reason}, wasClean=${event.wasClean}`)
+        console.log(`WebSocket 关闭: code=${event.code}, reason=${event.reason}, wasClean=${event.wasClean}, taskid=${task_id}`)
         this.cleanup()
         resolve(messages)
       }

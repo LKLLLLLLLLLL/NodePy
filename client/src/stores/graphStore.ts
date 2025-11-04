@@ -10,7 +10,7 @@ export const useGraphStore = defineStore('graph', () => {
   const {addNodes} = vueFLowInstance
   const project = ref<vueFlowProject>({
     project_id: -1,
-    project_name: "undefined",
+    project_name: "",
     user_id: -1,
     workflow: {
       nodes: [],

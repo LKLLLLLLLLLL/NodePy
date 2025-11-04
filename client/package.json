@@ -25,6 +25,7 @@
     "@vue-flow/minimap": "^1.5.4",
     "@vue-flow/node-resizer": "^1.5.0",
     "@vue-flow/node-toolbar": "^1.1.1",
+    "async-mutex": "^0.5.0",
     "axios": "^1.12.2",
     "element-plus": "^2.11.5",
     "html2canvas": "^1.4.1",
