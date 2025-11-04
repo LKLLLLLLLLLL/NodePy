@@ -7,7 +7,7 @@
 </script>
 <template>
     <div class = "main-container controller-style">
-        <div class = "up-container" v-if="route.path!='/login'">
+        <div class = "up-container" v-if="route.path!='/login_register'">
             <ControlBar />
         </div>
         <div class = "down-container">
@@ -17,7 +17,7 @@
     <ModalManager />
 </template>
 <style scoped lang = "scss">
-@use '@/common/global.scss';
+@use '@/common/global.scss' as *;
     .main-container{
         display: flex;
         flex-direction: column;
@@ -40,6 +40,7 @@
         flex: 1;
         min-height: 0;
         overflow: auto;
+        background-color: $background-color;
     }
 </style>
 <!-- <style lang = "scss">
