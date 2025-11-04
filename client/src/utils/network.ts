@@ -8,25 +8,30 @@ import { useVueFlow } from '@vue-flow/core'
 import { getProject, writeBackVueFLowProject } from './projectConvert'
 
 
-const mutex = new Mutex()
+const mutex_sync = new Mutex()
+const mutex_syncUi = new Mutex()
 const {vueFlowRef} = useVueFlow('main')
 
 
 const syncProject = (p: Project, graphStore: any) => {
     return new Promise<Project>(async (resolve, reject) => {
         let taskResponse: TaskResponse | undefined
+
+
+        const release = await mutex_sync.acquire()
+        p.updated_at = Date.now()
+        graphStore.is_syncing = true
+        graphStore.syncing_err_msg= ''
+
+
         try {
             const thumbBase64 = await autoCaptureMinimap(vueFlowRef.value)
             if (thumbBase64) {
-                // 确保是纯 Base64，不带 data URL 前缀
                 const pureBase64 = thumbBase64.startsWith('data:image')
                     ? thumbBase64.split(',')[1]
-                    : thumbBase64;
+                    : thumbBase64
 
-                p.thumb = pureBase64;
-            }
-            else{
-                p.thumb = null
+                p.thumb = pureBase64
             }
         }catch(err) {
             const errMsg = err && typeof err === 'object' && 'message' in err
@@ -35,13 +40,6 @@ const syncProject = (p: Project, graphStore: any) => {
             graphStore.syncing_err_msg = errMsg
             reject(err)
         }
-        
-
-        const release = await mutex.acquire()
-        p.updated_at = Date.now()
-        graphStore.is_syncing = true
-        graphStore.syncing_err_msg= ''
-        
 
         try {
             if (taskManager.hasActiveTask()) {
@@ -90,51 +88,53 @@ const syncProject = (p: Project, graphStore: any) => {
 
 const syncProjectUiState = (p: Project, graphStore: any) => {
     return new Promise<any>(async (resolve, reject) => {
+
+        const release = await mutex_syncUi.acquire()
+        p.updated_at = Date.now()
+        graphStore.is_syncing = true
+        graphStore.syncing_err_msg= ''
+
         try {
-            p.updated_at = Date.now()
-            graphStore.is_syncing = true
-            graphStore.syncing_err_msg= ''
             const res = await service.DefaultService.syncProjectUiApiProjectSyncUiPost(p.project_id, p.ui_state)
-            graphStore.is_syncing = false
             resolve(res)
         }catch(err) {
             const errMsg = err && typeof err === 'object' && 'message' in err
               ? String(err.message)
               : '无法连接到服务器，请检查网络或联系管理员。'
             graphStore.syncing_err_msg = errMsg
-            graphStore.is_syncing = false
             reject(err)
         }finally {
             graphStore.is_syncing = false
+            release()
         }
     })
 }
 
 export const sync = async(graphStore: any) => {
-    const p = getProject(graphStore.project)
 
     try {
-      const res = await syncProject(p, graphStore)
-      console.log('syncProject response:', res, res === p)
-      writeBackVueFLowProject(res, graphStore.project)
+        const p = getProject(graphStore.project)
+        const res = await syncProject(p, graphStore)
+        console.log('syncProject response:', res, res === p)
+        writeBackVueFLowProject(res, graphStore.project)
     }catch(err) {
-      if(err instanceof TaskCancelledError) {
-        console.log(err)
-      }else {
-        console.error('@', err)
-      }
+        if(err instanceof TaskCancelledError) {
+            console.log(err)
+        }else {
+            console.error('@', err)
+        }
     }
 
 }
 
 export const syncUiState = async(graphStore: any) => {
-    const p = getProject(graphStore.project)
 
     try {
-      const res = await syncProjectUiState(p, graphStore)
-      console.log('syncProjectUiState response:', res)
+        const p = getProject(graphStore.project)
+        const res = await syncProjectUiState(p, graphStore)
+        console.log('syncProjectUiState response:', res)
     }catch(err) {
-      console.error('@@',err)
+        console.error('@@',err)
     }
 
 }

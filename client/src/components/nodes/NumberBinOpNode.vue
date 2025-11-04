@@ -1,6 +1,6 @@
 <template>
     <div class="NumBinComputeNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="title nodes-topchild-border-radius">数字二元运算节点</div>
+        <div class="node-title nodes-topchild-border-radius">数字二元运算节点</div>
         <div class="data">
             <Handle id="x" type="target" :position="Position.Left" style="top: 25%" :class="`${x_type}-handle-color`"/>
             <Handle id="y" type="target" :position="Position.Left" style="top: 75%" :class="`${y_type}-handle-color`"/>
@@ -50,11 +50,6 @@
         height: 100%;
         width: $node-width;
         background: white;
-        .title {
-            background: #ccc;
-            text-align: left;
-            padding-left: 8px;
-        }
         .data {
             position: relative;
             padding: 10px 0;
@@ -68,8 +63,4 @@
     .all-handle-color {
         background: linear-gradient(to bottom, $int-color 0 50%, $float-color 50% 100%);
     }
-</style>
-
-<style lang="scss">
-    @import '@vue-flow/node-resizer/dist/style.css';
 </style>

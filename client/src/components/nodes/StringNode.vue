@@ -1,6 +1,6 @@
 <template>
     <div class="StringNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="title nodes-topchild-border-radius">字符串节点</div>
+        <div class="node-title nodes-topchild-border-radius">字符串节点</div>
         <div class="data">
             <Handle id="string" type="source" :position="Position.Right" class="str-handle-color"/>
             <div class="value">
@@ -40,11 +40,6 @@
         height: 100%;
         width: $node-width;
         background: white;
-        .title {
-            background: #ccc;
-            text-align: left;
-            padding-left: 8px;
-        }
         .data {
             padding: 5px 0;
             position: relative;
@@ -53,8 +48,4 @@
             }
         }
     }
-</style>
-
-<style lang="scss">
-    @import '@vue-flow/node-resizer/dist/style.css';
 </style>

@@ -48,3 +48,10 @@ $node-width: 200px;
 .default-type-handle-color {
   background: $default-type-color;
 }
+
+.node-title {
+  background: #ccc;
+  text-align: left;
+  padding-left: 8px;
+  height: 30px;
+}
