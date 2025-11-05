@@ -1,10 +1,10 @@
 <template>
-    <div class="NodePySelectFewLayout nodes-innertool-border-radius">
+    <div class="NodePySelectFewLayout nodes-innertool-border-radius" @click.stop>
         <div 
             class="item" 
             :class="{selected: selectedIdx.includes(index)}" 
             :style="{width: itemWidth, height: itemHeight}" 
-            @click="onClick(index)"
+            @click.stop="onClick(index)"
             v-for="(item, index) in options"
         >
             {{ item }}
@@ -55,7 +55,7 @@
             selectedIdx.value.shift()
             selectedIdx.value.push(index)
         }
-        emit('selectChange', selectedIdx)
+        emit('selectChange', selectedIdx.value)
     }
 
 </script>

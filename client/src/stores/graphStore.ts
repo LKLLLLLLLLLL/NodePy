@@ -65,7 +65,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedTableNode)
         break
-
+      case 'BoolNode':
+        const addedBoolNode: Nodetypes.BoolNode = {
+          id: Date.now().toString(),
+          position,
+          type: 'BoolNode',
+          data: {
+            param: {
+              value: true
+            }
+          }
+        }
+        addNodes(addedBoolNode)
+        break
       case 'NumberBinOpNode':
         const addedNumBinComputeNode: Nodetypes.NumberBinOpNode = {
           id: Date.now().toString(),

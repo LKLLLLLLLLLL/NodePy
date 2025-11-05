@@ -8,8 +8,7 @@ import { useVueFlow } from '@vue-flow/core'
 import { getProject, writeBackVueFLowProject } from './projectConvert'
 
 
-const mutex_sync = new Mutex()
-const mutex_syncUi = new Mutex()
+const mutex = new Mutex()
 const {vueFlowRef} = useVueFlow('main')
 
 
@@ -18,7 +17,7 @@ const syncProject = (p: Project, graphStore: any) => {
         let taskResponse: TaskResponse | undefined
 
 
-        const release = await mutex_sync.acquire()
+        const release = await mutex.acquire()
         p.updated_at = Date.now()
         graphStore.is_syncing = true
         graphStore.syncing_err_msg= ''
@@ -89,7 +88,7 @@ const syncProject = (p: Project, graphStore: any) => {
 const syncProjectUiState = (p: Project, graphStore: any) => {
     return new Promise<any>(async (resolve, reject) => {
 
-        const release = await mutex_syncUi.acquire()
+        const release = await mutex.acquire()
         p.updated_at = Date.now()
         graphStore.is_syncing = true
         graphStore.syncing_err_msg= ''

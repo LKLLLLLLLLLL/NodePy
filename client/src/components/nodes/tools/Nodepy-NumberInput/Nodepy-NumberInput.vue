@@ -1,5 +1,9 @@
 <template>
-    <div class="NodepyNumberInputLayout nodes-innertool-border-radius" :style="{width: width, height: height}">
+    <div 
+        class="NodepyNumberInputLayout nodes-innertool-border-radius" 
+        :style="{width: width, height: height}" 
+        @click.stop
+    >
         <div class="left-arrow" @click="onClick(-1)">
             <span>
                 <svg width="10" height="12" viewBox="0 0 8 8">

@@ -16,6 +16,7 @@ import NodePyConnectionLine from '../NodePyConnectionLine.vue'
 import ConstNode from '../nodes/ConstNode.vue'
 import StringNode from '../nodes/StringNode.vue'
 import TableNode from '../nodes/TableNode.vue'
+import BoolNode from '../nodes/BoolNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
 import { DefaultService } from '@/utils/api'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -201,6 +202,10 @@ const isValidConnection = (connection: any) => {
 
         <template #node-TableNode="TableNodeProps">
           <TableNode v-bind="TableNodeProps"/>
+        </template>
+        
+        <template #node-BoolNode="BoolNodeProps">
+          <BoolNode v-bind="BoolNodeProps"/>
         </template>
 
         <template #node-NumberBinOpNode="NumberBinOpNodeProps">

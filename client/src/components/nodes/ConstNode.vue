@@ -38,7 +38,7 @@
 
 
     const onSelectChange = (e: any) => {
-        const data_type = data_type_options[e.value[0]] as 'int' | 'float'
+        const data_type = data_type_options[e[0]] as 'int' | 'float'
         props.data.param.data_type = data_type
     }
 
@@ -61,7 +61,6 @@
             padding: 5px 0;
             .value {
                 display: flex;
-                flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 padding: 0 10px;

@@ -3,6 +3,7 @@
         class="NodePyStringInputLayout nodes-innertool-border-radius" 
         :class="{disabled: disabled}"
         :style="{width: width, height: height}"
+        @click.stop
     >
         <input 
             ref="inputEl"

@@ -3,8 +3,9 @@
         class="NodePySelectManyLayout" 
         ref="root" 
         :style="{height: height, width: width}"
+        @click.stop
     >
-        <div class="value" :class="{close: !open}" @click="toggle">
+        <div class="value" :class="{close: !open}" @click.stop="toggle">
             {{ selectedItem }}
             <span class="arrow" :class="{open}">
                 <svg width="10" height="12" viewBox="0 0 8 8">
@@ -17,7 +18,7 @@
             <div 
                 v-for="(item, idx) in options"
                 class="item"
-                @click="select(idx)"
+                @click.stop="select(idx)"
             >
                 {{ item }}
             </div>
