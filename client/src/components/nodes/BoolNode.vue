@@ -7,10 +7,11 @@
                 <NodepyBoolValue
                     v-model="value"
                     @update-value="onUpdateValue"
-                    width="40px"
-                    height="40px"
+                    width="20px"
+                    height="20px"
                     class="nodrag"
-                />
+                >
+                </NodepyBoolValue>
             </div>
         </div>
     </div>

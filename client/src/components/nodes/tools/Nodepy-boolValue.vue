@@ -1,14 +1,14 @@
 <template>
     <span
         class="NodePyBoolValueLayout"
+        :class="{'has-label': $slots.default }"
         role="checkbox"
         :aria-checked="model"
         tabindex="0"
         @click.stop="toggle"
         @keydown.space.prevent="toggle"
-        :style="{width: width, height: height}"
     >
-        <svg class="box" viewBox="0 0 24 24">
+        <svg class="box" viewBox="0 0 24 24" :style="{width: width, height: height}">
             <rect x="2" y="2" width="20" height="20" rx="3" :stroke="borderColor" fill="white" stroke-width="2"/>
             <path
                 class="tick"
@@ -57,18 +57,21 @@
 </script>
 
 <style lang="scss" scoped>
-    .NodePyBoolValueLayout{ 
+    .NodePyBoolValueLayout {
+        height: 100%;
+        width: 100%;
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         cursor: pointer;
         user-select: none;
-        gap: 6px;
         .box {
-            height: 100%;
-            width: 100%;
             .tick{
                 transition: opacity .2s ease;
             }
+        }
+        &.has-label { 
+            gap: 6px;
         }
     }
 </style>
