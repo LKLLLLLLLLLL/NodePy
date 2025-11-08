@@ -1,0 +1,110 @@
+from datetime import datetime, timedelta
+from typing import Optional
+from passlib.context import CryptContext
+from jose import JWTError, jwt
+from fastapi import HTTPException, status
+import os
+from fastapi import Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from server.models.database import get_async_session, UserRecord
+from sqlalchemy.ext.asyncio import AsyncSession
+
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_DAYS = 7
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+class AuthUtils:
+    @staticmethod
+    def hash_password(password: str) -> str:
+        """Hash a password"""
+        return pwd_context.hash(password)
+    
+    @staticmethod
+    def verify_password(plain_password: str, hashed_password: str) -> bool:
+        """Verify a password"""
+        return pwd_context.verify(plain_password, hashed_password)
+    
+    @staticmethod
+    def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+        """Create a JWT access token"""
+        to_encode = data.copy()
+
+        # Ensure sub is a string (JWT standard requirement)
+        if "sub" in to_encode and not isinstance(to_encode["sub"], str):
+            to_encode["sub"] = str(to_encode["sub"])
+        
+        if expires_delta:
+            expire = datetime.now() + expires_delta
+        else:
+            expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        return encoded_jwt
+
+    @staticmethod
+    def create_refresh_token(data: dict) -> str:
+        """创建 refresh token"""
+        to_encode = data.copy()
+
+        # Ensure sub is a string (JWT standard requirement)
+        if "sub" in to_encode and not isinstance(to_encode["sub"], str):
+            to_encode["sub"] = str(to_encode["sub"])
+        
+        expire = datetime.now() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        to_encode.update({"exp": expire, "type": "refresh"})
+        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        return encoded_jwt
+
+    @staticmethod
+    def verify_token(token: str) -> dict:
+        """Verify a JWT token"""
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            user_id = payload.get("sub")
+            if user_id is None:
+                raise ValueError("Could not validate credentials")
+            return payload
+        except JWTError:
+            raise ValueError("Could not validate credentials")
+
+security = HTTPBearer()
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db_client: AsyncSession = Depends(get_async_session),
+) -> UserRecord:
+    """
+    Auto check and extract the current authenticated user from the JWT token.
+    This may raise a HTTPException with code 401
+    """
+    token = credentials.credentials
+    try:
+        payload = AuthUtils.verify_token(token)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
+
+    user_id_str = payload.get("sub")
+    
+    # convert user_id from string to integer
+    try:
+        user_id = int(user_id_str) # type: ignore
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Invalid user ID in token"
+        )
+
+    user = await db_client.get(UserRecord, user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
+        )
+
+    return user

@@ -20,9 +20,9 @@ const showProjectName = computed(()=>{
 // 导航项
 const navItems = [
   { name: 'Home', path: '/home', label: '首页' },
-  { name: 'File', path: '/file', label: '文件' },
-  { name: 'Project', path: '/project', label: '项目' },
   { name: 'Example', path: '/example', label: '示例' },
+  { name: 'Project', path: '/project', label: '项目' },
+  { name: 'File', path: '/file', label: '文件' },
 ]
 
 // 判断当前页面是否激活
@@ -111,7 +111,7 @@ function handleAvatarClick(){
         color: #000000;
         text-decoration: none;
         font-size: 18px;
-        font-weight: 400;
+        font-weight: 500;
         padding: 8px 16px;
         margin: 0 0.4%;
         border-bottom: 2px solid transparent;
@@ -133,7 +133,7 @@ function handleAvatarClick(){
       left: 50%;
       transform: translateX(-50%);
       font-size: 14px;
-      font-weight: 400;
+      font-weight: 500;
     }
 
     .actions {
