@@ -6,10 +6,13 @@ import type { Body_upload_file_api_files_upload__project_id__post } from '../mod
 import type { DataView } from '../models/DataView';
 import type { DeleteResponse } from '../models/DeleteResponse';
 import type { File } from '../models/File';
+import type { LoginRequest } from '../models/LoginRequest';
 import type { Project } from '../models/Project';
 import type { ProjectList } from '../models/ProjectList';
 import type { ProjUIState } from '../models/ProjUIState';
+import type { SignupRequest } from '../models/SignupRequest';
 import type { TaskResponse } from '../models/TaskResponse';
+import type { TokenResponse } from '../models/TokenResponse';
 import type { UserFileList } from '../models/UserFileList';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -310,6 +313,91 @@ export class DefaultService {
                 422: `Validation Error`,
                 500: `Internal server error`,
             },
+        });
+    }
+    /**
+     * Signup
+     * sign up a new user, return a JWT token (no need to login again)
+     * @param requestBody
+     * @returns TokenResponse Successful Response
+     * @returns any User created successfully
+     * @throws ApiError
+     */
+    public static signupApiAuthSignupPost(
+        requestBody: SignupRequest,
+    ): CancelablePromise<TokenResponse | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/auth/signup',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Username or email already registered`,
+                422: `Validation Error`,
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
+     * Login
+     * Login user and return JWT tokens
+     * @param requestBody
+     * @returns TokenResponse Login successful
+     * @throws ApiError
+     */
+    public static loginApiAuthLoginPost(
+        requestBody: LoginRequest,
+    ): CancelablePromise<TokenResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/auth/login',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Invalid username or password`,
+                422: `Validation Error`,
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
+     * Refresh Access Token
+     * Use Refresh Token to get a new Access Token if access token expired
+     * @returns TokenResponse Access token refreshed successfully
+     * @throws ApiError
+     */
+    public static refreshAccessTokenApiAuthRefreshPost(): CancelablePromise<TokenResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/auth/refresh',
+            errors: {
+                401: `Invalid refresh token`,
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
+     * Logout
+     * Logout user by clearing the Refresh Token
+     * @returns string Logged out successfully
+     * @throws ApiError
+     */
+    public static logoutApiAuthLogoutPost(): CancelablePromise<Record<string, string>> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/auth/logout',
+        });
+    }
+    /**
+     * Get Current User Info
+     * Get current authenticated user's information, FOR DEBUGGING
+     * @returns any Current user information retrieved successfully
+     * @throws ApiError
+     */
+    public static getCurrentUserInfoApiAuthMeGet(): CancelablePromise<Record<string, any>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/auth/me',
         });
     }
     /**
