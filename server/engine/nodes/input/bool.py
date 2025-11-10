@@ -15,11 +15,11 @@ class BoolNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "ConstNode":
+        if not self.type == "BoolNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'ConstNode'.",
+                err_msg="Node type must be 'BoolNode'.",
             )
         return
 

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from passlib.context import CryptContext
 from jose import JWTError, jwt
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 import os
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -71,9 +71,8 @@ class AuthUtils:
         except JWTError:
             raise ValueError("Could not validate credentials")
 
+
 security = HTTPBearer()
-
-
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db_client: AsyncSession = Depends(get_async_session),
@@ -87,7 +86,7 @@ async def get_current_user(
         payload = AuthUtils.verify_token(token)
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            status_code=401, detail="Invalid token"
         )
 
     user_id_str = payload.get("sub")
@@ -97,14 +96,14 @@ async def get_current_user(
         user_id = int(user_id_str) # type: ignore
     except (ValueError, TypeError):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
+            status_code=401,
             detail="Invalid user ID in token"
         )
 
     user = await db_client.get(UserRecord, user_id)
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
+            status_code=401, detail="User not found"
         )
 
     return user

@@ -398,6 +398,9 @@ export class DefaultService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/auth/me',
+            errors: {
+                401: `Unauthorized`,
+            },
         });
     }
     /**

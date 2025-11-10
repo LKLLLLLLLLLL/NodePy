@@ -216,6 +216,7 @@ async def logout(response: Response) -> dict[str, str]:
     "/me",
     responses={
         200: {"description": "Current user information retrieved successfully"},
+        401: {"description": "Unauthorized"},
     })
 async def get_current_user_info(current_user: UserRecord = Depends(get_current_user)) -> dict[str, Any]:
     """Get current authenticated user's information, FOR DEBUGGING"""
