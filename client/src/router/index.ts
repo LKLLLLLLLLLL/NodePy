@@ -34,7 +34,7 @@ const routes: Array<RouteRecordRaw> = [
         component: Project
     },
     {
-        path: '/login_Register',
+        path: '/login_register',
         name: 'login_register',
         component: Login_Register
     },
