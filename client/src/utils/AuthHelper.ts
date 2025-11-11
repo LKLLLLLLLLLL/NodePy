@@ -1,9 +1,9 @@
 // utils/api/services/authHelper.ts
-import { DefaultService } from './DefaultService';
+import { DefaultService } from './api/services/DefaultService';
 import AuthenticatedServiceFactory from './AuthenticatedServiceFactory';
-import type { LoginRequest } from '../models/LoginRequest';
-import type { TokenResponse } from '../models/TokenResponse';
-import type { SignupRequest } from '../models/SignupRequest';
+import type { LoginRequest } from './api/models/LoginRequest';
+import type { TokenResponse } from './api/models/TokenResponse';
+import type { SignupRequest } from './api/models/SignupRequest';
 
 // 环境判断
 const isDev = import.meta.env.DEV;

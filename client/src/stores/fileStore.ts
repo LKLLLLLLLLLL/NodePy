@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref,computed } from 'vue';
 import { ApiError, FileItem, type UserFileList, type Body_upload_file_api_files_upload__project_id__post} from '@/utils/api';
-import AuthenticatedServiceFactory from '@/utils/api/services/AuthenticatedServiceFactory';
+import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
 import { ElMessage } from 'element-plus';
 
 export const useFileStore = defineStore('file', () => {

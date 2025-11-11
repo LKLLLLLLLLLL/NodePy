@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
 import {ref,computed} from 'vue'
 import { useModalStore } from "./modalStore"
-import AuthenticatedServiceFactory from "@/utils/api/services/AuthenticatedServiceFactory"
+import AuthenticatedServiceFactory from "@/utils/AuthenticatedServiceFactory"
 import { DataView } from "@/utils/api"
 import Result from "@/components/Result/Result.vue"
 export const useResultStore = defineStore('result',()=>{

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import AuthenticatedServiceFactory from '@/utils/api/services/AuthenticatedServiceFactory';
+import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
 import { useModalStore } from './modalStore';
 import { ApiError } from '@/utils/api';
 import { ElMessage } from 'element-plus';

@@ -20,7 +20,7 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 
 //authenticated service factory
-import AuthenticatedServiceFactory from './utils/api/services/AuthenticatedServiceFactory.ts'
+import AuthenticatedServiceFactory from './utils/AuthenticatedServiceFactory.ts'
 
 /**
  * 应用启动初始化

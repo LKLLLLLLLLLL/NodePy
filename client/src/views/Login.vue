@@ -3,7 +3,7 @@
     import { ElMessage } from 'element-plus';
     import { useRouter } from 'vuetify/lib/composables/router.mjs';
     // 导入新的认证工具函数
-    import { login, signup } from '@/utils/api/services/AuthHelper';
+    import { login, signup } from '@/utils/AuthHelper';
 
     const router = useRouter();
 

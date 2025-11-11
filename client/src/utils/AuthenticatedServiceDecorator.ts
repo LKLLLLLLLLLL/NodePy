@@ -1,7 +1,7 @@
 // services/AuthenticatedServiceDecorator.ts
-import { CancelablePromise } from '../core/CancelablePromise';
-import { OpenAPI } from '../core/OpenAPI';
-import { DefaultService } from './DefaultService';
+import { CancelablePromise } from './api/core/CancelablePromise';
+import { OpenAPI } from './api/core/OpenAPI';
+import { DefaultService } from './api/services/DefaultService';
 
 // 环境判断
 const isDev = import.meta.env.DEV;
