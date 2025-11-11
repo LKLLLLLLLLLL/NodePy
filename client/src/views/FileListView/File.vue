@@ -77,6 +77,7 @@
 </template>
 <style lang="scss" scoped>
     @use '../../common/global.scss' as *;
+    @use "sass:color";
     
     .fileview-container{
         display: flex;
@@ -175,16 +176,16 @@
         }
         
         &::-webkit-scrollbar-thumb {
-            background: darken($mix-background-color, 20%);
+            background: color.adjust($mix-background-color, $lightness: -20%);
             border-radius: 4px;
             
             &:hover {
-                background: darken($mix-background-color, 30%);
+                background: color.adjust($mix-background-color, $lightness: -30%)
             }
         }
         
         /* Firefox 滚动条样式 */
         scrollbar-width: thin;
-        scrollbar-color: darken($mix-background-color, 20%) $mix-background-color;
+        scrollbar-color: color.adjust($mix-background-color, $lightness: -20%) $mix-background-color;
     }
 </style>
