@@ -7,7 +7,7 @@
 </script>
 <template>
     <div class = "main-container controller-style">
-        <div class = "up-container" v-if="route.path!='/login_register'">
+        <div class = "up-container" v-if="route.path!='/login'">
             <ControlBar />
         </div>
         <div class = "down-container">

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { DefaultService } from '../utils/api/services/DefaultService';
+import AuthenticatedServiceFactory from '@/utils/api/services/AuthenticatedServiceFactory';
 import { useModalStore } from './modalStore';
 import { ApiError } from '@/utils/api';
 import { ElMessage } from 'element-plus';
@@ -39,6 +39,8 @@ export const useProjectStore = defineStore('project', () => {
 
     const modalStore = useModalStore();
 
+    const authService = AuthenticatedServiceFactory.getService();
+
     // async function openProject(id: number){
     //     console.log('Openning project by ID:',id)
     //     try{
@@ -68,7 +70,7 @@ export const useProjectStore = defineStore('project', () => {
     async function initializeProjects(){
         console.log('Getting all projects');
         try{
-            const response = await DefaultService.listProjectsApiProjectListGet();
+            const response = await authService.listProjectsApiProjectListGet();
             projectList.value = response;
             refresh();
             return true;
@@ -91,7 +93,7 @@ export const useProjectStore = defineStore('project', () => {
     async function createProject(){
         console.log('Creating project by name:', currentProjectName.value);
         try{
-            const response = await DefaultService.createProjectApiProjectCreatePost(currentProjectName.value);
+            const response = await authService.createProjectApiProjectCreatePost(currentProjectName.value);
             if(response)ElMessage('项目' + currentProjectName.value + '创建成功');
             currentProjectId.value = response;
             initializeProjects();
@@ -124,7 +126,7 @@ export const useProjectStore = defineStore('project', () => {
     async function deleteProject(id: number){
         console.log('Deleting project by ID:', id);
         try{
-            const response = await DefaultService.deleteProjectApiProjectProjectIdDelete(id);
+            const response = await authService.deleteProjectApiProjectProjectIdDelete(id);
             if(response==null)ElMessage('项目' + id + '删除成功');
             initializeProjects();
             return true;
@@ -159,7 +161,7 @@ export const useProjectStore = defineStore('project', () => {
     async function getProject(id: number){
         console.log('Getting project by ID:', id)
         try{
-            const response = await DefaultService.getProjectApiProjectProjectIdGet(id);
+            const response = await authService.getProjectApiProjectProjectIdGet(id);
             if(response)ElMessage('项目' + id + '获取成功');
             currentProject.value=response;
             return true;
@@ -191,7 +193,7 @@ export const useProjectStore = defineStore('project', () => {
     async function renameProject(id: number,name: string){
         console.log('Renaming project:',id,'New name is',name);
         try{
-            const response = await DefaultService.renameProjectApiProjectRenamePost(id,name);
+            const response = await authService.renameProjectApiProjectRenamePost(id,name);
             ElMessage('项目' + id + '改名成功');
             initializeProjects();
             return true;

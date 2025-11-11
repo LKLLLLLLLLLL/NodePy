@@ -1,12 +1,13 @@
 import { defineStore } from "pinia"
 import {ref,computed} from 'vue'
 import { useModalStore } from "./modalStore"
-import { DefaultService } from "@/utils/api"
+import AuthenticatedServiceFactory from "@/utils/api/services/AuthenticatedServiceFactory"
 import { DataView } from "@/utils/api"
 import Result from "@/components/Result/Result.vue"
 export const useResultStore = defineStore('result',()=>{
 
     const modalStore = useModalStore();
+    const authService = AuthenticatedServiceFactory.getService();
 
     const default_content: string = 'no-result'
     const default_dataview: DataView = {
@@ -116,7 +117,7 @@ export const useResultStore = defineStore('result',()=>{
     async function getResultCacheContent(id: number){
         const cacheItem = resultCache.value.get(id);
         if(!cacheItem){
-            const content = await DefaultService.getNodeDataApiDataDataIdGet(id);
+            const content = await authService.getNodeDataApiDataDataIdGet(id);
             addResultCacheContent(id,content);
         }
         const cacheItem_after = resultCache.value.get(id) as ResultCacheItem;

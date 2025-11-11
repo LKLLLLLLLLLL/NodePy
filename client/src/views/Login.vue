@@ -1,5 +1,11 @@
 <script lang="ts" setup>
-    import {ref,computed} from 'vue';
+    import { ref, computed } from 'vue';
+    import { ElMessage } from 'element-plus';
+    import { useRouter } from 'vuetify/lib/composables/router.mjs';
+    // 导入新的认证工具函数
+    import { login, signup } from '@/utils/api/services/AuthHelper';
+
+    const router = useRouter();
 
     type State = 'login'|'register';
     type LoginType = 'email'|'username';
@@ -47,12 +53,54 @@
         else return false
     }
     
-    function handleLogin(){
-
+    async function handleLogin(){
+        try {
+            // 使用新的登录函数
+            await login({
+                username: username.value,
+                password: password.value
+            });
+            ElMessage('登录成功');
+            router?.push({
+                name: 'project'
+            });
+        } catch (error: any) {
+            console.error('登录失败:', error);
+            if (error.status === 401) {
+                ElMessage('用户名或密码错误');
+            } else {
+                ElMessage('登录失败，请重试');
+            }
+        }
     }
 
-    function handleRegister(){
-        handleLogin()
+    async function handleRegister(){
+        if(comparePassword()){
+            try {
+                // 使用新的注册函数
+                await signup({
+                    username: username.value,
+                    email: email.value,
+                    password: password.value
+                });
+                ElMessage('注册成功，已自动登录');
+                router?.push({
+                    name: 'project'
+                });
+            } catch (error: any) {
+                console.error('注册失败:', error);
+                if (error.status === 400) {
+                    ElMessage('用户名或邮箱已被注册');
+                } else {
+                    ElMessage('注册失败，请重试');
+                }
+            }
+        }
+        else{
+            password.value = default_password
+            confirm_password.value = default_password
+            ElMessage('密码不一致，请重试')
+        }
     }
 
     function handleSubmit(){
@@ -70,7 +118,6 @@
     }
 
     function handleSwitch(){
-
         if(state.value=='login')state.value='register';
         else state.value='login';
     }

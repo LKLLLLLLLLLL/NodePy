@@ -14,18 +14,29 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["argon2"],
+    default="argon2",
+    argon2__time_cost=3,
+    argon2__memory_cost=65536,
+    argon2__parallelism=4,
+    argon2__hash_len=32,
+    argon2__salt_len=16,
+)
 
 class AuthUtils:
     @staticmethod
     def hash_password(password: str) -> str:
-        """Hash a password"""
+        """Hash a password using Argon2"""
         return pwd_context.hash(password)
     
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
-        """Verify a password"""
-        return pwd_context.verify(plain_password, hashed_password)
+        """Verify a password against its hash"""
+        try:
+            return pwd_context.verify(plain_password, hashed_password)
+        except Exception:
+            return False
     
     @staticmethod
     def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

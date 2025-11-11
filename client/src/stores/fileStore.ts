@@ -1,10 +1,13 @@
 import { defineStore } from 'pinia';
 import { ref,computed } from 'vue';
 import { ApiError, FileItem, type UserFileList, type Body_upload_file_api_files_upload__project_id__post} from '@/utils/api';
-import { DefaultService } from '@/utils/api';
+import AuthenticatedServiceFactory from '@/utils/api/services/AuthenticatedServiceFactory';
 import { ElMessage } from 'element-plus';
 
 export const useFileStore = defineStore('file', () => {
+
+    //authenticated service factory
+    const authService = AuthenticatedServiceFactory.getService();
 
     //fileList default
     const default_uid: number = 1;
@@ -168,7 +171,7 @@ export const useFileStore = defineStore('file', () => {
 
     async function initializeFiles(){
         try{
-            const response = await DefaultService.listFilesApiFilesListGet();
+            const response = await authService.listFilesApiFilesListGet();
             userFileList.value = response;
             refreshFile();
             refreshCache();
@@ -189,7 +192,7 @@ export const useFileStore = defineStore('file', () => {
 
     async function getUserFileList(){
         try{
-            const response = await DefaultService.listFilesApiFilesListGet();
+            const response = await authService.listFilesApiFilesListGet();
             userFileList.value = response;
         }
         catch(error){
@@ -208,7 +211,7 @@ export const useFileStore = defineStore('file', () => {
 
     async function uploadFile(pid: number,nodeid: string,formData: Body_upload_file_api_files_upload__project_id__post){
         try{
-            const response = await DefaultService.uploadFileApiFilesUploadProjectIdPost(pid,nodeid,formData);
+            const response = await authService.uploadFileApiFilesUploadProjectIdPost(pid,nodeid,formData);
             ElMessage('文件上传成功');
             await getUserFileList();
         }
@@ -237,7 +240,7 @@ export const useFileStore = defineStore('file', () => {
 
     async function getFileContent(key: string){
         try{
-            const response = await DefaultService.getFileContentApiFilesKeyGet(key);
+            const response = await authService.getFileContentApiFilesKeyGet(key);
             currentContent.value = response;
             ElMessage('获取文件内容成功');
             return currentContent.value
@@ -264,7 +267,7 @@ export const useFileStore = defineStore('file', () => {
 
     async function deleteFile(key: string){
         try{
-            const response = await DefaultService.deleteFileApiFilesKeyDelete(key)
+            const response = await authService.deleteFileApiFilesKeyDelete(key)
             ElMessage('删除文件成功');
             removeCacheContent(key);
             await getUserFileList();
