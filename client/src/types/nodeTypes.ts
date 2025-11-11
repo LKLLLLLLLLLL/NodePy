@@ -23,7 +23,7 @@ export interface BaseNode<T = BaseData> extends AbstractNode{
 }
 
 
-/**************  Generate Nodes ****************/
+/**************  Input Nodes ****************/
 export interface ConstNodeParam{
     value: number
     data_type: 'int' | 'float'
@@ -70,11 +70,7 @@ export interface TableNode extends BaseNode<TableNodeData>{
 }
 
 
-export interface TableFromCSVNodeParam {}
-export type TableFromCSVNodeData = BaseData & {
-    param: TableFromCSVNodeParam
-}
-export interface TableFromCSVNode extends BaseNode<TableFromCSVNodeData>{
+export interface TableFromCSVNode extends BaseNode {
     type: 'TableFromCSVNode'
 }
 
@@ -127,13 +123,14 @@ export interface BoolBinOpNode extends BaseNode<BoolBinOpNodeData>{
     type: 'BoolBinOpNode'
 }
 
+
 export interface BoolUnaryOpNodeParam {
     op: 'NOT'
 }
 export type BoolUnaryOpNodeData = BaseData & {
     param: BoolUnaryOpNodeParam
 }
-export interface BoolUnaryOpNode extends BaseNode{
+export interface BoolUnaryOpNode extends BaseNode<BoolUnaryOpNodeData>{
     type: 'BoolNotNode'
 }
 
@@ -239,6 +236,81 @@ export interface PlotNode extends BaseNode<PlotNodeData>{
 
 
 /*********************  StringProcess Nodes  **************************/
+export interface StripNodeParam {
+    strip_chars?: string
+}
+export type StripNodeData = BaseData & {
+    param: StripNodeParam
+}
+export interface StripNode extends BaseNode<StripNodeData> {
+    type: 'StripNode'
+}
+
+
+export interface SliceNodeParam {
+    start?: number
+    end?: number
+}
+export type SliceNodeData = BaseData & {
+    param: SliceNodeParam
+}
+export interface SliceNode extends BaseNode<SliceNodeData> {
+    type: 'SliceNode'
+}
+
+
+export interface ReplaceNodeParam {
+    old: string
+    new: string
+}
+export type ReplaceNodeData = BaseData & {
+    param: ReplaceNodeParam
+}
+export interface ReplaceNode extends BaseNode<ReplaceNodeData> {
+    type: 'ReplaceNode'
+}
+
+
+export interface LowerOrUpperNodeParam {
+    to_case: string
+}
+export type LowerOrUpperNodeData = BaseData & {
+    param: LowerOrUpperNodeParam
+}
+export interface LowerOrUpperNode extends BaseNode<LowerOrUpperNodeData> {
+    type: 'LowerOrUpperNode'
+}
+
+
+export interface ConcatNode extends BaseNode {
+    type: 'ConcatNode'
+}
+
+
+export interface BatchStripNodeParam {
+    strip_chars?: string
+    col: string
+    result_col?: string
+}
+export type BatchStripNodeData = BaseData & {
+    param: BatchStripNodeParam
+}
+export interface BatchStripNode extends BaseNode<BatchStripNodeData> {
+    type: 'BatchStripNode'
+}
+
+
+export interface BatchConcatNodeParam {
+    col1: string
+    col2: string
+    result_col?: string
+}
+export type BatchConcatNodeData = BaseData & {
+    param: BatchConcatNodeParam
+}
+export interface BatchConcatNode extends BaseNode<BatchConcatNodeData> {
+    type: 'BatchConcatNode'
+}
 
 
 /*********************  TableProcess Nodes  **************************/
@@ -256,10 +328,6 @@ export interface UploadNode extends BaseNode<UploadNodeData>{
 }
 
 
-export interface DisplayNodeParam {}
-export type DisplayNodeData = BaseData & {
-    param: DisplayNodeParam
-}
-export interface DisplayNode extends BaseNode<DisplayNodeData>{
+export interface DisplayNode extends BaseNode {
     type: 'DisplayNode'
 }

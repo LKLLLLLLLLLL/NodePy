@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted, type Ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
 export interface Position {
   x: number
@@ -6,27 +6,23 @@ export interface Position {
 }
 
 export function usePointerLock(params: { onMove: (movement: Position) => void, onDragEnd?: () => void }) {
-  const isLocked: Ref<boolean> = ref(false)
-  const hasDragged = ref(false)
+  const isLocked = ref(false)
+  const isDragging = ref(false)
 
   const handleLockChange = () => {
     isLocked.value = document.pointerLockElement !== null
-    if (isLocked.value) {
-      hasDragged.value = false
-    }
   }
 
   const handleMove = (e: PointerEvent) => {
-    if (!isLocked.value) return
-    if (e.movementX !== 0 || e.movementY !== 0) {
-      hasDragged.value = true
-    }
+    if (!isLocked.value || !isDragging.value) return
     params.onMove({ x: e.movementX, y: e.movementY })
   }
 
-  const handlePointerUp = () => {
+  const handleMouseUp = () => {
+    isDragging.value = false
     document.exitPointerLock()
     document.removeEventListener("pointermove", handleMove)
+    document.removeEventListener("mouseup", handleMouseUp)
     if(params.onDragEnd) {
       params.onDragEnd()
     }
@@ -34,22 +30,21 @@ export function usePointerLock(params: { onMove: (movement: Position) => void, o
 
   onMounted(() => {
     document.addEventListener("pointerlockchange", handleLockChange)
-    document.addEventListener("pointerup", handlePointerUp)
   })
 
   onUnmounted(() => {
     document.removeEventListener("pointerlockchange", handleLockChange)
-    document.removeEventListener("pointerup", handlePointerUp)
   })
 
   const requestLock = (element: HTMLElement) => {
+    isDragging.value = true
     element.requestPointerLock()
+    document.addEventListener("mouseup", handleMouseUp)
     document.addEventListener("pointermove", handleMove)
   }
 
   return {
     isLocked,
-    hasDragged,
     requestLock,
   }
 }

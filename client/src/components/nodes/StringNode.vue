@@ -1,9 +1,12 @@
 <template>
     <div class="StringNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="node-title nodes-topchild-border-radius">字符串节点</div>
+        <div class="node-title-input nodes-topchild-border-radius">字符串节点</div>
         <div class="data">
             <Handle id="string" type="source" :position="Position.Right" class="str-handle-color"/>
             <div class="value">
+                <div class="value-description">
+                    字符串
+                </div>
                 <NodepyStringInput 
                     v-model="value" 
                     :disabled="false" 
@@ -44,7 +47,7 @@
             padding: 5px 0;
             position: relative;
             .value {
-                padding: 0 10px;
+                padding: 0 $node-padding-left;
             }
         }
     }

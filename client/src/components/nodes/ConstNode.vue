@@ -1,12 +1,30 @@
 <template>
     <div class="ConstNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="node-title nodes-topchild-border-radius">常量节点</div>
+        <div class="node-title-input nodes-topchild-border-radius">常量节点</div>
         <div class="data">
             <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             <div class="value">
-                 <NodepyNumberInput v-model="value" class="nodrag" @update-value="onUpdateValue"/>
+                <div class="value-description">
+                    数值
+                </div>
+                <NodepyNumberInput 
+                    v-if="data_type == 'int'" 
+                    v-model="value" 
+                    class="nodrag" 
+                    @update-value="onUpdateValue"
+                 />
+                <NodepyNumberInput 
+                    v-else-if="data_type == 'float'" 
+                    v-model="value" 
+                    class="nodrag" 
+                    @update-value="onUpdateValue"
+                    :denominator="1000"
+                />
             </div>
             <div class="data_type">
+                <div class="data_type-description">
+                    类型
+                </div>
                 <NodepySelectFew 
                     :options="data_type_options" 
                     :select-max-num="1" 
@@ -35,11 +53,16 @@
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
     const data_type_options = ['int', 'float']
     const defaultSelected = [data_type_options.indexOf(props.data.param.data_type)]
+    const data_type = ref(props.data.param.data_type)
 
 
     const onSelectChange = (e: any) => {
-        const data_type = data_type_options[e[0]] as 'int' | 'float'
-        props.data.param.data_type = data_type
+        data_type.value = data_type_options[e[0]] as 'int' | 'float'
+        props.data.param.data_type = data_type.value
+        if(data_type.value == 'int') {
+            value.value = Math.floor(value.value)
+            props.data.param.value = value.value
+        }
     }
 
     const onUpdateValue = () => {
@@ -60,16 +83,11 @@
             position: relative;
             padding: 5px 0;
             .value {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0 10px;
+                padding: 0 $node-padding-left;
             }
             .data_type {
-                display: flex;
-                justify-content: center;
-                margin-top: 5px;
-                padding: 0 10px;
+                margin-top: 10px;
+                padding: 0 $node-padding-left;
             }
         }    
     }

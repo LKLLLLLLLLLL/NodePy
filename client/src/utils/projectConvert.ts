@@ -104,10 +104,5 @@ export const writeBackVueFLowProject = (p: Project, vp: vueFlowProject) => {
         vp.workflow.nodes[i].data.runningtime = p.workflow.nodes[i]?.runningtime    //@ts-ignore
         vp.workflow.nodes[i].data.schema_out = p.workflow.nodes[i]?.schema_out
     }
-    vp.project_id = p.project_id
-    vp.project_name = p.project_name
-    vp.user_id = p.user_id
     vp.workflow.error_message = p.workflow.error_message
-    vp.updated_at = p.updated_at
-    vp.thumb = p.thumb
 }

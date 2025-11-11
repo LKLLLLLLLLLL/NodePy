@@ -11,7 +11,7 @@
                 </svg>
             </span>
         </div>
-        <div v-if="!isEditing" class="value" @pointerdown="handlePointerDown" @click="handleValueClick">
+        <div v-if="!isEditing" class="value" @mousedown="handleLeftMouseDown">
             <span>{{ (model ?? 0).toFixed(local.fixed) }}</span>
         </div>
         <div class="value-input" v-else>
@@ -41,7 +41,6 @@
 
     const props = withDefaults(defineProps<NumberFieldProps>(), {
         denominator: 1,
-        scale: 0,
         width: '100%',
         height: '100%'
     })
@@ -78,20 +77,38 @@
       model.value = Math.min(Math.max(newValue, min), max)
     }
 
-    const { requestLock, hasDragged } = usePointerLock({
+    const { requestLock } = usePointerLock({
       onMove: relative => update(relative.x),
       onDragEnd: () => {emit('updateValue')}
     })
 
-    const handlePointerDown = (e: PointerEvent) => {
-      requestLock(e.currentTarget as HTMLElement)
-    }
+    const handleLeftMouseDown = (e: MouseEvent) => {
+        if(e.button === 0){
+            const element = e.currentTarget as HTMLElement
+            const startX = e.clientX
+            const startY = e.clientY
+            let hasMoved = false
 
-    const handleValueClick = () => {
-        if(!hasDragged.value) {
-            startEdit()
+            const onMouseMove = (moveEvent: MouseEvent) => {
+                const deltaX = Math.abs(moveEvent.clientX - startX)
+                const deltaY = Math.abs(moveEvent.clientY - startY)
+                if(!hasMoved && (deltaX > 3 || deltaY > 3)) {
+                    hasMoved = true
+                    requestLock(element)
+                }
+            }
+
+            const onMouseUp = () => {
+                document.removeEventListener('mousemove', onMouseMove)
+                document.removeEventListener('mouseup', onMouseUp)
+                if(!hasMoved) {
+                    startEdit()
+                }
+            }
+
+            document.addEventListener('mousemove', onMouseMove)
+            document.addEventListener('mouseup', onMouseUp)
         }
-        hasDragged.value = false
     }
 
     const startEdit = () => {
@@ -105,6 +122,7 @@
     }
 
     const commitEdit = () => {
+        if(!isEditing.value) return
         const n = Number(editText.value)
         if(Number.isFinite(n)) {
             const min = props.min ?? Number.NEGATIVE_INFINITY

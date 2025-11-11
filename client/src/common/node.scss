@@ -6,6 +6,8 @@ $table-color: pink;
 $file-color: brown;
 $default-type-color: gray;
 $node-width: 200px;
+$node-title-height: 30px;
+$node-padding-left: 10px;
 
 
 .nodes-style {
@@ -49,9 +51,58 @@ $node-width: 200px;
   background: $default-type-color;
 }
 
-.node-title {
+.node-title-input {
+  background: #ddd;
+  text-align: left;
+  padding-left: $node-padding-left;
+  height: $node-title-height;
+}
+
+.node-title-compute {
   background: #ccc;
   text-align: left;
-  padding-left: 8px;
-  height: 30px;
+  padding-left: $node-padding-left;
+  height: $node-title-height;
+}
+
+.node-title-control {
+  background: #bbb;
+  text-align: left;
+  padding-left: $node-padding-left;
+  height: $node-title-height;
+}
+
+.node-title-file {
+  background: #aaa;
+  text-align: left;
+  padding-left: $node-padding-left;
+  height: $node-title-height;
+}
+
+.node-title-stringProcess {
+  background: #999;
+  text-align: left;
+  padding-left: $node-padding-left;
+  height: $node-title-height;
+}
+
+.node-title-tableProcess {
+  background: #888;
+  text-align: left;
+  padding-left: $node-padding-left;
+  height: $node-title-height;
+}
+
+.node-title-tool {
+  background: #777;
+  text-align: left;
+  padding-left: $node-padding-left;
+  height: $node-title-height;
+}
+
+.node-title-visualize {
+  background: #666;
+  text-align: left;
+  padding-left: $node-padding-left;
+  height: $node-title-height;
 }

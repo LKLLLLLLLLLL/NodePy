@@ -5,11 +5,26 @@
         role="checkbox"
         :aria-checked="model"
         tabindex="0"
-        @click.stop="toggle"
-        @keydown.space.prevent="toggle"
     >
-        <svg class="box" viewBox="0 0 24 24" :style="{width: width, height: height}">
-            <rect x="2" y="2" width="20" height="20" rx="3" :stroke="borderColor" fill="white" stroke-width="2"/>
+        <span class="label" :style="{lineHeight: height}"><slot/></span>
+        <svg 
+            class="box nodrag" 
+            viewBox="0 0 24 24" 
+            :style="{width: width, height: height}" 
+            @click.stop="toggle" 
+            @keydown.space.prevent="toggle"
+        >
+            <rect 
+                class="rect" 
+                x="2" 
+                y="2" 
+                width="20" 
+                height="20" 
+                rx="3" 
+                :stroke="borderColor" 
+                fill="#eee" 
+                stroke-width="2"
+            />
             <path
                 class="tick"
                 d="M7 12l3 3 7-7"
@@ -21,8 +36,6 @@
                 :style="{ opacity: model ? 1 : 0 }"
             />
         </svg>
-
-        <span class="label"><slot/></span>
     </span>
 </template>
 
@@ -39,11 +52,11 @@
         },
         tickColor: {
             type: String,
-            default: '#aaa'
+            default: '#999'
         },
         borderColor: {
             type: String,
-            default: '#ccc'
+            default: '#aaa'
         }
     })
     const emit = defineEmits(['updateValue'])
@@ -58,16 +71,16 @@
 
 <style lang="scss" scoped>
     .NodePyBoolValueLayout {
-        height: 100%;
-        width: 100%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
         user-select: none;
         .box {
-            .tick{
-                transition: opacity .2s ease;
+            cursor: pointer;
+        }
+        .box:hover {
+            .rect {
+                fill: #ddd;
             }
         }
         &.has-label { 

@@ -1,6 +1,6 @@
 <template>
     <div class="BoolNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="node-title nodes-topchild-border-radius">布尔节点</div>
+        <div class="node-title-input nodes-topchild-border-radius">布尔节点</div>
         <div class="data">
             <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             <div class="value">
@@ -9,8 +9,8 @@
                     @update-value="onUpdateValue"
                     width="20px"
                     height="20px"
-                    class="nodrag"
                 >
+                布尔
                 </NodepyBoolValue>
             </div>
         </div>
@@ -41,17 +41,19 @@
     @use '../../common/global.scss' as *;
     @use '../../common/node.scss' as *;
     .BoolNodeLayout {
-        height: 100%;
+        height: 70px;
         width: $node-width;
         background: white;
         .data {
+            height: calc(100% - $node-title-height);
             position: relative;
             padding: 5px 0;
+            display: flex;
+            align-items: center;
             .value {
                 display: flex;
                 align-items: center;
-                justify-content: center;
-                padding: 0 10px;
+                padding-left: $node-padding-left;
             }
         }
     }

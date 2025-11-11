@@ -3,7 +3,6 @@ import { taskManager, TaskCancelledError } from './task'
 import type { Project, TaskResponse } from './api'
 import { Mutex } from 'async-mutex'
 import { autoCaptureMinimap } from '@/utils/GraphCapture/minimapCapture'
-import { autoCaptureDetailed } from './GraphCapture/detailedCapture'
 import { useVueFlow } from '@vue-flow/core'
 import { getProject, writeBackVueFLowProject } from './projectConvert'
 
@@ -19,6 +18,7 @@ const syncProject = (p: Project, graphStore: any) => {
 
         const release = await mutex.acquire()
         p.updated_at = Date.now()
+        graphStore.project.updated_at = p.updated_at    //  update_at should writeback immediately
         graphStore.is_syncing = true
         graphStore.syncing_err_msg= ''
 
@@ -31,6 +31,7 @@ const syncProject = (p: Project, graphStore: any) => {
                     : thumbBase64
 
                 p.thumb = pureBase64
+                graphStore.project.thumb = p.thumb  //  thumb should writeback immediately
             }
         }catch(err) {
             const errMsg = err && typeof err === 'object' && 'message' in err
@@ -89,7 +90,7 @@ const syncProjectUiState = (p: Project, graphStore: any) => {
     return new Promise<any>(async (resolve, reject) => {
 
         const release = await mutex.acquire()
-        p.updated_at = Date.now()
+        graphStore.project.updated_at = Date.now()    //  update_at should writeback immediately
         graphStore.is_syncing = true
         graphStore.syncing_err_msg= ''
 

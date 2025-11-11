@@ -1,11 +1,24 @@
 <template>
     <div class="NumBinComputeNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="node-title nodes-topchild-border-radius">数字二元运算节点</div>
+        <div class="node-title-compute nodes-topchild-border-radius">数字二元运算节点</div>
         <div class="data">
-            <Handle id="x" type="target" :position="Position.Left" style="top: 25%" :class="`${x_type}-handle-color`"/>
-            <Handle id="y" type="target" :position="Position.Left" style="top: 75%" :class="`${y_type}-handle-color`"/>
             <Handle id="result" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
+            <div class="input-x">
+                <div class="x-description">
+                    x输入端口
+                </div>
+                <Handle id="x" type="target" :position="Position.Left" :class="`${x_type}-handle-color`"/>
+            </div>
+            <div class="input-y">
+                <div class="y-description">
+                    y输入端口
+                </div>
+                <Handle id="y" type="target" :position="Position.Left" :class="`${y_type}-handle-color`"/>
+            </div>
             <div class="op">
+                <div class="op-description">
+                    运算类型
+                </div>
                 <NodepySelectMany 
                     :options="op"
                     :default-selected="defaultSelected"
@@ -53,10 +66,22 @@
         .data {
             position: relative;
             padding: 10px 0;
+            .input-x {
+                position: relative;
+                margin-bottom: 10px;
+                .x-description {
+                    padding-left: $node-padding-left;
+                }
+            }
+            .input-y {
+                position: relative;
+                .y-description {
+                    padding-left: $node-padding-left;
+                }
+                margin-bottom: 10px;
+            }
             .op {
-                display: flex;
-                justify-content: center;
-                padding: 0 10px;
+                padding: 0 $node-padding-left;
             }
         }
     }
