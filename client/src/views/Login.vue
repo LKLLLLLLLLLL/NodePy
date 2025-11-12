@@ -9,11 +9,17 @@
     const router = useRouter();
     const pageStore = usePageStore();
 
+    //el-form config
+    const label_width = "80px"
+    const label_position = "right"
+
+    //form type
     type State = 'login'|'register';
     type LoginType = 'email'|'username';
     const state = ref<State>('login');
     const loginType = ref<LoginType>('username');
 
+    //default info
     const default_password: string = '';
     const default_username: string = '';
     const default_confirmpassword: string = '';
@@ -171,7 +177,10 @@
                             <el-radio-button value="username">Username</el-radio-button>
                         </el-radio-group>
                     </el-form-item>
-                    
+                </el-form>
+                <el-form
+                    :label-width="label_width"
+                    label-position="right">
                     <el-form-item class="login-account" :label="accountLabel">
                         <el-input 
                             placeholder="Please enter your email"
@@ -195,14 +204,16 @@
                         >
                         </el-input>
                     </el-form-item>
-                    
+                </el-form>
+                <el-form>
                     <el-form-item class="login-control">
                         <el-button type="primary" @click="handleSubmit">Submit</el-button>
                         <el-button @click="handleReset">Reset</el-button>
                     </el-form-item>
+                </el-form>
                     
                     <!-- 第三方登录按钮 -->
-                    <div class="third-party-login">
+                    <!-- <div class="third-party-login">
                         <div class="divider">
                             Or continue with
                         </div>
@@ -223,8 +234,8 @@
                                 <span>GitHub</span>
                             </el-button>
                         </div>
-                    </div>
-                    
+                    </div> -->
+                <el-form>
                     <el-form-item class="switcher">
                         <el-button type="text" @click="handleSwitch">Register</el-button>
                     </el-form-item>
@@ -236,7 +247,9 @@
                 <h2>Register for NodePy</h2>
             </div>
             <div class="register-form">
-                <el-form>
+                <el-form
+                    :label-width="label_width"
+                    :label-position="label_position">
                     <el-form-item class="register-email" label="Email">
                         <el-input 
                             placeholder="Please enter your email" 
@@ -263,7 +276,7 @@
                         </el-input>
                     </el-form-item>
                     
-                    <el-form-item class="register-password-confirm" label="PasswordConfirm">
+                    <el-form-item class="register-password-confirm" label="Confirm">
                         <el-input 
                             placeholder="Please confirm your password" 
                             v-model="confirm_password"
@@ -272,7 +285,8 @@
                         >
                         </el-input>
                     </el-form-item>
-                    
+                </el-form>
+                <el-form>
                     <el-form-item class="register-control">
                         <el-button type="primary" @click="handleSubmit">Create Account</el-button>
                         <el-button @click="handleReset">Reset</el-button>
