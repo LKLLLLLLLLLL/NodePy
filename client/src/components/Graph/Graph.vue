@@ -7,7 +7,7 @@ import { MiniMap } from '@vue-flow/minimap'
 import { useGraphStore } from '@/stores/graphStore'
 import { useResultStore } from '@/stores/resultStore'
 import { useModalStore } from '@/stores/modalStore'
-import { sync, syncUiState } from '@/utils/network'
+import { sync, syncUiState, getProjectFromServer } from '@/utils/network'
 import RightClickMenu from '../RightClickMenu/RightClickMenu.vue'
 import GraphControls from './GraphControls.vue'
 import GraphInfo from './GraphInfo.vue'
@@ -18,7 +18,6 @@ import StringNode from '../nodes/StringNode.vue'
 import TableNode from '../nodes/TableNode.vue'
 import BoolNode from '../nodes/BoolNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
-import { DefaultService } from '@/utils/api'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { useRoute } from 'vue-router'
@@ -46,7 +45,7 @@ onUnmounted(() => {
 onMounted(async () => {
   try {
     console.log('getProjectApiProjectProjectIdGet')
-    const p = await DefaultService.getProjectApiProjectProjectIdGet(Number(projectId))
+    const p = await getProjectFromServer(Number(projectId))
     initVueFlowProject(p, graphStore.project)
     console.log(graphStore.project)
     await nextTick()

@@ -1,14 +1,15 @@
-import * as service from '@/utils/api/services/DefaultService'
 import { taskManager, TaskCancelledError } from './task'
 import type { Project, TaskResponse } from './api'
 import { Mutex } from 'async-mutex'
 import { autoCaptureMinimap } from '@/utils/GraphCapture/minimapCapture'
 import { useVueFlow } from '@vue-flow/core'
 import { getProject, writeBackVueFLowProject } from './projectConvert'
+import AuthenticatedServiceFactory from './AuthenticatedServiceFactory'
 
 
 const mutex = new Mutex()
 const {vueFlowRef} = useVueFlow('main')
+const authService = AuthenticatedServiceFactory.getService()
 
 
 const syncProject = (p: Project, graphStore: any) => {
@@ -45,7 +46,7 @@ const syncProject = (p: Project, graphStore: any) => {
             if (taskManager.hasActiveTask()) {
                 await taskManager.cancel()
             }
-            taskResponse = await service.DefaultService.syncProjectApiProjectSyncPost(p)
+            taskResponse = await authService.syncProjectApiProjectSyncPost(p)
         }catch(err) {
             const errMsg = err && typeof err === 'object' && 'message' in err
             ? String(err.message)
@@ -95,7 +96,7 @@ const syncProjectUiState = (p: Project, graphStore: any) => {
         graphStore.syncing_err_msg= ''
 
         try {
-            const res = await service.DefaultService.syncProjectUiApiProjectSyncUiPost(p.project_id, p.ui_state)
+            const res = await authService.syncProjectUiApiProjectSyncUiPost(p.project_id, p.ui_state)
             resolve(res)
         }catch(err) {
             const errMsg = err && typeof err === 'object' && 'message' in err
@@ -137,4 +138,8 @@ export const syncUiState = async(graphStore: any) => {
         console.error('@@',err)
     }
 
+}
+
+export const getProjectFromServer = async (ProjectId: number) => {
+    return authService.getProjectApiProjectProjectIdGet(ProjectId)
 }

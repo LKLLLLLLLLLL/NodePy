@@ -64,7 +64,7 @@
 
     const normalize = (number: number, denominator: number) => {
       const frac = denominator / 1
-      return Math.ceil(frac * number) / frac
+      return Math.floor(frac * number) / frac
     }
 
     const update = (relative: number) => {
