@@ -5,8 +5,6 @@
     import { useGraphStore } from '@/stores/graphStore';
     import { useResultStore } from '@/stores/resultStore';
 
-    import { DefaultService, type Project } from '@/utils/api';
-    import { getProject } from '@/utils/projectConvert';
     import { sync } from '@/utils/network';
 
     import Result from '../Result/Result.vue'

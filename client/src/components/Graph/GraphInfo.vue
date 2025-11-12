@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-    import { DefaultService } from '@/utils/api';
     import { ref, computed } from 'vue';
     import { useGraphStore } from '@/stores/graphStore';
     import SvgIcon from '@jamescoyle/vue-icon';
