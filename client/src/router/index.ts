@@ -11,7 +11,7 @@ import Editor from '@/views/Editor.vue'
 const routes: Array<RouteRecordRaw> = [
     {
         path:'/',
-        redirect:'/login'
+        redirect:'/home'
     },
     {
         path: '/visitor',

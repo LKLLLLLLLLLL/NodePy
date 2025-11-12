@@ -1,11 +1,13 @@
 <script lang="ts" setup>
     import { ref, computed } from 'vue';
     import { ElMessage } from 'element-plus';
-    import { useRouter } from 'vuetify/lib/composables/router.mjs';
+    import { useRouter } from 'vue-router';
     // 导入新的认证工具函数
     import { login, signup } from '@/utils/AuthHelper';
+    import { usePageStore } from '@/stores/pageStore';
 
     const router = useRouter();
+    const pageStore = usePageStore();
 
     type State = 'login'|'register';
     type LoginType = 'email'|'username';
@@ -52,6 +54,41 @@
         }
         else return false
     }
+
+    function jumpToPage(){
+        switch(pageStore.currentPage){
+            case('File'):
+                router.push({
+                    name: 'file'
+                })
+                break;
+            case('Example'):
+                router.push({
+                    name: 'example'
+                })
+                break;
+            case('Home'):
+                router.push({
+                    name: 'home'
+                })
+                break;
+            case('ProjectList'):
+                router.push({
+                    name: 'project'
+                })
+                break;
+            case('Visitor'):
+                router.push({
+                    name: 'visitor'
+                })
+                break;
+            default:
+                router.push({
+                    name: 'home'
+                })
+                break;
+        }
+    }
     
     async function handleLogin(){
         try {
@@ -61,9 +98,7 @@
                 password: password.value
             });
             ElMessage('登录成功');
-            router?.push({
-                name: 'project'
-            });
+            jumpToPage();
         } catch (error: any) {
             console.error('登录失败:', error);
             if (error.status === 401) {
@@ -84,9 +119,7 @@
                     password: password.value
                 });
                 ElMessage('注册成功，已自动登录');
-                router?.push({
-                    name: 'project'
-                });
+                jumpToPage();
             } catch (error: any) {
                 console.error('注册失败:', error);
                 if (error.status === 400) {

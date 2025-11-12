@@ -6,11 +6,16 @@ import { Avatar } from '@element-plus/icons-vue'
 import { ref,computed, watch } from "vue";
 import { type Project } from "@/utils/api";
 import { RouterLink } from 'vue-router';
-import {useRoute} from 'vue-router';
+import {useRoute,useRouter} from 'vue-router';
 import { useGraphStore } from "@/stores/graphStore";
+import { isLoggedIn } from "@/utils/AuthHelper";
+import { useModalStore } from "@/stores/modalStore";
+import Logout from "./Logout.vue";
 
 const graphStore = useGraphStore()
+const modalStore = useModalStore()
 const route = useRoute()
+const router = useRouter()
 
 const showProjectName = computed(()=>{
   if(route.params.projectId)return true
@@ -31,8 +36,29 @@ const isActive = (path: string) => {
 }
 
 function handleAvatarClick(){
-    // 处理头像点击事件，比如显示用户菜单
-    console.log('Avatar clicked');
+    if(isLoggedIn()){
+      modalStore.createModal({
+        id: 'log-out',
+        title: 'log-out',
+        isActive: true,
+        isDraggable: true,
+        isResizable: false,
+        position:{
+          x: 200,
+          y: 200
+        },
+        size:{
+          width: 300,
+          height: 200
+        },
+        component: Logout
+      })
+    }
+    else{
+      router.push({
+        name: 'login'
+      })
+    }
 }
 
 </script>

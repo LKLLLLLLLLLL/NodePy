@@ -1,17 +1,29 @@
 <script lang="ts" setup>
     import ProjectDemoFrame from './ProjectDemoFrame.vue';
     import CreateProject from './CreateProject.vue';
-    import { onMounted } from 'vue';
+    import { ref, onMounted } from 'vue';
     import { useModalStore } from '@/stores/modalStore';
     import { useProjectStore } from '@/stores/projectStore';
+    import { usePageStore } from '@/stores/pageStore';
     import { useRouter } from 'vue-router';
+    import { isLoggedIn } from '@/utils/AuthHelper';
+    import Mask from '../Mask.vue';
 
     const modalStore = useModalStore();
     const projectStore = useProjectStore();
+    const pageStore = usePageStore();
     const router = useRouter()
 
+    const login = ref<boolean>(false)
+
     onMounted(()=>{
-        projectStore.initializeProjects()
+        login.value = isLoggedIn()
+        if(login.value){
+            projectStore.initializeProjects()
+        }
+        else{
+            pageStore.setCurrentPage('Login')
+        }
     });
 
     function openAddProjectModal(){
@@ -53,7 +65,7 @@
 </script>
 
 <template>
-    <div class="project-container set_background_color">
+    <div class="project-container set_background_color" v-if="login">
         <div class="projects-grid">
             <!-- Existing projects -->
             <ProjectDemoFrame
@@ -74,6 +86,7 @@
                         :id="0" />
         </div>
     </div>
+    <Mask v-else></Mask>
 </template>
 
 <style lang="scss" scoped>

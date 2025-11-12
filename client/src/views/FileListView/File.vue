@@ -1,11 +1,16 @@
 <script lang="ts" setup>
     import {ref,onMounted} from 'vue';
+    import { useRouter } from 'vue-router';
     import { useFileStore } from '@/stores/fileStore';
     import { useModalStore } from '@/stores/modalStore';
     import FileDemoFrame from './FileDemoFrame.vue';
     import { FileItem } from '@/utils/api';
+    import { isLoggedIn } from '@/utils/AuthHelper';
+    import { usePageStore } from '@/stores/pageStore';
+    import Mask from '../Mask.vue';
 
     const fileStore = useFileStore();
+    const pageStore = usePageStore();
 
     const default_file: FileItem ={
         key: '123',
@@ -16,15 +21,23 @@
         project_name: 'default'
     }
 
+    const login = ref<boolean>(false)
+
     onMounted(()=>{
-        fileStore.initializeFiles();
-        console.log(fileStore.userFileList);
-        console.log(fileStore.userFileList.files);
+        login.value = isLoggedIn()
+        if(login.value){
+            fileStore.initializeFiles();
+            console.log(fileStore.userFileList);
+            console.log(fileStore.userFileList.files);
+        }
+        else{
+            pageStore.setCurrentPage('File');
+        }
     })
 
 </script>
 <template>
-    <div class="fileview-container">
+    <div class="fileview-container" v-if="login">
         <!-- <div class="left-container">
 
         </div> -->
@@ -74,6 +87,7 @@
 
         </div> -->
     </div>
+    <Mask v-else></Mask>
 </template>
 <style lang="scss" scoped>
     @use '../../common/global.scss' as *;
