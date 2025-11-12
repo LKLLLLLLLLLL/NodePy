@@ -108,7 +108,7 @@ export function withAuthMethod<T extends any[], R>(
       } catch (error: any) {
         console.error(`❌ API 请求失败 (${apiMethod.name}):`, error);
         
-        const isAuthError = error.status === 401 || error.status === 403;
+        const isAuthError = error.status === 401;
         
         if (isAuthError && retryCount < 1) {
           try {
