@@ -101,7 +101,7 @@ class PlotNode(BaseNode):
         plt.tight_layout()      
         # save to byte stream
         buf = file_manager.get_buffer()
-        plt.savefig(buf, format="png")
+        plt.savefig(buf, format="png", dpi=500)
         plt.close()
         file = file_manager.write_sync(
             content=buf,

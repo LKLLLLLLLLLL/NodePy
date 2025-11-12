@@ -1,6 +1,6 @@
 version = 1
-revision = 3
-requires-python = "==3.13.*"
+revision = 2
+requires-python = ">=3.13.0, <3.14.0"
 
 [[package]]
 name = "amqp"
@@ -613,7 +613,7 @@ requires-dist = [
 dev = [
     { name = "pygments", specifier = ">=2.19.2" },
     { name = "pytest", specifier = ">=8.4.2" },
-    { name = "stats-code", specifier = ">=0.1.1" },
+    { name = "stats-code", specifier = ">=0.1.5" },
     { name = "taskipy", specifier = ">=1.13.0" },
 ]
 
@@ -1085,18 +1085,17 @@ wheels = [
 
 [[package]]
 name = "stats-code"
-version = "0.1.2"
+version = "0.1.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "chardet" },
     { name = "pathspec" },
-    { name = "pydantic" },
     { name = "pyyaml" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/87/f0/4cfced3bd8d355f6593ab27e2ac94db34a4062057b6868006f21496be807/stats_code-0.1.2.tar.gz", hash = "sha256:b1ef9dd2218973a0006e9042501cefac3cf499a68bffd57a4625e5ca8e8be356", size = 14916, upload-time = "2025-11-01T06:55:39.438Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/53/a6/c296640da934da4dc5d22b2dfa3e42fe19fe273d440b620eab72aef52056/stats_code-0.1.5.tar.gz", hash = "sha256:75b978ec480706db68762e72e5f239f55dcbc80cbb329274c3d8b74b9ece38b6", size = 18653, upload-time = "2025-11-12T12:36:58.579Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/32/4c/42a037728c832e7bb1af551da6f97f8ae293d52d6a6b4253de5967df79ed/stats_code-0.1.2-py3-none-any.whl", hash = "sha256:93c6c9c4953016bcc5fa3c96144aee2a9513e816d928569d7ebc67d8e5da7642", size = 14578, upload-time = "2025-11-01T06:55:37.777Z" },
+    { url = "https://files.pythonhosted.org/packages/35/ed/f9be15637cbd54ed4dac0b96a777a0f13c4307780e543f2bfeff79149d75/stats_code-0.1.5-py3-none-any.whl", hash = "sha256:b02a78a9fe29c7285bc096850ac19e4574dc4c4cb2cf3192b72257f0955d97a1", size = 18937, upload-time = "2025-11-12T12:36:57.332Z" },
 ]
 
 [[package]]

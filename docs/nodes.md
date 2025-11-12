@@ -66,6 +66,7 @@ NodePy 的节点系统是一个完全静态类型的节点系统，类型验证�
 
 #### 1.4 TableNode
 表格输入节点，可以输出一个固定的表格值。
+注意：如果用户提供了列名但没有提供行数据，将会抛出错误，因为无法推断列的数据类型。
 
 **参数：**
 - rows: `List[Dict[str, str | int | float | bool]]`，表格的行数据，每一行是一个字典，键为列名，值为对应的单元格数据。
@@ -101,6 +102,42 @@ table:
 
 **输入：**
 - csv_file: 输入的CSV文件，类型为File，格式为CSV。
+
+**输出：**
+- table: 输出的表格，类型为Table。
+
+#### 1.5 RandomNode
+随机表格生成节点，可以生成一个包含一个由随机数构成的列的表格。
+
+**参数：**
+- col_name: 列名，类型为str。
+- row_count: 行数，类型为int或None，也可以由input输入覆盖。
+- col_type: 列的数据类型，类型为str，取值为"int"或"float"或"str"或"bool"。
+- min_value: 最小值，类型为int或float或None，也可以由input输入覆盖，如果col_type为"str"或"bool"则忽略该参数。
+- max_value: 最大值，类型为int或float或None，也可以由input输入覆盖，如果col_type为"str"或"bool"则忽略该参数。
+
+**输入：**
+- row_count: 行数，类型为int，可选，如果提供则覆盖参数中的row_count。
+- min_value: 最小值，类型为int或float，可选，如果提供则覆盖参数中的min_value，如果col_type为"str"或"bool"则不应有该输入。
+- max_value: 最大值，类型为int或float，可选，如果提供则覆盖参数中的max_value，如果col_type为"str"或"bool"则不应有该输入。
+
+**输出：**
+- table: 输出的表格，类型为Table。
+
+#### 1.6 RangeNode
+范围表格生成节点，可以生成一个包含一个由指定范围内数值构成的列的表格。
+
+**参数：**
+- col_name: 列名，类型为str。
+- start: 起始值，类型为int或float或None，也可以由input输入覆盖。
+- end: 结束值，类型为int或float或None，也可以由input输入覆盖。
+- step: 步长，类型为int或float或None，也可以由input输入覆盖。
+- col_type: 列的数据类型，类型为str，取值为"int"或"float"。
+
+**输入：**
+- start: 起始值，类型为int或float，可选，如果提供则覆盖参数中的start。
+- end: 结束值，类型为int或float，可选，如果提供则覆盖参数中的end。
+- step: 步长，类型为int或float，可选，如果提供则覆盖参数中的step。
 
 **输出：**
 - table: 输出的表格，类型为Table。

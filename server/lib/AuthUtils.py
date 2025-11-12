@@ -16,7 +16,6 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 pwd_context = CryptContext(
     schemes=["argon2"],
-    default="argon2",
     argon2__time_cost=3,
     argon2__memory_cost=65536,
     argon2__parallelism=4,
@@ -58,7 +57,7 @@ class AuthUtils:
 
     @staticmethod
     def create_refresh_token(data: dict) -> str:
-        """创建 refresh token"""
+        """Create a refresh token"""
         to_encode = data.copy()
 
         # Ensure sub is a string (JWT standard requirement)
