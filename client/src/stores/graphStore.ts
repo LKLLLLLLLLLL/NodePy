@@ -91,6 +91,17 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedNumBinComputeNode)
         break
+      case 'TableFromCSVNode':
+        const addedTableFromCSVNode: Nodetypes.TableFromCSVNode = {
+          id: Date.now().toString(),
+          position,
+          type: 'TableFromCSVNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedTableFromCSVNode)
+        break
     
       default:
         console.log(type)

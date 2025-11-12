@@ -17,6 +17,7 @@ import ConstNode from '../nodes/ConstNode.vue'
 import StringNode from '../nodes/StringNode.vue'
 import TableNode from '../nodes/TableNode.vue'
 import BoolNode from '../nodes/BoolNode.vue'
+import TableFromCSVNode from '../nodes/TableFromCSVNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
@@ -205,6 +206,10 @@ const isValidConnection = (connection: any) => {
         
         <template #node-BoolNode="BoolNodeProps">
           <BoolNode v-bind="BoolNodeProps"/>
+        </template>
+
+        <template #node-TableFromCSVNode="TableFromCSVNodeProps">
+          <TableFromCSVNode v-bind="TableFromCSVNodeProps"/>
         </template>
 
         <template #node-NumberBinOpNode="NumberBinOpNodeProps">

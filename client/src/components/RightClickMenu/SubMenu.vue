@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { watch, ref } from 'vue'
-import { type MenuNode } from '@/types/menuTypes'
+import { type MenuNode } from '@/components/RightClickMenu/menuTypes'
 
 interface Props {
   items: MenuNode[]

@@ -64,7 +64,7 @@
     @use '../../../common/global.scss';
     @use '../../../common/node.scss';
     .NodePySelectFewLayout {
-        display: inline-flex;
+        display: flex;
         border: 1.5px solid #ccc;
         overflow: hidden;
         .item {

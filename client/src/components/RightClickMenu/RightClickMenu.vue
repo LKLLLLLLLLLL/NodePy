@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useGraphStore } from '@/stores/graphStore'
 import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
-import { nodeMenuItems, type MenuNode } from '@/types/menuTypes'
+import { nodeMenuItems, type MenuNode } from '@/components/RightClickMenu/menuTypes'
 import { useVueFlow } from '@vue-flow/core'
 import SubMenu from './SubMenu.vue'
 

@@ -2,7 +2,6 @@
     <div class="BoolNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="node-title-input nodes-topchild-border-radius">布尔节点</div>
         <div class="data">
-            <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             <div class="value">
                 <NodepyBoolValue
                     v-model="value"
@@ -12,6 +11,12 @@
                 >
                 布尔
                 </NodepyBoolValue>
+            </div>
+            <div class="output-const port">
+                <div class="output-port-description">
+                    布尔输出端口
+                </div>
+                <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             </div>
         </div>
     </div>
@@ -41,19 +46,16 @@
     @use '../../common/global.scss' as *;
     @use '../../common/node.scss' as *;
     .BoolNodeLayout {
-        height: 70px;
+        height: 100%;
         width: $node-width;
         background: white;
         .data {
-            height: calc(100% - $node-title-height);
-            position: relative;
-            padding: 5px 0;
-            display: flex;
-            align-items: center;
+            padding-top: $node-padding;
+            padding-bottom: 5px;
             .value {
                 display: flex;
                 align-items: center;
-                padding-left: $node-padding-left;
+                padding-left: $node-padding;
             }
         }
     }

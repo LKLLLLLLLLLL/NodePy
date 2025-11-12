@@ -2,7 +2,6 @@
     <div class="StringNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="node-title-input nodes-topchild-border-radius">字符串节点</div>
         <div class="data">
-            <Handle id="string" type="source" :position="Position.Right" class="str-handle-color"/>
             <div class="value">
                 <div class="value-description">
                     字符串
@@ -13,6 +12,12 @@
                     @update-value="onUpdateValue" 
                     class="nodrag"
                 />
+            </div>
+            <div class="output-string port">
+                <div class="output-port-description">
+                    字符串输出端口
+                </div>
+                <Handle id="string" type="source" :position="Position.Right" class="str-handle-color"/>
             </div>
         </div>
     </div>
@@ -44,10 +49,13 @@
         width: $node-width;
         background: white;
         .data {
-            padding: 5px 0;
-            position: relative;
+            padding-top: $node-padding;
+            padding-bottom: 5px;
             .value {
-                padding: 0 $node-padding-left;
+                padding: 0 $node-padding;
+            }
+            .output-string {
+                margin-top: $node-margin;
             }
         }
     }

@@ -2,7 +2,6 @@
     <div class="ConstNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="node-title-input nodes-topchild-border-radius">常量节点</div>
         <div class="data">
-            <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             <div class="value">
                 <div class="value-description">
                     数值
@@ -33,6 +32,12 @@
                     item-width="90px"
                     class="nodrag"
                 />
+            </div>
+            <div class="output-const port">
+                <div class="output-port-description">
+                    常量输出端口
+                </div>
+                <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             </div>
         </div>
     </div>
@@ -80,14 +85,17 @@
         width: $node-width;
         background: white;
         .data {
-            position: relative;
-            padding: 5px 0;
+            padding-top: $node-padding;
+            padding-bottom: 5px;
             .value {
-                padding: 0 $node-padding-left;
+                padding: 0 $node-padding;
             }
             .data_type {
-                margin-top: 10px;
-                padding: 0 $node-padding-left;
+                margin-top: $node-margin;
+                padding: 0 $node-padding;
+            }
+            .output-const {
+                margin-top: $node-margin;
             }
         }    
     }

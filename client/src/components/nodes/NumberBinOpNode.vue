@@ -2,15 +2,14 @@
     <div class="NumBinComputeNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="node-title-compute nodes-topchild-border-radius">数字二元运算节点</div>
         <div class="data">
-            <Handle id="result" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
-            <div class="input-x">
-                <div class="x-description">
+            <div class="input-x port">
+                <div class="input-port-description">
                     x输入端口
                 </div>
                 <Handle id="x" type="target" :position="Position.Left" :class="`${x_type}-handle-color`"/>
             </div>
-            <div class="input-y">
-                <div class="y-description">
+            <div class="input-y port">
+                <div class="input-port-description">
                     y输入端口
                 </div>
                 <Handle id="y" type="target" :position="Position.Left" :class="`${y_type}-handle-color`"/>
@@ -26,6 +25,12 @@
                     width="100%"
                     class="nodrag"
                 />
+            </div>
+            <div class="output-result port">
+                <div class="output-port-description">
+                    结果输出端口
+                </div>
+                <Handle id="result" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             </div>
         </div>
     </div>
@@ -64,24 +69,19 @@
         width: $node-width;
         background: white;
         .data {
-            position: relative;
-            padding: 10px 0;
+            padding-top: $node-padding;
+            padding-bottom: 5px;
             .input-x {
-                position: relative;
-                margin-bottom: 10px;
-                .x-description {
-                    padding-left: $node-padding-left;
-                }
+                margin-bottom: $node-margin;
             }
             .input-y {
-                position: relative;
-                .y-description {
-                    padding-left: $node-padding-left;
-                }
-                margin-bottom: 10px;
+                margin-bottom: $node-margin;
             }
             .op {
-                padding: 0 $node-padding-left;
+                padding: 0 $node-padding;
+            }
+            .output-result {
+                margin-top: $node-margin;
             }
         }
     }
