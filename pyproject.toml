@@ -25,7 +25,8 @@ dependencies = [
     "passlib>=1.7.4",
     "email-validator>=2.3.0",
     "argon2-cffi>=21.3.0",
-    "passlib[argon2]>=1.7.4"
+    "passlib[argon2]>=1.7.4",
+    "restrictedpython>=8.1",
 ]
 
 [dependency-groups]

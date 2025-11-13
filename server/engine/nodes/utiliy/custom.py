@@ -1,0 +1,119 @@
+import math
+import RestrictedPython
+import typing
+from ..base_node import BaseNode, InPort, OutPort, register_node
+from typing import Literal, override
+from server.models.exception import (
+    NodeParameterError,
+    NodeExecutionError,
+)
+from server.models.data import Data
+from server.models.schema import Pattern, Schema
+
+@register_node
+class CostumScriptNode(BaseNode):
+    """
+    This node allows users to define custom Script using Python code.
+    The function should take inputs as defined in the input ports and return outputs as defined in the output ports.
+    """
+
+    type allowed_types = Literal["STR", "INT", "FLOAT", "BOOL"]
+
+    input_ports: list[tuple[str, allowed_types]]  # List of tuples (port_name, type)
+    output_ports: list[tuple[str, allowed_types]]  # List of tuples (port_name, type)
+    script: str  # The user-defined Python script
+
+    @override
+    def validate_parameters(self) -> None:
+        if not self.type == "CostumScriptNode":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Type must be 'CostumScriptNode'",
+            )
+        return
+
+    @override
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
+        in_ports = []
+        for name, type_str in self.input_ports:
+            schema_type = Schema.Type[type_str]
+            in_ports.append(
+                InPort(
+                    name=name,
+                    description=f"Input port of type {type_str}",
+                    optional=False,
+                    accept=Pattern(types={schema_type})
+                )
+            )
+        out_ports = []
+        for name, type_str in self.output_ports:
+            out_ports.append(
+                OutPort(
+                    name=name,
+                    description=f"Output port of type {type_str}",
+                )
+            )
+        return in_ports, out_ports
+
+    @override
+    def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
+        output_schemas = {}
+        for name, type_str in self.output_ports:
+            schema_type = Schema.Type[type_str]
+            output_schemas[name] = Schema(type=schema_type)
+        return output_schemas
+
+    @override
+    def process(self, input: dict[str, Data]) -> dict[str, Data]:
+        kwargs = {name: data.payload for name, data in input.items()}
+        # Execute the user-defined script
+        try:
+            byte_code = RestrictedPython.compile_restricted(
+                self.script,
+                filename='<inline>',
+                mode='exec'
+            )
+            safe_globals = {
+                "__builtins__": RestrictedPython.safe_builtins,
+                "_getiter_": iter,
+                "_print_": RestrictedPython.PrintCollector,
+                "math": math,
+                "typing": typing,
+            }
+            local_env = {}
+            exec(byte_code, safe_globals, local_env)
+            
+            # Call the script function
+            if 'script' not in local_env:
+                raise NodeExecutionError(
+                    node_id=self.id,
+                    err_msg="Function 'script' not defined in custom script"
+                )
+            
+            result = local_env['script'](**kwargs)
+            
+            if not isinstance(result, dict):
+                raise NodeExecutionError(
+                    node_id=self.id,
+                    err_msg=f"Script function must return a dict, got {type(result)}"
+                )
+                
+        except Exception as e:
+            raise NodeExecutionError(
+                node_id=self.id,
+                err_msg=f"Error executing custom script: {str(e)}"
+            )
+
+        # Collect outputs
+        output_data = {}
+        for name, type_str in self.output_ports:
+            if name not in local_env:
+                raise NodeExecutionError(
+                    node_id=self.id,
+                    err_msg=f"Output '{name}' not defined in script"
+                )
+            output_payload = local_env[name]
+            output_data[name] = Data(payload=output_payload)
+
+        return output_data

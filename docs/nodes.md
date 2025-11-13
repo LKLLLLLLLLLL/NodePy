@@ -161,7 +161,7 @@ table:
 **输出：**
 - datetime: 输出的日期时间值，类型为Datetime。
 
-### 2. 计算节点(Compute)
+### 2. 计算节点(compute)
 #### 2.1 NumberBinOpNode
 二元数值运算节点，支持对两个数值类型(int或float)的输入进行`ADD`, `SUB`, `MUL`, `DIV`, `POW`五种基本运算。
 
@@ -365,7 +365,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - output: 输出的布尔值，类型为bool。
 
-### 3. 可视化节点(Visualize)
+### 3. 可视化节点(visualize)
 #### 3.1 PlotNode
 绘图节点，支持对表格中的指定列进行绘图操作，支持柱状图(bar)、折线图(line)、散点图(scatter)三种图形类型。
 
@@ -381,7 +381,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - plot: 输出的图形，类型为File，格式为PNG。
 
-### 4. 字符串处理节点(StringProcess)
+### 4. 字符串处理节点(stringprocess)
 #### 4.1 StripNode
 节点用于去除字符串首尾的空白字符或指定字符。
 
@@ -482,7 +482,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - output: 输出的表格，类型为Table，包含新增的结果列。
 
-### 5. 表格处理节点(TableProcess)
+### 5. 表格处理节点(tableprocess)
 #### 5.1 InsertConstColNode
 在表格中插入常量列节点。
 
@@ -529,7 +529,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的随机列。
 
-### 6. 文件处理节点(File)
+### 6. 文件处理节点(file)
 #### 6.1 UploadNode
 文件上传节点，支持上传本地文件并输出为File类型。
 
@@ -555,7 +555,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 无
 
 
-### 7. 日期时间处理节点(DateTimeProcess)
+### 7. 日期时间处理节点(datetimeprocess)
 #### 7.1 DatetimeComputeNode
 日期与PRIM类型运算节点，支持对Datetime类型与int或float类型的输入进行`ADD`, `SUB`两种基本运算。
 
@@ -630,3 +630,23 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **输出：**
 - timestamp: 输出的时间戳，类型为float。
+
+### 8. 工具节点(utility)
+#### 8.1 CustomScriptNode
+用户自定义脚本节点，允许用户编写自定义的Python脚本来处理输入数据并生成输出数据。注意，为了安全起见，用户脚本将在受限的环境中执行，且只能使用预定义的安全库和函数。
+
+**参数：**
+- input_ports: 输入端口定义，类型为List[List[str, type]]，每个输入端口由名称和类型组成。
+- output_ports: 输出端口定义，类型为List[List[str, type]]，每个输出端口由名称和类型组成。
+- script: 用户自定义的Python脚本，类型为str。脚本必须定义一个名为`script`的函数。
+
+注：上述输入输出类型允许使用："STR", "INT", "FLOAT", "BOOL", "DATETIME"。
+
+**输入：**
+动态定义的输入端口，根据input_ports参数定义。
+
+**输出：**
+动态定义的输出端口，根据output_ports参数定义。
+
+### 9. 控制节点(control)
+TODO
