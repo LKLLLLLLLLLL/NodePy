@@ -157,3 +157,65 @@ class DatetimePrintNode(BaseNode):
         assert isinstance(datetime_value, Timestamp)
         formatted_string = datetime_value.strftime(self.pattern)
         return {"string": Data(payload=formatted_string)}
+
+@register_node
+class DatetimeToTimestampNode(BaseNode):
+    """
+    Convert input datetime data to float timestamp.
+    """
+    unit: Literal["DAYS", "HOURS", "MINUTES", "SECONDS"]
+
+    @override
+    def validate_parameters(self) -> None:
+        if not self.type == "DatetimeToTimestampNode":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Node type must be 'DatetimeToTimestampNode'."
+            )
+        return
+
+    @override
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
+        return [
+            InPort(
+                name="datetime", 
+                description="Input datetime data to be converted to timestamp.",
+                optional=False,
+                accept=Pattern(types={Schema.Type.DATETIME})
+            ),
+        ], [
+            OutPort(
+                name="timestamp",
+                description="Output float timestamp after conversion.",
+            )
+        ]
+
+    @override
+    def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
+        return {'timestamp': Schema(type=Schema.Type.FLOAT)}
+
+    @override
+    def process(self, input: dict[str, Data]) -> dict[str, Data]:
+        datetime_value = input["datetime"].payload
+        assert isinstance(datetime_value, Timestamp)
+
+        epoch = Timestamp("1970-01-01")
+        delta = datetime_value - epoch
+
+        if self.unit == "DAYS":
+            timestamp = delta.total_seconds() / 86400.0
+        elif self.unit == "HOURS":
+            timestamp = delta.total_seconds() / 3600.0
+        elif self.unit == "MINUTES":
+            timestamp = delta.total_seconds() / 60.0
+        elif self.unit == "SECONDS":
+            timestamp = delta.total_seconds()
+        else:
+            raise NodeExecutionError(
+                node_id=self.id,
+                err_msg=f"Unsupported unit: {self.unit}"
+            )
+
+        return {'timestamp': Data(payload=timestamp)}
+    

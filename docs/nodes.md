@@ -317,6 +317,54 @@ table:
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的结果列。
 
+#### 2.12 ToStringNode
+节点将输入的任意类型转换为字符串类型。
+
+**参数：**
+无
+
+**输入：**
+- input: 输入的数据，类型为int, float, bool, Table。Datetime类型请参考DatetimePrintNode节点。
+
+**输出：**
+- output: 输出的字符串，类型为str。
+
+#### 2.13 ToIntNode
+节点将输入的任意类型转换为整数类型。
+
+**参数：**
+method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
+
+**输入：**
+- input: 输入的数据，类型为float, bool或str。对于str类型，字符串必须能转换为float或是int格式。
+
+**输出：**
+- output: 输出的整数，类型为int。
+
+#### 2.14 ToFloatNode
+节点将输入的任意类型转换为浮点数类型。
+
+**参数：**
+无
+
+**输入：**
+- input: 输入的数据，类型为int, bool或str。对于str类型，字符串必须能转换为float格式。
+
+**输出：**
+- output: 输出的浮点数，类型为float。
+
+#### 2.15 ToBoolNode
+节点将输入的任意类型转换为布尔类型。
+
+**参数：**
+无
+
+**输入：**
+- input: 输入的数据，类型为int, float或str。对于str类型，字符串必须是"true"或"false"（不区分大小写）。
+
+**输出：**
+- output: 输出的布尔值，类型为bool。
+
 ### 3. 可视化节点(Visualize)
 #### 3.1 PlotNode
 绘图节点，支持对表格中的指定列进行绘图操作，支持柱状图(bar)、折线图(line)、散点图(scatter)三种图形类型。
@@ -571,3 +619,14 @@ table:
 **输出：**
 - output: 输出的字符串，类型为str。
 
+#### 7.6 DatetimeToTimestampNode
+将Datetime类型转换为时间戳类型(float)节点。
+
+**参数：**
+- unit: 时间单位，用来指定输出时间戳的单位，类型为str，取值为"DAYS", "HOURS", "MINUTES", "SECONDS"。
+
+**输入：**
+- datetime: 输入的日期时间，类型为Datetime。
+
+**输出：**
+- timestamp: 输出的时间戳，类型为float。

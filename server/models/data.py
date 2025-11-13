@@ -75,7 +75,7 @@ class Table(BaseModel):
             "data": self.df.to_dict(orient="list"),
             "col_types": {k: v.value for k, v in self.col_types.items()}
         }
-    
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> 'Table':
         df = pandas.DataFrame.from_dict(data["data"])
