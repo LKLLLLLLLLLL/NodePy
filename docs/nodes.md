@@ -13,18 +13,31 @@ NodePy 的节点系统是一个完全静态类型的节点系统，类型验证�
 
 **注意：该节点系统是完全静态类型的，没有任何隐式转换，各类运算都要求操作数的类型完全一致。**
 
-### 2. 六种类型
-在我们的节点系统中，一共只有六大类型：
+### 2. 七种类型
+在我们的节点系统中，一共只有七大类型：
 - `int`: 整数类型, 底层通过Python的`int`实现或`int64`实现。
 - `float`: 浮点数类型, 底层通过Python的`float`实现或`float64`实现。
 - `bool`: 布尔类型, 底层通过Python的`bool`实现。
 - `str`: 字符串类型, 底层通过Python的`str`实现。
 - `Table`: 表格类型, 底层通过Pandas的`DataFrame`实现。
 - `File`: 文件类型, 是对象文件系统的一个抽象，每个用户所产生的全部文件大小受限于其配额（默认5GB）。
+- `Datetime`: 日期时间类型, 底层通过Pandas的`Timestamp`实现，对应Python的`datetime`类型。
 
 其中，前三种由于可以定义各种数学运算，因此也被称作"Prim"类型；前两种也可以被称作"Number"类型。
 
+在表格中，每一列的数据类型允许是：
+- `int`: 整数类型，底层通过Pandas的`int64`实现。
+- `float`: 浮点数类型，底层通过Pandas的`float64`实现。
+- `bool`: 布尔类型，底层通过Pandas的`bool`实现。
+- `str`: 字符串类型，底层通过Pandas的`str`实现。
+- `datetime`: 日期时间类型，底层通过Pandas的`datetime64[ns]`实现，对应Python的`datetime`类型。
+
 ## 二、节点列表
+尽管有了严格的类型系统，但由于json序列化的特点，在传输数据时，一些类型可能丢失，因此在实现节点时还是允许一下这些隐式转换的：
+- 在节点参数中，允许`int` -> `float`的隐式转换。
+- 在节点参数中，允许`str` -> `datetime`的隐式转换，要求字符串符合ISO 8601格式。
+
+注意：在节点输入和输出中，不允许任何隐式转换，所有类型必须完全匹配。
 
 ### 1. 输入节点(input)
 #### 1.1 ConstNode
@@ -111,15 +124,12 @@ table:
 
 **参数：**
 - col_name: 列名，类型为str。
-- row_count: 行数，类型为int或None，也可以由input输入覆盖。
 - col_type: 列的数据类型，类型为str，取值为"int"或"float"或"str"或"bool"。
-- min_value: 最小值，类型为int或float或None，也可以由input输入覆盖，如果col_type为"str"或"bool"则忽略该参数。
-- max_value: 最大值，类型为int或float或None，也可以由input输入覆盖，如果col_type为"str"或"bool"则忽略该参数。
 
 **输入：**
-- row_count: 行数，类型为int，可选，如果提供则覆盖参数中的row_count。
-- min_value: 最小值，类型为int或float，可选，如果提供则覆盖参数中的min_value，如果col_type为"str"或"bool"则不应有该输入。
-- max_value: 最大值，类型为int或float，可选，如果提供则覆盖参数中的max_value，如果col_type为"str"或"bool"则不应有该输入。
+- row_count: 行数，类型为int。
+- min_value: 最小值，类型为int或float，可选，如果col_type为"str"或"bool"则不应有该输入。
+- max_value: 最大值，类型为int或float，可选，如果col_type为"str"或"bool"则不应有该输入。
 
 **输出：**
 - table: 输出的表格，类型为Table。
@@ -129,15 +139,12 @@ table:
 
 **参数：**
 - col_name: 列名，类型为str。
-- start: 起始值，类型为int或float或None，也可以由input输入覆盖。
-- end: 结束值，类型为int或float或None，也可以由input输入覆盖。
-- step: 步长，类型为int或float或None，也可以由input输入覆盖。
 - col_type: 列的数据类型，类型为str，取值为"int"或"float"。
 
 **输入：**
-- start: 起始值，类型为int或float，可选，如果提供则覆盖参数中的start。
-- end: 结束值，类型为int或float，可选，如果提供则覆盖参数中的end。
-- step: 步长，类型为int或float，可选，如果提供则覆盖参数中的step。
+- start: 起始值，类型为int或float。
+- end: 结束值，类型为int或float。
+- step: 步长，类型为int或float，可选，如果未提供则默认为1.0/1/1Day。
 
 **输出：**
 - table: 输出的表格，类型为Table。
@@ -416,8 +423,51 @@ table:
 - output: 输出的表格，类型为Table，包含新增的结果列。
 
 ### 5. 表格处理节点(TableProcess)
+#### 5.1 InsertConstColNode
+在表格中插入常量列节点。
 
-TODO
+**参数：**
+- col_name: 列名，类型为str。
+- col_type: 列的数据类型，类型为str，取值为"int", "float", "bool", "str", "Datetime"。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+- const_value: 列的常量值，类型根据col_type而定。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含新增的常量列。
+
+#### 5.2 InsertRangeColNode
+在表格中插入范围列节点。
+
+**参数：**
+- col_name: 列名，类型为str。
+- col_type: 列的数据类型，类型为str，取值为"int", "float", "Datetime"。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+- start: 起始值，类型根据col_type而定。
+- step: 步长，类型根据col_type而定，可选，如果未提供则默认为1.0/1/1Day。
+
+（注：end值由表格的行数决定，即生成的列长度与表格行数一致。）
+
+**输出：**
+- table: 输出的表格，类型为Table，包含新增的范围列。
+
+#### 5.3 InsertRandomColNode
+在表格中插入随机列节点。
+
+**参数：**
+- col_name: 列名，类型为str。
+- col_type: 列的数据类型，类型为str，取值为"int", "float"。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+- min_value: 最小值，类型根据col_type而定。
+- max_value: 最大值，类型根据col_type而定。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含新增的随机列。
 
 ### 6. 文件处理节点(File)
 #### 6.1 UploadNode
@@ -443,3 +493,4 @@ TODO
 
 **输出：**
 无
+

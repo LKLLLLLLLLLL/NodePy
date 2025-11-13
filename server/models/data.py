@@ -1,4 +1,4 @@
-from pandas import DataFrame, Series
+from pandas import DataFrame, Series, Timestamp
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
 import pandas
@@ -84,7 +84,7 @@ class Table(BaseModel):
 
 
 class Data(BaseModel):
-    payload: Union[Table, str, int, bool, float, File]
+    payload: Union[Table, str, int, bool, float, File, Timestamp]
 
     def extract_schema(self) -> Schema:
         if isinstance(self.payload, Table):
@@ -102,6 +102,8 @@ class Data(BaseModel):
             return Schema(type=Schema.Type.FLOAT)
         elif isinstance(self.payload, File):
             return Schema(type=Schema.Type.FILE)
+        elif isinstance(self.payload, Timestamp):
+            return Schema(type=Schema.Type.DATETIME)
         else:
             raise TypeError(f"Unsupported data payload type: {type(self.payload)}")
 
@@ -139,17 +141,22 @@ class Data(BaseModel):
                 int: "int",
                 float: "float",
                 bool: "bool",
-                File: "File"
+                File: "File",
+                Timestamp: "Datetime",
             }
             payload_type = type_map.get(type(self.payload))
             if payload_type is None:
                 raise TypeError(f"Unsupported payload type for DataView: {type(self.payload)}")
+            
+            value = self.payload
+            if isinstance(self.payload, Timestamp):
+                value = self.payload.isoformat()
             return DataView(
                 type=cast(
-                    Literal["bool", "int", "float", "str", "File"],
+                    Literal["bool", "int", "float", "str", "File", "Datetime"],
                     payload_type,
             ),
-                value=self.payload,
+                value=value,
             )
     
     @classmethod
@@ -178,6 +185,12 @@ class Data(BaseModel):
         elif payload_type == "bool":
             assert isinstance(payload_value, bool)
             payload = payload_value
+        elif payload_type == "Datetime":
+            if isinstance(payload_value, str):
+                payload = Timestamp(payload_value)
+            else:
+                assert isinstance(payload_value, Timestamp)
+                payload = payload_value
         else:
             raise TypeError(f"Unsupported payload type for deserialization: {payload_type}")
         
@@ -188,12 +201,23 @@ class DataView(BaseModel):
     A dict-like view of data, for transmitting or json serialization.
     """
     class TableView(BaseModel):
-        cols: dict[str, list[str | bool | int | float]]
+        cols: dict[str, list[str | bool | int | float | Timestamp]]
         col_types: dict[str, str]  # col name -> col type
-    
-    type: Literal["int", "float", "str", "bool", "Table", "File"]
-    value: Union[TableView, str, int, bool, float, File]
-    
+        
+        def model_dump(self, **kwargs):
+            """Override to handle Timestamp serialization"""
+            result = super().model_dump(**kwargs)
+            # Convert Timestamp objects to ISO format strings
+            for col_name, values in result['cols'].items():
+                result['cols'][col_name] = [
+                    v.isoformat() if isinstance(v, Timestamp) else v 
+                    for v in values
+                ]
+            return result
+
+    type: Literal["int", "float", "str", "bool", "Table", "File", "Datetime"]
+    value: Union[TableView, str, int, bool, float, File, Timestamp]
+
     def to_dict(self) -> dict[str, Any]:
         return super().model_dump()
 

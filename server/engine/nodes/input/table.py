@@ -1,6 +1,6 @@
 from ..base_node import BaseNode, InPort, OutPort, register_node
 from typing import List, Dict, override, Literal
-from server.models.exception import NodeParameterError, NodeExecutionError
+from server.models.exception import NodeParameterError, NodeExecutionError, NodeValidationError
 from server.models.data import Data, File
 from server.models.schema import (
     Schema,
@@ -59,7 +59,12 @@ class TableNode(BaseNode):
                     err_msg=f"All rows must have the same keys as col_names. But got row keys: {list(row.keys())}"
                 )
         # check no illegal column names
-        check_no_illegal_cols(self.col_names)
+        if not check_no_illegal_cols(self.col_names):
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col_names",
+                err_msg="Column names contain illegal names (e.g., reserved keywords)."
+            )
         # check if all columns has same type
         if len(self.rows) > 0:
             col_types: Dict[str, ColType] = {}
@@ -202,14 +207,11 @@ class RandomNode(BaseNode):
     """
     Node to generate a table, with a random column of specified type and range.
     
-    The row_count and min_value and max_value can be got from parameters or inputs.
+    The row_count and min_value and max_value can be got from inputs.
     If col_type is "str" or "bool", min_value and max_value must be None
     """
     col_name: str
-    row_count: int | None
     col_type: Literal["float", "int", "str", "bool"]
-    min_value: float | int | None
-    max_value: float | int | None
     
     @override
     def validate_parameters(self) -> None:
@@ -219,43 +221,12 @@ class RandomNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type must be 'RandomNode'."
             )
-        if self.row_count is not None and self.row_count <= 0:
+        if not check_no_illegal_cols([self.col_name]):
             raise NodeParameterError(
                 node_id=self.id,
-                err_param_key="row_count",
-                err_msg="row_count must be positive."
+                err_param_key="col_name",
+                err_msg="Column name contains illegal characters.",
             )
-        check_no_illegal_cols([self.col_name])
-        if self.col_type in ["float", "int"]:
-            if self.min_value is not None:
-                if type(self.min_value).__name__ != self.col_type:
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="min_value",
-                        err_msg=f"min_value must be of type {self.col_type}."
-                    )
-            if self.max_value is not None:
-                if type(self.max_value).__name__ != self.col_type:
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="max_value",
-                        err_msg=f"max_value must be of type {self.col_type}."
-                    )
-            if self.min_value is not None and self.max_value is not None:
-                if self.min_value >= self.max_value:
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="min_value/max_value",
-                        err_msg="min_value must be less than max_value."
-             
-                    )
-        else:
-            if self.min_value is not None or self.max_value is not None:
-                raise NodeParameterError(
-                    node_id=self.id,
-                    err_param_key="min_value/max_value",
-                    err_msg="min_value and max_value must be None when col_type is 'str' or 'bool'."
-                )
         return
 
     @override
@@ -263,8 +234,7 @@ class RandomNode(BaseNode):
         return [
             InPort(
                 name="row_count",
-                description="Optional input to specify number of rows to generate.",
-                optional=True,
+                description="Input to specify number of rows to generate.",
                 accept=Pattern(
                     types={Schema.Type.INT}
                 )
@@ -299,39 +269,43 @@ class RandomNode(BaseNode):
         }
         # check if input min_value and max_value are compatible
         if self.col_type in ["float", "int"]:
-            if input_schemas.get("min_value") is not None:
-                min_schema = input_schemas["min_value"]
-                if min_schema.type == Schema.Type.INT and self.col_type == "float":
-                    pass  # INT can be promoted to FLOAT
-                elif (min_schema.type == Schema.Type.INT and self.col_type == "int") or (min_schema.type == Schema.Type.FLOAT and self.col_type == "float"):
-                    pass
-                else:
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="min_value",
-                        err_msg=f"min_value input type {min_schema.type} incompatible with col_type {self.col_type}."
-                    )
-            if input_schemas.get("max_value") is not None:
-                max_schema = input_schemas["max_value"]
-                if max_schema.type == Schema.Type.INT and self.col_type == "float":
-                    pass  # INT can be promoted to FLOAT
-                elif (max_schema.type == Schema.Type.INT and self.col_type == "int") or (max_schema.type == Schema.Type.FLOAT and self.col_type == "float"):
-                    pass
-                else:
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="max_value",
-                        err_msg=f"max_value input type {max_schema.type} incompatible with col_type {self.col_type}."
-                    )
-        # check if row_count has been set
-        if self.row_count is None:
-            if input_schemas.get("row_count") is None:
-                raise NodeParameterError(
+            if input_schemas.get("min_value") is None:
+                raise NodeValidationError(
                     node_id=self.id,
-                    err_param_key="row_count",
-                    err_msg="row_count must be provided either as parameter or input."
+                    err_input="min_value",
+                    err_msg="min_value must be provided for numeric col_type."
                 )
-            
+            min_schema = input_schemas["min_value"]
+            if not(
+                (min_schema.type == Schema.Type.INT and self.col_type == "int") or 
+                (min_schema.type == Schema.Type.FLOAT and self.col_type == "float")):
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="min_value",
+                    err_msg=f"min_value input type {min_schema.type} incompatible with col_type {self.col_type}."
+                )
+            if input_schemas.get("max_value") is None:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="max_value",
+                    err_msg="max_value must be provided for numeric col_type."
+                )
+            max_schema = input_schemas["max_value"]
+            if not(
+                (max_schema.type == Schema.Type.INT and self.col_type == "int") or 
+                (max_schema.type == Schema.Type.FLOAT and self.col_type == "float")):
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="max_value",
+                    err_msg=f"max_value input type {max_schema.type} incompatible with col_type {self.col_type}."
+                )
+        # check if row_count has been set
+        if input_schemas.get("row_count") is None:
+            raise NodeValidationError(
+                node_id=self.id,
+                err_input="row_count",
+                err_msg="row_count must be provided as input."
+            )
         return {
             "table": Schema(
                 type=Schema.Type.TABLE,
@@ -343,20 +317,11 @@ class RandomNode(BaseNode):
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
-        min_value = self.min_value
-        if isinstance(min_value, int) and self.col_type == "float":
-            min_value = float(min_value)
-        if input.get("min_value") is not None:
-            min_value = input["min_value"].payload
-        max_value = self.max_value
-        if isinstance(max_value, int) and self.col_type == "float":
-            max_value = float(max_value)
-        if input.get("max_value") is not None:
-            max_value = input["max_value"].payload
-        row_count = self.row_count
-        if row_count is None:
-            row_count = input["row_count"].payload
+        min_value = input["min_value"].payload
+        max_value = input["max_value"].payload
+        row_count = input["row_count"].payload
         assert isinstance(row_count, int)
+
         data_rows = []
         for _ in range(row_count):
             if self.col_type == "float":
@@ -404,10 +369,7 @@ class RangeNode(BaseNode):
     Parameters start, end, step can be specified by parameters or inputs.
     """
     col_name: str
-    start: float | int | None
-    end: float | int | None
-    step: float | int | None
-    col_type: Literal["float", "int"]
+    col_type: Literal["float", "int", "Datetime"]
     
     @override
     def validate_parameters(self) -> None:
@@ -417,69 +379,12 @@ class RangeNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type must be 'RangeNode'."
             )
-        check_no_illegal_cols([self.col_name])
-        if self.col_type == "float":
-            if self.start is not None and not isinstance(self.start, float):
-                raise NodeParameterError(
-                    node_id=self.id,
-                    err_param_key="start",
-                    err_msg="start must be float when col_type is 'float'."
-                )
-            if self.end is not None and not isinstance(self.end, float):
-                raise NodeParameterError(
-                    node_id=self.id,
-                    err_param_key="end",
-                    err_msg="end must be float when col_type is 'float'."
-                )
-            if self.step is not None and not isinstance(self.step, float):
-                raise NodeParameterError(
-                    node_id=self.id,
-                    err_param_key="step",
-                    err_msg="step must be float when col_type is 'float'."
-                )
-        elif self.col_type == "int":
-            if isinstance(self.start, float):
-                if not self.start.is_integer():
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="start",
-                        err_msg="start must be an integer when col_type is 'int'."
-                    )
-                self.start = int(self.start)
-            if self.start is not None and not isinstance(self.start, int):
-                raise NodeParameterError(
-                    node_id=self.id,
-                    err_param_key="start",
-                    err_msg="start must be int when col_type is 'int'."
-                )
-            if self.end is not None and isinstance(self.end, float):
-                if not self.end.is_integer():
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="end",
-                        err_msg="end must be an integer when col_type is 'int'."
-                    )
-                self.end = int(self.end)
-            if self.end is not None and not isinstance(self.end, int):
-                raise NodeParameterError(
-                    node_id=self.id,
-                    err_param_key="end",
-                    err_msg="end must be int when col_type is 'int'."
-                )
-            if isinstance(self.step, float):
-                if not self.step.is_integer():
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="step",
-                        err_msg="step must be an integer when col_type is 'int'."
-                    )
-                self.step = int(self.step)
-            if self.step is not None and not isinstance(self.step, int):
-                raise NodeParameterError(
-                    node_id=self.id,
-                    err_param_key="step",
-                    err_msg="step must be int when col_type is 'int'."
-                )
+        if not check_no_illegal_cols([self.col_name]):
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col_name",
+                err_msg="Column name contains illegal names (e.g., reserved keywords)."
+            )
         return
 
     @override
@@ -487,18 +392,16 @@ class RangeNode(BaseNode):
         return [
             InPort(
                 name="start",
-                description="Optional input to specify start value of the range.",
-                optional=True,
+                description="Input to specify start value of the range.",
                 accept=Pattern(
-                    types={Schema.Type.FLOAT, Schema.Type.INT}
+                    types={Schema.Type.FLOAT, Schema.Type.INT, Schema.Type.DATETIME}
                 )
             ),
             InPort(
                 name="end",
-                description="Optional input to specify end value of the range.",
-                optional=True,
+                description="Input to specify end value of the range.",
                 accept=Pattern(
-                    types={Schema.Type.FLOAT, Schema.Type.INT}
+                    types={Schema.Type.FLOAT, Schema.Type.INT, Schema.Type.DATETIME}
                 )
             ),
             InPort(
@@ -506,7 +409,7 @@ class RangeNode(BaseNode):
                 description="Optional input to specify step value of the range.",
                 optional=True,
                 accept=Pattern(
-                    types={Schema.Type.FLOAT, Schema.Type.INT}
+                    types={Schema.Type.FLOAT, Schema.Type.INT, Schema.Type.DATETIME}
                 )
             )
         ], [
@@ -517,59 +420,79 @@ class RangeNode(BaseNode):
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         col_type_map = {
             "float": ColType.FLOAT,
-            "int": ColType.INT
+            "int": ColType.INT,
+            "Datetime": ColType.DATETIME
         }
         # check if input start, end, step are compatible
         if self.col_type == "float":
-            if input_schemas.get("start") is not None:
-                start_schema = input_schemas["start"]
-                if start_schema.type != Schema.Type.FLOAT:
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="start",
-                        err_msg=f"start input type {start_schema.type} incompatible with col_type {self.col_type}."
-                    )
-            if input_schemas.get("end") is not None:
-                end_schema = input_schemas["end"]
-                if end_schema.type != Schema.Type.FLOAT:
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="end",
-                        err_msg=f"end input type {end_schema.type} incompatible with col_type {self.col_type}."
-                    )
-            if input_schemas.get("step") is not None:
-                step_schema = input_schemas["step"]
+            start_schema = input_schemas["start"]
+            if start_schema.type != Schema.Type.FLOAT:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="start",
+                    err_msg=f"start input type {start_schema.type} incompatible with col_type {self.col_type}."
+                )
+            end_schema = input_schemas["end"]
+            if end_schema.type != Schema.Type.FLOAT:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="end",
+                    err_msg=f"end input type {end_schema.type} incompatible with col_type {self.col_type}."
+                )
+            step_schema = input_schemas.get("step")
+            if step_schema is not None:
                 if step_schema.type != Schema.Type.FLOAT:
-                    raise NodeParameterError(
+                    raise NodeValidationError(
                         node_id=self.id,
-                        err_param_key="step",
+                        err_input="step",
                         err_msg=f"step input type {step_schema.type} incompatible with col_type {self.col_type}."
                     )
         elif self.col_type == "int":
-            if input_schemas.get("start") is not None:
-                start_schema = input_schemas["start"]
-                if start_schema.type != Schema.Type.INT:
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="start",
-                        err_msg=f"start input type {start_schema.type} incompatible with col_type {self.col_type}."
-                    )
-            if input_schemas.get("end") is not None:
-                end_schema = input_schemas["end"]
-                if end_schema.type != Schema.Type.INT:
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="end",
-                        err_msg=f"end input type {end_schema.type} incompatible with col_type {self.col_type}."
-                    )
-            if input_schemas.get("step") is not None:
-                step_schema = input_schemas["step"]
+            start_schema = input_schemas["start"]
+            if start_schema.type != Schema.Type.INT:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="start",
+                    err_msg=f"start input type {start_schema.type} incompatible with col_type {self.col_type}."
+                )
+            end_schema = input_schemas["end"]
+            if end_schema.type != Schema.Type.INT:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="end",
+                    err_msg=f"end input type {end_schema.type} incompatible with col_type {self.col_type}."
+                )
+            step_schema = input_schemas.get("step")
+            if step_schema is not None:
                 if step_schema.type != Schema.Type.INT:
-                    raise NodeParameterError(
+                    raise NodeValidationError(
                         node_id=self.id,
-                        err_param_key="step",
+                        err_input="step",
                         err_msg=f"step input type {step_schema.type} incompatible with col_type {self.col_type}."
-                    )
+                )
+        elif self.col_type == "Datetime":
+            start_schema = input_schemas["start"]
+            if start_schema.type != Schema.Type.DATETIME:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="start",
+                    err_msg=f"start input type {start_schema.type} incompatible with col_type {self.col_type}."
+                )
+            end_schema = input_schemas["end"]
+            if end_schema.type != Schema.Type.DATETIME:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="end",
+                    err_msg=f"end input type {end_schema.type} incompatible with col_type {self.col_type}."
+                )
+            step_schema = input_schemas.get("step")
+            if step_schema is not None:
+                if step_schema.type != Schema.Type.DATETIME:
+                    raise NodeValidationError(
+                        node_id=self.id,
+                        err_input="step",
+                        err_msg=f"step input type {step_schema.type} incompatible with col_type {self.col_type}."
+                )
         return {
             "table": Schema(
                 type=Schema.Type.TABLE,
@@ -581,20 +504,14 @@ class RangeNode(BaseNode):
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
-        start = self.start
-        if input.get("start") is not None:
-            start = input["start"].payload
-        end = self.end
-        if input.get("end") is not None:
-            end = input["end"].payload
-        step = self.step
-        if input.get("step") is not None:
+        start = input["start"].payload
+        end = input["end"].payload
+        if "step" in input:
             step = input["step"].payload
-        if start is None or end is None:
-            raise NodeExecutionError(
-                node_id=self.id,
-                err_msg="start and end must be provided either as parameter or input."
-            )
+        else:
+            step = None
+        assert start is not None
+        assert end is not None
         data_rows = []
         if self.col_type == "float":
             assert isinstance(start, float)
@@ -612,6 +529,16 @@ class RangeNode(BaseNode):
             if step is None:
                 step = 1
             assert isinstance(step, int)
+            current = start
+            while current < end:
+                data_rows.append({self.col_name: current})
+                current += step
+        elif self.col_type == "Datetime":
+            assert isinstance(start, pandas.Timestamp)
+            assert isinstance(end, pandas.Timestamp)
+            if step is None:
+                step = pandas.Timedelta(1, "D")
+            assert isinstance(step, pandas.Timedelta)
             current = start
             while current < end:
                 data_rows.append({self.col_name: current})

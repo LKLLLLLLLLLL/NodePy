@@ -3,7 +3,7 @@ from enum import Enum
 from typing_extensions import Self
 from pandas.api import types as ptypes
 import pandas
-from typing import Optional, ClassVar, Any, Literal
+from typing import Optional, ClassVar, Any, Literal, Union
 from server.models.data import File
 from server.lib.FileManager import FileManager
 from io import StringIO
@@ -17,7 +17,9 @@ class ColType(str, Enum):
     FLOAT = "float"  # float64
     STR = "str"  # str
     BOOL = "bool"  # bool
-    DATETIME = "datetime"  # datetime64[ns]
+    DATETIME = "datetime"  # datetime64[ns] pandas.Timestamp
+
+    type ColTypeValue = Union[int, float, str, bool, pandas.Timestamp]
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, ColType):
@@ -41,11 +43,11 @@ class ColType(str, Enum):
 
     def to_ptype(self):
         coltype_to_dtype = {
-            ColType.INT: pandas.Int64Dtype(),
-            ColType.FLOAT: pandas.Float64Dtype(),
-            ColType.STR: pandas.StringDtype(),
-            ColType.BOOL: pandas.BooleanDtype(),
-            ColType.DATETIME: pandas.DatetimeTZDtype(tz=None),
+            ColType.INT: pandas.Int64Dtype,
+            ColType.FLOAT: pandas.Float64Dtype,
+            ColType.STR: pandas.StringDtype,
+            ColType.BOOL: pandas.BooleanDtype,
+            ColType.DATETIME: "datetime64[ns]",
         }
         return coltype_to_dtype[self]
 
@@ -181,6 +183,7 @@ class Schema(BaseModel):
         BOOL = "bool"
         FLOAT = "float"
         FILE = "File"
+        DATETIME = "Datetime"
 
     type: Type
     tab: Optional[TableSchema] = None  # not None if type is TABLE
@@ -219,7 +222,7 @@ class Schema(BaseModel):
             elif other == ColType.STR:
                 return self.type == self.Type.STR
             elif other == ColType.DATETIME:
-                return False  # no datetime type in Schema.Type
+                return self.type == self.Type.DATETIME
             else:
                 return False
         elif isinstance(other, Schema):
