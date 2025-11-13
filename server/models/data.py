@@ -86,6 +86,8 @@ class Table(BaseModel):
 class Data(BaseModel):
     payload: Union[Table, str, int, bool, float, File, Timestamp]
 
+    model_config = {"arbitrary_types_allowed": True}
+
     def extract_schema(self) -> Schema:
         if isinstance(self.payload, Table):
             return Schema(
@@ -204,6 +206,8 @@ class DataView(BaseModel):
         cols: dict[str, list[str | bool | int | float | Timestamp]]
         col_types: dict[str, str]  # col name -> col type
         
+        model_config = {"arbitrary_types_allowed": True}
+        
         def model_dump(self, **kwargs):
             """Override to handle Timestamp serialization"""
             result = super().model_dump(**kwargs)
@@ -217,6 +221,8 @@ class DataView(BaseModel):
 
     type: Literal["int", "float", "str", "bool", "Table", "File", "Datetime"]
     value: Union[TableView, str, int, bool, float, File, Timestamp]
+
+    model_config = {"arbitrary_types_allowed": True}
 
     def to_dict(self) -> dict[str, Any]:
         return super().model_dump()

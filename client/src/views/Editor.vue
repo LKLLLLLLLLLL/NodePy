@@ -16,5 +16,6 @@
         display: flex;
         min-height: 0;
         width: 100%;
+        background-color: white;
     }
 </style>
