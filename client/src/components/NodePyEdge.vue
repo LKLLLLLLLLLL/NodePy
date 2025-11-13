@@ -33,3 +33,12 @@ const strokeColor = computed(() => {
       :style="{ stroke: strokeColor, strokeWidth: 3 }"
   />
 </template>
+
+
+<style lang="scss" scoped>
+    :deep(.error-edge) path {
+        stroke: red;
+        stroke-width: 7;
+        paint-order: stroke; 
+    }   //  add red border on error edges
+</style>

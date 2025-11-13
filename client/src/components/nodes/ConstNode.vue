@@ -1,7 +1,7 @@
 <template>
     <div class="ConstNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="node-title-input nodes-topchild-border-radius">常量节点</div>
-        <div class="data">
+        <div class="data" :class="{'node-has-paramerr': hasParamerr}">
             <div class="value">
                 <div class="value-description">
                     数值
@@ -40,17 +40,23 @@
                 <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             </div>
         </div>
+        <div class="node-err">
+            <div v-for="err in errMsg">
+                {{ err }}
+            </div>
+        </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-    import {ref, computed } from 'vue'
+    import {ref, computed, watch } from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import type {ConstNodeData} from '../../types/nodeTypes'
     import type { Type } from '@/utils/api'
     import NodepyNumberInput from './tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
     import NodepySelectFew from './tools/Nodepy-selectFew.vue'
+    import { handleParamError, handleExecError } from './handleError'
 
 
     const props = defineProps<NodeProps<ConstNodeData>>()
@@ -59,6 +65,8 @@
     const data_type_options = ['int', 'float']
     const defaultSelected = [data_type_options.indexOf(props.data.param.data_type)]
     const data_type = ref(props.data.param.data_type)
+    const errMsg = ref<string[]>([])
+    const hasParamerr = ref(false)
 
 
     const onSelectChange = (e: any) => {
@@ -74,6 +82,12 @@
         props.data.param.value = Number(value.value)        
     }
 
+
+    watch(() => JSON.stringify(props.data.error), () => {
+        handleExecError(props.data.error, errMsg)
+        handleParamError(hasParamerr, props.data.error, errMsg)
+    })
+
 </script>
 
 <style lang="scss" scoped>
@@ -84,6 +98,7 @@
         height: 100%;
         width: $node-width;
         background: white;
+        position: relative;
         .data {
             padding-top: $node-padding;
             padding-bottom: 5px;

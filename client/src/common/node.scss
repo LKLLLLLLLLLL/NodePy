@@ -133,3 +133,22 @@ $node-margin: 10px;
   padding-right: $node-padding;
   text-align: right;  
 }
+
+.node-has-paramerr {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    red        4px,
+    red        6px
+  );
+}
+
+.node-err {
+  position: absolute;
+  top: 100%;
+} //  errmsg style
+
+.node-errhandle {
+  outline: 2px solid red;
+}

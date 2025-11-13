@@ -19,26 +19,38 @@
                 <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             </div>
         </div>
+        <div class="node-err">
+            <div v-for="err in errMsg">
+                {{ err }}
+            </div>
+        </div>
     </div>
 </template>
 
 <script lang="ts" setup>
     import { Position, Handle } from '@vue-flow/core'
-    import {ref, computed } from 'vue'
+    import {ref, computed, watch } from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import type {BoolNodeData} from '../../types/nodeTypes'
     import type { Type } from '@/utils/api'
     import NodepyBoolValue from './tools/Nodepy-boolValue.vue'
+    import { handleExecError } from './handleError'
 
 
      const props = defineProps<NodeProps<BoolNodeData>>()
      const value = ref(props.data.param.value)
      const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
+     const errMsg = ref<string[]>([])
 
 
     const onUpdateValue = () => {
         props.data.param.value = value.value
     }
+
+
+    watch(() => JSON.stringify(props.data.error), () => {
+        handleExecError(props.data.error, errMsg)
+    })
 
 </script>
 
@@ -49,6 +61,7 @@
         height: 100%;
         width: $node-width;
         background: white;
+        position: relative;
         .data {
             padding-top: $node-padding;
             padding-bottom: 5px;

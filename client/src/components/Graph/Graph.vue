@@ -23,12 +23,12 @@ import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { useRoute } from 'vue-router'
 
-const resultStore = useResultStore();
-const modalStore = useModalStore();
+const resultStore = useResultStore()
+const modalStore = useModalStore()
 const graphStore = useGraphStore()
 
 const {params: {projectId}} = useRoute()
-const { onNodeClick,findNode,onConnect, onInit, onNodeDragStop, addEdges } = useVueFlow('main')
+const { onNodeClick, findNode, onConnect, onInit, onNodeDragStop, addEdges } = useVueFlow('main')
 const shouldWatch = ref(false)
 const listenNodePosition = ref(true)
 const intervalId = setInterval(() => {
@@ -89,7 +89,7 @@ onNodeDragStop(async (event: NodeDragEvent) => {
     console.error('project is undefined')
   }
 
-})
+})  //  sync and sync projectUI
 
 onConnect((connection) => {
   const addedEdge = {
@@ -108,28 +108,20 @@ onConnect((connection) => {
     
   onNodeClick( async (event) => {
     // 获取节点完整信息
-    resultStore.refresh();
-    const currentNode = findNode(event.node.id);
-    // console.log('完整节点信息:', currentNode);
-    // console.log('data.param:',currentNode?.data.param);
-    // console.log('data.out:',currentNode?.data.data_out);
-    // console.log('currentInfo:',resultStore.currentInfo)
-    // console.log('是否存在result:',currentNode?.data.data_out.result)
-    // console.log('currentResult:',resultStore.currentResult)
+    resultStore.refresh()
+    const currentNode = findNode(event.node.id)
     if(!currentNode?.data.data_out.result){
       resultStore.currentInfo = currentNode?.data.param
-      // console.log('没有result,有currentInfo:',resultStore.currentInfo)
     }
-    if(currentNode) url_id.value = currentNode.data.data_out.result.data_id;
-    resultStore.currentResult = await resultStore.getResultCacheContent(url_id.value);
+    if(currentNode) url_id.value = currentNode.data.data_out.result.data_id
+    resultStore.currentResult = await resultStore.getResultCacheContent(url_id.value)
     if(modalStore.findModal('result')==undefined){
-      resultStore.createResultModal();
+      resultStore.createResultModal()
       modalStore.activateModal('result')
     }
     else{
-      modalStore.activateModal('result');
+      modalStore.activateModal('result')
     }
-    // console.log(resultStore.cacheStatus);
   })
 
 
