@@ -16,6 +16,8 @@ from server.models.data import Data
 from server.models.schema import Pattern, Schema
 from server.lib.utils import timeout
 
+AllowedTypes = Literal["STR", "INT", "FLOAT", "BOOL"]
+
 @register_node
 class CostumScriptNode(BaseNode):
     """
@@ -23,10 +25,8 @@ class CostumScriptNode(BaseNode):
     The function should take inputs as defined in the input ports and return outputs as defined in the output ports.
     """
 
-    type allowed_types = Literal["STR", "INT", "FLOAT", "BOOL"]
-
-    input_ports: list[tuple[str, allowed_types]]  # List of tuples (port_name, type)
-    output_ports: list[tuple[str, allowed_types]]  # List of tuples (port_name, type)
+    input_ports: list[tuple[str, AllowedTypes]]  # List of tuples (port_name, type)
+    output_ports: list[tuple[str, AllowedTypes]]  # List of tuples (port_name, type)
     script: str  # The user-defined Python script
 
     @override

@@ -12,29 +12,14 @@ class ProjNodeError(BaseModel):
     
     @model_validator(mode="after")
     def check_error_type(self) -> Self:
-        if isinstance(self.params, list):
-            if self.inputs is not None:
-                raise ValueError("If 'params' is a list, 'inputs' must be None.")
-            if not isinstance(self.message, list):
-                raise ValueError("If 'params' is a list, 'message' must be a list.")
-            if len(self.params) != len(self.message):
-                raise ValueError("Length of 'params' and 'message' must be the same.")
-        elif isinstance(self.inputs, list):
-            if self.params is not None:
-                raise ValueError("If 'inputs' is a list, 'params' must be None.")
-            if not isinstance(self.message, list):
-                raise ValueError("If 'inputs' is a list, 'message' must be a list.")
-            if len(self.inputs) != len(self.message):
-                raise ValueError("Length of 'inputs' and 'message' must be the same.")
-        else:
-            if not isinstance(self.message, str):
-                raise ValueError("If neither 'params' nor 'inputs' is a list, 'message' must be a string.")
         # check type consistency
         if self.type == "param":
             if self.params is None:
                 raise ValueError("'params' must be provided for 'param' type errors.")
             if not isinstance(self.params, list):
                 raise ValueError("'params' must be a list for 'param' type errors.")
+            if not isinstance(self.message, list):
+                raise ValueError("'message' must be a list for 'param' type errors.")
             if len(self.params) != len(self.message):
                 raise ValueError("Length of 'params' and 'message' must be the same for 'param' type errors.")
         elif self.type == "validation":
@@ -42,6 +27,8 @@ class ProjNodeError(BaseModel):
                 raise ValueError("'inputs' must be provided for 'validation' type errors.")
             if not isinstance(self.inputs, list):
                 raise ValueError("'inputs' must be a list for 'validation' type errors.")
+            if not isinstance(self.message, list):
+                raise ValueError("'message' must be a list for 'validation' type errors.")
             if len(self.inputs) != len(self.message):
                 raise ValueError("Length of 'inputs' and 'message' must be the same for 'validation' type errors.")
         else:  # execution

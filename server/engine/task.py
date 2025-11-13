@@ -130,7 +130,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             patch = ProjWorkflowPatch(
                                 key=["nodes", node_index, "error"],
                                 value=ProjNodeError(
-                                    params=e.err_param_keys, inputs=None, message=e.err_msgs
+                                    type="param", params=e.err_param_keys, inputs=None, message=e.err_msgs
                                 ),
                             )
                             queue.push_message_sync(
@@ -206,7 +206,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             patch = ProjWorkflowPatch(
                                         key=["nodes", node_index, "error"],
                                         value=ProjNodeError(
-                                            params=None, inputs=e.err_inputs, message=e.err_msgs
+                                            type="validation", params=None, inputs=e.err_inputs, message=e.err_msgs
                                         ),
                                     )
                             queue.push_message_sync(
@@ -310,7 +310,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                             patch = ProjWorkflowPatch(
                                 key=["nodes", node_index, "error"],
                                 value=ProjNodeError(
-                                    params=None, inputs=None, message=e.err_msg
+                                    type="execution", params=None, inputs=None, message=e.err_msg
                                 ),
                             )
                             queue.push_message_sync(
