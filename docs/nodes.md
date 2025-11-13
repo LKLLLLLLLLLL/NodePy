@@ -119,7 +119,7 @@ table:
 **输出：**
 - table: 输出的表格，类型为Table。
 
-#### 1.5 RandomNode
+#### 1.6 RandomNode
 随机表格生成节点，可以生成一个包含一个由随机数构成的列的表格。
 
 **参数：**
@@ -134,7 +134,7 @@ table:
 **输出：**
 - table: 输出的表格，类型为Table。
 
-#### 1.6 RangeNode
+#### 1.7 RangeNode
 范围表格生成节点，可以生成一个包含一个由指定范围内数值构成的列的表格。
 
 **参数：**
@@ -148,6 +148,18 @@ table:
 
 **输出：**
 - table: 输出的表格，类型为Table。
+
+#### 1.8 DateTimeNode
+日期时间输入节点，可以输出一个固定的日期时间值。
+
+**参数：**
+- value: 常量值，类型为str，必须符合ISO 8601格式。
+
+**输入：**
+无
+
+**输出：**
+- datetime: 输出的日期时间值，类型为Datetime。
 
 ### 2. 计算节点(Compute)
 #### 2.1 NumberBinOpNode
@@ -493,4 +505,69 @@ table:
 
 **输出：**
 无
+
+
+### 7. 日期时间处理节点(DateTimeProcess)
+#### 7.1 DatetimeComputeNode
+日期与PRIM类型运算节点，支持对Datetime类型与int或float类型的输入进行`ADD`, `SUB`两种基本运算。
+
+**参数：**
+- op: 运算类型，类型为str，取值为"ADD", "SUB"。
+- unit: 时间单位，用来指定输入float/int的单位，类型为str，取值为"DAYS", "HOURS", "MINUTES", "SECONDS"。
+
+**输入：**
+- datetime: 日期时间操作数，类型为Datetime。
+- value: 数值操作数，类型为int或float。
+
+**输出：**
+- result: 运算结果，类型为Datetime。
+
+#### 7.2 DatetimeDiffNode
+日期时间差值节点，支持计算两个Datetime类型输入之间的差值，结果以指定单位表示。
+
+**参数：**
+- unit: 时间单位，用来指定输出差值的单位，类型为str，取值为"DAYS", "HOURS", "MINUTES", "SECONDS"。
+
+**输入：**
+- datetime_x: 第一个日期时间操作数，类型为Datetime。
+- datetime_y: 第二个日期时间操作数，类型为Datetime。
+
+**输出：**
+- difference: 两个日期时间的差值，类型为float。
+
+#### 7.3 ToDatetimeNode
+节点将输入的数值类型转换为日期时间类型。
+
+**参数：**
+- unit: 时间单位，用来指定输入数值的单位，类型为str，取值为"DAYS", "HOURS", "MINUTES", "SECONDS"。
+
+**输入：**
+- value: 输入的数值，类型为INT或FLOAT。
+
+**输出：**
+- datetime: 输出的日期时间值，类型为Datetime。
+
+#### 7.4 StrToDatetimeNode
+节点将输入的字符串类型转换为日期时间类型。
+
+**参数：**
+无
+
+**输入：**
+- value: 输入的字符串，类型为STR，必须符合任何Pandas支持的日期时间格式，如：ISO 8601格式等。
+
+**输出：**
+- datetime: 输出的日期时间值，类型为Datetime。
+
+#### 7.5 DatetimePrintNode
+将Datetime类型格式化为字符串类型节点。
+
+**参数：**
+- format: 日期时间格式字符串，类型为str，符合Python的strftime格式规范。
+
+**输入：**
+- datetime: 输入的日期时间，类型为Datetime。
+
+**输出：**
+- output: 输出的字符串，类型为str。
 
