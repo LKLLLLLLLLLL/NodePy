@@ -1,6 +1,11 @@
 import math
 import RestrictedPython
 import typing
+import re
+import json
+import decimal
+import fractions
+import itertools
 from ..base_node import BaseNode, InPort, OutPort, register_node
 from typing import Literal, override
 from server.models.exception import (
@@ -9,6 +14,7 @@ from server.models.exception import (
 )
 from server.models.data import Data
 from server.models.schema import Pattern, Schema
+from server.lib.utils import timeout
 
 @register_node
 class CostumScriptNode(BaseNode):
@@ -80,10 +86,25 @@ class CostumScriptNode(BaseNode):
                 "_print_": RestrictedPython.PrintCollector,
                 "math": math,
                 "typing": typing,
+                "re": re,
+                "json": json,
+                "decimal": decimal,
+                "fractions": fractions,
+                "itertools": itertools,
             }
             local_env = {}
-            exec(byte_code, safe_globals, local_env)
             
+            @timeout(5)
+            def wrap_exec(code, globals_dict, locals_dict):
+                exec(code, globals_dict, locals_dict)
+
+            success, _ = wrap_exec(byte_code, safe_globals, local_env)
+            if not success:
+                raise NodeExecutionError(
+                    node_id=self.id,
+                    err_msg="Custom script execution timed out"
+                )
+
             # Call the script function
             if 'script' not in local_env:
                 raise NodeExecutionError(

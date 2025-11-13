@@ -6,7 +6,7 @@ from server.models.exception import (
 )
 from server.models.data import Data
 from server.models.schema import Pattern, Schema
-from pandas import Timestamp, Timedelta
+from datetime import datetime, timedelta
 
 """
 This file defines conversion nodes between datetime data and other type data.
@@ -53,19 +53,19 @@ class ToDatetimeNode(BaseNode):
         value = input["value"].payload
         assert isinstance(value, (int, float))
         if self.unit == "DAYS":
-            delta = Timedelta(days=value)
+            delta = timedelta(days=value)
         elif self.unit == "HOURS":
-            delta = Timedelta(hours=value)
+            delta = timedelta(hours=value)
         elif self.unit == "MINUTES":
-            delta = Timedelta(minutes=value)
+            delta = timedelta(minutes=value)
         elif self.unit == "SECONDS":
-            delta = Timedelta(seconds=value)
+            delta = timedelta(seconds=value)
         else:
             raise NodeExecutionError(
                 node_id=self.id,
                 err_msg=f"Unsupported unit: {self.unit}"
             )
-        epoch = Timestamp("1970-01-01")
+        epoch = datetime(1970, 1, 1)
         result_datetime = epoch + delta
         return {"datetime": Data(payload=result_datetime)}
 
@@ -108,7 +108,7 @@ class StrToDatetimeNode(BaseNode):
         value = input["value"].payload
         assert isinstance(value, str)
         try:
-            result_datetime = Timestamp(value)
+            result_datetime = datetime.fromisoformat(value)
         except Exception as e:
             raise NodeExecutionError(
                 node_id=self.id,
@@ -154,7 +154,7 @@ class DatetimePrintNode(BaseNode):
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         datetime_value = input["datetime"].payload
-        assert isinstance(datetime_value, Timestamp)
+        assert isinstance(datetime_value, datetime)
         formatted_string = datetime_value.strftime(self.pattern)
         return {"string": Data(payload=formatted_string)}
 
@@ -198,9 +198,9 @@ class DatetimeToTimestampNode(BaseNode):
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         datetime_value = input["datetime"].payload
-        assert isinstance(datetime_value, Timestamp)
+        assert isinstance(datetime_value, datetime)
 
-        epoch = Timestamp("1970-01-01")
+        epoch = datetime(1970, 1, 1)
         delta = datetime_value - epoch
 
         if self.unit == "DAYS":

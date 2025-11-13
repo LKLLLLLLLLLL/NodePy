@@ -2,7 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from server.models.project import Project, ProjUIState, ProjWorkflow
 from server.models.database import ProjectRecord
 import base64
-from loguru import logger
+from typing import Any, Callable
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 
 
 async def get_project_by_id(
@@ -43,3 +44,22 @@ async def set_project_record(db: AsyncSession, project: Project, user_id: int) -
     except Exception:
         await db.rollback()
         raise
+
+def timeout(seconds: float):
+    """
+    A decorator to set a timeout for a function execution.
+    If the function raise error, timeout will raise the error as well.
+    """
+
+    def _decorator(func: Callable):
+        def _wrapper(*args, **kwargs) -> tuple[bool, Any]:
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(func, *args, **kwargs)
+                try:
+                    result = future.result(timeout=seconds)
+                    return True, result
+                except TimeoutError:
+                    return False, None
+        return _wrapper
+    return _decorator
+        

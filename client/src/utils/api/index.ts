@@ -23,7 +23,7 @@ export type { ProjectList } from './models/ProjectList';
 export type { ProjectListItem } from './models/ProjectListItem';
 export type { ProjEdge } from './models/ProjEdge';
 export type { ProjNode } from './models/ProjNode';
-export type { ProjNodeError } from './models/ProjNodeError';
+export { ProjNodeError } from './models/ProjNodeError';
 export type { ProjUIState } from './models/ProjUIState';
 export type { ProjWorkflow } from './models/ProjWorkflow';
 export type { Schema } from './models/Schema';

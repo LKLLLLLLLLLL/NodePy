@@ -2,24 +2,23 @@ from pydantic import BaseModel, model_validator
 from enum import Enum
 from typing_extensions import Self
 from pandas.api import types as ptypes
-import pandas
-from typing import Optional, ClassVar, Any, Literal, Union
+from typing import Optional, ClassVar, Any, Literal
 from server.models.data import File
 from server.lib.FileManager import FileManager
 from io import StringIO
+import pandas
 
 """
 This file defined schema passed between nodes during static analysis stage.
 """
+
 
 class ColType(str, Enum):
     INT = "int"  # int64
     FLOAT = "float"  # float64
     STR = "str"  # str
     BOOL = "bool"  # bool
-    DATETIME = "datetime"  # datetime64[ns] pandas.Timestamp
-
-    type ColTypeValue = Union[int, float, str, bool, pandas.Timestamp]
+    DATETIME = "datetime"  # datetime64[ns]
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, ColType):

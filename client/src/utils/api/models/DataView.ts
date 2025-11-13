@@ -19,6 +19,7 @@ export namespace DataView {
         BOOL = 'bool',
         TABLE = 'Table',
         FILE = 'File',
+        DATETIME = 'Datetime',
     }
 }
 

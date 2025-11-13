@@ -6,7 +6,7 @@ from server.models.exception import (
 )
 from server.models.data import Data
 from server.models.schema import Pattern, Schema
-from pandas import Timestamp, Timedelta
+from datetime import datetime, timedelta
 
 """
 This file defines compute nodes between datetime data.
@@ -58,7 +58,7 @@ class DatetimeComputeNode(BaseNode):
         datetime_value = input["datetime"].payload
         value = input["value"].payload
 
-        assert isinstance(datetime_value, Timestamp)
+        assert isinstance(datetime_value, datetime)
         assert isinstance(value, (int, float))
 
         delta_kwargs = {}
@@ -76,7 +76,7 @@ class DatetimeComputeNode(BaseNode):
                 err_msg=f"Unsupported unit '{self.unit}'."
             )
 
-        delta = Timedelta(**delta_kwargs)
+        delta = timedelta(**delta_kwargs)
 
         if self.op == "ADD":
             result_datetime = datetime_value + delta
@@ -136,8 +136,8 @@ class DatetimeDiffNode(BaseNode):
         datetime_x = input["datetime_x"].payload
         datetime_y = input["datetime_y"].payload
 
-        assert isinstance(datetime_x, Timestamp)
-        assert isinstance(datetime_y, Timestamp)
+        assert isinstance(datetime_x, datetime)
+        assert isinstance(datetime_y, datetime)
 
         delta = datetime_x - datetime_y
 

@@ -21,7 +21,7 @@ NodePy 的节点系统是一个完全静态类型的节点系统，类型验证�
 - `str`: 字符串类型, 底层通过Python的`str`实现。
 - `Table`: 表格类型, 底层通过Pandas的`DataFrame`实现。
 - `File`: 文件类型, 是对象文件系统的一个抽象，每个用户所产生的全部文件大小受限于其配额（默认5GB）。
-- `Datetime`: 日期时间类型, 底层通过Pandas的`Timestamp`实现，对应Python的`datetime`类型。
+- `Datetime`: 日期时间类型, 底层通过Python的`datetime`类型实现。
 
 其中，前三种由于可以定义各种数学运算，因此也被称作"Prim"类型；前两种也可以被称作"Number"类型。
 
@@ -634,6 +634,8 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 ### 8. 工具节点(utility)
 #### 8.1 CustomScriptNode
 用户自定义脚本节点，允许用户编写自定义的Python脚本来处理输入数据并生成输出数据。注意，为了安全起见，用户脚本将在受限的环境中执行，且只能使用预定义的安全库和函数。
+
+注意：在节点中的代码编辑器中，应该为用户提供基本的模版，即`server/engine/nodes/utiliy/custom_template.py`文件中的内容。
 
 **参数：**
 - input_ports: 输入端口定义，类型为List[List[str, type]]，每个输入端口由名称和类型组成。

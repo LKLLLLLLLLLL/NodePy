@@ -1,10 +1,11 @@
 from pydantic import BaseModel, model_validator
-from typing import Any, Self
+from typing import Any, Self, Literal
 from .data import Schema, DataRef
 from .project_topology import WorkflowTopology, TopoNode, TopoEdge
 
 
 class ProjNodeError(BaseModel):
+    type: Literal["param", "validation", "execution"]
     params: list[str] | None
     inputs: list[str] | None
     message: list[str] | str
@@ -28,6 +29,24 @@ class ProjNodeError(BaseModel):
         else:
             if not isinstance(self.message, str):
                 raise ValueError("If neither 'params' nor 'inputs' is a list, 'message' must be a string.")
+        # check type consistency
+        if self.type == "param":
+            if self.params is None:
+                raise ValueError("'params' must be provided for 'param' type errors.")
+            if not isinstance(self.params, list):
+                raise ValueError("'params' must be a list for 'param' type errors.")
+            if len(self.params) != len(self.message):
+                raise ValueError("Length of 'params' and 'message' must be the same for 'param' type errors.")
+        elif self.type == "validation":
+            if self.inputs is None:
+                raise ValueError("'inputs' must be provided for 'validation' type errors.")
+            if not isinstance(self.inputs, list):
+                raise ValueError("'inputs' must be a list for 'validation' type errors.")
+            if len(self.inputs) != len(self.message):
+                raise ValueError("Length of 'inputs' and 'message' must be the same for 'validation' type errors.")
+        else:  # execution
+            if not isinstance(self.message, str):
+                raise ValueError("'message' must be a string for 'execution' type errors.")
 
         return self
 

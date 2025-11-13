@@ -1,7 +1,7 @@
-from pandas import DataFrame, Series, Timestamp
+from pandas import DataFrame, Series
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
-import pandas
+from datetime import datetime
 from typing import Union, ClassVar, Any, Literal, cast
 from server.lib.FileManager import File
 from .schema import ColType, check_no_illegal_cols, TableSchema, Schema
@@ -78,15 +78,13 @@ class Table(BaseModel):
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> 'Table':
-        df = pandas.DataFrame.from_dict(data["data"])
+        df = DataFrame.from_dict(data["data"])
         col_types = {k: ColType(v) for k, v in data["col_types"].items()}
         return Table(df=df, col_types=col_types)
 
 
 class Data(BaseModel):
-    payload: Union[Table, str, int, bool, float, File, Timestamp]
-
-    model_config = {"arbitrary_types_allowed": True}
+    payload: Union[Table, str, int, bool, float, File, datetime]
 
     def extract_schema(self) -> Schema:
         if isinstance(self.payload, Table):
@@ -104,7 +102,7 @@ class Data(BaseModel):
             return Schema(type=Schema.Type.FLOAT)
         elif isinstance(self.payload, File):
             return Schema(type=Schema.Type.FILE)
-        elif isinstance(self.payload, Timestamp):
+        elif isinstance(self.payload, datetime):
             return Schema(type=Schema.Type.DATETIME)
         else:
             raise TypeError(f"Unsupported data payload type: {type(self.payload)}")
@@ -144,14 +142,14 @@ class Data(BaseModel):
                 float: "float",
                 bool: "bool",
                 File: "File",
-                Timestamp: "Datetime",
+                datetime: "Datetime",
             }
             payload_type = type_map.get(type(self.payload))
             if payload_type is None:
                 raise TypeError(f"Unsupported payload type for DataView: {type(self.payload)}")
             
             value = self.payload
-            if isinstance(self.payload, Timestamp):
+            if isinstance(self.payload, datetime):
                 value = self.payload.isoformat()
             return DataView(
                 type=cast(
@@ -169,7 +167,7 @@ class Data(BaseModel):
         payload: Any
         if payload_type == "Table":
             assert isinstance(payload_value, DataView.TableView)
-            df = pandas.DataFrame.from_dict(payload_value.cols)
+            df = DataFrame.from_dict(payload_value.cols)
             col_types = {k: ColType(v) for k, v in payload_value.col_types.items()}
             payload = Table(df=df, col_types=col_types)
         elif payload_type == "File":
@@ -189,9 +187,9 @@ class Data(BaseModel):
             payload = payload_value
         elif payload_type == "Datetime":
             if isinstance(payload_value, str):
-                payload = Timestamp(payload_value)
+                payload = datetime.fromisoformat(payload_value)
             else:
-                assert isinstance(payload_value, Timestamp)
+                assert isinstance(payload_value, datetime)
                 payload = payload_value
         else:
             raise TypeError(f"Unsupported payload type for deserialization: {payload_type}")
@@ -203,10 +201,8 @@ class DataView(BaseModel):
     A dict-like view of data, for transmitting or json serialization.
     """
     class TableView(BaseModel):
-        cols: dict[str, list[str | bool | int | float | Timestamp]]
+        cols: dict[str, list[str | bool | int | float | datetime]]
         col_types: dict[str, str]  # col name -> col type
-        
-        model_config = {"arbitrary_types_allowed": True}
         
         def model_dump(self, **kwargs):
             """Override to handle Timestamp serialization"""
@@ -214,13 +210,13 @@ class DataView(BaseModel):
             # Convert Timestamp objects to ISO format strings
             for col_name, values in result['cols'].items():
                 result['cols'][col_name] = [
-                    v.isoformat() if isinstance(v, Timestamp) else v 
+                    v.isoformat() if isinstance(v, datetime) else v 
                     for v in values
                 ]
             return result
 
     type: Literal["int", "float", "str", "bool", "Table", "File", "Datetime"]
-    value: Union[TableView, str, int, bool, float, File, Timestamp]
+    value: Union[TableView, str, int, bool, float, File, datetime]
 
     model_config = {"arbitrary_types_allowed": True}
 

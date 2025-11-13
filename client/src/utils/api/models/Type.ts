@@ -9,4 +9,5 @@ export enum Type {
     BOOL = 'bool',
     FLOAT = 'float',
     FILE = 'File',
+    DATETIME = 'Datetime',
 }

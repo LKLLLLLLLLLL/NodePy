@@ -2,6 +2,11 @@
 # Do not modify provided codes below.
 import math
 import typing
+import re
+import json
+import decimal
+import fractions
+import itertools
 
 def script(**kwargs) -> dict[str, typing.Any]:
     # You can access the input data via kwargs dictionary.
