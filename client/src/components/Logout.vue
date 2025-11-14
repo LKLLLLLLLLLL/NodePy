@@ -1,13 +1,14 @@
 <script lang="ts" setup>
+    import { useLoginStore } from '@/stores/loginStore';
     import { useModalStore } from '@/stores/modalStore';
-    import { logout } from '@/utils/AuthHelper';
     import { ElMessage } from 'element-plus';
     import { useRouter } from 'vue-router';
     const router = useRouter()
     const modalStore = useModalStore()
+    const loginStore = useLoginStore()
 
     function handleLogOut(){
-        logout()
+        loginStore.logout()
         router.push({
             name: 'home'
         })

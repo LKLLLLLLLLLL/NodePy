@@ -8,12 +8,13 @@ import { type Project } from "@/utils/api";
 import { RouterLink } from 'vue-router';
 import {useRoute,useRouter} from 'vue-router';
 import { useGraphStore } from "@/stores/graphStore";
-import { isLoggedIn } from "@/utils/AuthHelper";
 import { useModalStore } from "@/stores/modalStore";
 import Logout from "./Logout.vue";
+import { useLoginStore } from "@/stores/loginStore";
 
 const graphStore = useGraphStore()
 const modalStore = useModalStore()
+const loginStore = useLoginStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -36,7 +37,8 @@ const isActive = (path: string) => {
 }
 
 function handleAvatarClick(){
-    if(isLoggedIn()){
+    loginStore.checkAuthStatus()
+    if(loginStore.loggedIn){
       modalStore.createModal({
         id: 'log-out',
         title: 'log-out',

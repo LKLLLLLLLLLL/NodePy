@@ -1,17 +1,16 @@
 <script lang="ts" setup>
+    import { useLoginStore } from '@/stores/loginStore';
     import { usePageStore } from '@/stores/pageStore';
-    import { isLoggedIn } from '@/utils/AuthHelper';
     import { ref, onMounted } from 'vue';
     import { useRouter } from 'vue-router';
 
     const pageStore = usePageStore()
+    const loginStore = useLoginStore()
 
     const router = useRouter()
 
-    const login = ref<boolean>(false)
-
     onMounted(()=>{
-        login.value = isLoggedIn()
+        loginStore.checkAuthStatus()
         pageStore.setCurrentPage('Home')
     })
 
@@ -27,7 +26,7 @@
             <div class="home-info">
                 <h1>Welcome to NodePy!</h1>
             </div>
-            <div class="home-controls" v-if="!login">
+            <div class="home-controls" v-if="!loginStore.loggedIn">
                 <el-button @click="jumpToLogin">Login</el-button>
             </div>
         </div>

@@ -5,12 +5,13 @@
     import { useModalStore } from '@/stores/modalStore';
     import FileDemoFrame from './FileDemoFrame.vue';
     import { FileItem } from '@/utils/api';
-    import { isLoggedIn } from '@/utils/AuthHelper';
     import { usePageStore } from '@/stores/pageStore';
     import Mask from '../Mask.vue';
+    import { useLoginStore } from '@/stores/loginStore';
 
     const fileStore = useFileStore();
     const pageStore = usePageStore();
+    const loginStore = useLoginStore()
     
     const test: boolean = true
 
@@ -59,7 +60,6 @@
     type SortType = 'project_a'|'project_z'|'size_big'|'size_small'|'type'|'time_new'|'time_old'|'name_a'|'name_z'
     const default_type: SortType = 'size_big'
 
-    const login = ref<boolean>(false)
     const sortType = ref<SortType>(default_type)
     const typeSortOrder = ref<number>(0) // 0-3 表示四种排序顺序
     const cycleTypeSort = () => {
@@ -142,8 +142,8 @@
     })
 
     onMounted(()=>{
-        login.value = isLoggedIn()
-        if(login.value){
+        loginStore.checkAuthStatus();
+        if(loginStore.loggedIn){
             fileStore.initializeFiles();
             console.log(fileStore.userFileList);
             console.log(fileStore.userFileList.files);
@@ -164,7 +164,7 @@
 
 </script>
 <template>
-    <div class="fileview-container" v-if="login">
+    <div class="fileview-container" v-if="loginStore.loggedIn">
         <!-- <div class="left-container">
 
         </div> -->

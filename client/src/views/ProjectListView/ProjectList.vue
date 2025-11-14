@@ -1,24 +1,23 @@
 <script lang="ts" setup>
-    import ProjectDemoFrame from './ProjectDemoFrame.vue';
-    import CreateProject from './CreateProject.vue';
     import { ref, onMounted, computed } from 'vue';
+    import { useRouter } from 'vue-router';
     import { useModalStore } from '@/stores/modalStore';
     import { useProjectStore } from '@/stores/projectStore';
     import { usePageStore } from '@/stores/pageStore';
-    import { useRouter } from 'vue-router';
-    import { isLoggedIn } from '@/utils/AuthHelper';
+    import { useLoginStore } from '@/stores/loginStore';
+    import ProjectDemoFrame from './ProjectDemoFrame.vue';
+    import CreateProject from './CreateProject.vue';
     import Mask from '../Mask.vue';
-
+    
     const modalStore = useModalStore();
     const projectStore = useProjectStore();
     const pageStore = usePageStore();
+    const loginStore = useLoginStore()
     const router = useRouter()
 
-    const login = ref<boolean>(false)
-
     onMounted(()=>{
-        login.value = isLoggedIn()
-        if(login.value){
+        loginStore.checkAuthStatus()
+        if(loginStore.loggedIn){
             projectStore.initializeProjects()
         }
         else{
@@ -72,7 +71,7 @@
 </script>
 
 <template>
-    <div class="project-container set_background_color" v-if="login">
+    <div class="project-container set_background_color" v-if="loginStore.loggedIn">
         <div class="projects-grid">
             <!-- Existing projects -->
             <ProjectDemoFrame

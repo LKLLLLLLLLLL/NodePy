@@ -3,11 +3,12 @@
     import { ElMessage } from 'element-plus';
     import { useRouter } from 'vue-router';
     // 导入新的认证工具函数
-    import { login, signup } from '@/utils/AuthHelper';
     import { usePageStore } from '@/stores/pageStore';
+    import { useLoginStore } from '@/stores/loginStore';
 
     const router = useRouter();
     const pageStore = usePageStore();
+    const loginStore = useLoginStore()
 
     //el-form config
     const label_width = "80px"
@@ -101,7 +102,7 @@
     async function handleLogin(){
         try {
             // 使用新的登录函数
-            await login({
+            await loginStore.login({
                 username: username.value,
                 password: password.value
             });
@@ -121,7 +122,7 @@
         if(comparePassword()){
             try {
                 // 使用新的注册函数
-                await signup({
+                await loginStore.signup({
                     username: username.value,
                     email: email.value,
                     password: password.value
