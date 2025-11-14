@@ -31,7 +31,7 @@ const isErrorEdge = computed(() => props.data === 'error')
       :source-position="sourcePosition"
       :target-position="targetPosition"
       :curvature="0.1"
-      :style="{ stroke: strokeColor, strokeWidth: 3, filter: isErrorEdge ? 'drop-shadow(0 0 2px red)': 'none'}"
+      :style="{ stroke: isErrorEdge ? 'red' : strokeColor, strokeWidth: isErrorEdge ? 3 : 3, filter: isErrorEdge ? 'drop-shadow(0 0 3px red)' : 'none' }"
   />
 </template>
 

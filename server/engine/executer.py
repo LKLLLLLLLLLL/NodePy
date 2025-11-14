@@ -110,7 +110,10 @@ class ProjectExecutor:
 
             # run schema inference
             try:
+                # input_schemas_hash = hash(input_schemas) # guide to avoid accidental mutation
                 output_schemas = node.infer_schema(input_schemas)
+                # if hash(input_schemas) != input_schemas_hash:
+                #     raise AssertionError(f"Node {node_id} in type {node.type} input schemas were modified during inference, which is not allowed.")
                 # store output schema
                 for tar_port, schema in output_schemas.items():
                     schema_cache[(node_id, tar_port)] = schema
@@ -178,9 +181,12 @@ class ProjectExecutor:
                     callbefore(node_id)
 
                     # run node
+                    # input_data_hash = hash(input_data)  # guide to avoid accidental mutation
                     start_time = time.perf_counter()
                     output_data = node.execute(input_data)
                     running_time = (time.perf_counter() - start_time) * 1000  # in ms
+                    # if hash(input_data) != input_data_hash:
+                    #     raise AssertionError(f"Node {node_id} in type {node.type} input data were modified during execution, which is not allowed.")
                 else:
                     output_data, running_time = cache_data
             # 4. call callafter

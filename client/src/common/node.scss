@@ -134,7 +134,7 @@ $node-margin: 10px;
 
 .output-port-description {
   padding-right: $node-padding;
-  text-align: right;  
+  text-align: right;
 }
 
 .node-has-paramerr {
@@ -153,5 +153,6 @@ $node-margin: 10px;
 } //  errmsg style
 
 .node-errhandle {
+  background-color: red;
   filter: drop-shadow(0 0 3px red);
 }
