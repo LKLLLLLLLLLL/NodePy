@@ -79,12 +79,18 @@ export const useProjectStore = defineStore('project', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(500):
-                        ElMessage('服务器内部错误');
+                        ElMessage({
+                            message: '服务器内部错误',
+                            type: 'error'
+                        });
                         break;
                 }
             }
             else{
-                ElMessage('Unknown error occurred.');
+                ElMessage({
+                    message: 'Unknown error occurred',
+                    type: 'error'
+                });
             }
             return false;
         }
@@ -94,7 +100,12 @@ export const useProjectStore = defineStore('project', () => {
         console.log('Creating project by name:', currentProjectName.value);
         try{
             const response = await authService.createProjectApiProjectCreatePost(currentProjectName.value);
-            if(response)ElMessage('项目' + currentProjectName.value + '创建成功');
+            if(response){
+                ElMessage({
+                    message: '项目' + currentProjectName.value + '创建成功',
+                    type: 'success'
+                });
+            }
             currentProjectId.value = response;
             initializeProjects();
             return true;
@@ -103,21 +114,36 @@ export const useProjectStore = defineStore('project', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(400):
-                        ElMessage('项目名称已存在');
+                        ElMessage({
+                            message: '项目名称已存在',
+                            type: 'error'
+                        });
                         break;
                     case(404):
-                        ElMessage('用户未找到');
+                        ElMessage({
+                            message: '用户未找到',
+                            type: 'error'
+                        });
                         break;
                     case(422):
-                        ElMessage('验证错误');
+                        ElMessage({
+                            message: '验证错误',
+                            type: 'error'
+                        });
                         break;
                     case(500):
-                        ElMessage('服务器内部错误');
+                        ElMessage({
+                            message: '服务器内部错误',
+                            type: 'error'
+                        });
                         break;
                 }
             }
             else{
-                ElMessage('Unknown error occurred.');
+                ElMessage({
+                    message: 'Unknown error occurred',
+                    type: 'error'
+                });
             }
             return false;
         }
@@ -127,7 +153,12 @@ export const useProjectStore = defineStore('project', () => {
         console.log('Deleting project by ID:', id);
         try{
             const response = await authService.deleteProjectApiProjectProjectIdDelete(id);
-            if(response==null)ElMessage('项目' + id + '删除成功');
+            if(response==null){
+                ElMessage({
+                    message: '项目' + id + '删除成功',
+                    type: 'success'
+                });
+            }
             initializeProjects();
             return true;
         }
@@ -135,24 +166,42 @@ export const useProjectStore = defineStore('project', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(403):
-                        ElMessage('没有访问权限');
+                        ElMessage({
+                            message: '没有访问权限',
+                            type: 'error'
+                        });
                         break;
                     case(404):
-                        ElMessage('找不到项目');
+                        ElMessage({
+                            message: '找不到项目',
+                            type: 'error'
+                        });
                         break;
                     case(422):
-                        ElMessage('验证错误');
+                        ElMessage({
+                            message: '验证错误',
+                            type: 'error'
+                        });
                         break;
                     case(423):
-                        ElMessage('项目被锁定，可能正在被其他进程访问');
+                        ElMessage({
+                            message: '项目被锁定，可能正在被其他进程访问',
+                            type: 'error'
+                        });
                         break;
                     case(500):
-                        ElMessage('服务器内部错误');
+                        ElMessage({
+                            message: '服务器内部错误',
+                            type: 'error'
+                        });
                         break;
                 }
             }
             else{
-                ElMessage('Unknown error occurred.');
+                ElMessage({
+                    message: 'Unknown error occurred',
+                    type: 'error'
+                });
             }
             return false;
         }
@@ -162,7 +211,12 @@ export const useProjectStore = defineStore('project', () => {
         console.log('Getting project by ID:', id)
         try{
             const response = await authService.getProjectApiProjectProjectIdGet(id);
-            if(response)ElMessage('项目' + id + '获取成功');
+            if(response){
+                ElMessage({
+                    message: '项目' + id + '获取成功',
+                    type: 'error'
+                });
+            }
             currentProject.value=response;
             return true;
         }
@@ -170,7 +224,10 @@ export const useProjectStore = defineStore('project', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(403):
-                        ElMessage('没有访问权限');
+                        ElMessage({
+                            message: '没有访问权限',
+                            type: 'error'
+                        });
                         break;
                     case(404):
                         ElMessage('找不到项目');

@@ -18,6 +18,7 @@ import '@mdi/font/css/materialdesignicons.css'
 //element-plus
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import './common/elmessage.css'
 
 //authenticated service factory
 import AuthenticatedServiceFactory from './utils/AuthenticatedServiceFactory.ts'

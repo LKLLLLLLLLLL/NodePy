@@ -64,40 +64,7 @@
         else return false
     }
 
-    function jumpToPage(){
-        switch(pageStore.currentPage){
-            case('File'):
-                router.push({
-                    name: 'file'
-                })
-                break;
-            case('Example'):
-                router.push({
-                    name: 'example'
-                })
-                break;
-            case('Home'):
-                router.push({
-                    name: 'home'
-                })
-                break;
-            case('ProjectList'):
-                router.push({
-                    name: 'project'
-                })
-                break;
-            case('Visitor'):
-                router.push({
-                    name: 'visitor'
-                })
-                break;
-            default:
-                router.push({
-                    name: 'home'
-                })
-                break;
-        }
-    }
+    
     
     async function handleLogin(){
         try {
@@ -106,14 +73,22 @@
                 username: username.value,
                 password: password.value
             });
-            ElMessage('登录成功');
-            jumpToPage();
+            ElMessage({
+                type: 'success',
+                message: '登录成功'
+            });
+            pageStore.jumpToPage();
         } catch (error: any) {
-            console.error('登录失败:', error);
             if (error.status === 401) {
-                ElMessage('用户名或密码错误');
+                ElMessage({
+                    message:'用户名、邮箱或密码错误',
+                    type: 'error'
+                });
             } else {
-                ElMessage('登录失败，请重试');
+                ElMessage({
+                    message: '登录失败，请重试',
+                    type: 'error'
+                });
             }
         }
     }
@@ -127,21 +102,32 @@
                     email: email.value,
                     password: password.value
                 });
-                ElMessage('注册成功，已自动登录');
-                jumpToPage();
+                ElMessage({
+                    message: '注册成功，已自动登录',
+                    type: 'success'
+                });
+                pageStore.jumpToPage();
             } catch (error: any) {
-                console.error('注册失败:', error);
                 if (error.status === 400) {
-                    ElMessage('用户名或邮箱已被注册');
+                    ElMessage({
+                        message: '用户名或邮箱已被注册',
+                        type: 'error'
+                    });
                 } else {
-                    ElMessage('注册失败，请重试');
+                    ElMessage({
+                        message: '注册失败，请重试',
+                        type: 'error'
+                    });
                 }
             }
         }
         else{
             password.value = default_password
             confirm_password.value = default_password
-            ElMessage('密码不一致，请重试')
+            ElMessage({
+                message: '密码不一致，请重试',
+                type: 'error'
+            })
         }
     }
 

@@ -20,7 +20,7 @@ export const useResultStore = defineStore('result',()=>{
     const currentInfo = ref<any>(default_info)
 
     //result modal default 
-    const marginRight = 25;
+    const marginRight = 30;
     const marginTop = 60;
     const marginBottom = 65;
     const modalWidth = ref<number>(500);

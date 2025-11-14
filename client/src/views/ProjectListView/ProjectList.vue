@@ -12,8 +12,8 @@
     const modalStore = useModalStore();
     const projectStore = useProjectStore();
     const pageStore = usePageStore();
-    const loginStore = useLoginStore()
-    const router = useRouter()
+    const loginStore = useLoginStore();
+    const router = useRouter();
 
     onMounted(()=>{
         loginStore.checkAuthStatus()
@@ -21,7 +21,9 @@
             projectStore.initializeProjects()
         }
         else{
-            pageStore.setCurrentPage('Login')
+            router.push({
+                name: 'login'
+            })
         }
     });
 

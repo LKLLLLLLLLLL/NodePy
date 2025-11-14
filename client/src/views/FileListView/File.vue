@@ -12,6 +12,8 @@
     const fileStore = useFileStore();
     const pageStore = usePageStore();
     const loginStore = useLoginStore()
+
+    const router = useRouter()
     
     const test: boolean = true
 
@@ -149,7 +151,9 @@
             console.log(fileStore.userFileList.files);
         }
         else{
-            pageStore.setCurrentPage('File');
+            router.push({
+                name: 'login'
+            })
         }
     })
 
