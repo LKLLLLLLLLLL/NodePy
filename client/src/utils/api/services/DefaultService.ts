@@ -5,6 +5,7 @@
 import type { Body_upload_file_api_files_upload__project_id__post } from '../models/Body_upload_file_api_files_upload__project_id__post';
 import type { DataView } from '../models/DataView';
 import type { DeleteResponse } from '../models/DeleteResponse';
+import type { ExploreList } from '../models/ExploreList';
 import type { File } from '../models/File';
 import type { LoginRequest } from '../models/LoginRequest';
 import type { Project } from '../models/Project';
@@ -427,6 +428,18 @@ export class DefaultService {
             errors: {
                 401: `Unauthorized`,
             },
+        });
+    }
+    /**
+     * Get Explore Projects
+     * Get the list of projects that are marked as 'show in explore'.
+     * @returns ExploreList Successful Response
+     * @throws ApiError
+     */
+    public static getExploreProjectsApiExploreExploreProjectsGet(): CancelablePromise<ExploreList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/explore/explore/projects',
         });
     }
     /**

@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
 """
-This file contains data models for example list representation, used in example page.
+This file contains data models for project list representation, used in explore page.
 """
 
 
-class ExampleListItem(BaseModel):
+class ExploreListItem(BaseModel):
     project_id: int
     project_name: str
     owner: int
@@ -14,6 +14,5 @@ class ExampleListItem(BaseModel):
     thumb: str | None = None  # base64 encoded thumbnail image
 
 
-class ExampleList(BaseModel):
-    userid: int
-    projects: list[ExampleListItem]
+class ExploreList(BaseModel):
+    projects: list[ExploreListItem]
