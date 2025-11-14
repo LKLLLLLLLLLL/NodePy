@@ -11,7 +11,7 @@
 
     //el-form config
     const label_width = "80px"
-    const label_position = "right"
+    const label_position = "top"
 
     //form type
     type State = 'login'|'register';
@@ -24,10 +24,12 @@
     const default_username: string = '';
     const default_confirmpassword: string = '';
     const default_email: string = '';
+    const default_email_username: string = ''
     const password = ref<string>(default_password);
     const confirm_password = ref<string>(default_confirmpassword);
     const email = ref<string>(default_email);
     const username = ref<string>(default_username);
+    const email_username = ref<string>(default_email_username)
 
     const accountLabel = computed(()=>{
         if(loginType.value=='email')return 'Email';

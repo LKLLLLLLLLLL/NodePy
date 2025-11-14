@@ -44,12 +44,12 @@ const routes: Array<RouteRecordRaw> = [
         component: Example
     },
     {
-        path: '/editor/:exampleName',
+        path: '/example/:exampleName',
         name: 'editor-example',
         component: Editor
     },
     {
-        path: '/editor/:projectId',
+        path: '/project/:projectId',
         name: 'editor-project',
         component: Editor
     }

@@ -240,7 +240,7 @@
             </div>
         </div>
         <div class = "modal-footer">
-            footer
+            
         </div>
     </div>
 </template>

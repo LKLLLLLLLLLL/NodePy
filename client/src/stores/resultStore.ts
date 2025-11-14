@@ -21,9 +21,9 @@ export const useResultStore = defineStore('result',()=>{
 
     //result modal default 
     const marginRight = 25;
-    const marginTop = 75;
-    const marginBottom = 75;
-    const modalWidth = ref<number>(300);
+    const marginTop = 60;
+    const marginBottom = 65;
+    const modalWidth = ref<number>(500);
     const modalHeight = ref<number>(window.innerHeight - marginTop - marginBottom);
     const xPosition = ref<number>(window.innerWidth - modalWidth.value - marginRight);
     const yPosition = ref<number>(marginTop);
