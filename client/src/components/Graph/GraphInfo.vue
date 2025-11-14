@@ -3,7 +3,7 @@
     import { useGraphStore } from '@/stores/graphStore';
     import SvgIcon from '@jamescoyle/vue-icon';
     import { mdiAlertCircleOutline, mdiCheckCircleOutline } from '@mdi/js';
-    import Loading from './Loading.vue';
+    import Loading from '../Loading.vue';
 
     const mdiWarn = mdiAlertCircleOutline;
     const mdiSuccess = mdiCheckCircleOutline;
