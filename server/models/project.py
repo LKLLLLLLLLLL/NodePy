@@ -83,19 +83,6 @@ class ProjWorkflow(BaseModel):
             edges=topo_edges,
         )
 
-    # def cleanse(self) -> "ProjWorkflow":
-    #     """
-    #     Remove unreliable data from frontend before saving to database.
-    #     Waiting to be overwritten by backend execution results.
-    #     """
-    #     for node in self.nodes:
-    #         node.schema_out = {}
-    #         node.data_out = {}
-    #         node.error = None
-    #         node.runningtime = None
-    #     self.error_message = None
-    #     return self
-
     def merge_run_results_from(self, other: "ProjWorkflow") -> None:
         """
         Merge running results from another workflow instance.
@@ -163,6 +150,25 @@ class ProjWorkflow(BaseModel):
                 )
         return result
 
+    def generate_del_data_patches(self, node_indexs: list[int] = []) -> list["ProjWorkflowPatch"]:
+        """
+        If node_ids is provided, only delete data_out for those nodes.
+        """
+        result = []
+        for index, node in enumerate(self.nodes):
+            if node.data_out and (index not in node_indexs):
+                result.append(
+                    ProjWorkflowPatch(
+                        key=[
+                            "nodes",
+                            self.nodes.index(node),
+                            "data_out",
+                        ],
+                        value={},
+                    )
+                )
+        return result
+
 class ProjUIState(BaseModel):
     """
     The UI state of the project, e.g., node positions.
@@ -212,14 +218,6 @@ class Project(BaseModel):
     def to_topo(self) -> WorkflowTopology:
         """Convert to WorkflowTopology"""
         return self.workflow.to_topo(project_id=self.project_id)
-
-    # def cleanse(self) -> "Project":
-    #     """
-    #     Remove unreliable data from frontend before saving to database.
-    #     Waiting to be overwritten by backend execution results.
-    #     """
-    #     self.workflow.cleanse()
-    #     return self
 
 class ProjWorkflowPatch(BaseModel):
     """

@@ -171,6 +171,17 @@ def execute_project_task(self, project_id: int, user_id: int):
                         return True # continue execution for other nodes
                     graph.construct_nodes(callback=construct_reporter)
                     if has_exception:
+                        # cleanup all data output (schemas have been cleaned in step 1)
+                        patches = workflow.generate_del_data_patches()
+                        for patch in patches:
+                            workflow.apply_patch(patch)
+                            queue.push_message_sync(
+                                Status.IN_PROGRESS,
+                                {"stage": "CONSTRUCTION",
+                                    "status": "IN_PROGRESS",
+                                    "patch": [patch.model_dump()]
+                                }
+                            )
                         queue.push_message_sync(
                             Status.FAILURE, 
                             {"stage": "CONSTRUCTION", "status": "FAILURE"}
@@ -247,6 +258,17 @@ def execute_project_task(self, project_id: int, user_id: int):
                         return True # continue execution for other nodes
                     graph.static_analyse(callback=anl_reporter)
                     if has_exception:
+                        # cleanup all data output (schemas have been cleaned in step 1)
+                        patches = workflow.generate_del_data_patches()
+                        for patch in patches:
+                            workflow.apply_patch(patch)
+                            queue.push_message_sync(
+                                Status.IN_PROGRESS,
+                                {"stage": "STATIC_ANALYSIS",
+                                    "status": "IN_PROGRESS",
+                                    "patch": [patch.model_dump()]
+                                }
+                            )
                         queue.push_message_sync(
                             Status.FAILURE, 
                             {"stage": "STATIC_ANALYSIS", "status": "FAILURE"}
@@ -351,6 +373,18 @@ def execute_project_task(self, project_id: int, user_id: int):
                     graph.execute(callbefore=exec_before_reporter, callafter=exec_after_reporter)
                     # time.sleep(5)  # for debug
                     if has_exception:
+                        # cleanup unreached nodes' data output
+                        unreached_node_ids = getattr(graph, "_last_unreached_node_ids", [])
+                        patches = workflow.generate_del_data_patches(node_indexs=unreached_node_ids)
+                        for patch in patches:
+                            workflow.apply_patch(patch)
+                            queue.push_message_sync(
+                                Status.IN_PROGRESS,
+                                {"stage": "EXECUTION",
+                                    "status": "IN_PROGRESS",
+                                    "patch": [patch.model_dump()]
+                                }
+                            )
                         queue.push_message_sync(
                             Status.FAILURE, 
                             {"stage": "EXECUTION", "status": "FAILURE"}

@@ -40,6 +40,8 @@ class ProjectExecutor:
         # construct global config
         self.cache_manager = cache_manager # used only by NodeGraph, no need to pass to nodes
         self._global_config = GlobalConfig(file_manager=file_manager, user_id=user_id, project_id=topology.project_id)
+        # cache last unreached node ids, for unreached method
+        self._last_unreached_node_ids: list[int] = []
     
     def construct_nodes(self, callback: Callable[[str, Literal["success", "error"], Exception | None], bool]) -> None:
         """ 
@@ -93,6 +95,8 @@ class ProjectExecutor:
         schema_cache : dict[tuple[str, str], Schema] = {} # cache for node output schema: (node_id, port) -> Schema
         unreachable_nodes = set() # the descendants of nodes that failed static analysis
         
+        self._last_unreached_node_ids = []
+        
         for node_id in self._exec_queue:
             # if one node fails, all its descendants will be skipped for avoiding redundant errors
             if node_id in unreachable_nodes:
@@ -122,12 +126,14 @@ class ProjectExecutor:
                 unreachable_nodes.update([node_id, *nx.descendants(self._graph, node_id)])
                 continue_execution = callback(node_id, "error", e)
                 if not continue_execution:
+                    self._last_unreached_node_ids = list(unreachable_nodes)
                     return
                 else:
                     continue
             else:
                 continue_execution = callback(node_id, "success", output_schemas)
                 if not continue_execution:
+                    self._last_unreached_node_ids = list(unreachable_nodes)
                     return
                 else:
                     continue
@@ -151,6 +157,8 @@ class ProjectExecutor:
             raise AssertionError(f"Graph is in stage '{self._stage}', cannot run.")
         data_cache : dict[tuple[str, str], Data] = {} # cache for node output data: (node_id, port) -> Data
         unreachable_nodes = set() # the descendants of nodes that failed execution
+
+        self._last_unreached_node_ids = []
 
         for node_id in self._exec_queue:
             if node_id in unreachable_nodes:
@@ -196,12 +204,14 @@ class ProjectExecutor:
                 unreachable_nodes.update([node_id, *nx.descendants(self._graph, node_id)])
                 continue_execution = callafter(node_id, "error", e, None)
                 if not continue_execution:
+                    self._last_unreached_node_ids = list(unreachable_nodes)
                     return
                 else:
                     continue
             else:
                 continue_execution = callafter(node_id, "success", output_data, running_time)
                 if not continue_execution:
+                    self._last_unreached_node_ids = list(unreachable_nodes)
                     return
                 else:
                     pass
@@ -223,3 +233,9 @@ class ProjectExecutor:
                 )
         self._stage = "finished"
         return
+
+    def get_unreached_nodes(self) -> list[int]:
+        """ 
+        Get the list of node ids that were not reached during the last static analysis or execution.
+        """
+        return self._last_unreached_node_ids
