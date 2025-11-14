@@ -48,15 +48,13 @@
         input.accept = '*'
         input.onchange = async (e) => {
             const file = (e.target as HTMLInputElement).files?.[0]
+            console.log(file instanceof Blob)
             if(!file) return
 
-            const form = new FormData()
-            form.append('file', file)
-
             try {
-                const file = await authService.uploadFileApiFilesUploadProjectIdPost(projectId, props.id, form as unknown as any)
-                console.log('文件上传成功:', file)
-                props.data.param.file = file
+                const f = await authService.uploadFileApiFilesUploadProjectIdPost(projectId, props.id, {file})
+                console.log('文件上传成功:', f)
+                props.data.param.file = f
             }catch(err) {
                 console.error('文件上传失败:', err)
             }

@@ -48,7 +48,8 @@ export const getProject = (vp: vueFlowProject): Project => {
         thumb: vp.thumb,
         ui_state: {
             nodes: ui_state
-        }
+        },
+        editable: vp.editable
     }
 }
 
@@ -91,6 +92,7 @@ export const initVueFlowProject = (p: Project, vp: vueFlowProject) => {
     setEdges(edges)
     vp.updated_at = p.updated_at
     vp.thumb = p.thumb
+    vp.editable = p.editable
 }
 
 export const writeBackVueFLowProject = (p: Project, vp: vueFlowProject) => {

@@ -46,10 +46,8 @@ onUnmounted(() => {
 
 onMounted(async () => {
   try {
-    console.log('getProjectApiProjectProjectIdGet')
     const p = await getProjectFromServer(Number(projectId))
     initVueFlowProject(p, graphStore.project)
-    console.log(graphStore.project)
     await nextTick()
     shouldWatch.value = true
   }catch(err) {
@@ -76,11 +74,6 @@ watch([
 
 }, {deep: false, immediate: false})
 onNodeDragStop(async (event: NodeDragEvent) => {
-  console.log('节点位置变化:', {
-    nodeId: event.node.id,
-    nodeType: event.node.type,
-    newPosition: event.node.position,
-  }, 'listenNodePosition:', listenNodePosition.value)
   if(!listenNodePosition.value || !shouldWatch.value) return
   listenNodePosition.value = false
 
