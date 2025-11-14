@@ -1,7 +1,7 @@
 <script lang="ts" setup>
     import { useLoginStore } from '@/stores/loginStore';
     import { useModalStore } from '@/stores/modalStore';
-    import { ElMessage } from 'element-plus';
+    import notify from './Notification/notify';
     import { useRouter } from 'vue-router';
     const router = useRouter()
     const modalStore = useModalStore()
@@ -14,7 +14,7 @@
         })
         modalStore.deactivateModal('log-out')
         modalStore.destroyModal('log-out')
-        ElMessage({
+        notify({
             message: '退出登录成功',
             type: 'success'
         })

@@ -3,7 +3,7 @@
     name="toast"
     tag="div"
     class="notification-root"
-    :style="{ top: typeof props.topOffset === 'number' ? props.topOffset + 'px' : (props.topOffset || '20px') }"
+    :style="{ top: typeof props.topOffset === 'number' ? props.topOffset + 'px' : (props.topOffset || '60px') }"
   >
     <NotificationToast
       v-for="msg in state.messages"

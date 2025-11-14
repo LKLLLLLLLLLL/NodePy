@@ -28,15 +28,13 @@ onMounted(() => {})
   display:flex;
   align-items:center;
   justify-content:space-between;
-  min-width:200px;
-  max-width:360px;
-  padding:10px 14px;
+  padding:5px 14px;
   /* controller-style already sets border-radius, background and box-shadow */
   color:#fff;
   margin-top:10px;
-  font-size:16px;
+  font-size:14px;
 }
-.toast .content{flex:1;padding-right:8px}
+.toast .content{flex:1;padding-right:8px;text-align: center;}
 .toast .close{background:transparent;border:none;color:inherit;font-size:18px;cursor:pointer}
 .toast.success{background:#67C23A;color:#fff}
 .toast.error{background:#F56C6C;color:#fff}

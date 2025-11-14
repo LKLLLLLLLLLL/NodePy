@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref,computed } from 'vue';
 import { ApiError, FileItem, type UserFileList, type Body_upload_file_api_files_upload__project_id__post} from '@/utils/api';
 import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
-import { ElMessage } from 'element-plus';
+import notify from '@/components/Notification/notify';
 
 export const useFileStore = defineStore('file', () => {
 
@@ -180,13 +180,13 @@ export const useFileStore = defineStore('file', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(404):
-                        ElMessage({
+                        notify({
                             message: '无法找到文件列表',
                             type: 'error'
                         });
                         break;
                     case(500):
-                        ElMessage({
+                        notify({
                             message: '服务器内部错误',
                             type: 'error'
                         });
@@ -205,13 +205,13 @@ export const useFileStore = defineStore('file', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(404):
-                        ElMessage({
+                        notify({
                             message: '无法找到文件列表',
                             type: 'error'
                         });
                         break;
                     case(500):
-                        ElMessage({
+                        notify({
                             message: '服务器内部错误',
                             type: 'error'
                         });
@@ -224,7 +224,7 @@ export const useFileStore = defineStore('file', () => {
     async function uploadFile(pid: number,nodeid: string,formData: Body_upload_file_api_files_upload__project_id__post){
         try{
             const response = await authService.uploadFileApiFilesUploadProjectIdPost(pid,nodeid,formData);
-            ElMessage({
+            notify({
                 message: '文件上传成功',
                 type: 'success'
             });
@@ -234,31 +234,31 @@ export const useFileStore = defineStore('file', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(400):
-                        ElMessage({
+                        notify({
                             message: '无效的文件或参数',
                             type: 'error'
                         });
                         break;
                     case(403):
-                        ElMessage({
+                        notify({
                             message: '操作被禁止',
                             type: 'error'
                         });
                         break;
                     case(422):
-                        ElMessage({
+                        notify({
                             message: '认证错误',
                             type: 'error'
                         });
                         break;
                     case(500):
-                        ElMessage({
+                        notify({
                             message: '服务器内部错误',
                             type: 'error'
                         });
                         break;
                     case(507):
-                        ElMessage({
+                        notify({
                             message: '存储空间不足',
                             type: 'error'
                         });
@@ -272,7 +272,7 @@ export const useFileStore = defineStore('file', () => {
         try{
             const response = await authService.getFileContentApiFilesKeyGet(key);
             currentContent.value = response;
-            ElMessage({
+            notify({
                 message: '获取文件内容成功',
                 type: 'error'
             });
@@ -282,25 +282,25 @@ export const useFileStore = defineStore('file', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(403):
-                        ElMessage({
+                        notify({
                             message: '无权访问此文件',
                             type: 'error'
                         });
                         break;
                     case(404):
-                        ElMessage({
+                        notify({
                             message: '找不到文件',
                             type: 'error'
                         });
                         break;
                     case(422):
-                        ElMessage({
+                        notify({
                             message: '认证错误',
                             type: 'error'
                         });
                         break;
                     case(500):
-                        ElMessage({
+                        notify({
                             message: '服务器内部错误',
                             type: 'error'
                         });
@@ -313,7 +313,7 @@ export const useFileStore = defineStore('file', () => {
     async function deleteFile(key: string){
         try{
             const response = await authService.deleteFileApiFilesKeyDelete(key)
-            ElMessage({
+            notify({
                 message: '删除文件成功',
                 type: 'error'
             });
@@ -324,25 +324,25 @@ export const useFileStore = defineStore('file', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(403):
-                        ElMessage({
+                        notify({
                             message: '无权访问此文件',
                             type: 'error'
                         });
                         break;
                     case(404):
-                        ElMessage({
+                        notify({
                             message: '找不到文件',
                             type: 'error'
                         });
                         break;
                     case(422):
-                        ElMessage({
+                        notify({
                             message: '认证错误',
                             type: 'error'
                         });
                         break;
                     case(500):
-                        ElMessage({
+                        notify({
                             message: '服务器内部错误',
                             type: 'error'
                         });

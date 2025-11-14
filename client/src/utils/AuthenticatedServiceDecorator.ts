@@ -98,10 +98,6 @@ export function withAuthMethod<T extends any[], R>(
           OpenAPI.TOKEN = currentToken;
         }
         
-        if (isDev) {
-          console.log(`🔧 API 请求: ${apiMethod.name}`);
-        }
-        
         const result = await apiMethod(...args);
         return result;
         

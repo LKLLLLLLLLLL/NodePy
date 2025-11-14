@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
 import { useModalStore } from './modalStore';
 import { ApiError } from '@/utils/api';
-import { ElMessage } from 'element-plus';
+import notify from '@/components/Notification/notify';
 import { type ProjectList, type Project, type ProjUIState } from '@/utils/api';
 
 export const useProjectStore = defineStore('project', () => {
@@ -48,7 +48,7 @@ export const useProjectStore = defineStore('project', () => {
     //         return success;
     //     }
     //     catch(error){
-    //         ElMessage('Unknown error occurred.(open)');
+    //         notify('Unknown error occurred.(open)');
     //         return false;
     //     }
     // }
@@ -79,7 +79,7 @@ export const useProjectStore = defineStore('project', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(500):
-                        ElMessage({
+                        notify({
                             message: '服务器内部错误',
                             type: 'error'
                         });
@@ -87,7 +87,7 @@ export const useProjectStore = defineStore('project', () => {
                 }
             }
             else{
-                ElMessage({
+                notify({
                     message: 'Unknown error occurred',
                     type: 'error'
                 });
@@ -99,10 +99,11 @@ export const useProjectStore = defineStore('project', () => {
     async function createProject(){
         console.log('Creating project by name:', currentProjectName.value);
         try{
+            const name = currentProjectName.value
             const response = await authService.createProjectApiProjectCreatePost(currentProjectName.value);
             if(response){
-                ElMessage({
-                    message: '项目' + currentProjectName.value + '创建成功',
+                notify({
+                    message: '项目' + name + '创建成功',
                     type: 'success'
                 });
             }
@@ -114,25 +115,25 @@ export const useProjectStore = defineStore('project', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(400):
-                        ElMessage({
+                        notify({
                             message: '项目名称已存在',
                             type: 'error'
                         });
                         break;
                     case(404):
-                        ElMessage({
+                        notify({
                             message: '用户未找到',
                             type: 'error'
                         });
                         break;
                     case(422):
-                        ElMessage({
+                        notify({
                             message: '验证错误',
                             type: 'error'
                         });
                         break;
                     case(500):
-                        ElMessage({
+                        notify({
                             message: '服务器内部错误',
                             type: 'error'
                         });
@@ -140,7 +141,7 @@ export const useProjectStore = defineStore('project', () => {
                 }
             }
             else{
-                ElMessage({
+                notify({
                     message: 'Unknown error occurred',
                     type: 'error'
                 });
@@ -154,7 +155,7 @@ export const useProjectStore = defineStore('project', () => {
         try{
             const response = await authService.deleteProjectApiProjectProjectIdDelete(id);
             if(response==null){
-                ElMessage({
+                notify({
                     message: '项目' + id + '删除成功',
                     type: 'success'
                 });
@@ -166,31 +167,31 @@ export const useProjectStore = defineStore('project', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(403):
-                        ElMessage({
+                        notify({
                             message: '没有访问权限',
                             type: 'error'
                         });
                         break;
                     case(404):
-                        ElMessage({
+                        notify({
                             message: '找不到项目',
                             type: 'error'
                         });
                         break;
                     case(422):
-                        ElMessage({
+                        notify({
                             message: '验证错误',
                             type: 'error'
                         });
                         break;
                     case(423):
-                        ElMessage({
+                        notify({
                             message: '项目被锁定，可能正在被其他进程访问',
                             type: 'error'
                         });
                         break;
                     case(500):
-                        ElMessage({
+                        notify({
                             message: '服务器内部错误',
                             type: 'error'
                         });
@@ -198,7 +199,7 @@ export const useProjectStore = defineStore('project', () => {
                 }
             }
             else{
-                ElMessage({
+                notify({
                     message: 'Unknown error occurred',
                     type: 'error'
                 });
@@ -212,7 +213,7 @@ export const useProjectStore = defineStore('project', () => {
         try{
             const response = await authService.getProjectApiProjectProjectIdGet(id);
             if(response){
-                ElMessage({
+                notify({
                     message: '项目' + id + '获取成功',
                     type: 'error'
                 });
@@ -224,25 +225,25 @@ export const useProjectStore = defineStore('project', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(403):
-                        ElMessage({
+                        notify({
                             message: '没有访问权限',
                             type: 'error'
                         });
                         break;
                     case(404):
-                        ElMessage({
+                        notify({
                             message: '找不到项目',
                             type: 'error'
                         });
                         break;
                     case(422):
-                        ElMessage({
+                        notify({
                             message: '验证错误',
                             type: 'error'
                         });
                         break;
                     case(500):
-                        ElMessage({
+                        notify({
                             message: '服务器内部错误',
                             type: 'error'
                         });
@@ -250,7 +251,7 @@ export const useProjectStore = defineStore('project', () => {
                 }
             }
             else{
-                ElMessage({
+                notify({
                     message: 'Unknown error occurred',
                     type: 'error'
                 });
@@ -263,7 +264,7 @@ export const useProjectStore = defineStore('project', () => {
         console.log('Renaming project:',id,'New name is',name);
         try{
             // const response = await authService.renameProjectApiProjectRenamePost(id,name);
-            ElMessage({
+            notify({
                 message: '项目' + id + '改名成功',
                 type: 'success'
             });
@@ -274,25 +275,25 @@ export const useProjectStore = defineStore('project', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(403):
-                        ElMessage({
+                        notify({
                             message: '没有访问权限',
                             type: 'error'
                         });
                         break;
                     case(404):
-                        ElMessage({
+                        notify({
                             message: '找不到项目',
                             type: 'error'
                         });
                         break;
                     case(422):
-                        ElMessage({
+                        notify({
                             message: '验证错误',
                             type: 'error'
                         });
                         break;
                     case(500):
-                        ElMessage({
+                        notify({
                             message: '服务器内部错误',
                             type: 'error'
                         });
@@ -300,7 +301,7 @@ export const useProjectStore = defineStore('project', () => {
                 }
             }
             else{
-                ElMessage({
+                notify({
                     message: 'Unknown error occurred',
                     type: 'error'
                 });
