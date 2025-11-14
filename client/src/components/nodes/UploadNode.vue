@@ -1,0 +1,96 @@
+<template>
+    <div class="UploadNodeLayout nodes-style" :class="{'nodes-selected': selected}">
+        <div class="node-title-file nodes-topchild-border-radius">文件上传节点</div>
+        <div class="data" :class="{'node-has-paramerr': hasParamerr}">
+            <div class="file">
+                <div class="file-description">上传文件</div>
+                <svg-icon type="mdi" :path="mdiAddFile" @click="addFile" class="file-icon"></svg-icon>
+            </div>
+            <div class="output-file port">
+                <div class="output-port-description">文件输出端口</div>
+                <Handle id="file" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
+            </div>
+        </div>
+        <div class="node-err nodrag">
+            <div v-for="err in errMsg">
+                {{ err }}
+            </div>
+        </div>
+    </div>
+</template>
+
+<script lang="ts" setup>
+    //@ts-ignore
+    import SvgIcon from '@jamescoyle/vue-icon';
+    import { mdiFilePlus } from '@mdi/js';
+    import {ref, computed, watch } from 'vue'
+    import type { NodeProps } from '@vue-flow/core'
+    import { Position, Handle } from '@vue-flow/core'
+    import type { Type } from '@/utils/api'
+    import { handleParamError, handleExecError } from './handleError'
+    import type { UploadNodeData } from '@/types/nodeTypes'
+    import { useGraphStore } from '@/stores/graphStore'
+    import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory'
+
+    const mdiAddFile: string = mdiFilePlus
+    const props = defineProps<NodeProps<UploadNodeData>>()
+    const schema_type = computed(():Type|'default' => props.data.schema_out?.['file']?.type || 'default')
+    const errMsg = ref<string[]>([])
+    const hasParamerr = ref(false)
+    const graphStore = useGraphStore()
+    const authService = AuthenticatedServiceFactory.getService()
+
+
+    const addFile = async() => {
+        const projectId = graphStore.project.project_id
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = '*'
+        input.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0]
+            if(!file) return
+
+            const form = new FormData()
+            form.append('file', file)
+
+            try {
+                const file = await authService.uploadFileApiFilesUploadProjectIdPost(projectId, props.id, form as unknown as any)
+                console.log('文件上传成功:', file)
+                props.data.param.file = file
+            }catch(err) {
+                console.error('文件上传失败:', err)
+            }
+        }
+        input.click()
+    }
+
+
+    watch(() => JSON.stringify(props.data.error), () => {
+        errMsg.value = []
+        handleExecError(props.data.error, errMsg)
+        handleParamError(hasParamerr, props.data.error, errMsg)
+    }, {immediate: true})
+
+</script>
+
+<style lang="scss" scoped>
+    @use '../../common/global.scss' as *;
+    @use '../../common/node.scss' as *;
+    .UploadNodeLayout {
+        height: 100%;
+        .data {
+            padding-top: $node-padding;
+            padding-bottom: 5px;
+            .file {
+                padding: 0 $node-padding;
+                .file-icon {
+                    margin-left: 50%;
+                    transform: translateX(-50%);
+                }
+            }
+            .output-file {
+                margin-top: $node-margin;
+            }
+        }
+    }
+</style>

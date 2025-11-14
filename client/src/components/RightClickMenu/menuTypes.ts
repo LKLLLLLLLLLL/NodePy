@@ -92,7 +92,7 @@ export const nodeMenuItems: MenuNode[] = [
         children: [
             {
                 label: '文件上传节点',
-                value: 'FileUploadNode'
+                value: 'UploadNode'
             },
             {
                 label: '文件显示节点',

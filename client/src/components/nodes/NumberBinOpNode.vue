@@ -33,7 +33,7 @@
                 <Handle id="result" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             </div>
         </div>
-        <div class="node-err">
+        <div class="node-err nodrag">
             <div v-for="err in errMsg">
                 {{ err }}
             </div>
@@ -81,7 +81,7 @@
         handleExecError(props.data.error, errMsg)
         handleParamError(hasParamerr, props.data.error, errMsg)
         handleValidationError(props.id, props.data.error, errMsg, xHasErr, yHasErr)
-    })
+    }, {immediate: true})
 
 </script>
 

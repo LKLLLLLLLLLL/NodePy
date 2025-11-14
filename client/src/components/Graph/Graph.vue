@@ -19,6 +19,7 @@ import TableNode from '../nodes/TableNode.vue'
 import BoolNode from '../nodes/BoolNode.vue'
 import TableFromCSVNode from '../nodes/TableFromCSVNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
+import UploadNode from '../nodes/UploadNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { useRoute } from 'vue-router'
@@ -205,7 +206,11 @@ const isValidConnection = (connection: any) => {
         </template>
 
         <template #node-NumberBinOpNode="NumberBinOpNodeProps">
-          <NumberBinOpNode v-bind="NumberBinOpNodeProps" />
+          <NumberBinOpNode v-bind="NumberBinOpNodeProps"/>
+        </template>
+
+        <template #node-UploadNode="UploadNodeProps">
+          <UploadNode v-bind="UploadNodeProps"/>
         </template>
 
       </VueFlow>

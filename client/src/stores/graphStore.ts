@@ -102,6 +102,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedTableFromCSVNode)
         break
+      case 'UploadNode':
+        const addedUploadNode: Nodetypes.UploadNode = {
+          id: Date.now().toString(),
+          position,
+          type: 'UploadNode',
+          data: {
+            param: {
+              file: null as any
+            }
+          }
+        }
+        addNodes(addedUploadNode)
+        break
     
       default:
         console.log(type)

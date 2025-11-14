@@ -83,42 +83,42 @@ $node-margin: 10px;
 }
 
 .node-title-control {
-  background: #bbb;
+  background: $control-node-color;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
 }
 
 .node-title-file {
-  background: #aaa;
+  background: $file-node-color;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
 }
 
 .node-title-stringProcess {
-  background: #999;
+  background: $str-node-color;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
 }
 
 .node-title-tableProcess {
-  background: #888;
+  background: $table-node-color;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
 }
 
 .node-title-tool {
-  background: #777;
+  background: $utils-node-color;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
 }
 
 .node-title-visualize {
-  background: #666;
+  background: $visualize-node-color;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
@@ -153,6 +153,6 @@ $node-margin: 10px;
 } //  errmsg style
 
 .node-errhandle {
-  background-color: red;
+  background: red !important;
   filter: drop-shadow(0 0 3px red);
 }

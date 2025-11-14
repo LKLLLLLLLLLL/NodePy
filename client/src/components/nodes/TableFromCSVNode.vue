@@ -27,6 +27,11 @@
                 />
             </div>
         </div>
+        <div class="node-err nodrag">
+            <div v-for="err in errMsg">
+                {{ err }}
+            </div>
+        </div>
     </div>
 </template>
 
@@ -54,7 +59,7 @@
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
         handleValidationError(props.id, props.data.error, errMsg, csv_fileHaserr)
-    })
+    }, {immediate: true})
 
 </script>
 

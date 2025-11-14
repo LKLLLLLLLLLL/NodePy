@@ -19,7 +19,7 @@
                 <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             </div>
         </div>
-        <div class="node-err">
+        <div class="node-err nodrag">
             <div v-for="err in errMsg">
                 {{ err }}
             </div>
@@ -51,7 +51,7 @@
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []   //  reset errMsg
         handleExecError(props.data.error, errMsg)
-    })
+    }, {immediate: true})
 
 </script>
 
