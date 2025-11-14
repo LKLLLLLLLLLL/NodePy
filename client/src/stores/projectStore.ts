@@ -230,18 +230,30 @@ export const useProjectStore = defineStore('project', () => {
                         });
                         break;
                     case(404):
-                        ElMessage('找不到项目');
+                        ElMessage({
+                            message: '找不到项目',
+                            type: 'error'
+                        });
                         break;
                     case(422):
-                        ElMessage('验证错误');
+                        ElMessage({
+                            message: '验证错误',
+                            type: 'error'
+                        });
                         break;
                     case(500):
-                        ElMessage('服务器内部错误');
+                        ElMessage({
+                            message: '服务器内部错误',
+                            type: 'error'
+                        });
                         break;
                 }
             }
             else{
-                ElMessage('Unknown error occurred.');
+                ElMessage({
+                    message: 'Unknown error occurred',
+                    type: 'error'
+                });
             }
             return false;
         }
@@ -250,8 +262,11 @@ export const useProjectStore = defineStore('project', () => {
     async function renameProject(id: number,name: string){
         console.log('Renaming project:',id,'New name is',name);
         try{
-            const response = await authService.renameProjectApiProjectRenamePost(id,name);
-            ElMessage('项目' + id + '改名成功');
+            // const response = await authService.renameProjectApiProjectRenamePost(id,name);
+            ElMessage({
+                message: '项目' + id + '改名成功',
+                type: 'success'
+            });
             initializeProjects();
             return true;
         }
@@ -259,21 +274,36 @@ export const useProjectStore = defineStore('project', () => {
             if(error instanceof ApiError){
                 switch(error.status){
                     case(403):
-                        ElMessage('没有访问权限');
+                        ElMessage({
+                            message: '没有访问权限',
+                            type: 'error'
+                        });
                         break;
                     case(404):
-                        ElMessage('找不到项目');
+                        ElMessage({
+                            message: '找不到项目',
+                            type: 'error'
+                        });
                         break;
                     case(422):
-                        ElMessage('验证错误');
+                        ElMessage({
+                            message: '验证错误',
+                            type: 'error'
+                        });
                         break;
                     case(500):
-                        ElMessage('服务器内部错误');
+                        ElMessage({
+                            message: '服务器内部错误',
+                            type: 'error'
+                        });
                         break;
                 }
             }
             else{
-                ElMessage('Unknown error occurred.');
+                ElMessage({
+                    message: 'Unknown error occurred',
+                    type: 'error'
+                });
             }
             return false;
         }

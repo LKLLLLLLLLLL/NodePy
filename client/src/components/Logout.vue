@@ -14,7 +14,10 @@
         })
         modalStore.deactivateModal('log-out')
         modalStore.destroyModal('log-out')
-        ElMessage('退出登录成功')
+        ElMessage({
+            message: '退出登录成功',
+            type: 'success'
+        })
     }
 </script>
 <template>
