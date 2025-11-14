@@ -232,6 +232,6 @@ class ProjWorkflowPatch(BaseModel):
     value: Any
 
 class ProjectSetting(BaseModel):
-    show_to_examples: bool = False  
-    # whether the project is shown in example list to other users
+    show_to_explore: bool = False  
+    # whether the project is shown in explore list to other users
     project_name: str

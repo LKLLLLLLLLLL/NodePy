@@ -215,7 +215,7 @@ async def get_project_setting(
         if project_record.owner_id != user_id: # type: ignore
             raise HTTPException(status_code=403, detail="User has no access to this project")
         return ProjectSetting(
-            show_to_examples=project_record.show_in_examples,  # type: ignore
+            show_to_explore=project_record.show_in_explore,  # type: ignore
             project_name=project_record.name,  # type: ignore
         )
     except HTTPException:
@@ -259,7 +259,7 @@ async def update_project_setting(
                 raise HTTPException(status_code=400, detail="Project name already exists")
             # update settings
             project_record.name = setting.project_name # type: ignore
-            project_record.show_in_examples = setting.show_to_examples # type: ignore
+            project_record.show_in_explore = setting.show_to_explore # type: ignore
             await db_client.commit()
             return
     except ProjectLockError:

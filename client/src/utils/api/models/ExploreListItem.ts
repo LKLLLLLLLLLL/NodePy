@@ -2,8 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ProjectSetting = {
-    show_to_explore?: boolean;
+export type ExploreListItem = {
+    project_id: number;
     project_name: string;
+    owner: number;
+    created_at: number;
+    updated_at: number;
+    thumb?: (string | null);
 };
 

@@ -206,7 +206,7 @@ export const useProjectStore = defineStore('project', () => {
             return false;
         }
     }
-    
+
     async function getProject(id: number){
         console.log('Getting project by ID:', id)
         try{

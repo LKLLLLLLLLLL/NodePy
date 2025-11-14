@@ -64,7 +64,7 @@ class ProjectRecord(Base):
     thumb = Column(LargeBinary, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
-    show_in_examples = Column(Boolean, default=False, nullable=False)
+    show_in_explore = Column(Boolean, default=False, nullable=False)
 
 class NodeOutputRecord(Base):
     """

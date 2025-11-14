@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ProjectSetting = {
-    show_to_explore?: boolean;
-    project_name: string;
+import type { ExploreListItem } from './ExploreListItem';
+export type ExploreList = {
+    projects: Array<ExploreListItem>;
 };
 

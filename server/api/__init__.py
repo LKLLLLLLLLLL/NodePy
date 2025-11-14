@@ -3,6 +3,7 @@ from .project import router as project_router
 from .files import router as files_router
 from .data import router as data_router
 from .auth import router as auth_router
+from .explore import router as explore_router
 
 # Create main API router
 router = APIRouter()
@@ -12,5 +13,6 @@ router.include_router(project_router, prefix="/project")
 router.include_router(files_router, prefix="/files")
 router.include_router(data_router, prefix="/data")
 router.include_router(auth_router, prefix="/auth")
+router.include_router(explore_router, prefix="/explore")
 
 __all__ = ["router"]
