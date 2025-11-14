@@ -158,7 +158,10 @@ class Data(BaseModel):
             ),
                 value=value,
             )
-    
+
+    def to_dict(self) -> dict[str, Any]:
+        return self.to_view().to_dict()
+
     @classmethod
     def from_view(cls, data_view: "DataView") -> "Data":
         payload_type = data_view.type

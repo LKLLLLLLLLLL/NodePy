@@ -4,6 +4,8 @@ from server.models.database import ProjectRecord
 import base64
 from typing import Any, Callable
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
+import json
+import hashlib
 
 
 async def get_project_by_id(
@@ -62,4 +64,31 @@ def timeout(seconds: float):
                     return False, None
         return _wrapper
     return _decorator
-        
+
+def safe_hash(obj: Any) -> str:
+    """
+    A safe hash function that handles unhashable objects.
+    For unhashable objects, if it has write the to_dict() method, use its dict representation for hashing.
+    """
+    if isinstance(obj, (str, int, float, bool, type(None))):
+        obj_bytes = json.dumps(obj, sort_keys=True).encode('utf-8')
+        return hashlib.sha256(obj_bytes).hexdigest()
+    elif isinstance(obj, dict):
+        hash_dict = {}
+        for k, v in obj.items():
+            hash_dict[safe_hash(k)] = safe_hash(v)
+        obj_bytes = json.dumps(hash_dict, sort_keys=True).encode('utf-8')
+        return hashlib.sha256(obj_bytes).hexdigest()
+    elif isinstance(obj, object): 
+        if hasattr(obj, "__hash__") and callable(getattr(obj, "__hash__")):
+            return hashlib.sha256(repr(obj).encode('utf-8')).hexdigest()
+        elif hasattr(obj, "to_dict") and callable(getattr(obj, "to_dict")):
+            return safe_hash(obj.to_dict()) # type: ignore
+        else:
+            raise TypeError(f"Object of type {type(obj)} is unhashable and has no to_dict() method.")
+    elif isinstance(obj, (list, tuple)):
+        hash_list = [safe_hash(item) for item in obj]
+        obj_bytes = json.dumps(hash_list).encode('utf-8')
+        return hashlib.sha256(obj_bytes).hexdigest()
+    else:
+        raise TypeError(f"Object of type {type(obj)} is unhashable.")
