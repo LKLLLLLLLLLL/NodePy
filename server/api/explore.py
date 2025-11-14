@@ -1,10 +1,12 @@
+import base64
+
 from fastapi import APIRouter, Depends
-from server.models.database import get_async_session, ProjectRecord
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from server.models.project_list import ProjectListItem
+
+from server.models.database import ProjectRecord, get_async_session
 from server.models.explore_list import ExploreList
-import base64
+from server.models.project_list import ProjectListItem
 
 """
 API router for explore-related endpoints.
@@ -23,7 +25,7 @@ async def get_explore_projects(
     Get the list of projects that are marked as 'show in explore'.
     """
     result = await db.execute(
-        select(ProjectRecord).where(ProjectRecord.show_in_explore)  # type: ignore
+        select(ProjectRecord).where(ProjectRecord.show_in_explore)
     )
     project_records = result.scalars().all()
     project_items = []

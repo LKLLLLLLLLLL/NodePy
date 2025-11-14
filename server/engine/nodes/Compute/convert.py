@@ -1,12 +1,14 @@
 import math
-from ..base_node import BaseNode, InPort, OutPort, register_node
 from typing import Literal, override
-from server.models.exception import (
-    NodeParameterError,
-    NodeExecutionError,
-)
+
 from server.models.data import Data, Table
+from server.models.exception import (
+    NodeExecutionError,
+    NodeParameterError,
+)
 from server.models.schema import Pattern, Schema
+
+from ..base_node import BaseNode, InPort, OutPort, register_node
 
 """
 This file defines nodes for converting data types.

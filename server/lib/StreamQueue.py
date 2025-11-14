@@ -1,9 +1,10 @@
-import redis.asyncio as redis
-import redis as redis_sync
-import os
 import json
-from typing import Any, Optional
+import os
 from enum import Enum
+from typing import Any, Optional
+
+import redis as redis_sync
+import redis.asyncio as redis
 
 STREAMQUEUE_REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379") + "/1"
 STREAM_TTL_SECONDS = 3600  # 1 hour

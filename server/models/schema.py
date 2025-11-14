@@ -1,12 +1,14 @@
-from pydantic import BaseModel, model_validator
 from enum import Enum
-from typing_extensions import Self
-from pandas.api import types as ptypes
-from typing import Optional, ClassVar, Any, Literal
-from server.models.data import File
-from server.lib.FileManager import FileManager
 from io import StringIO
+from typing import Any, ClassVar, Literal, Optional
+
 import pandas
+from pandas.api import types as ptypes
+from pydantic import BaseModel, model_validator
+from typing_extensions import Self
+
+from server.lib.FileManager import FileManager
+from server.models.data import File
 
 """
 This file defined schema passed between nodes during static analysis stage.

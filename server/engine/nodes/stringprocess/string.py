@@ -1,11 +1,17 @@
-from ..base_node import BaseNode, InPort, OutPort, register_node
-from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
+from typing import Literal, override
+
 from server.models.data import Data
+from server.models.exception import (
+    NodeExecutionError,
+    NodeParameterError,
+    NodeValidationError,
+)
 from server.models.schema import (
     Pattern,
     Schema,
 )
-from typing import override, Literal
+
+from ..base_node import BaseNode, InPort, OutPort, register_node
 
 """
 This file defines string processing nodes for simple string type data.

@@ -1,20 +1,23 @@
-import math
-import RestrictedPython
-import typing
-import re
-import json
 import decimal
 import fractions
 import itertools
-from ..base_node import BaseNode, InPort, OutPort, register_node
+import json
+import math
+import re
+import typing
 from typing import Literal, override
-from server.models.exception import (
-    NodeParameterError,
-    NodeExecutionError,
-)
-from server.models.data import Data
-from server.models.schema import Pattern, Schema
+
+import RestrictedPython
+
 from server.lib.utils import timeout
+from server.models.data import Data
+from server.models.exception import (
+    NodeExecutionError,
+    NodeParameterError,
+)
+from server.models.schema import Pattern, Schema
+
+from ..base_node import BaseNode, InPort, OutPort, register_node
 
 AllowedTypes = Literal["STR", "INT", "FLOAT", "BOOL"]
 

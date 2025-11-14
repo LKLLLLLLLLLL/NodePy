@@ -1,9 +1,10 @@
 from fastapi import APIRouter
-from .project import router as project_router
-from .files import router as files_router
-from .data import router as data_router
+
 from .auth import router as auth_router
+from .data import router as data_router
 from .explore import router as explore_router
+from .files import router as files_router
+from .project import router as project_router
 
 # Create main API router
 router = APIRouter()

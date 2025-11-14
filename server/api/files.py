@@ -1,14 +1,17 @@
-from fastapi import APIRouter, UploadFile, File as fastapiFile, HTTPException, Depends
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
-from server.models.file import File, UserFileList
-from server.models.exception import InsufficientStorageError
-from server.models.database import get_async_session, UserRecord
-from server.lib.FileManager import FileManager
-from server.lib.AuthUtils import get_current_user
-from typing import cast, Literal
 import io
+from typing import Literal, cast
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import File as fastapiFile
+from fastapi.responses import StreamingResponse
 from loguru import logger
+from pydantic import BaseModel
+
+from server.lib.AuthUtils import get_current_user
+from server.lib.FileManager import FileManager
+from server.models.database import UserRecord, get_async_session
+from server.models.exception import InsufficientStorageError
+from server.models.file import File, UserFileList
 
 """
 Apis for file operations.

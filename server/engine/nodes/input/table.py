@@ -1,19 +1,26 @@
-from ..base_node import BaseNode, InPort, OutPort, register_node
-from typing import List, Dict, override, Literal
-from server.models.exception import NodeParameterError, NodeExecutionError, NodeValidationError
+import random
+from io import StringIO
+from typing import Dict, List, Literal, override
+
+import pandas
+from pandas import DataFrame
+from pydantic import PrivateAttr
+
 from server.models.data import Data, File
+from server.models.exception import (
+    NodeExecutionError,
+    NodeParameterError,
+    NodeValidationError,
+)
 from server.models.schema import (
+    ColType,
+    Pattern,
     Schema,
     TableSchema,
     check_no_illegal_cols,
-    ColType,
-    Pattern
 )
-from pydantic import PrivateAttr
-from pandas import DataFrame
-import pandas
-from io import StringIO
-import random
+
+from ..base_node import BaseNode, InPort, OutPort, register_node
 
 """
 A series of node that generates a table.

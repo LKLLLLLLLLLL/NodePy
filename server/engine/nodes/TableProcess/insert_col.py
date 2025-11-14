@@ -1,16 +1,22 @@
-import pandas
+from typing import Dict, Literal, override
+
 import numpy as np
-from ..base_node import BaseNode, InPort, OutPort, register_node
-from typing import Dict, override, Literal
-from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
+import pandas
+
 from server.models.data import Data, Table
+from server.models.exception import (
+    NodeExecutionError,
+    NodeParameterError,
+    NodeValidationError,
+)
 from server.models.schema import (
-    Schema,
-    check_no_illegal_cols,
     ColType,
     Pattern,
+    Schema,
+    check_no_illegal_cols,
 )
 
+from ..base_node import BaseNode, InPort, OutPort, register_node
 
 """
 This file defines nodes for inserting columns into tables.

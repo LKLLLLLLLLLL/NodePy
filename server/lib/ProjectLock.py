@@ -1,11 +1,13 @@
-import redis.asyncio as redis
-import redis as redis_sync
-import os
-from typing import Optional, Self, Literal
 import asyncio
+import os
 import time
-from server.models.exception import ProjectLockError, ProjLockIdentityError
+from typing import Literal, Optional, Self
+
+import redis as redis_sync
+import redis.asyncio as redis
 from loguru import logger
+
+from server.models.exception import ProjectLockError, ProjLockIdentityError
 
 LOCK_REDIS_URL = os.getenv("REDIS_URL", "") + "/3"
 RETRY_INTERVAL = 0.1  # seconds

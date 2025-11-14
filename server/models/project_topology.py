@@ -1,5 +1,7 @@
-from pydantic import BaseModel, model_validator
 from typing import Any
+
+from pydantic import BaseModel, model_validator
+
 from .exception import ModelValidationError
 
 

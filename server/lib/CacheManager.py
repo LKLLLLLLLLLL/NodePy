@@ -1,10 +1,12 @@
-import redis
-import os
-from typing import Any
-from server.models.data import Data, DataView
 import hashlib
 import json
+import os
+from typing import Any
+
+import redis
 from loguru import logger
+
+from server.models.data import Data, DataView
 
 CACHE_REDIS_URL = os.getenv("REDIS_URL", "") + "/2"
 CACHE_TTL_SECONDS  = 60 * 60 # 1 hour

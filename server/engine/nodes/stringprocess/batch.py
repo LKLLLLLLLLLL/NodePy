@@ -1,15 +1,16 @@
-from ..base_node import BaseNode, InPort, OutPort, register_node
-from server.models.exception import NodeParameterError
+from typing import override
+
 from server.models.data import Data, Table
+from server.models.exception import NodeParameterError
 from server.models.schema import (
     ColType,
     Pattern,
     Schema,
+    check_no_illegal_cols,
     generate_default_col_name,
-    check_no_illegal_cols
 )
-from typing import override
 
+from ..base_node import BaseNode, InPort, OutPort, register_node
 
 """
 This file defines some batch string processing nodes for string columns in tables.

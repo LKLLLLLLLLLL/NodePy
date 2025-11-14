@@ -1,11 +1,13 @@
-from fastapi import APIRouter, HTTPException, Depends, status, Response, Request
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from loguru import logger
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from server.models.database import get_async_session, UserRecord
+
 from server.lib.AuthUtils import AuthUtils, get_current_user
-from loguru import logger
-from typing import Any
+from server.models.database import UserRecord, get_async_session
 
 router = APIRouter()
 

@@ -1,15 +1,22 @@
-from ..base_node import BaseNode,InPort, OutPort, register_node
 from typing import Literal, override
-from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
-from server.models.data import Table, Data
+
+import numpy as np
+
+from server.models.data import Data, Table
+from server.models.exception import (
+    NodeExecutionError,
+    NodeParameterError,
+    NodeValidationError,
+)
 from server.models.schema import (
+    ColType,
     Pattern,
     Schema,
-    generate_default_col_name,
     check_no_illegal_cols,
-    ColType,
+    generate_default_col_name,
 )
-import numpy as np
+
+from ..base_node import BaseNode, InPort, OutPort, register_node
 
 """
 A series of nodes to compute columns of tables vectorizedly.

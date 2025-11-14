@@ -1,9 +1,16 @@
-from server.models.data import Data
-from server.models.schema import Pattern, Schema
-from pydantic import BaseModel, model_validator, PrivateAttr
 from abc import abstractmethod
+
+from pydantic import BaseModel, PrivateAttr, model_validator
 from typing_extensions import Self
-from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
+
+from server.models.data import Data
+from server.models.exception import (
+    NodeExecutionError,
+    NodeParameterError,
+    NodeValidationError,
+)
+from server.models.schema import Pattern, Schema
+
 from .config import GlobalConfig
 
 """

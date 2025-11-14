@@ -1,12 +1,15 @@
+import os
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-from server.models.database import init_database
-from pathlib import Path
-from .api import router
-import os
+
 from server.lib.ApiLoggerMiddleware import ApiLoggerMiddleware
+from server.models.database import init_database
+
+from .api import router
 
 app = FastAPI(title="NodePy API", separate_input_output_schemas=False)
 DEBUG = os.getenv("DEBUG", "false").lower() == "true"

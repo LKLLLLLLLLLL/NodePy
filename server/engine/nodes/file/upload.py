@@ -1,11 +1,11 @@
-from ..base_node import BaseNode, InPort, OutPort, register_node
-from typing import List, Dict, override
-from server.models.exception import NodeParameterError
+from typing import Dict, List, override
+
 from server.models.data import Data, File
-from server.models.schema import (
-    Schema,
-    FileSchema
-)
+from server.models.exception import NodeParameterError
+from server.models.schema import FileSchema, Schema
+
+from ..base_node import BaseNode, InPort, OutPort, register_node
+
 
 @register_node
 class UploadNode(BaseNode):

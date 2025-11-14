@@ -1,6 +1,8 @@
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
+
 from server.lib.FileManager import FileManager
+
 
 class GlobalConfig(BaseModel):
     """

@@ -1,5 +1,6 @@
 from ..base_node import BaseNode, register_node
 
+
 @register_node
 class WordCloudNode(BaseNode):
     """

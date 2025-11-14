@@ -1,10 +1,13 @@
+from datetime import datetime
+from typing import Any, ClassVar, Literal, Union, cast
+
 from pandas import DataFrame, Series
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
-from datetime import datetime
-from typing import Union, ClassVar, Any, Literal, cast
+
 from server.lib.FileManager import File
-from .schema import ColType, check_no_illegal_cols, TableSchema, Schema
+
+from .schema import ColType, Schema, TableSchema, check_no_illegal_cols
 
 """
 Actual runtime data passed between nodes.

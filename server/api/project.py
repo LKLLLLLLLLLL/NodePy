@@ -1,24 +1,26 @@
-from fastapi import APIRouter, HTTPException, WebSocket, Response, Depends
-from pydantic import BaseModel
-from server.models.project import Project, ProjWorkflow, ProjUIState, ProjectSetting
-from server.engine.task import execute_project_task, revoke_project_task
-from server.models.database import get_async_session, ProjectRecord, UserRecord
-from server.lib.utils import get_project_by_id, set_project_record
-from server.lib.AuthUtils import get_current_user
-from celery.app.task import Task as CeleryTask
-from typing import cast
-from server.lib.StreamQueue import StreamQueue, Status
-from server.lib.ProjectLock import ProjectLock
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 import asyncio
-from server.celery import celery_app
-from server.models.exception import ProjectLockError, ProjLockIdentityError
-from loguru import logger
-from server.models.project_list import ProjectList, ProjectListItem
-from celery.result import AsyncResult
 import base64
 import binascii
+from typing import cast
+
+from celery.app.task import Task as CeleryTask
+from celery.result import AsyncResult
+from fastapi import APIRouter, Depends, HTTPException, Response, WebSocket
+from loguru import logger
+from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from server.celery import celery_app
+from server.engine.task import execute_project_task, revoke_project_task
+from server.lib.AuthUtils import get_current_user
+from server.lib.ProjectLock import ProjectLock
+from server.lib.StreamQueue import Status, StreamQueue
+from server.lib.utils import get_project_by_id, set_project_record
+from server.models.database import ProjectRecord, UserRecord, get_async_session
+from server.models.exception import ProjectLockError, ProjLockIdentityError
+from server.models.project import Project, ProjectSetting, ProjUIState, ProjWorkflow
+from server.models.project_list import ProjectList, ProjectListItem
 
 """
 The api for nodes runing, reporting and so on,

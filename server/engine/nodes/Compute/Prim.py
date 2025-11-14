@@ -1,8 +1,14 @@
-from ..base_node import BaseNode, InPort, OutPort, register_node
 from typing import Literal, override
-from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
+
 from server.models.data import Data
+from server.models.exception import (
+    NodeExecutionError,
+    NodeParameterError,
+    NodeValidationError,
+)
 from server.models.schema import Pattern, Schema
+
+from ..base_node import BaseNode, InPort, OutPort, register_node
 
 """
 This file defines compute nodes between primitive(float, int, str, bool) data.

@@ -1,3 +1,10 @@
+import importlib
+from pathlib import Path
+
+from loguru import logger
+
+from .base_node import _NODE_REGISTRY
+
 """
 Auto-discovery and registration system for node modules.
 
@@ -10,10 +17,6 @@ Adding new nodes:
 - No need to modify this __init__.py file!
 """
 
-import importlib
-from pathlib import Path
-from loguru import logger
-from .base_node import _NODE_REGISTRY
 
 # Files to skip during auto-discovery (infrastructure, not node definitions)
 _SKIP_FILES = {

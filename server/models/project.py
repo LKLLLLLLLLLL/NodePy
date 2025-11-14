@@ -1,7 +1,9 @@
+from typing import Any, Literal, Self
+
 from pydantic import BaseModel, model_validator
-from typing import Any, Self, Literal
-from .data import Schema, DataRef
-from .project_topology import WorkflowTopology, TopoNode, TopoEdge
+
+from .data import DataRef, Schema
+from .project_topology import TopoEdge, TopoNode, WorkflowTopology
 
 
 class ProjNodeError(BaseModel):

@@ -1,13 +1,14 @@
+import os
 from datetime import datetime, timedelta
 from typing import Optional
-from passlib.context import CryptContext
+
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from fastapi import HTTPException
-import os
-from fastapi import Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from server.models.database import get_async_session, UserRecord
+from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from server.models.database import UserRecord, get_async_session
 
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"

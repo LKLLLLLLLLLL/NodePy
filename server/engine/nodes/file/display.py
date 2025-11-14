@@ -1,11 +1,10 @@
-from ..base_node import BaseNode, InPort, OutPort
-from typing import List, Dict, override
-from server.models.exception import NodeParameterError
+from typing import Dict, List, override
+
 from server.models.data import Data
-from server.models.schema import (
-    Schema,
-    Pattern
-)
+from server.models.exception import NodeParameterError
+from server.models.schema import Pattern, Schema
+
+from ..base_node import BaseNode, InPort, OutPort
 
 
 class DisplayNode(BaseNode):

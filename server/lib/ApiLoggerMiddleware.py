@@ -1,9 +1,10 @@
-from fastapi import Request
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
-from loguru import logger
 import json
 import re
+
+from fastapi import Request
+from loguru import logger
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 
 
 def skip_thumb(input: str) -> str:

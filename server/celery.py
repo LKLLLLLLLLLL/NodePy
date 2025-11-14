@@ -1,5 +1,6 @@
-from celery import Celery
 import os
+
+from celery import Celery
 
 """
 Shared configuration across deferrent container.
