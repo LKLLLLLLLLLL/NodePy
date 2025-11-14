@@ -4,6 +4,7 @@ from server.models.project import Project, ProjWorkflow, ProjUIState
 from server.engine.task import execute_project_task, revoke_project_task
 from server.models.database import get_async_session, ProjectRecord, UserRecord
 from server.lib.utils import get_project_by_id, set_project_record
+from server.lib.AuthUtils import get_current_user
 from celery.app.task import Task as CeleryTask
 from typing import cast
 from server.lib.StreamQueue import StreamQueue, Status
@@ -32,11 +33,14 @@ router = APIRouter()
         500: {"description": "Internal server error"},
     },
 )
-async def list_projects(db_client: AsyncSession = Depends(get_async_session)) -> ProjectList:
+async def list_projects(
+    db_client: AsyncSession = Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> ProjectList:
     """
     List all projects for the current user.
     """
-    user_id = 1 # for debug
+    user_id = int(user_record.id)  # type: ignore
     try:
         project_records = await db_client.execute(
             ProjectRecord.__table__.select().where(ProjectRecord.owner_id == user_id)
@@ -71,11 +75,15 @@ async def list_projects(db_client: AsyncSession = Depends(get_async_session)) ->
         500: {"description": "Internal server error"},
     }
 )
-async def get_project(project_id: int, db_client: AsyncSession = Depends(get_async_session)) -> Project:
+async def get_project(
+    project_id: int,
+    db_client: AsyncSession = Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> Project:
     """
     Get the full data structure of a project.
     """
-    user_id = 1 # for debug
+    user_id = int(user_record.id)  # type: ignore
     try:
         project = await get_project_by_id(db_client, project_id, user_id)
         if project is None:
@@ -99,12 +107,16 @@ async def get_project(project_id: int, db_client: AsyncSession = Depends(get_asy
         500: {"description": "Internal server error"},
     },
 )
-async def create_project(project_name: str, db_client: AsyncSession = Depends(get_async_session)) -> int:
+async def create_project(
+    project_name: str,
+    db_client: AsyncSession = Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> int:
     """
     Create a new project for a user.
     Return project id.
     """
-    user_id = 1 # for debug
+    user_id = int(user_record.id)  # type: ignore
     try:
         # 1. check if user exists
         user = await db_client.get(UserRecord, user_id)
@@ -148,11 +160,15 @@ async def create_project(project_name: str, db_client: AsyncSession = Depends(ge
         500: {"description": "Internal server error"},
     },
 )
-async def delete_project(project_id: int, db_client: AsyncSession = Depends(get_async_session)) -> None:
+async def delete_project(
+    project_id: int,
+    db_client: AsyncSession = Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> None:
     """
     Delete a project.
     """
-    user_id = 1 # for debug
+    user_id = int(user_record.id)  # type: ignore
     try:
         async with ProjectLock(project_id=project_id, max_block_time=5.0, identity=None, scope="all"):
             project = await db_client.get(ProjectRecord, project_id)
@@ -185,11 +201,16 @@ async def delete_project(project_id: int, db_client: AsyncSession = Depends(get_
         500: {"description": "Internal server error"},
     },
 )
-async def rename_project(project_id: int, new_name: str, db_client: AsyncSession = Depends(get_async_session)) -> None:
+async def rename_project(
+    project_id: int,
+    new_name: str,
+    db_client: AsyncSession = Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> None:
     """
     Rename a project.
     """
-    user_id = 1 # for debug
+    user_id = int(user_record.id)  # type: ignore
     try:
         async with ProjectLock(project_id=project_id, max_block_time=5.0, identity=None, scope="all"):
             project = await db_client.get(ProjectRecord, project_id)
@@ -217,11 +238,16 @@ async def rename_project(project_id: int, new_name: str, db_client: AsyncSession
 @router.post(
     "/sync_ui"
 )
-async def sync_project_ui(project_id: int, ui_state: ProjUIState, db_client: AsyncSession = Depends(get_async_session)) -> None:
+async def sync_project_ui(
+    project_id: int,
+    ui_state: ProjUIState,
+    db_client: AsyncSession = Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> None:
     """
     Only save the ui of a project. Make sure the ui_state corresponds to the workflow in last sync.
     """
-    user_id = 1  # for debug
+    user_id = int(user_record.id)  # type: ignore
     try:
         async with ProjectLock(project_id=project_id, max_block_time=5.0, identity=None, scope="ui_state"):
             project = await get_project_by_id(db_client, project_id, user_id)
@@ -260,14 +286,19 @@ class TaskResponse(BaseModel):
         500: {"description": "Internal server error"},
     },
 )
-async def sync_project(project: Project, response: Response, db_client: AsyncSession = Depends(get_async_session)) -> TaskResponse | None:
+async def sync_project(
+    project: Project,
+    response: Response,
+    db_client: AsyncSession = Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> TaskResponse | None:
     """
     Save a project to the database, if topology changed, enqueue a task to execute it.
     If decide to execute, enqueues a Celery task. Use
     the returned `task_id` to subscribe to the websocket status endpoint
     `/nodes/status/{task_id}`.
     """
-    user_id = 1  # for debug
+    user_id = int(user_record.id)  # type: ignore
     project_id = project.project_id
     new_project = project
 

@@ -3,8 +3,9 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from server.models.file import File, UserFileList
 from server.models.exception import InsufficientStorageError
-from server.models.database import get_async_session
+from server.models.database import get_async_session, UserRecord
 from server.lib.FileManager import FileManager
+from server.lib.AuthUtils import get_current_user
 from typing import cast, Literal
 import io
 from loguru import logger
@@ -32,10 +33,13 @@ MIME_TYPES = {
         507: {"description": "Insufficient Storage - user storage limit exceeded"},
     },
 )
-async def upload_file(project_id: int, 
-                      node_id: str, 
-                      file: UploadFile = fastapiFile(),
-                      async_db_session = Depends(get_async_session)) -> File:
+async def upload_file(
+    project_id: int,
+    node_id: str,
+    file: UploadFile = fastapiFile(),
+    async_db_session=Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> File:
     """
     Upload a file to a project. Return the saved file info.
     """
@@ -47,7 +51,7 @@ async def upload_file(project_id: int,
         raise HTTPException(status_code=400, detail="Unsupported file format")
     format = cast(Literal['png', 'jpg', 'pdf', 'csv'], file.filename.split('.')[-1])
 
-    user_id = 1  # for debug
+    user_id = int(user_record.id) # type: ignore
     try:
         file_manager = FileManager(async_db_session=async_db_session)
         saved_file = await file_manager.write_async(content=content, filename=file.filename, format=format, node_id=node_id, project_id=project_id, user_id=user_id)
@@ -70,9 +74,11 @@ async def upload_file(project_id: int,
         500: {"description": "Internal Server Error"},
     },
 )
-async def list_files(async_db_session=Depends(get_async_session)) -> UserFileList:
-    logger.debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    user_id = 1  # for debug
+async def list_files(
+    async_db_session=Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> UserFileList:
+    user_id = int(user_record.id)  # type: ignore
     try:
         file_manager = FileManager(async_db_session=async_db_session)
         user_file_list = await file_manager.list_file_async(user_id=user_id)
@@ -97,7 +103,11 @@ async def list_files(async_db_session=Depends(get_async_session)) -> UserFileLis
         500: {"description": "Internal Server Error"},
     },
 )
-async def get_file_content(key: str, async_db_session = Depends(get_async_session)) -> StreamingResponse:
+async def get_file_content(
+    key: str,
+    async_db_session=Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> StreamingResponse:
     """
     Get the content of a file by its key and project id.
     The project id is used to verify the access permission.
@@ -105,7 +115,7 @@ async def get_file_content(key: str, async_db_session = Depends(get_async_sessio
     **important: if user want to re upload a file, you need to delete the old file first,
     otherwise the file space may not be released.**
     """
-    user_id = 1  # for debug
+    user_id = int(user_record.id)  # type: ignore
     try:
         file_manager = FileManager(async_db_session=async_db_session)
         file = await file_manager.get_file_by_key_async(key=key)
@@ -140,12 +150,16 @@ class DeleteResponse(BaseModel):
         500: {"description": "Internal Server Error"},
     },
 )
-async def delete_file(key: str, async_db_session = Depends(get_async_session)) -> DeleteResponse:
+async def delete_file(
+    key: str,
+    async_db_session=Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> DeleteResponse:
     """
     Delete a file by its key and project id.
     The project id is used to verify the access permission.
     """
-    user_id = 1  # for debug
+    user_id = int(user_record.id)  # type: ignore
     try:
         file_manager = FileManager(async_db_session=async_db_session)
         file = await file_manager.get_file_by_key_async(key=key)
