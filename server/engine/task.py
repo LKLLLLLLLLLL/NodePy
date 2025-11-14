@@ -3,12 +3,14 @@ from server.lib.FileManager import FileManager
 from server.lib.CacheManager import CacheManager
 from server.lib.ProjectLock import ProjectLock
 from server.models.data import Data
-from server.models.project import WorkflowTopology, ProjWorkflowPatch, DataRef, ProjNodeError, ProjWorkflow
-from server.models.database import NodeOutputRecord, ProjectRecord, DatabaseTransaction
+from server.models.project import ProjWorkflow, ProjWorkflowPatch, DataRef, ProjNodeError
+from server.models.database import NodeOutputRecord, DatabaseTransaction
+from server.models.project_topology import WorkflowTopology
 from .executer import ProjectExecutor
 from server.models.exception import NodeParameterError, NodeValidationError, NodeExecutionError
 from typing import Any, Literal
 from server.lib.StreamQueue import StreamQueue, Status
+from server.lib.utils import get_project_by_id_sync, set_project_record_sync
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.result import AsyncResult
 from loguru import logger
@@ -28,14 +30,12 @@ _revoke_lock = threading.Lock()
     time_limit=10*60,  # 10 minutes
     soft_time_limit=9*60,  # 9 minutes
 )
-def execute_project_task(self, topo_graph_dict: dict, user_id: int):
+def execute_project_task(self, project_id: int, user_id: int):
     """
     Celery task to execute a node graph with real-time updates via Redis Streams.
     Uses StreamQueue (sync version) to handle state reporting.
     """
     logger.debug(f"Task start: {self.request.id}")
-    topo_graph = WorkflowTopology(**topo_graph_dict)
-    project_id = topo_graph.project_id
     task_id = self.request.id
 
     def _signal_handler(signum, frame):
@@ -60,15 +60,26 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
         with StreamQueue(task_id) as queue:
             with DatabaseTransaction() as db_client:
                 # 0. get old workflow from db
-                project_record = db_client.query(ProjectRecord).filter(ProjectRecord.id == project_id).first()
-                if project_record is None:
-                    raise ValueError("Project not found")
-                if project_record.workflow is None:
-                    raise ValueError("Project workflow is empty")
-                workflow = ProjWorkflow(**project_record.workflow)  # type: ignore
+                project = get_project_by_id_sync(db_client, project_id, user_id)
+                if project is None:
+                    raise ValueError("Project not found.")
+                workflow: ProjWorkflow = project.workflow
+                topo_graph: WorkflowTopology = project.to_topo()
                 
-                # 1. remove all error messages from previous runs
+                # 1. cleanup 
+                # remove all error messages from previous runs
                 patches = workflow.generate_del_error_patches()
+                for patch in patches:
+                    workflow.apply_patch(patch)
+                    queue.push_message_sync(
+                        Status.IN_PROGRESS,
+                        {"stage": "CLEANUP",
+                            "status": "IN_PROGRESS",
+                            "patch": [patch.model_dump()]
+                        }
+                    )
+                # remove all schemas from previous runs
+                patches = workflow.generate_del_schema_data_patches()
                 for patch in patches:
                     workflow.apply_patch(patch)
                     queue.push_message_sync(
@@ -292,8 +303,6 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                                 "node_id": node_id,
                                 "timer": "stop",
                                 "patch": [data_patch.model_dump(), time_patch.model_dump()], 
-                                # frontend has its own timer calculation, ours timer only for save to db
-                                # if user refresh the page, the runningtime will change to the backend calculated one
                             }
                             queue.push_message_sync(Status.IN_PROGRESS, meta)
                             workflow.apply_patch(data_patch)
@@ -351,7 +360,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                         queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "SUCCESS"})
 
                     # 6. Finalize and save workflow
-                    project_record.workflow = workflow.model_dump() # type: ignore
+                    set_project_record_sync(db_client, project, user_id)
                     db_client.commit()
                     logger.debug(f"Task {task_id} completed successfully")
 
@@ -405,7 +414,7 @@ def execute_project_task(self, topo_graph_dict: dict, user_id: int):
                     )
                 finally:
                     logger.debug(f"Task {task_id} finalized")
-                    project_record.workflow = workflow.model_dump() # type: ignore
+                    set_project_record_sync(db_client, project, user_id)
                     if db_client.is_active:
                         db_client.commit()  # Commit the error state to the DB
 

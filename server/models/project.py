@@ -83,18 +83,18 @@ class ProjWorkflow(BaseModel):
             edges=topo_edges,
         )
 
-    def cleanse(self) -> "ProjWorkflow":
-        """
-        Remove unreliable data from frontend before saving to database.
-        Waiting to be overwritten by backend execution results.
-        """
-        for node in self.nodes:
-            node.schema_out = {}
-            node.data_out = {}
-            node.error = None
-            node.runningtime = None
-        self.error_message = None
-        return self
+    # def cleanse(self) -> "ProjWorkflow":
+    #     """
+    #     Remove unreliable data from frontend before saving to database.
+    #     Waiting to be overwritten by backend execution results.
+    #     """
+    #     for node in self.nodes:
+    #         node.schema_out = {}
+    #         node.data_out = {}
+    #         node.error = None
+    #         node.runningtime = None
+    #     self.error_message = None
+    #     return self
 
     def merge_run_results_from(self, other: "ProjWorkflow") -> None:
         """
@@ -143,6 +143,22 @@ class ProjWorkflow(BaseModel):
                             "error",
                         ],
                         value=None,
+                    )
+                )
+        return result
+
+    def generate_del_schema_data_patches(self) -> list["ProjWorkflowPatch"]:
+        result = []
+        for node in self.nodes:
+            if node.schema_out:
+                result.append(
+                    ProjWorkflowPatch(
+                        key=[
+                            "nodes",
+                            self.nodes.index(node),
+                            "schema_out",
+                        ],
+                        value={},
                     )
                 )
         return result

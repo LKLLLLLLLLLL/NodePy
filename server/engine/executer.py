@@ -137,7 +137,8 @@ class ProjectExecutor:
 
     def execute(self, 
                 callbefore: Callable[[str], None], 
-                callafter: Callable[[str, Literal["success", "error"], dict[str, Any] | Exception, float | None], bool]) -> None:
+                callafter: Callable[[str, Literal["success", "error"], dict[str, Any] | Exception, float | None], bool]
+    ) -> None:
         """ 
         Execute the graph in topological order.
         
@@ -205,7 +206,7 @@ class ProjectExecutor:
                 else:
                     pass
 
-            # 4. store output data to self cache
+            # 5. store output data to self cache
             for tar_port, data in output_data.items():
                 if data_cache.get((node_id, tar_port)) is not None:
                     raise RuntimeError(f"Node '{node_id}' output on port '{tar_port}' already exists in cache.")

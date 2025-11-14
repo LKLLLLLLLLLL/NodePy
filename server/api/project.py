@@ -321,7 +321,6 @@ async def sync_project(
                 logger.warning(f"Project {project.project_id} topology not changed, no need to execute. Please use /sync_ui to update UI only.")
                 await set_project_record(db_client, new_project, user_id)
             else:
-                new_project.workflow.cleanse()
                 await set_project_record(db_client, new_project, user_id)
 
             if not need_exec:
@@ -330,11 +329,12 @@ async def sync_project(
             
             celery_task = cast(CeleryTask, execute_project_task)  # to suppress type checker error
             task = celery_task.delay(  # the return message will be sent back via streamqueue
-                topo_graph_dict=new_topo.model_dump(),
+                project_id=project.project_id,
                 user_id=user_id,
             )
             response.status_code = 202  # Accepted
             await lock.appoint_transfer_async(task.id)
+            await db_client.commit()
             return TaskResponse(task_id=task.id)
     except binascii.Error as e:
         logger.error(f"Error decoding thumb for project {project.project_id}: {e}")
