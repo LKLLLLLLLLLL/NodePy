@@ -84,6 +84,7 @@
 
 
     watch(() => JSON.stringify(props.data.error), () => {
+        errMsg.value = []
         handleExecError(props.data.error, errMsg)
         handleParamError(hasParamerr, props.data.error, errMsg)
     })

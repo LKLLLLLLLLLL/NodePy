@@ -17,6 +17,7 @@ const strokeColor = computed(() => {
     }
     return 'default'
 })
+const isErrorEdge = computed(() => props.data === 'error')
 
 </script>
 
@@ -30,15 +31,7 @@ const strokeColor = computed(() => {
       :source-position="sourcePosition"
       :target-position="targetPosition"
       :curvature="0.1"
-      :style="{ stroke: strokeColor, strokeWidth: 3 }"
+      :style="{ stroke: strokeColor, strokeWidth: 3, filter: isErrorEdge ? 'drop-shadow(0 0 2px red)': 'none'}"
   />
 </template>
 
-
-<style lang="scss" scoped>
-    :deep(.error-edge) path {
-        stroke: red;
-        stroke-width: 7;
-        paint-order: stroke; 
-    }   //  add red border on error edges
-</style>

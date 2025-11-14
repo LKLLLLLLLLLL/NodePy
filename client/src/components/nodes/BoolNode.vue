@@ -49,6 +49,7 @@
 
 
     watch(() => JSON.stringify(props.data.error), () => {
+        errMsg.value = []   //  reset errMsg
         handleExecError(props.data.error, errMsg)
     })
 

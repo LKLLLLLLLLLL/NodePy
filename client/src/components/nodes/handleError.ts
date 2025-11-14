@@ -5,8 +5,7 @@ import type { Ref } from "vue"
 const {getEdges} = useVueFlow('main')
 
 export const handleValidationError = (nodeId: string, err: ProjNodeError | null | undefined, errMsg: Ref<string[]>, ...handleErrObj: any[]) => {
-    errMsg.value = []   //  reset errMsg
-    getEdges.value.filter(e => e.target === nodeId).forEach(e => { e.class = '' })  //  reset classname
+    getEdges.value.filter(e => e.target === nodeId).forEach(e => { e.data = null })  //  reset edge data
     handleErrObj.forEach((v) => {
         v.value.value = false
     })  //  reset handleErrObj
@@ -15,8 +14,7 @@ export const handleValidationError = (nodeId: string, err: ProjNodeError | null 
         const inputHandles = new Set(err.inputs)
         getEdges.value.forEach(e => {
             if(e.target === nodeId && inputHandles.has(e.targetHandle!)) {
-                e.class= 'error-edge'
-                console.log('error-edge')
+                e.data = 'error'
             }
         })
         handleErrObj.forEach((v) => {
@@ -29,8 +27,7 @@ export const handleValidationError = (nodeId: string, err: ProjNodeError | null 
 }
 
 export const handleParamError = (hasParamerr: Ref<boolean>, err: ProjNodeError | null | undefined, errMsg: Ref<string[]>) => {
-    errMsg.value = []
-    hasParamerr.value = false
+    hasParamerr.value = false   //  reset hasParamerr
     if(!err) return
     if(err.type === 'param') {
         hasParamerr.value = true
@@ -39,9 +36,8 @@ export const handleParamError = (hasParamerr: Ref<boolean>, err: ProjNodeError |
 }
 
 export const handleExecError = (err: ProjNodeError | null | undefined, errMsg: Ref<string[]>) => {
-    errMsg.value = []
     if(!err) return
     if(err.type === 'execution') {
         errMsg.value = [err.message as string]
-    }
+    }   //  reset outside
 }

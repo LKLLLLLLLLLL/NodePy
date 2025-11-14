@@ -109,6 +109,7 @@
             left: 0;
             right: 0;
             z-index: 10;
+            background: #ddd;
             .item {
                 padding: 2px 0 2px 10px;
                 background: #ddd;

@@ -150,5 +150,5 @@ $node-margin: 10px;
 } //  errmsg style
 
 .node-errhandle {
-  outline: 2px solid red;
+  filter: drop-shadow(0 0 3px red);
 }
