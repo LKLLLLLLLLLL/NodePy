@@ -15,8 +15,12 @@ async def get_project_by_id(
     project_record = await db.get(ProjectRecord, project_id)
     if project_record is None:
         return None
+    editable = True
     if project_record.owner_id != user_id:  # type: ignore
-        raise PermissionError("User does not have access to this project.")
+        if not project_record.show_in_examples:  # type: ignore
+            raise PermissionError("User does not have access to this project.")
+        else:
+            editable = False
     workflow = ProjWorkflow(**project_record.workflow)  # type: ignore
     ui_state = ProjUIState(**project_record.ui_state)  # type: ignore
     return Project(
@@ -25,6 +29,7 @@ async def get_project_by_id(
         user_id=project_record.owner_id,  # type: ignore
         updated_at=int(project_record.updated_at.timestamp() * 1000),  # type: ignore
         thumb=base64.b64encode(project_record.thumb).decode("utf-8") if project_record.thumb else None,  # type: ignore
+        editable=editable,
         workflow=workflow,
         ui_state=ui_state,
     )
@@ -35,8 +40,12 @@ def get_project_by_id_sync(
     project_record = db.get(ProjectRecord, project_id)
     if project_record is None:
         return None
+    editable = True
     if project_record.owner_id != user_id:  # type: ignore
-        raise PermissionError("User does not have access to this project.")
+        if not project_record.show_in_examples:  # type: ignore
+            raise PermissionError("User does not have access to this project.")
+        else:
+            editable = False
     workflow = ProjWorkflow(**project_record.workflow)  # type: ignore
     ui_state = ProjUIState(**project_record.ui_state)  # type: ignore
     return Project(
@@ -45,6 +54,7 @@ def get_project_by_id_sync(
         user_id=project_record.owner_id,  # type: ignore
         updated_at=int(project_record.updated_at.timestamp() * 1000),  # type: ignore
         thumb=base64.b64encode(project_record.thumb).decode("utf-8") if project_record.thumb else None,  # type: ignore
+        editable=editable,
         workflow=workflow,
         ui_state=ui_state,
     )

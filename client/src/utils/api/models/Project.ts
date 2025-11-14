@@ -13,6 +13,7 @@ export type Project = {
     user_id: number;
     updated_at: number;
     thumb?: (string | null);
+    editable?: boolean;
     workflow: ProjWorkflow;
     ui_state: ProjUIState;
 };

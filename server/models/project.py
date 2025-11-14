@@ -199,8 +199,9 @@ class Project(BaseModel):
     project_id: int
     user_id: int
     updated_at: int # timestamp in milliseconds
-
     thumb: str | None = None  # base64 encoded thumbnail image
+    
+    editable: bool = True  # whether the project is editable by the current user. This value is read-only.
 
     workflow: ProjWorkflow
     ui_state: ProjUIState
@@ -229,3 +230,8 @@ class ProjWorkflowPatch(BaseModel):
     """
     key: list[str | int]
     value: Any
+
+class ProjectSetting(BaseModel):
+    show_to_examples: bool = False  
+    # whether the project is shown in example list to other users
+    project_name: str

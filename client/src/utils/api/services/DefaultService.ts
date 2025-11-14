@@ -9,6 +9,7 @@ import type { File } from '../models/File';
 import type { LoginRequest } from '../models/LoginRequest';
 import type { Project } from '../models/Project';
 import type { ProjectList } from '../models/ProjectList';
+import type { ProjectSetting } from '../models/ProjectSetting';
 import type { ProjUIState } from '../models/ProjUIState';
 import type { SignupRequest } from '../models/SignupRequest';
 import type { TaskResponse } from '../models/TaskResponse';
@@ -108,26 +109,51 @@ export class DefaultService {
         });
     }
     /**
-     * Rename Project
-     * Rename a project.
+     * Get Project Setting
+     * Get the settings of a project.
      * @param projectId
-     * @param newName
-     * @returns any Project renamed successfully
+     * @returns ProjectSetting Project setting retrieved successfully
      * @throws ApiError
      */
-    public static renameProjectApiProjectRenamePost(
+    public static getProjectSettingApiProjectSettingProjectIdGet(
         projectId: number,
-        newName: string,
+    ): CancelablePromise<ProjectSetting> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/project/setting/{project_id}',
+            path: {
+                'project_id': projectId,
+            },
+            errors: {
+                403: `User has no access to this project`,
+                404: `Project not found`,
+                422: `Validation Error`,
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
+     * Update Project Setting
+     * Update the settings of a project.
+     * @param projectId
+     * @param requestBody
+     * @returns any Project setting updated successfully
+     * @throws ApiError
+     */
+    public static updateProjectSettingApiProjectUpdateSettingPost(
+        projectId: number,
+        requestBody: ProjectSetting,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/project/rename',
+            url: '/api/project/update_setting',
             query: {
                 'project_id': projectId,
-                'new_name': newName,
             },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
-                400: `Project name already exists`,
+                400: `Project setting update failed`,
                 403: `User has no access to this project`,
                 404: `Project not found`,
                 422: `Validation Error`,

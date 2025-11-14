@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, WebSocket, Response, Depends
 from pydantic import BaseModel
-from server.models.project import Project, ProjWorkflow, ProjUIState
+from server.models.project import Project, ProjWorkflow, ProjUIState, ProjectSetting
 from server.engine.task import execute_project_task, revoke_project_task
 from server.models.database import get_async_session, ProjectRecord, UserRecord
 from server.lib.utils import get_project_by_id, set_project_record
@@ -189,40 +189,77 @@ async def delete_project(
         logger.exception(f"Error deleting project {project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@router.post(
-    "/rename",
+@router.get(
+    "/setting/{project_id}",
     status_code=200,
     responses={
-        200: {"description": "Project renamed successfully"},
-        400: {"description": "Project name already exists"},
+        200: {"description": "Project setting retrieved successfully", "model": ProjectSetting},
+        404: {"description": "Project not found"},
+        403: {"description": "User has no access to this project"},
+        500: {"description": "Internal server error"},
+    }
+)
+async def get_project_setting(
+    project_id: int,
+    db_client: AsyncSession = Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> ProjectSetting:
+    """
+    Get the settings of a project.
+    """
+    user_id = int(user_record.id)  # type: ignore
+    try:
+        project_record = await db_client.get(ProjectRecord, project_id)
+        if project_record is None:
+            raise HTTPException(status_code=404, detail="Project not found")
+        if project_record.owner_id != user_id: # type: ignore
+            raise HTTPException(status_code=403, detail="User has no access to this project")
+        return ProjectSetting(
+            show_to_examples=project_record.show_in_examples,  # type: ignore
+            project_name=project_record.name,  # type: ignore
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Error getting project setting for project {project_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+@router.post(
+    "/update_setting",
+    status_code=200,
+    responses={
+        200: {"description": "Project setting updated successfully"},
+        400: {"description": "Project setting update failed"},
         404: {"description": "Project not found"},
         403: {"description": "User has no access to this project"},
         423: {"description": "Project is locked, it may be being edited by another process"},
         500: {"description": "Internal server error"},
     },
 )
-async def rename_project(
+async def update_project_setting(
     project_id: int,
-    new_name: str,
+    setting: ProjectSetting,
     db_client: AsyncSession = Depends(get_async_session),
     user_record: UserRecord = Depends(get_current_user),
 ) -> None:
     """
-    Rename a project.
+    Update the settings of a project.
     """
     user_id = int(user_record.id)  # type: ignore
     try:
         async with ProjectLock(project_id=project_id, max_block_time=5.0, identity=None, scope="all"):
-            project = await db_client.get(ProjectRecord, project_id)
-            if project is None:
+            project_record = await db_client.get(ProjectRecord, project_id)
+            if project_record is None:
                 raise HTTPException(status_code=404, detail="Project not found")
-            if project.owner_id != user_id: # type: ignore
+            if project_record.owner_id != user_id: # type: ignore
                 raise HTTPException(status_code=403, detail="User has no access to this project")
             # check if new name already exists
-            existing_project = await db_client.get(ProjectRecord, new_name)
+            existing_project = await db_client.get(ProjectRecord, setting.project_name)
             if existing_project is not None:
                 raise HTTPException(status_code=400, detail="Project name already exists")
-            project.name = new_name # type: ignore
+            # update settings
+            project_record.name = setting.project_name # type: ignore
+            project_record.show_in_examples = setting.show_to_examples # type: ignore
             await db_client.commit()
             return
     except ProjectLockError:
@@ -232,7 +269,7 @@ async def rename_project(
         raise
     except Exception as e:
         await db_client.rollback()
-        logger.exception(f"Error renaming project {project_id} to '{new_name}': {e}")
+        logger.exception(f"Error updating project setting for project {project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.post(

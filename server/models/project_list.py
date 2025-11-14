@@ -1,5 +1,9 @@
 from pydantic import BaseModel
 
+"""
+This file contains data models for project list representation, used in project page.
+"""
+
 class ProjectListItem(BaseModel):
     project_id: int
     project_name: str
