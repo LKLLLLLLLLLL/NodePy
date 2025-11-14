@@ -1,6 +1,6 @@
 <script lang="ts" setup>
     import { ref, computed } from 'vue';
-    import { ElMessage } from 'element-plus';
+    import { notify } from '@/components/Notification/notify';
     import { useRouter } from 'vue-router';
     // 导入新的认证工具函数
     import { usePageStore } from '@/stores/pageStore';
@@ -46,7 +46,7 @@
     }
 
     function restrictPassword(){
-        
+
     }
 
     function restrictUsername(){
@@ -64,8 +64,8 @@
         else return false
     }
 
-    
-    
+
+
     async function handleLogin(){
         try {
             // 使用新的登录函数
@@ -73,22 +73,13 @@
                 username: username.value,
                 password: password.value
             });
-            ElMessage({
-                type: 'success',
-                message: '登录成功'
-            });
+            notify({ message: '登录成功', type: 'success' });
             pageStore.jumpToPage();
         } catch (error: any) {
             if (error.status === 401) {
-                ElMessage({
-                    message:'用户名、邮箱或密码错误',
-                    type: 'error'
-                });
+                notify({ message:'用户名、邮箱或密码错误', type: 'error' });
             } else {
-                ElMessage({
-                    message: '登录失败，请重试',
-                    type: 'error'
-                });
+                notify({ message: '登录失败，请重试', type: 'error' });
             }
         }
     }
@@ -102,32 +93,20 @@
                     email: email.value,
                     password: password.value
                 });
-                ElMessage({
-                    message: '注册成功，已自动登录',
-                    type: 'success'
-                });
+                notify({ message: '注册成功，已自动登录', type: 'success' });
                 pageStore.jumpToPage();
             } catch (error: any) {
                 if (error.status === 400) {
-                    ElMessage({
-                        message: '用户名或邮箱已被注册',
-                        type: 'error'
-                    });
+                    notify({ message: '用户名或邮箱已被注册', type: 'error' });
                 } else {
-                    ElMessage({
-                        message: '注册失败，请重试',
-                        type: 'error'
-                    });
+                    notify({ message: '注册失败，请重试', type: 'error' });
                 }
             }
         }
         else{
             password.value = default_password
             confirm_password.value = default_password
-            ElMessage({
-                message: '密码不一致，请重试',
-                type: 'error'
-            })
+            notify({ message: '密码不一致，请重试', type: 'error' })
         }
     }
 
@@ -137,7 +116,7 @@
         }
         else handleRegister()
     }
-    
+
     function handleReset(){
         password.value = default_password;
         confirm_password.value = default_confirmpassword;
@@ -171,7 +150,7 @@
                     :label-width="label_width"
                     label-position="right">
                     <el-form-item class="login-account" :label="accountLabel">
-                        <el-input 
+                        <el-input
                             placeholder="Please enter your email"
                             v-if="loginType=='email'"
                             v-model="email"
@@ -183,10 +162,10 @@
                             v-model="username">
                         </el-input>
                     </el-form-item>
-                    
+
                     <el-form-item class="login-password" label="Password">
-                        <el-input 
-                            placeholder="Please enter your password" 
+                        <el-input
+                            placeholder="Please enter your password"
                             v-model="password"
                             type="password"
                             show-password
@@ -200,7 +179,7 @@
                         <el-button @click="handleReset">Reset</el-button>
                     </el-form-item>
                 </el-form>
-                    
+
                     <!-- 第三方登录按钮 -->
                     <!-- <div class="third-party-login">
                         <div class="divider">
@@ -240,34 +219,34 @@
                     :label-width="label_width"
                     :label-position="label_position">
                     <el-form-item class="register-email" label="Email">
-                        <el-input 
-                            placeholder="Please enter your email" 
+                        <el-input
+                            placeholder="Please enter your email"
                             v-model="email"
                         >
                         </el-input>
                     </el-form-item>
-                    
+
                     <el-form-item class="register-username" label="UserName">
-                        <el-input 
-                            placeholder="Please enter your username" 
+                        <el-input
+                            placeholder="Please enter your username"
                             v-model="username"
                         >
                         </el-input>
                     </el-form-item>
-                    
+
                     <el-form-item class="register-password" label="Password">
-                        <el-input 
-                            placeholder="Please enter your password" 
+                        <el-input
+                            placeholder="Please enter your password"
                             v-model="password"
                             type="password"
                             show-password
                         >
                         </el-input>
                     </el-form-item>
-                    
+
                     <el-form-item class="register-password-confirm" label="Confirm">
-                        <el-input 
-                            placeholder="Please confirm your password" 
+                        <el-input
+                            placeholder="Please confirm your password"
                             v-model="confirm_password"
                             type="password"
                             show-password
@@ -280,7 +259,7 @@
                         <el-button type="primary" @click="handleSubmit">Create Account</el-button>
                         <el-button @click="handleReset">Reset</el-button>
                     </el-form-item>
-                    
+
                     <el-form-item class="switcher">
                         <el-button type="text" @click="handleSwitch">Return</el-button>
                     </el-form-item>
@@ -288,7 +267,7 @@
             </div>
         </div>
     </div>
-    
+
 </template>
 
 <style lang="scss" scoped>
@@ -312,7 +291,7 @@
         text-align: center;
         height: 50px;
     }
-    
+
     /* 第三方登录样式 */
     .third-party-login {
         margin: 20px 0 10px;
@@ -325,7 +304,7 @@
         text-align: center;
         height: 30px;
     }
-    
+
     .oauth-buttons{
         display: flex;
         justify-content: center;

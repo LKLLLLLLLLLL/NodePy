@@ -26,9 +26,9 @@ const showProjectName = computed(()=>{
 // 导航项
 const navItems = [
   { name: 'Home', path: '/home', label: '首页' },
-  { name: 'Example', path: '/example', label: '示例' },
-  { name: 'Project', path: '/project', label: '项目' },
-  { name: 'File', path: '/file', label: '文件' },
+  { name: 'Example', path: '/example', label: '探索' },
+  { name: 'Project', path: '/project', label: '工作室' },
+  { name: 'File', path: '/file', label: '文件管理' },
 ]
 
 // 判断当前页面是否激活

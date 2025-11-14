@@ -1,5 +1,6 @@
 <script setup lang = "ts">
     import ControlBar from './components/ControlBar.vue';
+    import NotificationContainer from './components/Notification/NotificationContainer.vue';
     import { useRoute,RouterView } from 'vue-router';
 
     const route = useRoute();
@@ -15,6 +16,7 @@
         </div>
     </div>
     <ModalManager />
+    <NotificationContainer />
 </template>
 <style scoped lang = "scss">
 @use '@/common/global.scss' as *;
