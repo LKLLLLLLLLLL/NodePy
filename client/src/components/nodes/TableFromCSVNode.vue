@@ -36,13 +36,25 @@
     import { getInputType } from './getInputType'
     import type {BaseData} from '../../types/nodeTypes'
     import type { Type } from '@/utils/api'
-    import {computed} from 'vue'
+    import {computed, watch, ref} from 'vue'
+    import { handleExecError, handleValidationError } from './handleError'
 
 
     const props = defineProps<NodeProps<BaseData>>()
     const csv_file_type = computed(() => getInputType(props.id, 'csv_file'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['table']?.type || 'default')
+    const errMsg = ref<string[]>([])
+    const csv_fileHaserr = ref({
+        handleId: 'csv_file',
+        value: false
+    })
 
+
+    watch(() => JSON.stringify(props.data.error), () => {
+        errMsg.value = []
+        handleExecError(props.data.error, errMsg)
+        handleValidationError(props.id, props.data.error, errMsg, csv_fileHaserr)
+    })
 
 </script>
 
@@ -51,8 +63,6 @@
     @use '../../common/node.scss' as *;
     .TableFromCSVNodeLayout {
         height: 100%;
-        width: $node-width;
-        background: white;
         .data {
             padding-top: $node-padding;
             padding-bottom: 5px;

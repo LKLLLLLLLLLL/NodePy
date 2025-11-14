@@ -1,7 +1,7 @@
 <template>
     <div class="StringNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="node-title-input nodes-topchild-border-radius">字符串节点</div>
-        <div class="data">
+        <div class="data" :class="{'node-has-paramerr': hasParamerr}">
             <div class="value">
                 <div class="value-description">
                     字符串
@@ -20,24 +20,39 @@
                 <Handle id="string" type="source" :position="Position.Right" class="str-handle-color"/>
             </div>
         </div>
+        <div class="node-err">
+            <div v-for="err in errMsg">
+                {{ err }}
+            </div>
+        </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-    import {ref} from 'vue'
+    import {ref, watch} from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import type {StringNodeData} from '../../types/nodeTypes'
     import NodepyStringInput from './tools/Nodepy-StringInput.vue'
+    import { handleExecError, handleParamError } from './handleError'
 
 
     const props = defineProps<NodeProps<StringNodeData>>()
     const value = ref(props.data.param.value)
+    const errMsg = ref<string[]>([])
+    const hasParamerr = ref(false)
 
 
     const onUpdateValue = (e?: Event) => {
         props.data.param.value = value.value
     }
+
+
+    watch(() => JSON.stringify(props.data.error), () => {
+        errMsg.value = []
+        handleExecError(props.data.error, errMsg)
+        handleParamError(hasParamerr, props.data.error, errMsg)
+    })
 
 </script>
 
@@ -46,8 +61,6 @@
     @use '../../common/node.scss' as *;
     .StringNodeLayout{
         height: 100%;
-        width: $node-width;
-        background: white;
         .data {
             padding-top: $node-padding;
             padding-bottom: 5px;

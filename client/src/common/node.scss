@@ -23,6 +23,9 @@ $node-margin: 10px;
 .nodes-style {
   border-radius: 9px;
   box-shadow: 5px 2px 15px rgba(128, 128, 128, 0.1);
+  width: $node-width;
+  background: white;
+  position: relative;
 }
 
 .nodes-topchild-border-radius {

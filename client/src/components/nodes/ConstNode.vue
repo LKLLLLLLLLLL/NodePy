@@ -97,9 +97,6 @@
 
     .ConstNodeLayout {
         height: 100%;
-        width: $node-width;
-        background: white;
-        position: relative;
         .data {
             padding-top: $node-padding;
             padding-bottom: 5px;
