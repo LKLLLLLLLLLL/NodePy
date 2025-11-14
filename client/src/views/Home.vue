@@ -27,7 +27,7 @@
             <div class="home-info">
                 <h1>Welcome to NodePy!</h1>
             </div>
-            <div class="home-controls">
+            <div class="home-controls" v-if="!login">
                 <el-button @click="jumpToLogin">Login</el-button>
             </div>
         </div>

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
     import ProjectDemoFrame from './ProjectDemoFrame.vue';
     import CreateProject from './CreateProject.vue';
-    import { ref, onMounted } from 'vue';
+    import { ref, onMounted, computed } from 'vue';
     import { useModalStore } from '@/stores/modalStore';
     import { useProjectStore } from '@/stores/projectStore';
     import { usePageStore } from '@/stores/pageStore';
@@ -25,6 +25,14 @@
             pageStore.setCurrentPage('Login')
         }
     });
+
+    const sortedProjects = computed(()=>{
+        return [...projectStore.projectList.projects].sort((a, b) => {
+            const timeB = Number(new Date(b.updated_at))
+            const timeA = Number(new Date(a.updated_at))
+            return timeB - timeA
+        })
+    })
 
     function openAddProjectModal(){
         const modalWidth = 400;
@@ -50,7 +58,7 @@
     async function handleOpenExistingProject(id:number){
         console.log('Opening existing project...')
         const route = router.resolve({
-            name: 'editor',
+            name: 'editor-project',
             params: { projectId: id }
         });
         window.open(route.href, '_blank');
@@ -61,7 +69,6 @@
         openAddProjectModal();
     }
 
-
 </script>
 
 <template>
@@ -69,7 +76,7 @@
         <div class="projects-grid">
             <!-- Existing projects -->
             <ProjectDemoFrame
-                v-for="project in projectStore.projectList.projects"
+                v-for="project in sortedProjects"
                 :key="project.project_id"
                 :id="project.project_id"
                 :title="project.project_name || `Project ${project.project_id}`"

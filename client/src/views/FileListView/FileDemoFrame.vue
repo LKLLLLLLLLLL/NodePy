@@ -132,6 +132,7 @@
         justify-content: flex-end;
         width: 200px;
         gap: 8px;
+        padding: 0 4px;
     }
     
     .fileinfo{

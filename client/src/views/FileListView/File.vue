@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-    import {ref,onMounted} from 'vue';
+    import {ref,onMounted, computed} from 'vue';
     import { useRouter } from 'vue-router';
     import { useFileStore } from '@/stores/fileStore';
     import { useModalStore } from '@/stores/modalStore';
@@ -11,8 +11,10 @@
 
     const fileStore = useFileStore();
     const pageStore = usePageStore();
+    
+    const test: boolean = true
 
-    const default_file: FileItem ={
+    const default_file1: FileItem ={
         key: '123',
         filename: 'lkllll',
         format: FileItem.format.PNG,
@@ -20,8 +22,124 @@
         modified_at: 2077,
         project_name: 'default'
     }
+    const default_file2: FileItem ={
+        key: '456',
+        filename: 'WEH',
+        format: FileItem.format.JPG,
+        size: 120,
+        modified_at: 2072,
+        project_name: 'abccc'
+    }
+    const default_file3: FileItem ={
+        key: '789',
+        filename: 'zhegebi',
+        format: FileItem.format.CSV,
+        size: 200,
+        modified_at: 10086,
+        project_name: 'zhegebi'
+    }
+    const default_file4: FileItem ={
+        key: '000',
+        filename: 'weh',
+        format: FileItem.format.PDF,
+        size: 60,
+        modified_at: 1949,
+        project_name: 'SOFTWARE'
+    }
+    const default_file5: FileItem ={
+        key: '111',
+        filename: 'weh',
+        format: FileItem.format.PDF,
+        size: 60,
+        modified_at: 1949,
+        project_name: 'sOFTWARE'
+    }
+    const default_files: FileItem[] = [default_file1,default_file2,default_file3,default_file4,default_file5]
+
+    type SortType = 'project_a'|'project_z'|'size_big'|'size_small'|'type'|'time_new'|'time_old'|'name_a'|'name_z'
+    const default_type: SortType = 'size_big'
 
     const login = ref<boolean>(false)
+    const sortType = ref<SortType>(default_type)
+    const typeSortOrder = ref<number>(0) // 0-3 表示四种排序顺序
+    const cycleTypeSort = () => {
+        typeSortOrder.value = (typeSortOrder.value + 1) % 4
+        sortType.value = 'type'
+    }
+
+    const sortedFiles = computed(() => {
+        const toBeSortedFiles = test? [...default_files] : [...fileStore.userFileList.files]
+        switch(sortType.value) {
+            case('project_a'):
+                return toBeSortedFiles.sort((a, b) => {
+                    const projectA = (a.project_name || '').toLowerCase()
+                    const projectB = (b.project_name || '').toLowerCase()
+                    return projectA.localeCompare(projectB)
+                })
+            
+            case('project_z'):
+                return toBeSortedFiles.sort((a, b) => {
+                    const projectA = (a.project_name || '').toLowerCase()
+                    const projectB = (b.project_name || '').toLowerCase()
+                    return projectB.localeCompare(projectA)
+                })
+            
+            case('size_big'):
+                return toBeSortedFiles.sort((a, b) => {
+                    return b.size - a.size
+                })
+            
+            case('size_small'):
+                return toBeSortedFiles.sort((a, b) => {
+                    return a.size - b.size
+                })
+            
+            case('type'):
+                return toBeSortedFiles.sort((a, b) => {
+                    const baseOrder = [FileItem.format.PNG, FileItem.format.JPG, FileItem.format.CSV, FileItem.format.PDF]
+                    const currentOrder = [...baseOrder]
+                    
+                    for (let i = 0; i < typeSortOrder.value; i++) {
+                        const first = currentOrder.shift()
+                        if (first) currentOrder.push(first)
+                    }
+                    
+                    const getTypeOrder = (file: FileItem) => {
+                        const index = currentOrder.indexOf(file.format)
+                        return index === -1 ? currentOrder.length : index
+                    }
+                    
+                    return getTypeOrder(a) - getTypeOrder(b)
+                })
+                
+            case('time_new'):
+                return toBeSortedFiles.sort((a, b) => {
+                    return b.modified_at - a.modified_at
+                })
+            
+            case('time_old'):
+                return toBeSortedFiles.sort((a, b) => {
+                    return a.modified_at - b.modified_at
+                })
+            
+            case('name_a'):
+                return toBeSortedFiles.sort((a, b) => {
+                    const nameA = (a.filename || '').toLowerCase()
+                    const nameB = (b.filename || '').toLowerCase()
+                    return nameA.localeCompare(nameB)
+                })
+
+            case('name_z'):
+                return toBeSortedFiles.sort((a, b) => {
+                    const nameA = (a.filename || '').toLowerCase()
+                    const nameB = (b.filename || '').toLowerCase()
+                    return nameB.localeCompare(nameA)
+                })
+            
+            default:
+                return toBeSortedFiles
+        }
+    })
 
     onMounted(()=>{
         login.value = isLoggedIn()
@@ -35,6 +153,15 @@
         }
     })
 
+    function handleSort(sort: SortType){
+        if(sort=='type'){
+            cycleTypeSort()
+        }
+        else{
+            sortType.value = sort
+        }
+    }
+
 </script>
 <template>
     <div class="fileview-container" v-if="login">
@@ -44,43 +171,53 @@
         <div class="middle-container">
             <div class="file-controlbar">
                 <div class="control-header">
-                    <div class="header-item header-name">名称</div>
+                    <div class="header-item header-type-name">
+                        <div class="header-item header-type" @click="handleSort('type')">类型</div>
+                        <div class="header-item header-name" @click="()=>{
+                                if(sortType=='name_a')handleSort('name_z')
+                                else handleSort('name_a')
+                            }"
+                        >
+                            名称
+                        </div>
+                    </div>
                     <div class="header-item header-info">
-                        <div class="header-item header-project">所属项目</div>
-                        <div class="header-item header-size">大小</div>
-                        <div class="header-item header-modified">修改时间</div>
+                        <div class="header-item header-project" 
+                            @click="()=>{
+                                if(sortType=='project_a')handleSort('project_z')
+                                else handleSort('project_a')
+                            }"
+                        >
+                            所属项目
+                        </div>
+                        <div class="header-item header-size" 
+                            @click="()=>{
+                                if(sortType=='size_big')handleSort('size_small')
+                                else handleSort('size_big')
+                            }"
+                        >
+                            大小
+                        </div>
+                        <div class="header-item header-modified" 
+                            @click="()=>{
+                                if(sortType=='time_new')handleSort('time_old')
+                                else handleSort('time_new')
+                            }"
+                        >
+                            修改时间
+                        </div>
                     </div>
                     <div class="header-item header-actions">操作</div>
                 </div>
             </div>
             <div class="filelist-container">
                 <div class="filelist"
-                    v-for="file in fileStore.userFileList.files"
+                    v-for="file in sortedFiles"
                     :key="file.key"
                 >
                     <FileDemoFrame :file="file">
                     </FileDemoFrame>
                 </div>
-                <FileDemoFrame :file="default_file">
-                </FileDemoFrame>
-                <FileDemoFrame :file="default_file">
-                </FileDemoFrame>
-                <FileDemoFrame :file="default_file">
-                </FileDemoFrame>
-                <FileDemoFrame :file="default_file">
-                </FileDemoFrame>
-                <FileDemoFrame :file="default_file">
-                </FileDemoFrame>
-                <FileDemoFrame :file="default_file">
-                </FileDemoFrame>
-                <FileDemoFrame :file="default_file">
-                </FileDemoFrame>
-                <FileDemoFrame :file="default_file">
-                </FileDemoFrame>
-                <FileDemoFrame :file="default_file">
-                </FileDemoFrame>
-                <FileDemoFrame :file="default_file">
-                </FileDemoFrame>
             </div>
         </div>
         <!-- <div class="right-container">
@@ -119,7 +256,7 @@
         width: 100%;
         background-color: $stress-background-color;
         border-radius: 10px;
-        padding: 0 24px;
+        padding: 0 20px;
         display: flex;
         align-items: center;
         flex-shrink: 0; /* 防止控制栏被压缩 */
@@ -136,10 +273,25 @@
     
     .header-item{
         padding: 0 16px;
+        // border: 2px solid black;
+    }
+
+    .header-type,.header-name,.header-project,.header-size,.header-modified{
+        cursor: pointer; /* 添加指针样式表明可点击 */
     }
     
-    .header-name{
+    .header-type-name{
         width: 200px;
+        text-align: center;
+        display: flex;
+        // border: 2px solid black;
+    }
+
+    .header-type{
+        text-align: center;
+    }
+
+    .header-name{
         text-align: center;
     }
     

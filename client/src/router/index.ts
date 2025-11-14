@@ -4,7 +4,7 @@ import Home from '@/views/Home.vue'
 import File from '@/views//FileListView/File.vue'
 import Project from '@/views/ProjectListView/ProjectList.vue'
 import Login from '@/views/Login.vue'
-import Example from '@/views/Example.vue'
+import Example from '@/views/ExampleView/Example.vue'
 import Editor from '@/views/Editor.vue'
 
 // 定义路由类型
@@ -44,8 +44,13 @@ const routes: Array<RouteRecordRaw> = [
         component: Example
     },
     {
+        path: '/editor/:exampleName',
+        name: 'editor-example',
+        component: Editor
+    },
+    {
         path: '/editor/:projectId',
-        name: 'editor',
+        name: 'editor-project',
         component: Editor
     }
 ]

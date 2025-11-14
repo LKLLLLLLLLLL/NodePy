@@ -1,8 +1,5 @@
 <script lang="ts" setup>
     import Graph from '@/components/Graph/Graph.vue';
-    import { onMounted } from 'vue'
-    import { useProjectStore } from '@/stores/projectStore';
-    import { useModalStore } from '@/stores/modalStore';
 
 </script>
 <template>
