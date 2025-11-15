@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
 import { useModalStore } from './modalStore';
-import { ApiError } from '@/utils/api';
+import { ApiError, type ProjectSetting } from '@/utils/api';
 import notify from '@/components/Notification/notify';
 import { type ProjectList, type Project, type ProjUIState } from '@/utils/api';
 
@@ -29,11 +29,13 @@ export const useProjectStore = defineStore('project', () => {
     const default_delete_pname: string = 'toBeDeleted'
     const default_rename_pid: number = 22222222
     const default_rename_pname: string = 'toBeRenamed'//原名
+    const default_whether_show: boolean = false//默认不公开
 
     const projectList = ref<ProjectList>({userid: default_uid,projects: []});
     const currentProjectName = ref<string>(default_pname);
     const currentProjectId = ref<number>(default_pid);
     const currentProject = ref<Project>(default_project);
+    const currentWhetherShow = ref<boolean>(default_whether_show)
     const toBeDeleted = ref<{name: string,id: number}>({id: default_delete_pid,name: default_delete_pname});
     const toBeRenamed = ref<{name: string,id: number}>({id: default_rename_pid,name: default_rename_pname});
 
