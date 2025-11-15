@@ -171,6 +171,22 @@ class ProjWorkflow(BaseModel):
                 )
         return result
 
+    def generate_del_runningtime_patches(self) -> list["ProjWorkflowPatch"]:
+        result = []
+        for node in self.nodes:
+            if node.runningtime is not None:
+                result.append(
+                    ProjWorkflowPatch(
+                        key=[
+                            "nodes",
+                            self.nodes.index(node),
+                            "runningtime",
+                        ],
+                        value=None,
+                    )
+                )
+        return result
+
 class ProjUIState(BaseModel):
     """
     The UI state of the project, e.g., node positions.

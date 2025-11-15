@@ -80,8 +80,8 @@ class PlotNode(BaseNode):
         input_table = input["input"].payload
         assert isinstance(input_table, Table)
 
-        x_data = input_table.df[self.x_column]  # type: ignore
-        y_data = input_table.df[self.y_column]  # type: ignore
+        x_data = input_table.df[self.x_col]  # type: ignore
+        y_data = input_table.df[self.y_col]  # type: ignore
 
         file_manager = self.global_config.file_manager
         

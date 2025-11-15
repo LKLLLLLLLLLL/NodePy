@@ -10,19 +10,19 @@
                 </div>
                 <Handle
                     id="csv_file"
-                    type="target" 
-                    :position="Position.Left" 
-                    :class="[`${csv_file_type}-handle-color`, {'node-errhandle': csv_fileHaserr}]"
+                    type="target"
+                    :position="Position.Left"
+                    :class="[`${csv_file_type}-handle-color`, {'node-errhandle': csv_fileHaserr.value}]"
                 />
             </div>
             <div class="output-table port">
                 <div class="output-port-description">
                     表格输出端口
                 </div>
-                <Handle 
-                    id="table" 
-                    type="source" 
-                    :position="Position.Right" 
+                <Handle
+                    id="table"
+                    type="source"
+                    :position="Position.Right"
                     :class="`${schema_type}-handle-color`"
                 />
             </div>
@@ -36,13 +36,13 @@
 </template>
 
 <script lang="ts" setup>
-    import { Position, Handle } from '@vue-flow/core'
-    import type { NodeProps } from '@vue-flow/core'
-    import { getInputType } from './getInputType'
-    import type {BaseData} from '../../types/nodeTypes'
     import type { Type } from '@/utils/api'
-    import {computed, watch, ref} from 'vue'
-    import { handleExecError, handleValidationError } from './handleError'
+import type { NodeProps } from '@vue-flow/core'
+import { Handle, Position } from '@vue-flow/core'
+import { computed, ref, watch } from 'vue'
+import type { BaseData } from '../../types/nodeTypes'
+import { getInputType } from './getInputType'
+import { handleExecError, handleValidationError } from './handleError'
 
 
     const props = defineProps<NodeProps<BaseData>>()

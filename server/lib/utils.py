@@ -114,6 +114,10 @@ def safe_hash(obj: Any) -> str:
     if isinstance(obj, (str, int, float, bool, type(None))):
         obj_bytes = json.dumps(obj, sort_keys=True).encode('utf-8')
         return hashlib.sha256(obj_bytes).hexdigest()
+    elif isinstance(obj, (list, tuple)):
+        hash_list = [safe_hash(item) for item in obj]
+        obj_bytes = json.dumps(hash_list).encode("utf-8")
+        return hashlib.sha256(obj_bytes).hexdigest()
     elif isinstance(obj, dict):
         hash_dict = {}
         for k, v in obj.items():
@@ -127,9 +131,5 @@ def safe_hash(obj: Any) -> str:
             return safe_hash(obj.to_dict()) # type: ignore
         else:
             raise TypeError(f"Object of type {type(obj)} is unhashable and has no to_dict() method.")
-    elif isinstance(obj, (list, tuple)):
-        hash_list = [safe_hash(item) for item in obj]
-        obj_bytes = json.dumps(hash_list).encode('utf-8')
-        return hashlib.sha256(obj_bytes).hexdigest()
     else:
         raise TypeError(f"Object of type {type(obj)} is unhashable.")

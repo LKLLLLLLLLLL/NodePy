@@ -29,7 +29,7 @@ MIME_TYPES = {
     "/upload/{project_id}",
     status_code=201,
     responses={
-        201: {"description": "File uploaded successfully", "model": File},
+        201: {"description": "File uploaded successfully"},
         400: {"description": "Bad Request - invalid file or parameters"},
         403: {"description": "Forbidden - not allowed"},
         500: {"description": "Internal Server Error"},

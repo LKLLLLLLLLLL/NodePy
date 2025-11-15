@@ -34,23 +34,22 @@ class UploadNode(BaseNode):
     def port_def(self) -> tuple[List[InPort], List[OutPort]]:
         return [], [
             OutPort(
-                name="file_out",
+                name="file",
                 description="The uploaded file.",
             )
         ]
 
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
-        file_manager = self.global_config.file_manager
         return {
-            "file_out": Schema(
+            "file": Schema(
                 type=Schema.Type.FILE,
-                file=FileSchema.from_file(self.file, file_manager=file_manager)
+                file=FileSchema.from_file(self.file),
             )
         }
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         return {
-            "file_out": Data(payload=self.file)
+            "file": Data(payload=self.file)
         }

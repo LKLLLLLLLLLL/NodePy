@@ -5,9 +5,8 @@ from pandas import DataFrame, Series
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
 
-from server.lib.FileManager import File
-
-from .schema import ColType, Schema, TableSchema, check_no_illegal_cols
+from .file import File
+from .schema import ColType, FileSchema, Schema, TableSchema, check_no_illegal_cols
 
 """
 Actual runtime data passed between nodes.
@@ -104,7 +103,7 @@ class Data(BaseModel):
         elif isinstance(self.payload, float):
             return Schema(type=Schema.Type.FLOAT)
         elif isinstance(self.payload, File):
-            return Schema(type=Schema.Type.FILE)
+            return Schema(type=Schema.Type.FILE, file=FileSchema.from_file(self.payload))
         elif isinstance(self.payload, datetime):
             return Schema(type=Schema.Type.DATETIME)
         else:

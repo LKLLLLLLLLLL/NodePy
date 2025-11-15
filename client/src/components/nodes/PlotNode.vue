@@ -4,7 +4,7 @@
         <div class="data">
             <div class="input-table port">
                 <div class="input-port-description">表格输入端口</div>
-                <Handle id="table" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': tableHasErr.value}]"/>
+                <Handle id="input" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': tableHasErr.value}]"/>
             </div>
             <div class="x_col">
                 <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列名</div>
@@ -16,9 +16,9 @@
             </div>
             <div class="plot_type">
                 <div class="param-description" :class="{'node-has-paramerr': plot_typeHasErr.value}">图形类型</div>
-                <NodepySelectFew 
-                    :options="plot_type_options" 
-                    :select-max-num="1" 
+                <NodepySelectFew
+                    :options="plot_type_options"
+                    :select-max-num="1"
                     :defualt-selected="defaultSelected"
                     @select-change="onSelectChange"
                     item-width="90px"
@@ -43,15 +43,15 @@
 </template>
 
 <script lang="ts" setup>
-    import {ref, computed, watch} from 'vue'
-    import type { NodeProps } from '@vue-flow/core'
-    import { Position, Handle } from '@vue-flow/core'
-    import { getInputType } from './getInputType'
-    import type { Type } from '@/utils/api'
-    import { handleValidationError, handleExecError, handleParamError } from './handleError'
-    import NodepyStringInput from './tools/Nodepy-StringInput.vue'
-    import NodepySelectFew from './tools/Nodepy-selectFew.vue'
     import type { PlotNodeData } from '@/types/nodeTypes'
+import type { Type } from '@/utils/api'
+import type { NodeProps } from '@vue-flow/core'
+import { Handle, Position } from '@vue-flow/core'
+import { computed, ref, watch } from 'vue'
+import { getInputType } from './getInputType'
+import { handleExecError, handleParamError, handleValidationError } from './handleError'
+import NodepyStringInput from './tools/Nodepy-StringInput.vue'
+import NodepySelectFew from './tools/Nodepy-selectFew.vue'
 
 
     const props = defineProps<NodeProps<PlotNodeData>>()
@@ -64,7 +64,7 @@
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['plot']?.type || 'default')
     const errMsg = ref<string[]>([])
     const tableHasErr = ref({
-        handleId: 'talbe',
+        handleId: 'input',
         value: false
     })
     const x_colHasErr = ref({

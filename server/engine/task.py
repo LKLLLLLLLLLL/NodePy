@@ -102,6 +102,17 @@ def execute_project_task(self, project_id: int, user_id: int):
                             "patch": [patch.model_dump()]
                         }
                     )
+                # remove all running times from previous runs
+                patches = workflow.generate_del_runningtime_patches()
+                for patch in patches:
+                    workflow.apply_patch(patch)
+                    queue.push_message_sync(
+                        Status.IN_PROGRESS,
+                        {"stage": "CLEANUP",
+                            "status": "IN_PROGRESS",
+                            "patch": [patch.model_dump()]
+                        }
+                    )
 
                 try:
                     graph = None
@@ -167,6 +178,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                             )
                             workflow.apply_patch(patch)
                         except Exception as e:
+                            logger.exception(f"Unexpected error during node construction: {e}")
                             has_exception = True
                             patch = ProjWorkflowPatch(
                                 key=["error_message"],
@@ -254,6 +266,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                             )
                             workflow.apply_patch(patch)
                         except Exception as e:
+                            logger.exception(f"Unexpected error during static analysis: {e}")
                             has_exception = True
                             patch = ProjWorkflowPatch(
                                         key=["error_message"],
@@ -368,6 +381,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                             workflow.apply_patch(patch)
                             return True
                         except Exception as e:
+                            logger.exception(f"Unexpected error during node execution: {e}")
                             has_exception = True
                             patch = ProjWorkflowPatch(
                                 key=["error_message"],
@@ -384,7 +398,6 @@ def execute_project_task(self, project_id: int, user_id: int):
                             workflow.apply_patch(patch)
                             return True
                     graph.execute(callbefore=exec_before_reporter, callafter=exec_after_reporter)
-                    # time.sleep(5)  # for debug
                     if has_exception:
                         # cleanup unreached nodes' data output
                         unreached_node_ids = getattr(graph, "_last_unreached_node_ids", [])

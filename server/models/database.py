@@ -71,7 +71,7 @@ class ProjectRecord(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, unique=True, index=True, nullable=False)
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     workflow = Column(JSON, nullable=False)  # Serialized workflow structure
     ui_state = Column(JSON, nullable=False)  # Serialized UI state
     thumb = Column(LargeBinary, nullable=True)
@@ -100,8 +100,8 @@ class FileRecord(Base):
     filename = Column(String, nullable=False)  # Original file name
     file_key = Column(String, nullable=False) # MinIO object key
     format = Column(Enum("jpg", "png", "csv", "pdf", name="file_format"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
     node_id = Column(String, nullable=False, index=True) # ID of the node that generated the file
     file_size = Column(BigInteger, nullable=False) # Byte
     last_modify_time = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())

@@ -1,14 +1,13 @@
 from enum import Enum
-from io import StringIO
-from typing import Any, ClassVar, Literal, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional
 
 import pandas
 from pandas.api import types as ptypes
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
 
-from server.lib.FileManager import FileManager
-from server.models.data import File
+if TYPE_CHECKING:
+    from .file import File
 
 """
 This file defined schema passed between nodes during static analysis stage.
@@ -20,7 +19,7 @@ class ColType(str, Enum):
     FLOAT = "float"  # float64
     STR = "str"  # str
     BOOL = "bool"  # bool
-    DATETIME = "datetime"  # datetime64[ns]
+    DATETIME = "Datetime"  # datetime64[ns]
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, ColType):
@@ -37,6 +36,8 @@ class ColType(str, Enum):
             else:
                 return False
         else:
+            if isinstance(other, str):
+                return self.value == other
             raise NotImplementedError(f"Cannot compare ColType with {type(other)}")
 
     def __hash__(self) -> int:
@@ -162,15 +163,10 @@ class FileSchema(BaseModel):
         return super().model_dump()
     
     @classmethod
-    def from_file(cls, file: File, file_manager: FileManager) -> "FileSchema":
+    def from_file(cls, file: "File") -> "FileSchema":
         if file.format == "csv":
-            file_content = file_manager.read_sync(file=file, user_id=None)
-            df = pandas.read_csv(StringIO(file_content.decode('utf-8')))
-            col_types = {}
-            for col in df.columns:
-                dtype = df[col].dtype
-                col_type = ColType.from_ptype(dtype)
-                col_types[col] = col_type
+            col_types = file.col_types
+            assert col_types is not None
             return FileSchema(format="csv", col_types=col_types)
         else:
             return FileSchema(format=file.format)

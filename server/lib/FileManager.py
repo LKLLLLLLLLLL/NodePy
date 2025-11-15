@@ -6,6 +6,7 @@ import os
 from typing import Literal, cast
 from uuid import uuid4
 
+import pandas
 from loguru import logger
 from minio import Minio, S3Error
 from sqlalchemy import select
@@ -15,6 +16,7 @@ from server.celery import celery_app
 from server.models.database import FileRecord, ProjectRecord, UserRecord, get_session
 from server.models.exception import InsufficientStorageError
 from server.models.file import File, FileItem, UserFileList
+from server.models.schema import ColType
 
 
 class FileManager:
@@ -94,6 +96,14 @@ class FileManager:
         total = result.scalars().all()
         return sum(size for size in total)  # type: ignore
 
+    def _get_col_types(self, content: bytes) -> dict[str, ColType]:
+        df = pandas.read_csv(io.StringIO(content.decode('utf-8')))
+        col_types = {}
+        for col in df.columns:
+            dtype = df[col].dtype
+            col_type = ColType.from_ptype(dtype)
+            col_types[col] = col_type
+        return col_types
     """
     For unsupport lib, you can use write method like this:
     ```py
@@ -125,6 +135,10 @@ class FileManager:
         if isinstance(content, io.BytesIO):
             content.seek(0)
             content = content.getvalue()
+        # detect col_types for csv
+        col_types: dict[str, ColType] | None = None
+        if format == "csv":
+            col_types = self._get_col_types(content)
         key = uuid4().hex
         existing_file = self.db_client.query(FileRecord).filter(FileRecord.project_id == project_id and FileRecord.node_id == node_id).first()
         try:
@@ -154,9 +168,6 @@ class FileManager:
                 existing_file.project_id = project_id  # type: ignore
                 existing_file.node_id = node_id # type: ignore
                 existing_file.file_size = len(content) # type: ignore
-                existing_file.last_modify_time = datetime.datetime.now(  # type: ignore
-                    datetime.timezone.utc
-                ).isoformat()
                 try:
                     self.minio_client.remove_object(
                         bucket_name=self.bucket,
@@ -173,7 +184,6 @@ class FileManager:
                     project_id=project_id,
                     node_id=node_id,
                     file_size=len(content),
-                    last_modify_time=datetime.datetime.now(datetime.timezone.utc).isoformat()
                 )
                 self.db_client.add(file)
             self.db_client.commit()
@@ -194,7 +204,7 @@ class FileManager:
                 pass
             logger.exception(f"Failed to write file: {e}")
             raise IOError(f"Failed to write file: {e}")
-        return File(key=key, filename=filename, format=format, size=len(content))
+        return File(key=key, col_types=col_types, filename=filename, format=format, size=len(content))
     
     async def write_async(self, 
                           filename: str, 
@@ -210,6 +220,10 @@ class FileManager:
         if isinstance(content, io.BytesIO):
             content.seek(0)
             content = content.getvalue()
+        # detect col_types for csv
+        col_types: dict[str, ColType] | None = None
+        if format == "csv":
+            col_types = self._get_col_types(content)
         key = uuid4().hex
         stmt = select(FileRecord).where(
             (FileRecord.project_id == project_id) & (FileRecord.node_id == node_id)
@@ -246,9 +260,6 @@ class FileManager:
                 existing_file.project_id = project_id  # type: ignore
                 existing_file.node_id = node_id # type: ignore
                 existing_file.file_size = len(content) # type: ignore
-                existing_file.last_modify_time = datetime.datetime.now(  # type: ignore
-                    datetime.timezone.utc
-                ).isoformat()
                 try:
                     await asyncio.to_thread(
                         self.minio_client.remove_object,
@@ -266,7 +277,6 @@ class FileManager:
                     project_id=project_id,
                     node_id=node_id,
                     file_size=len(content),
-                    last_modify_time=datetime.datetime.now(datetime.timezone.utc).isoformat()
                 )
                 self.async_db_client.add(file)
             await self.async_db_client.commit()
@@ -288,7 +298,7 @@ class FileManager:
                 pass
             logger.exception(f"Failed to write file: {e}")
             raise IOError(f"Failed to write file: {e}")
-        return File(key=key, filename=filename, format=format, size=len(content))
+        return File(key=key, col_types=col_types, filename=filename, format=format, size=len(content))
     
     def delete_sync(self, file: File, user_id: int | None) -> None:
         """ Delete a file. If user_id is None, means admin operation """

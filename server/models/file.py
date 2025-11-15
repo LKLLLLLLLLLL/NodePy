@@ -1,6 +1,8 @@
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel
+
+from server.models.schema import ColType
 
 
 class File(BaseModel):
@@ -11,6 +13,7 @@ class File(BaseModel):
     key: str  # for minio object key
     filename: str  # original file name
     format: Literal["png", "jpg", "pdf", "csv"]
+    col_types: Optional[dict[str, ColType]] = None  # only for csv files
     size: int  # file size in bytes
 
     def to_dict(self) -> dict[str, str]:
