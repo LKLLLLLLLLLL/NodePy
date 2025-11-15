@@ -1,6 +1,5 @@
+from datetime import datetime
 from typing import override
-
-from pandas import Timestamp
 
 from server.models.data import Data
 from server.models.exception import NodeParameterError
@@ -15,7 +14,7 @@ class DateTimeNode(BaseNode):
     A node to generate current date and time.
     """
     value: str
-    _value: Timestamp | None = None
+    _value: datetime | None = None
 
     @override
     def validate_parameters(self) -> None:
@@ -26,12 +25,18 @@ class DateTimeNode(BaseNode):
                 err_msg="Node type must be 'DateTimeNode'."
             )
         try:
-            self._value = Timestamp(self.value)
+            self._value = datetime.fromisoformat(self.value)
         except Exception as e:
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="value",
                 err_msg=f"value must be a valid datetime string. Error: {str(e)}"
+            )
+        if self._value.tzinfo is None:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="value",
+                err_msg="Datetime string must have timezone information."
             )
         return
 

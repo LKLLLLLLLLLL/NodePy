@@ -154,9 +154,6 @@ class FileManager:
                 existing_file.project_id = project_id  # type: ignore
                 existing_file.node_id = node_id # type: ignore
                 existing_file.file_size = len(content) # type: ignore
-                existing_file.last_modify_time = datetime.datetime.now(  # type: ignore
-                    datetime.timezone.utc
-                ).isoformat()
                 try:
                     self.minio_client.remove_object(
                         bucket_name=self.bucket,
@@ -173,7 +170,6 @@ class FileManager:
                     project_id=project_id,
                     node_id=node_id,
                     file_size=len(content),
-                    last_modify_time=datetime.datetime.now(datetime.timezone.utc).isoformat()
                 )
                 self.db_client.add(file)
             self.db_client.commit()
@@ -246,9 +242,6 @@ class FileManager:
                 existing_file.project_id = project_id  # type: ignore
                 existing_file.node_id = node_id # type: ignore
                 existing_file.file_size = len(content) # type: ignore
-                existing_file.last_modify_time = datetime.datetime.now(  # type: ignore
-                    datetime.timezone.utc
-                ).isoformat()
                 try:
                     await asyncio.to_thread(
                         self.minio_client.remove_object,
@@ -266,7 +259,6 @@ class FileManager:
                     project_id=project_id,
                     node_id=node_id,
                     file_size=len(content),
-                    last_modify_time=datetime.datetime.now(datetime.timezone.utc).isoformat()
                 )
                 self.async_db_client.add(file)
             await self.async_db_client.commit()

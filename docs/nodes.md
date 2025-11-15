@@ -30,7 +30,7 @@ NodePy 的节点系统是一个完全静态类型的节点系统，类型验证�
 - `float`: 浮点数类型，底层通过Pandas的`float64`实现。
 - `bool`: 布尔类型，底层通过Pandas的`bool`实现。
 - `str`: 字符串类型，底层通过Pandas的`str`实现。
-- `datetime`: 日期时间类型，底层通过Pandas的`datetime64[ns]`实现，对应Python的`datetime`类型。
+- `Datetime`: 日期时间类型，底层通过Pandas的`datetime64[ns]`实现，对应Python的`datetime`类型。
 
 ## 二、节点列表
 尽管有了严格的类型系统，但由于json序列化的特点，在传输数据时，一些类型可能丢失，因此在实现节点时还是允许一下这些隐式转换的：

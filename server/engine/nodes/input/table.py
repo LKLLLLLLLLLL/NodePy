@@ -208,7 +208,6 @@ class TableFromCSVNode(BaseNode):
         out_table = Data.from_df(df)
         return {"table": out_table}
 
-
 @register_node
 class RandomNode(BaseNode):
     """
@@ -366,8 +365,6 @@ class RandomNode(BaseNode):
         df = DataFrame(data_rows, columns=[self.col_name])
         out_table = Data.from_df(df)
         return {"table": out_table}
-
-
 
 @register_node
 class RangeNode(BaseNode):

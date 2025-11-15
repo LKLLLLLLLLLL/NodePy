@@ -20,7 +20,7 @@ class ColType(str, Enum):
     FLOAT = "float"  # float64
     STR = "str"  # str
     BOOL = "bool"  # bool
-    DATETIME = "datetime"  # datetime64[ns]
+    DATETIME = "Datetime"  # datetime64[ns]
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, ColType):
