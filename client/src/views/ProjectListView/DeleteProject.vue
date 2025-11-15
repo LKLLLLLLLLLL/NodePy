@@ -24,7 +24,7 @@
 
 </script>
 <template>
-    <el-form class="create-project-container">
+    <el-form class="delete-project-container">
         <el-form-item>
             <div>R U sure to delete this project (ID:{{ projectStore.toBeDeleted.id }})which is irreversible?</div>
         </el-form-item>

@@ -17,11 +17,11 @@
 
     onMounted(()=>{
         loginStore.checkAuthStatus()
-        if(loginStore.loggedIn){
+        if(loginStore.loggedIn==true){
             projectStore.initializeProjects()
         }
         else{
-            router.push({
+            router.replace({
                 name: 'login'
             })
         }

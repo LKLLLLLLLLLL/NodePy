@@ -109,7 +109,7 @@
             console.log(fileStore.userFileList.files);
         }
         else{
-            router.push({
+            router.replace({
                 name: 'login'
             })
         }

@@ -30,14 +30,19 @@ export const useProjectStore = defineStore('project', () => {
     const default_rename_pid: number = 22222222
     const default_rename_pname: string = 'toBeRenamed'//原名
     const default_whether_show: boolean = false//默认不公开
+    const default_project_setting: ProjectSetting = {
+        project_name: default_pname,
+        show_to_explore: default_whether_show
+    }
 
     const projectList = ref<ProjectList>({userid: default_uid,projects: []});
     const currentProjectName = ref<string>(default_pname);
     const currentProjectId = ref<number>(default_pid);
     const currentProject = ref<Project>(default_project);
     const currentWhetherShow = ref<boolean>(default_whether_show)
-    const toBeDeleted = ref<{name: string,id: number}>({id: default_delete_pid,name: default_delete_pname});
-    const toBeRenamed = ref<{name: string,id: number}>({id: default_rename_pid,name: default_rename_pname});
+    const toBeDeleted = ref<{id: number,name: string}>({id: default_delete_pid,name: default_delete_pname});
+    const toBeRenamed = ref<{id: number,name: string}>({id: default_rename_pid,name: default_rename_pname});
+    const toBeUpdated = ref<ProjectSetting>(default_project_setting)
 
     const modalStore = useModalStore();
 
@@ -59,6 +64,7 @@ export const useProjectStore = defineStore('project', () => {
         currentProject.value = default_project;
         currentProjectId.value = default_pid;
         currentProjectName.value = default_pname;
+        currentWhetherShow.value = default_whether_show
         toBeDeleted.value = {
             id: default_delete_pid,
             name: default_delete_pname
@@ -67,6 +73,7 @@ export const useProjectStore = defineStore('project', () => {
             id: default_rename_pid,
             name: default_rename_pname
         };
+        toBeUpdated.value = default_project_setting
     }
 
     async function initializeProjects(){
@@ -217,7 +224,7 @@ export const useProjectStore = defineStore('project', () => {
             if(response){
                 notify({
                     message: '项目' + id + '获取成功',
-                    type: 'error'
+                    type: 'info'
                 });
             }
             currentProject.value=response;
@@ -262,16 +269,12 @@ export const useProjectStore = defineStore('project', () => {
         }
     }
 
-    async function renameProject(id: number,name: string){
-        console.log('Renaming project:',id,'New name is',name);
+    async function getProjectSettings(id: number){
+        console.log('Getting project:', id)
         try{
-            // const response = await authService.renameProjectApiProjectRenamePost(id,name);
-            notify({
-                message: '项目' + id + '改名成功',
-                type: 'success'
-            });
-            initializeProjects();
-            return true;
+            const response = await authService.getProjectSettingApiProjectSettingProjectIdGet(id)
+            toBeUpdated.value = response
+            currentProjectName.value = response.project_name
         }
         catch(error){
             if(error instanceof ApiError){
@@ -308,7 +311,71 @@ export const useProjectStore = defineStore('project', () => {
                     type: 'error'
                 });
             }
-            return false;
+        }
+    }
+
+    async function updateProjectSetting(id: number){
+        console.log('Updating project:',id);
+        try{
+            const setting: ProjectSetting = {
+                project_name: currentProjectName.value,
+                show_to_explore: currentWhetherShow.value
+            }
+            const response = await authService.updateProjectSettingApiProjectUpdateSettingPost(id,setting);
+            notify({
+                message: '项目' + id + '更新成功',
+                type: 'success'
+            });
+            initializeProjects();
+            return response;
+        }
+        catch(error){
+            if(error instanceof ApiError){
+                switch(error.status){
+                    case(400):
+                        notify({
+                            message: '项目信息更新失败',
+                            type: 'error'
+                        })
+                        break;
+                    case(403):
+                        notify({
+                            message: '没有访问权限',
+                            type: 'error'
+                        });
+                        break;
+                    case(404):
+                        notify({
+                            message: '找不到项目',
+                            type: 'error'
+                        });
+                        break;
+                    case(422):
+                        notify({
+                            message: '验证错误',
+                            type: 'error'
+                        });
+                        break;
+                    case(423):
+                        notify({
+                            message: '项目被锁定，可能正在被其他进程访问',
+                            type: 'error'
+                        })
+                        break;
+                    case(500):
+                        notify({
+                            message: '服务器内部错误',
+                            type: 'error'
+                        });
+                        break;
+                }
+            }
+            else{
+                notify({
+                    message: 'Unknown error occurred',
+                    type: 'error'
+                });
+            }
         }
     }
 
@@ -317,12 +384,15 @@ export const useProjectStore = defineStore('project', () => {
         currentProjectId,
         currentProjectName,
         currentProject,
+        currentWhetherShow,
         toBeDeleted,
         toBeRenamed,
+        toBeUpdated,
         getProject,
         createProject,
         deleteProject,
-        renameProject,
+        getProjectSettings,
+        updateProjectSetting,
         initializeProjects
     }
 });

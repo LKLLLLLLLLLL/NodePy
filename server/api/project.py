@@ -256,7 +256,7 @@ async def update_project_setting(
             if project_record.owner_id != user_id: # type: ignore
                 raise HTTPException(status_code=403, detail="User has no access to this project")
             # check if new name already exists
-            existing_project = await db_client.get(ProjectRecord, setting.project_name)
+            existing_project = await db_client.get(ProjectRecord, project_id)
             if existing_project is not None:
                 raise HTTPException(status_code=400, detail="Project name already exists")
             # update settings

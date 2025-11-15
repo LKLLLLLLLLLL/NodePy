@@ -4,7 +4,7 @@ import { Plus, Edit, Delete } from '@element-plus/icons-vue';
 import { useProjectStore } from '@/stores/projectStore';
 import { useModalStore } from '@/stores/modalStore';
 import DeleteProject from './DeleteProject.vue';
-import RenameProject from './RenameProject.vue';
+import UpdateProjectSetting from './UpdateProjectSetting.vue';
 
 const props = defineProps<{
     id: number,
@@ -75,15 +75,14 @@ async function handleClickDelete(){
     })
 }
 
-async function handleClickRename(){
-    await projectStore.getProject(props.id);
-    projectStore.toBeRenamed.id = projectStore.currentProject.project_id;
-    projectStore.toBeRenamed.name = projectStore.currentProject.project_name;
+async function handleClickUpdate(){
+    await projectStore.getProjectSettings(props.id)
+    projectStore.currentProjectId = props.id
     const modalWidth = 300;
     const modalHeight = 400;
     modalStore.createModal({
-        id: 'rename-modal',
-        title: "Rename a project",
+        id: 'update-modal',
+        title: "Update a project",
         isActive: true,
         isDraggable: true,
         isResizable: false,
@@ -95,7 +94,7 @@ async function handleClickRename(){
             height: modalHeight,
             width: modalWidth
         },
-        component: RenameProject
+        component: UpdateProjectSetting
     })
 }
 
@@ -125,7 +124,7 @@ async function handleClickRename(){
                 </div>
             </slot>
             <div v-if="props.id !== 0" class="card-actions">
-                <el-button type="text" class="action-btn" @click.stop="handleClickRename" title="重命名">
+                <el-button type="text" class="action-btn" @click.stop="handleClickUpdate" title="更新">
                     <el-icon><Edit/></el-icon>
                 </el-button>
                 <el-button type="text" class="action-btn" @click.stop="handleClickDelete" title="删除">
