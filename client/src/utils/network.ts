@@ -5,11 +5,13 @@ import { autoCaptureMinimap } from '@/utils/GraphCapture/minimapCapture'
 import { useVueFlow } from '@vue-flow/core'
 import { getProject, writeBackVueFLowProject } from './projectConvert'
 import AuthenticatedServiceFactory from './AuthenticatedServiceFactory'
+import { useResultStore } from '@/stores/resultStore'
 
 
 const mutex = new Mutex()
 const {vueFlowRef} = useVueFlow('main')
 const authService = AuthenticatedServiceFactory.getService()
+const resultStore = useResultStore()
 
 
 const syncProject = (p: Project, graphStore: any) => {
@@ -114,6 +116,7 @@ const syncProjectUiState = (p: Project, graphStore: any) => {
 export const sync = async(graphStore: any) => {
 
     try {
+        resultStore.cacheGarbageRecycle()
         const p = getProject(graphStore.project)
         const res = await syncProject(p, graphStore)
         console.log('syncProject response:', res, res === p)
