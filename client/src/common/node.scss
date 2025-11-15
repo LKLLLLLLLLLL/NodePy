@@ -3,7 +3,7 @@ $int-color: #1c6bbf;
 $float-color: #ecbc00;
 $str-color: green;
 $table-color: pink;
-$file-color: brown;
+$file-color: rgb(216, 105, 91);
 $bool-color: #76ab0b;
 $default-type-color: gray;
 $node-width: 200px;
@@ -18,8 +18,8 @@ $table-node-color: $table-color;
 $utils-node-color: rgb(183, 0, 70);
 $visualize-node-color: #7572d2;
 $node-margin: 10px;
-$node-title-fontsize: 1em;
-$node-description-fontsize: 1em;
+$node-title-fontsize: 18px;
+$node-description-fontsize: 16px;
 
 
 .nodes-style {
@@ -70,68 +70,53 @@ $node-description-fontsize: 1em;
   background: $default-type-color;
 }
 
-.node-title-input {
-  background: $input-node-color;
+@mixin node-title-style {
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
   font-size: $node-title-fontsize;
+  display: flex;
+  align-items: center;
+}
+
+.node-title-input {
+  @include node-title-style();
+  background: $input-node-color;
 }
 
 .node-title-compute {
+  @include node-title-style();
   background: $compute-node-color;
-  text-align: left;
-  padding-left: $node-padding;
-  height: $node-title-height;
-  font-size: $node-title-fontsize;
 }
 
 .node-title-control {
+  @include node-title-style();
   background: $control-node-color;
-  text-align: left;
-  padding-left: $node-padding;
-  height: $node-title-height;
-  font-size: $node-title-fontsize;
 }
 
 .node-title-file {
+  @include node-title-style();
   background: $file-node-color;
-  text-align: left;
-  padding-left: $node-padding;
-  height: $node-title-height;
-  font-size: $node-title-fontsize;
 }
 
 .node-title-stringProcess {
+  @include node-title-style();
   background: $str-node-color;
-  text-align: left;
-  padding-left: $node-padding;
-  height: $node-title-height;
-  font-size: $node-title-fontsize;
 }
 
 .node-title-tableProcess {
+  @include node-title-style();
   background: $table-node-color;
-  text-align: left;
-  padding-left: $node-padding;
-  height: $node-title-height;
-  font-size: $node-title-fontsize;
 }
 
 .node-title-tool {
+  @include node-title-style();
   background: $utils-node-color;
-  text-align: left;
-  padding-left: $node-padding;
-  height: $node-title-height;
-  font-size: $node-title-fontsize;
 }
 
 .node-title-visualize {
+  @include node-title-style();
   background: $visualize-node-color;
-  text-align: left;
-  padding-left: $node-padding;
-  height: $node-title-height;
-  font-size: $node-title-fontsize;
 }
 
 .port {
