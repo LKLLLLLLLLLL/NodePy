@@ -2,11 +2,13 @@ import time
 from typing import Any, Callable, Literal
 
 import networkx as nx
+from pydantic import ValidationError
 
 from server.lib.CacheManager import CacheManager
 from server.lib.FileManager import FileManager
 from server.lib.utils import safe_hash
 from server.models.data import Data, Schema
+from server.models.exception import NodeParameterError
 from server.models.project import TopoEdge, TopoNode, WorkflowTopology
 
 from .nodes.base_node import BaseNode
@@ -70,6 +72,21 @@ class ProjectExecutor:
                 if self._node_objects is None:
                     raise RuntimeError("Node objects initialized failed.")
                 self._node_objects[id] = node_object
+            except ValidationError as e:
+                # convert pydantic ValidationError to parameter error with more information
+                errors = e.errors()
+                err_params: list[str] = [str(error['loc'][-1]) for error in errors]
+                err_msgs: list[str] = [error['msg'] for error in errors]
+                param_error = NodeParameterError(
+                    node_id=node_id,
+                    err_param_keys=err_params,
+                    err_msgs=err_msgs,
+                )
+                continue_execution = callback(id, "error", param_error)
+                if not continue_execution:
+                    return
+                else:
+                    continue
             except Exception as e:
                 continue_execution = callback(id, "error", e)
                 if not continue_execution:

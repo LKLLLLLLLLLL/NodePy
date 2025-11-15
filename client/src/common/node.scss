@@ -156,7 +156,8 @@ $node-description-fontsize: 1em;
 
 .node-has-paramerr {
   /* wave under text */
-  text-decoration: underline wavy red;
+  text-decoration: underline dotted red;
+  text-decoration-thickness: 3px;
 }
 
 .node-err {
