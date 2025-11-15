@@ -1,9 +1,9 @@
 <template>
     <div class="ConstNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="node-title-input nodes-topchild-border-radius">{{`常量节点${props.id.split('_')[1]}`}}</div>
-        <div class="data" :class="{'node-has-paramerr': hasParamerr}">
+        <div class="data">
             <div class="value">
-                <div class="param-description">
+                <div class="param-description" :class="{'node-has-paramerr': valueHasErr.value}">
                     数值
                 </div>
                 <NodepyNumberInput 
@@ -65,7 +65,10 @@
     const defaultSelected = [data_type_options.indexOf(props.data.param.data_type)]
     const data_type = ref(props.data.param.data_type)
     const errMsg = ref<string[]>([])
-    const hasParamerr = ref(false)
+    const valueHasErr = ref({
+        id: 'value',
+        value: false
+    })
 
 
     const onSelectChange = (e: any) => {
@@ -85,7 +88,7 @@
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
-        handleParamError(hasParamerr, props.data.error, errMsg)
+        handleParamError(props.data.error, errMsg, valueHasErr)
     }, {immediate: true})
 
 </script>

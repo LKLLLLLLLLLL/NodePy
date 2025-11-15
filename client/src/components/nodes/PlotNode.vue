@@ -1,21 +1,21 @@
 <template>
     <div class="PlotNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="node-title-visualize nodes-topchild-border-radius">{{`绘图节点${props.id.split('_')[1]}`}}</div>
-        <div class="data" :class="{'node-has-paramerr': hasParamerr}">
+        <div class="data">
             <div class="input-table port">
                 <div class="input-port-description">表格输入端口</div>
                 <Handle id="table" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': tableHasErr.value}]"/>
             </div>
             <div class="x_col">
-                <div class="param-description">x轴列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列名</div>
                 <NodepyStringInput v-model="x_col" @update-value="onUpdateX_col" class="nodrag"/>
             </div>
             <div class="y_col">
-                <div class="param-description">y轴列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': y_colHasErr.value}">y轴列名</div>
                 <NodepyStringInput v-model="y_col" @update-value="onUpdateY_col" class="nodrag"/>
             </div>
             <div class="plot_type">
-                <div class="param-description">图形类型</div>
+                <div class="param-description" :class="{'node-has-paramerr': plot_typeHasErr.value}">图形类型</div>
                 <NodepySelectFew 
                     :options="plot_type_options" 
                     :select-max-num="1" 
@@ -63,9 +63,20 @@
     const table_type = computed(() => getInputType(props.id, 'table'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['plot']?.type || 'default')
     const errMsg = ref<string[]>([])
-    const hasParamerr = ref(false)
     const tableHasErr = ref({
         handleId: 'talbe',
+        value: false
+    })
+    const x_colHasErr = ref({
+        id: 'x_col',
+        value: false
+    })
+    const y_colHasErr = ref({
+        id: 'y_col',
+        value: false
+    })
+    const plot_typeHasErr = ref({
+        id: 'plot_type',
         value: false
     })
 
@@ -91,7 +102,7 @@
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
-        handleParamError(hasParamerr, props.data.error, errMsg)
+        handleParamError(props.data.error, errMsg, x_colHasErr, y_colHasErr, plot_typeHasErr)
         handleValidationError(props.id, props.data.error, errMsg, tableHasErr)
     }, {immediate: true})
 

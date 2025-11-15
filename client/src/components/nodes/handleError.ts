@@ -26,11 +26,16 @@ export const handleValidationError = (nodeId: string, err: ProjNodeError | null 
     }
 }
 
-export const handleParamError = (hasParamerr: Ref<boolean>, err: ProjNodeError | null | undefined, errMsg: Ref<string[]>) => {
-    hasParamerr.value = false   //  reset hasParamerr
+export const handleParamError = (err: ProjNodeError | null | undefined, errMsg: Ref<string[]>, ...paramErrObj: any[]) => {
+    paramErrObj.forEach((v) => {v.value.value = false})   //  reset hasParamErr
     if(!err) return
     if(err.type === 'param') {
-        hasParamerr.value = true
+        const errParams = new Set(err.params)
+        paramErrObj.forEach(v => {
+            if(errParams.has(v.value.id)) {
+                v.value.value = true
+            }
+        })
         errMsg.value = err.message as string[]
     }
 }

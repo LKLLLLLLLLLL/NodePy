@@ -1,9 +1,9 @@
 <template>
     <div class="UploadNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="node-title-file nodes-topchild-border-radius">{{`文件上传节点${props.id.split('_')[1]}`}}</div>
-        <div class="data" :class="{'node-has-paramerr': hasParamerr}">
+        <div class="data">
             <div class="file">
-                <div class="param-description">上传文件</div>
+                <div class="param-description" :class="{'node-has-paramerr': fileHasErr.value}">上传文件</div>
                 <svg-icon type="mdi" :path="mdiAddFile" @click="addFile" class="file-icon"></svg-icon>
             </div>
             <div class="output-file port">
@@ -32,11 +32,15 @@
     import { useGraphStore } from '@/stores/graphStore'
     import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory'
 
+
     const mdiAddFile: string = mdiFilePlus
     const props = defineProps<NodeProps<UploadNodeData>>()
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['file']?.type || 'default')
     const errMsg = ref<string[]>([])
-    const hasParamerr = ref(false)
+    const fileHasErr = ref({
+        id: 'file',
+        value: false
+    })
     const graphStore = useGraphStore()
     const authService = AuthenticatedServiceFactory.getService()
 
@@ -66,7 +70,7 @@
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
-        handleParamError(hasParamerr, props.data.error, errMsg)
+        handleParamError(props.data.error, errMsg, fileHasErr)
     }, {immediate: true})
 
 </script>

@@ -1,7 +1,7 @@
 <template>
     <div class="NumBinComputeNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="node-title-compute nodes-topchild-border-radius">{{`数字二元运算节点${props.id.split('_')[1]}`}}</div>
-        <div class="data" :class="{'node-has-paramerr': hasParamerr}">
+        <div class="data">
             <div class="input-x port">
                 <div class="input-port-description">
                     x输入端口
@@ -15,7 +15,7 @@
                 <Handle id="y" type="target" :position="Position.Left" :class="[`${y_type}-handle-color`, {'node-errhandle': yHasErr.value}]"/>
             </div>
             <div class="op">
-                <div class="param-description">
+                <div class="param-description" :class="{'node-has-paramerr': opHasErr.value}">
                     运算类型
                 </div>
                 <NodepySelectMany 
@@ -59,7 +59,10 @@
     const y_type = computed(() => getInputType(props.id, 'y'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['result']?.type || 'default')
     const errMsg = ref<string[]>([])
-    const hasParamerr = ref(false)
+    const opHasErr = ref({
+        id: 'op',
+        value: false
+    })
     const xHasErr = ref({
         handleId: 'x',
         value: false
@@ -79,7 +82,7 @@
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
-        handleParamError(hasParamerr, props.data.error, errMsg)
+        handleParamError(props.data.error, errMsg, opHasErr)
         handleValidationError(props.id, props.data.error, errMsg, xHasErr, yHasErr)
     }, {immediate: true})
 
