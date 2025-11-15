@@ -130,6 +130,8 @@ class FileManager:
                    user_id: int
     ) -> File:
         """ Write content to a file for a user, return the file path """
+        logger.debug("@@@@@@@@@@@@@@@@@@@@@")
+        logger.debug(f"Writing file sync: filename={filename}, format={format}, node_id={node_id}, project_id={project_id}, user_id={user_id}")
         if self.db_client is None:
             raise AssertionError("Synchronous DB client is not initialized")
         if isinstance(content, io.BytesIO):
@@ -140,7 +142,7 @@ class FileManager:
         if format == "csv":
             col_types = self._get_col_types(content)
         key = uuid4().hex
-        existing_file = self.db_client.query(FileRecord).filter(FileRecord.project_id == project_id and FileRecord.node_id == node_id).first()
+        existing_file = self.db_client.query(FileRecord).filter((FileRecord.project_id == project_id) & (FileRecord.node_id == node_id)).first()
         try:
             # check storage limit
             user = self.db_client.query(UserRecord).filter(UserRecord.id == user_id).first()
