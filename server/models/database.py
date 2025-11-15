@@ -65,6 +65,7 @@ class UserRecord(Base):
     github_id = Column(String, unique=True, index=True, nullable=True)
 
     file_total_space = Column(BigInteger, default=5 * 1024 * 1024 * 1024, nullable=False)  # 5 GB default
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
 class ProjectRecord(Base):
     __tablename__ = "projects"
