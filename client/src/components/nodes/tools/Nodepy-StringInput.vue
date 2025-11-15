@@ -66,6 +66,7 @@
     @use '../../../common/global.scss';
     @use '../../../common/node.scss';
     .NodePyStringInputLayout {
+        background: white;
         border: 1.5px solid #ccc;
         input {
             width: 100%;

@@ -1,6 +1,6 @@
 <template>
     <div class="NumBinComputeNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="node-title-compute nodes-topchild-border-radius">数字二元运算节点</div>
+        <div class="node-title-compute nodes-topchild-border-radius">{{`数字二元运算节点${props.id.split('_')[1]}`}}</div>
         <div class="data" :class="{'node-has-paramerr': hasParamerr}">
             <div class="input-x port">
                 <div class="input-port-description">
@@ -15,7 +15,7 @@
                 <Handle id="y" type="target" :position="Position.Left" :class="[`${y_type}-handle-color`, {'node-errhandle': yHasErr.value}]"/>
             </div>
             <div class="op">
-                <div class="op-description">
+                <div class="param-description">
                     运算类型
                 </div>
                 <NodepySelectMany 
@@ -33,7 +33,7 @@
                 <Handle id="result" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             </div>
         </div>
-        <div class="node-err nodrag">
+        <div class="node-err nodrag" @click.stop>
             <div v-for="err in errMsg">
                 {{ err }}
             </div>

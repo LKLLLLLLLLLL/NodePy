@@ -1,7 +1,7 @@
 <template>
     <div class="TableFromCSVNodeLayout nodes-style" :class="{'nodes-selected': selected}">
         <div class="node-title-input nodes-topchild-border-radius">
-            CSV表格节点
+            {{`CSV表格节点${props.id.split('_')[1]}`}}
         </div>
         <div class="data">
             <div class="input-csv_file port">
@@ -27,7 +27,7 @@
                 />
             </div>
         </div>
-        <div class="node-err nodrag">
+        <div class="node-err nodrag" @click.stop>
             <div v-for="err in errMsg">
                 {{ err }}
             </div>

@@ -157,9 +157,11 @@
         .value {
             width: 100%;
             text-align: center;
+            background: white;
         }
         .value-input {
             width: 100%;
+            background: white;
             input {
                 width: 100%;
                 text-align: center;

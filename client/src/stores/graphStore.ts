@@ -7,7 +7,7 @@ import {ref} from 'vue'
 
 export const useGraphStore = defineStore('graph', () => {
   const vueFLowInstance = useVueFlow('main')
-  const {addNodes} = vueFLowInstance
+  const {addNodes, nodes} = vueFLowInstance
   const project = ref<vueFlowProject>({
     project_id: -1,
     project_name: "",
@@ -22,11 +22,18 @@ export const useGraphStore = defineStore('graph', () => {
   const syncing_err_msg = ref('')
 
 
+  const nextId = (type:string):string => {
+    const sameTypeNodes = nodes.value.filter(n => n.type === type)
+    const count = sameTypeNodes.length + 1
+    return `${type}_${count}`
+  }
+
   const addNode = (type: string, position: {x: number, y: number}) => {
+    const id = nextId(type)
     switch(type){
       case 'ConstNode':
         const addedConstNode: Nodetypes.ConstNode = {
-          id: Date.now().toString(),
+          id,
           position,
           type: 'ConstNode',
           data: {
@@ -40,7 +47,7 @@ export const useGraphStore = defineStore('graph', () => {
         break
       case 'StringNode':
         const addedStringNode: Nodetypes.StringNode = {
-          id: Date.now().toString(),
+          id,
           position,
           type: 'StringNode',
           data: {
@@ -53,7 +60,7 @@ export const useGraphStore = defineStore('graph', () => {
         break
       case 'TableNode':
         const addedTableNode: Nodetypes.TableNode = {
-          id: Date.now().toString(),
+          id,
           position,
           type: 'TableNode',
           data: {
@@ -67,7 +74,7 @@ export const useGraphStore = defineStore('graph', () => {
         break
       case 'BoolNode':
         const addedBoolNode: Nodetypes.BoolNode = {
-          id: Date.now().toString(),
+          id,
           position,
           type: 'BoolNode',
           data: {
@@ -80,7 +87,7 @@ export const useGraphStore = defineStore('graph', () => {
         break
       case 'NumberBinOpNode':
         const addedNumBinComputeNode: Nodetypes.NumberBinOpNode = {
-          id: Date.now().toString(),
+          id,
           position,
           type: 'NumberBinOpNode',
           data: {
@@ -93,7 +100,7 @@ export const useGraphStore = defineStore('graph', () => {
         break
       case 'TableFromCSVNode':
         const addedTableFromCSVNode: Nodetypes.TableFromCSVNode = {
-          id: Date.now().toString(),
+          id,
           position,
           type: 'TableFromCSVNode',
           data: {
@@ -104,7 +111,7 @@ export const useGraphStore = defineStore('graph', () => {
         break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
-          id: Date.now().toString(),
+          id,
           position,
           type: 'UploadNode',
           data: {
@@ -114,6 +121,21 @@ export const useGraphStore = defineStore('graph', () => {
           }
         }
         addNodes(addedUploadNode)
+        break
+      case 'PlotNode':
+        const addedPlotNode: Nodetypes.PlotNode = {
+          id,
+          position,
+          type: 'PlotNode',
+          data: {
+            param: {
+              x_col: '',
+              y_col: '',
+              plot_type: 'line',
+            }
+          }
+        }
+        addNodes(addedPlotNode)
         break
     
       default:

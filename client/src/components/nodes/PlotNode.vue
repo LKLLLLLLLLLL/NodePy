@@ -1,0 +1,120 @@
+<template>
+    <div class="PlotNodeLayout nodes-style" :class="{'nodes-selected': selected}">
+        <div class="node-title-visualize nodes-topchild-border-radius">{{`绘图节点${props.id.split('_')[1]}`}}</div>
+        <div class="data" :class="{'node-has-paramerr': hasParamerr}">
+            <div class="input-table port">
+                <div class="input-port-description">表格输入端口</div>
+                <Handle id="table" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': tableHasErr.value}]"/>
+            </div>
+            <div class="x_col">
+                <div class="param-description">x轴列名</div>
+                <NodepyStringInput v-model="x_col" @update-value="onUpdateX_col" class="nodrag"/>
+            </div>
+            <div class="y_col">
+                <div class="param-description">y轴列名</div>
+                <NodepyStringInput v-model="y_col" @update-value="onUpdateY_col" class="nodrag"/>
+            </div>
+            <div class="plot_type">
+                <div class="param-description">图形类型</div>
+                <NodepySelectFew 
+                    :options="plot_type_options" 
+                    :select-max-num="1" 
+                    :defualt-selected="defaultSelected"
+                    @select-change="onSelectChange"
+                    item-width="90px"
+                    class="nodrag"
+                />
+            </div>
+            <div class="title">
+                <div class="param-description">图形标题</div>
+                <NodepyStringInput v-model="title" @update-value="onUpdateTitle" class="nodrag"/>
+            </div>
+            <div class="output-plot port">
+                <div class="output-port-description">图形输出端口</div>
+                <Handle id="plot" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
+            </div>
+        </div>
+        <div class="node-err nodrag" @click.stop>
+            <div v-for="err in errMsg">
+                {{ err }}
+            </div>
+        </div>
+    </div>
+</template>
+
+<script lang="ts" setup>
+    import {ref, computed, watch} from 'vue'
+    import type { NodeProps } from '@vue-flow/core'
+    import { Position, Handle } from '@vue-flow/core'
+    import { getInputType } from './getInputType'
+    import type { Type } from '@/utils/api'
+    import { handleValidationError, handleExecError, handleParamError } from './handleError'
+    import NodepyStringInput from './tools/Nodepy-StringInput.vue'
+    import NodepySelectFew from './tools/Nodepy-selectFew.vue'
+    import type { PlotNodeData } from '@/types/nodeTypes'
+
+
+    const props = defineProps<NodeProps<PlotNodeData>>()
+    const x_col = ref(props.data.param.x_col)
+    const y_col = ref(props.data.param.y_col)
+    const title = ref(props.data.param.title || '')
+    const plot_type_options = ['bar', 'line', 'scatter']
+    const defaultSelected = [plot_type_options.indexOf(props.data.param.plot_type)]
+    const table_type = computed(() => getInputType(props.id, 'table'))
+    const schema_type = computed(():Type|'default' => props.data.schema_out?.['plot']?.type || 'default')
+    const errMsg = ref<string[]>([])
+    const hasParamerr = ref(false)
+    const tableHasErr = ref({
+        handleId: 'talbe',
+        value: false
+    })
+
+
+    const onSelectChange = (e: any) => {
+        const selected_plot_type = plot_type_options[e] as 'bar'| 'line'| 'scatter'
+        props.data.param.plot_type = selected_plot_type
+    }
+
+    const onUpdateX_col = () => {
+        props.data.param.x_col = x_col.value
+    }
+
+    const onUpdateY_col = () => {
+        props.data.param.y_col = y_col.value
+    }
+
+    const onUpdateTitle = () => {
+        props.data.param.title = title.value
+    }
+
+
+    watch(() => JSON.stringify(props.data.error), () => {
+        errMsg.value = []
+        handleExecError(props.data.error, errMsg)
+        handleParamError(hasParamerr, props.data.error, errMsg)
+        handleValidationError(props.id, props.data.error, errMsg, tableHasErr)
+    }, {immediate: true})
+
+</script>
+
+<style lang="scss" scoped>
+    @use '../../common/global.scss' as *;
+    @use '../../common/node.scss' as *;
+    .PlotNodeLayout {
+        height: 100%;
+        .data {
+            padding-top: $node-padding;
+            padding-bottom: 5px;
+            .input-table {
+                margin-bottom: $node-margin;
+            }
+            .x_col, .y_col, .plot_type, .title {
+                padding: 0 $node-padding;
+                margin-bottom: $node-margin;
+            }
+        }
+    }
+    .all-handle-color {
+        background: $file-color;
+    }
+</style>

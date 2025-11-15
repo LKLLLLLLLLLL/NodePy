@@ -12,6 +12,18 @@ export const dataTypeColor = {
     default: 'gray'
 }
 
+export const nodeCategoryColor = {
+    input: 'rgb(255, 102, 255)',
+    compute: '#00b688',
+    control: '#d87e00',
+    file: dataTypeColor.File,
+    str: dataTypeColor.str,
+    table: dataTypeColor.Table,
+    utils: 'rgb(183, 0, 70)',
+    visualize: '#7572d2',
+    default: 'gray'
+}
+
 
 export type AbstractNode = Omit<Node, 'data' | 'type'>
 

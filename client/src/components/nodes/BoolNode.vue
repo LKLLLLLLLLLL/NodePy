@@ -1,6 +1,6 @@
 <template>
     <div class="BoolNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="node-title-input nodes-topchild-border-radius">布尔节点</div>
+        <div class="node-title-input nodes-topchild-border-radius">{{`布尔节点${props.id.split('_')[1]}`}}</div>
         <div class="data">
             <div class="value">
                 <NodepyBoolValue
@@ -19,7 +19,7 @@
                 <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             </div>
         </div>
-        <div class="node-err nodrag">
+        <div class="node-err nodrag" @click.stop>
             <div v-for="err in errMsg">
                 {{ err }}
             </div>

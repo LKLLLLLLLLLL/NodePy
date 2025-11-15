@@ -18,6 +18,8 @@ $table-node-color: $table-color;
 $utils-node-color: rgb(183, 0, 70);
 $visualize-node-color: #7572d2;
 $node-margin: 10px;
+$node-title-fontsize: 1em;
+$node-description-fontsize: 1em;
 
 
 .nodes-style {
@@ -73,6 +75,7 @@ $node-margin: 10px;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
+  font-size: $node-title-fontsize;
 }
 
 .node-title-compute {
@@ -80,6 +83,7 @@ $node-margin: 10px;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
+  font-size: $node-title-fontsize;
 }
 
 .node-title-control {
@@ -87,6 +91,7 @@ $node-margin: 10px;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
+  font-size: $node-title-fontsize;
 }
 
 .node-title-file {
@@ -94,6 +99,7 @@ $node-margin: 10px;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
+  font-size: $node-title-fontsize;
 }
 
 .node-title-stringProcess {
@@ -101,6 +107,7 @@ $node-margin: 10px;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
+  font-size: $node-title-fontsize;
 }
 
 .node-title-tableProcess {
@@ -108,6 +115,7 @@ $node-margin: 10px;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
+  font-size: $node-title-fontsize;
 }
 
 .node-title-tool {
@@ -115,6 +123,7 @@ $node-margin: 10px;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
+  font-size: $node-title-fontsize;
 }
 
 .node-title-visualize {
@@ -122,6 +131,7 @@ $node-margin: 10px;
   text-align: left;
   padding-left: $node-padding;
   height: $node-title-height;
+  font-size: $node-title-fontsize;
 }
 
 .port {
@@ -130,21 +140,22 @@ $node-margin: 10px;
 
 .input-port-description {
   padding-left: $node-padding;
+  font-size: $node-description-fontsize;
 }
 
 .output-port-description {
   padding-right: $node-padding;
   text-align: right;
+  font-size: $node-description-fontsize;
+}
+
+.param-description {
+  font-size: $node-description-fontsize;
 }
 
 .node-has-paramerr {
-  background-image: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 4px,
-    red        4px,
-    red        6px
-  );
+  /* wave under text */
+  text-decoration: underline wavy red;
 }
 
 .node-err {

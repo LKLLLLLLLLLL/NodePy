@@ -1,9 +1,9 @@
 <template>
     <div class="StringNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="node-title-input nodes-topchild-border-radius">字符串节点</div>
+        <div class="node-title-input nodes-topchild-border-radius">{{`字符串节点${props.id.split('_')[1]}`}}</div>
         <div class="data" :class="{'node-has-paramerr': hasParamerr}">
             <div class="value">
-                <div class="value-description">
+                <div class="param-description">
                     字符串
                 </div>
                 <NodepyStringInput 
@@ -20,7 +20,7 @@
                 <Handle id="string" type="source" :position="Position.Right" class="str-handle-color"/>
             </div>
         </div>
-        <div class="node-err nodrag">
+        <div class="node-err nodrag" @click.stop>
             <div v-for="err in errMsg">
                 {{ err }}
             </div>

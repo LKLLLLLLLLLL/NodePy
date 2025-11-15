@@ -1,9 +1,9 @@
 <template>
     <div class="UploadNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="node-title-file nodes-topchild-border-radius">文件上传节点</div>
+        <div class="node-title-file nodes-topchild-border-radius">{{`文件上传节点${props.id.split('_')[1]}`}}</div>
         <div class="data" :class="{'node-has-paramerr': hasParamerr}">
             <div class="file">
-                <div class="file-description">上传文件</div>
+                <div class="param-description">上传文件</div>
                 <svg-icon type="mdi" :path="mdiAddFile" @click="addFile" class="file-icon"></svg-icon>
             </div>
             <div class="output-file port">
@@ -11,7 +11,7 @@
                 <Handle id="file" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             </div>
         </div>
-        <div class="node-err nodrag">
+        <div class="node-err nodrag" @click.stop>
             <div v-for="err in errMsg">
                 {{ err }}
             </div>

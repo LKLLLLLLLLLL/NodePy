@@ -75,6 +75,7 @@
         align-items: center;
         justify-content: center;
         user-select: none;
+        background: white;
         .box {
             cursor: pointer;
         }

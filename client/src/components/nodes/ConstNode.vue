@@ -1,9 +1,9 @@
 <template>
     <div class="ConstNodeLayout nodes-style" :class="{'nodes-selected': selected}">
-        <div class="node-title-input nodes-topchild-border-radius">常量节点</div>
+        <div class="node-title-input nodes-topchild-border-radius">{{`常量节点${props.id.split('_')[1]}`}}</div>
         <div class="data" :class="{'node-has-paramerr': hasParamerr}">
             <div class="value">
-                <div class="value-description">
+                <div class="param-description">
                     数值
                 </div>
                 <NodepyNumberInput 
@@ -21,12 +21,11 @@
                 />
             </div>
             <div class="data_type">
-                <div class="data_type-description">
+                <div class="param-description">
                     类型
                 </div>
                 <NodepySelectFew 
                     :options="data_type_options" 
-                    :select-max-num="1" 
                     :defualt-selected="defaultSelected"
                     @select-change="onSelectChange"
                     item-width="90px"
@@ -40,7 +39,7 @@
                 <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
             </div>
         </div>
-        <div class="node-err nodrag">
+        <div class="node-err nodrag" @click.stop>
             <div v-for="err in errMsg">
                 {{ err }}
             </div>

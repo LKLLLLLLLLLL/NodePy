@@ -20,8 +20,10 @@ import BoolNode from '../nodes/BoolNode.vue'
 import TableFromCSVNode from '../nodes/TableFromCSVNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
 import UploadNode from '../nodes/UploadNode.vue'
+import PlotNode from '../nodes/PlotNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
+import { nodeCategoryColor } from '@/types/nodeTypes'
 import { useRoute } from 'vue-router'
 
 const resultStore = useResultStore()
@@ -122,15 +124,23 @@ onConnect((connection) => {
 const nodeColor = (node: BaseNode) => {
   switch (node.type) {
     case 'ConstNode':
-      return '#ccc'
+      return nodeCategoryColor.input
     case 'StringNode':
-      return '#ccc'
+      return nodeCategoryColor.input
+    case 'boolNode':
+      return nodeCategoryColor.input
     case 'TableNode':
-      return '#ccc'
+      return nodeCategoryColor.input
+    case 'TableFromCSVNode':
+      return nodeCategoryColor.input
     case 'NumBinComputeNode':
-      return '#ccc'
+      return nodeCategoryColor.compute
+    case 'PlotNode':
+      return nodeCategoryColor.visualize
+    case 'UploadNode':
+      return nodeCategoryColor.file
     default:
-      return '#ff0072'
+      return nodeCategoryColor.default
   }
 }
 
@@ -200,6 +210,10 @@ const isValidConnection = (connection: any) => {
 
         <template #node-NumberBinOpNode="NumberBinOpNodeProps">
           <NumberBinOpNode v-bind="NumberBinOpNodeProps"/>
+        </template>
+
+        <template #node-PlotNode="PlotNodeProps">
+          <PlotNode v-bind="PlotNodeProps" />
         </template>
 
         <template #node-UploadNode="UploadNodeProps">
