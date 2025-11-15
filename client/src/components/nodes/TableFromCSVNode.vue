@@ -12,7 +12,7 @@
                     id="csv_file"
                     type="target" 
                     :position="Position.Left" 
-                    :class="`${csv_file_type}-handle-color`"
+                    :class="[`${csv_file_type}-handle-color`, {'node-errhandle': csv_fileHaserr}]"
                 />
             </div>
             <div class="output-table port">
