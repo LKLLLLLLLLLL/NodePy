@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import override
 
+from server.config import DEFAULT_TIMEZONE
 from server.models.data import Data
 from server.models.exception import NodeParameterError
 from server.models.schema import Schema
@@ -33,11 +34,7 @@ class DateTimeNode(BaseNode):
                 err_msg=f"value must be a valid datetime string. Error: {str(e)}"
             )
         if self._value.tzinfo is None:
-            raise NodeParameterError(
-                node_id=self.id,
-                err_param_key="value",
-                err_msg="Datetime string must have timezone information."
-            )
+            self._value = self._value.replace(tzinfo=DEFAULT_TIMEZONE)
         return
 
     @override

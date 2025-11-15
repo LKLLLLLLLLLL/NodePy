@@ -1,4 +1,5 @@
 import random
+from datetime import datetime, timedelta
 from io import StringIO
 from typing import Dict, List, Literal, override
 
@@ -6,7 +7,8 @@ import pandas
 from pandas import DataFrame
 from pydantic import PrivateAttr
 
-from server.models.data import Data, File
+from server.config import DEFAULT_TIMEZONE
+from server.models.data import Data, File, Table
 from server.models.exception import (
     NodeExecutionError,
     NodeParameterError,
@@ -40,7 +42,8 @@ class TableNode(BaseNode):
 
     rows: List[Dict[str, str | int | float | bool]]
     col_names: List[str]
-    _col_types: Dict[str, ColType] | None = PrivateAttr(None)  # cache for column types
+    col_types: Dict[str, ColType]
+    _rows: List[Dict[str, str | int | float | bool | datetime]] | None = PrivateAttr(None)
 
     @override
     def validate_parameters(self) -> None:
@@ -57,14 +60,6 @@ class TableNode(BaseNode):
                     err_param_key="rows",
                     err_msg="Rows cannot be empty. Else cannot refer types of columns."
                 )
-        # check all rows key equals col_names (compare as list to avoid dict_keys mismatch)
-        for row in self.rows:
-            if list(row.keys()) != list(self.col_names):
-                raise NodeParameterError(
-                    node_id=self.id,
-                    err_param_key="rows",
-                    err_msg=f"All rows must have the same keys as col_names. But got row keys: {list(row.keys())}"
-                )
         # check no illegal column names
         if not check_no_illegal_cols(self.col_names):
             raise NodeParameterError(
@@ -72,63 +67,86 @@ class TableNode(BaseNode):
                 err_param_key="col_names",
                 err_msg="Column names contain illegal names (e.g., reserved keywords)."
             )
-        # check if all columns has same type
+        # check all rows key equals col_names (compare as list to avoid dict_keys mismatch)
+        for row in self.rows:
+            if list(row.keys()) != list(self.col_names):
+                raise NodeParameterError(
+                    node_id=self.id,
+                    err_param_key="rows",
+                    err_msg=f"All rows must have the same keys as col_names. But got row keys: {list(row.keys())}",
+                )
+        # check all col_types key equals col_names
+        if set(self.col_types.keys()) != set(self.col_names):
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col_types",
+                err_msg="col_types keys must match col_names.",
+            )
+        # check all values to check and convert the value types
+        self._rows = []
         if len(self.rows) > 0:
-            col_types: Dict[str, ColType] = {}
-            # traverse first row to initialize types
-            first_row = self.rows[0]
-            for col in self.col_names:
-                val = first_row[col]
-                if isinstance(val, str):
-                    col_types[col] = ColType.STR
-                elif isinstance(val, bool):
-                    col_types[col] = ColType.BOOL
-                elif isinstance(val, int):
-                    col_types[col] = ColType.INT
-                elif isinstance(val, float):
-                    col_types[col] = ColType.FLOAT
-                else:
-                    raise NodeParameterError(
-                        node_id=self.id,
-                        err_param_key="rows",
-                        err_msg=f"Unsupported value type {type(val)} in column '{col}'."
-                    )
-            self._col_types = col_types
-            # traverse other rows to check types
-            for row in self.rows[1:]:
+            for row_index, row in enumerate(self.rows):
+                self._rows.append({})
                 for col in self.col_names:
                     val = row[col]
                     if isinstance(val, str):
-                        if col_types[col] != ColType.STR:
+                        if self.col_types[col] == ColType.STR:
+                            self._rows[row_index][col] = val
+                        elif self.col_types[col] == ColType.DATETIME:
+                            try:
+                                datetime_obj =  datetime.fromisoformat(val)
+                            except ValueError as e:
+                                raise NodeParameterError(
+                                    node_id=self.id,
+                                    err_param_key="rows",
+                                    err_msg=f"Invalid datetime format in column '{col}': {val}. Error: {e}"
+                                )
+                            if datetime_obj.tzinfo is None:
+                                # assume UTC if no timezone info
+                                datetime_obj = datetime_obj.replace(tzinfo=DEFAULT_TIMEZONE)
+                            self._rows[row_index][col] = pandas.Timestamp(datetime_obj)
+                        else:
                             raise NodeParameterError(
                                 node_id=self.id,
                                 err_param_key="rows",
-                                err_msg=f"Column '{col}' has mixed types: {col_types[col]} and STR."
+                                err_msg=f"Column '{col}' has mixed types: {self.col_types[col]} and STR."
                             )
                     elif isinstance(val, bool):
-                        if col_types[col] != ColType.BOOL:
+                        if self.col_types[col] == ColType.BOOL:
+                            self._rows[row_index][col] = val
+                        else:
                             raise NodeParameterError(
                                 node_id=self.id,
                                 err_param_key="rows",
-                                err_msg=f"Column '{col}' has mixed types: {col_types[col]} and BOOL."
+                                err_msg=f"Column '{col}' has mixed types: {self.col_types[col]} and BOOL."
                             )
                     elif isinstance(val, int):
-                        if col_types[col] == ColType.FLOAT:
+                        if self.col_types[col] == ColType.INT:
+                            self._rows[row_index][col] = val
+                        elif self.col_types[col] == ColType.FLOAT:
+                            self._rows[row_index][col] = float(val)
+                        else:
                             raise NodeParameterError(
                                 node_id=self.id,
                                 err_param_key="rows",
-                                err_msg=f"Column '{col}' has mixed types: FLOAT and INT."
+                                err_msg=f"Column '{col}' has mixed types: {self.col_types[col]} and INT."
                             )
-                        col_types[col] = ColType.INT # INT can be promoted to FLOAT
                     elif isinstance(val, float):
-                        col_types[col] = ColType.FLOAT # promote to FLOAT
+                        if self.col_types[col] == ColType.FLOAT:
+                            self._rows[row_index][col] = val
+                        else:
+                            raise NodeParameterError(
+                                node_id=self.id,
+                                err_param_key="rows",
+                                err_msg=f"Column '{col}' has mixed types: {self.col_types[col]} and FLOAT."
+                            )
                     else:
                         raise NodeParameterError(
                             node_id=self.id,
                             err_param_key="rows",
                             err_msg=f"Unsupported value type {type(val)} in column '{col}'."
                         )
-        assert self._col_types is not None
+        assert self._rows is not None
         return
 
     @override
@@ -139,14 +157,12 @@ class TableNode(BaseNode):
 
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
-        assert self._col_types is not None
         return {
-            "table": Schema(type=Schema.Type.TABLE, tab=TableSchema(col_types=self._col_types))
+            "table": Schema(type=Schema.Type.TABLE, tab=TableSchema(col_types=self.col_types))
         }
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
-        assert self._col_types is not None
         df = DataFrame(self.rows, columns=self.col_names)
         out_table = Data.from_df(df)
         return {"table": out_table}
@@ -206,6 +222,16 @@ class TableFromCSVNode(BaseNode):
         file_content = file_manager.read_sync(csv_file_data.payload, user_id=user_id)
         df = pandas.read_csv(StringIO(file_content.decode('utf-8')))
         out_table = Data.from_df(df)
+        
+        # add default timezone if not specified in csv file
+        assert isinstance(out_table.payload, Table)
+        for col_name in df.select_dtypes(include=["datetime64[ns]"]).columns:
+            # If a datetime column is naive, localize it to UTC.
+            if df[col_name].dt.tz is None:
+                df[col_name] = df[col_name].dt.tz_localize(
+                    DEFAULT_TIMEZONE
+                )
+
         return {"table": out_table}
 
 @register_node
@@ -538,12 +564,12 @@ class RangeNode(BaseNode):
                 data_rows.append({self.col_name: current})
                 current += step
         elif self.col_type == "Datetime":
-            assert isinstance(start, pandas.Timestamp)
-            assert isinstance(end, pandas.Timestamp)
+            assert isinstance(start, datetime)
+            assert isinstance(end, datetime)
             if step is None:
-                step = pandas.Timedelta(1, "D")
-            assert isinstance(step, pandas.Timedelta)
-            current = start
+                step = timedelta(days=1)
+            assert isinstance(step, timedelta)
+            current = start.replace(tzinfo=DEFAULT_TIMEZONE) if start.tzinfo is None else start
             while current < end:
                 data_rows.append({self.col_name: current})
                 current += step

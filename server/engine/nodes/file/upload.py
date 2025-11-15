@@ -12,7 +12,7 @@ class UploadNode(BaseNode):
     """
     Node which allows users to upload files.
     """
-    file: File
+    file: File | None # allow None to pass pydantic validation before validate_parameters is called
     
     @override
     def validate_parameters(self) -> None:
@@ -21,6 +21,12 @@ class UploadNode(BaseNode):
                 node_id=self.id,
                 err_param_key="type",
                 err_msg="Node type must be 'UploadNode'."
+            )
+        if self.file is None:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="file",
+                err_msg="File parameter must be provided."
             )
         file_manager = self.global_config.file_manager
         if not file_manager.check_file_exists_sync(self.file):
@@ -41,6 +47,7 @@ class UploadNode(BaseNode):
 
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
+        assert self.file is not None
         return {
             "file": Schema(
                 type=Schema.Type.FILE,
@@ -50,6 +57,7 @@ class UploadNode(BaseNode):
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
+        assert self.file is not None
         return {
             "file": Data(payload=self.file)
         }

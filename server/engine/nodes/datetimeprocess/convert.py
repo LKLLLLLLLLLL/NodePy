@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Literal, override
 
+from server.config import DEFAULT_TIMEZONE
 from server.models.data import Data
 from server.models.exception import (
     NodeExecutionError,
@@ -67,7 +68,7 @@ class ToDatetimeNode(BaseNode):
                 node_id=self.id,
                 err_msg=f"Unsupported unit: {self.unit}"
             )
-        epoch = datetime(1970, 1, 1)
+        epoch = datetime(1970, 1, 1, tzinfo=DEFAULT_TIMEZONE)
         result_datetime = epoch + delta
         return {"datetime": Data(payload=result_datetime)}
 
@@ -111,6 +112,8 @@ class StrToDatetimeNode(BaseNode):
         assert isinstance(value, str)
         try:
             result_datetime = datetime.fromisoformat(value)
+            if result_datetime.tzinfo is None:
+                result_datetime = result_datetime.replace(tzinfo=DEFAULT_TIMEZONE)
         except Exception as e:
             raise NodeExecutionError(
                 node_id=self.id,

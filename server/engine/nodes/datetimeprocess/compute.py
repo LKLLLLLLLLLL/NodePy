@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Literal, override
 
+from server.config import DEFAULT_TIMEZONE
 from server.models.data import Data
 from server.models.exception import (
     NodeExecutionError,
@@ -90,6 +91,8 @@ class DatetimeComputeNode(BaseNode):
                 err_msg=f"Unsupported operation '{self.op}'."
             )
 
+        if result_datetime.tzinfo is None:
+            result_datetime = result_datetime.replace(tzinfo=DEFAULT_TIMEZONE)
         return {"result": Data(payload=result_datetime)}
     
 @register_node
