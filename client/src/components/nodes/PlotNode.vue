@@ -44,14 +44,14 @@
 
 <script lang="ts" setup>
     import type { PlotNodeData } from '@/types/nodeTypes'
-import type { Type } from '@/utils/api'
-import type { NodeProps } from '@vue-flow/core'
-import { Handle, Position } from '@vue-flow/core'
-import { computed, ref, watch } from 'vue'
-import { getInputType } from './getInputType'
-import { handleExecError, handleParamError, handleValidationError } from './handleError'
-import NodepyStringInput from './tools/Nodepy-StringInput.vue'
-import NodepySelectFew from './tools/Nodepy-selectFew.vue'
+    import type { Type } from '@/utils/api'
+    import type { NodeProps } from '@vue-flow/core'
+    import { Handle, Position } from '@vue-flow/core'
+    import { computed, ref, watch } from 'vue'
+    import { getInputType } from './getInputType'
+    import { handleExecError, handleParamError, handleValidationError } from './handleError'
+    import NodepyStringInput from './tools/Nodepy-StringInput.vue'
+    import NodepySelectFew from './tools/Nodepy-selectFew.vue'
 
 
     const props = defineProps<NodeProps<PlotNodeData>>()
@@ -60,7 +60,7 @@ import NodepySelectFew from './tools/Nodepy-selectFew.vue'
     const title = ref(props.data.param.title || '')
     const plot_type_options = ['bar', 'line', 'scatter']
     const defaultSelected = [plot_type_options.indexOf(props.data.param.plot_type)]
-    const table_type = computed(() => getInputType(props.id, 'table'))
+    const table_type = computed(() => getInputType(props.id, 'input'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['plot']?.type || 'default')
     const errMsg = ref<string[]>([])
     const tableHasErr = ref({
@@ -126,6 +126,6 @@ import NodepySelectFew from './tools/Nodepy-selectFew.vue'
         }
     }
     .all-handle-color {
-        background: $file-color;
+        background: $table-color;
     }
 </style>
