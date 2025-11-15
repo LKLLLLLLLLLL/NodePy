@@ -10,6 +10,46 @@ export const useFileStore = defineStore('file', () => {
     const authService = AuthenticatedServiceFactory.getService();
 
     //fileList default
+    const default_file1: FileItem ={
+        key: '123',
+        filename: 'lkllll',
+        format: FileItem.format.PNG,
+        size: 100,
+        modified_at: 2077,
+        project_name: 'default'
+    }
+    const default_file2: FileItem ={
+        key: '456',
+        filename: 'WEH',
+        format: FileItem.format.JPG,
+        size: 120,
+        modified_at: 2072,
+        project_name: 'abccc'
+    }
+    const default_file3: FileItem ={
+        key: '789',
+        filename: 'zhegebi',
+        format: FileItem.format.CSV,
+        size: 200,
+        modified_at: 10086,
+        project_name: 'zhegebi'
+    }
+    const default_file4: FileItem ={
+        key: '000',
+        filename: 'weh',
+        format: FileItem.format.PDF,
+        size: 60,
+        modified_at: 1949,
+        project_name: 'SOFTWARE'
+    }
+    const default_file5: FileItem ={
+        key: '111',
+        filename: 'weh',
+        format: FileItem.format.PDF,
+        size: 60,
+        modified_at: 1949,
+        project_name: 'sOFTWARE'
+    }
     const default_uid: number = 1;
     const default_files: FileItem[] = [];
     const default_totalsize: number = 10086;

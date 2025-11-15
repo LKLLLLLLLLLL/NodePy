@@ -99,18 +99,46 @@ onConnect((connection) => {
   addEdges(addedEdge)
 })
 
-  const default_url_id: number = 12306
-  const url_id = ref<number>(default_url_id)
-    
-  onNodeClick( async (event) => {
+  watch(()=>graphStore.currentNode?.data.data_out?.result?.data_id,async ()=>{
+    graphStore.url_id = graphStore.currentNode?.data.data_out?.result?.data_id!
+    resultStore.currentResult = await resultStore.getResultCacheContent(graphStore.url_id)
+  })
+
+  // 双击检测变量
+const lastClickTime = ref<number>(0)
+const lastNodeId = ref<string>('default')
+
+// 监听节点点击事件
+onNodeClick((event) => {
+  const currentTime = Date.now()
+  const currentNodeId = event.node.id
+  
+  // 检查是否是双击（300ms 内点击同一节点）
+  if (currentTime - lastClickTime.value < 300 && currentNodeId === lastNodeId.value) {
+    // 执行双击处理逻辑
+    handleNodeDoubleClick(event)
+    // 重置状态
+    lastClickTime.value = 0
+    lastNodeId.value = 'default'
+  } else {
+    // 更新状态等待可能的第二次点击
+    lastClickTime.value = currentTime
+    lastNodeId.value = currentNodeId
+  }
+})
+
+  async function handleNodeDoubleClick(event){
     // 获取节点完整信息
-    resultStore.refresh()
-    const currentNode = findNode(event.node.id)
-    if(!currentNode?.data.data_out.result){
-      resultStore.currentInfo = currentNode?.data.param
+    resultStore.cacheGarbageRecycle()
+    console.log('double click success')
+    graphStore.currentNode = findNode(event.node.id)
+    if(!graphStore.currentNode?.data?.data_out?.result){
+      resultStore.currentInfo = graphStore.currentNode?.data.param
     }
-    if(currentNode) url_id.value = currentNode.data.data_out.result.data_id
-    resultStore.currentResult = await resultStore.getResultCacheContent(url_id.value)
+    else if(graphStore.currentNode) {
+      graphStore.url_id = graphStore.currentNode?.data?.data_out?.result?.data_id!//waiting multi-result nodes
+      resultStore.currentResult = await resultStore.getResultCacheContent(graphStore.url_id)
+    }
     if(modalStore.findModal('result')==undefined){
       resultStore.createResultModal()
       modalStore.activateModal('result')
@@ -118,7 +146,8 @@ onConnect((connection) => {
     else{
       modalStore.activateModal('result')
     }
-  })
+
+  }
 
 
 const nodeColor = (node: BaseNode) => {

@@ -181,40 +181,30 @@ const createCenteredFlowContainer = (flowClone: HTMLElement): HTMLElement => {
 const adjustClonedFlow = (container: HTMLElement): void => {
   const flowClone = container.querySelector('.vue-flow') as HTMLElement
   if (!flowClone) {
-    console.warn('未找到克隆的流程图元素')
     return
   }
   
   const viewport = flowClone.querySelector('.vue-flow__viewport') as HTMLElement
   if (!viewport) {
-    console.warn('未找到视口元素')
     return
   }
   
   const nodes = flowClone.querySelectorAll('.vue-flow__node')
   if (nodes.length === 0) {
-    console.warn('未找到任何节点')
     return
   }
-  
-  console.log(`找到 ${nodes.length} 个节点`)
   
   try {
     // 计算所有节点的边界框
     const nodesBoundingBox = calculateNodesBoundingBox(nodes)
     if (!nodesBoundingBox) {
-      console.warn('无法计算节点边界框')
       return
     }
-    
-    console.log('节点边界框:', nodesBoundingBox)
     
     // 获取容器尺寸
     const containerRect = container.getBoundingClientRect()
     const containerWidth = containerRect.width
     const containerHeight = containerRect.height
-    
-    console.log('容器尺寸:', { containerWidth, containerHeight })
     
     // 计算内容尺寸
     const contentWidth = nodesBoundingBox.width
@@ -224,14 +214,10 @@ const adjustClonedFlow = (container: HTMLElement): void => {
     const validContentWidth = contentWidth > 0 ? contentWidth : 800
     const validContentHeight = contentHeight > 0 ? contentHeight : 600
     
-    console.log('内容尺寸:', { validContentWidth, validContentHeight })
-    
     // 计算缩放比例 - 确保内容完全可见且居中
     const scaleX = (containerWidth * 0.85) / validContentWidth  // 85%宽度用于内容
     const scaleY = (containerHeight * 0.85) / validContentHeight // 85%高度用于内容
     const scale = Math.min(scaleX, scaleY, 1) // 取最小值，不超过1
-    
-    console.log('计算缩放比例:', { scaleX, scaleY, scale })
     
     // 计算内容中心点
     const contentCenterX = nodesBoundingBox.minX + validContentWidth / 2
@@ -245,18 +231,14 @@ const adjustClonedFlow = (container: HTMLElement): void => {
     const translateX = containerCenterX - contentCenterX * scale
     const translateY = containerCenterY - contentCenterY * scale
     
-    console.log('变换参数:', { translateX, translateY, scale })
-    
     // 应用变换到视口
     viewport.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`
     viewport.style.transformOrigin = '0 0'
     viewport.style.width = 'auto'
     viewport.style.height = 'auto'
     
-    console.log('已应用变换到视口')
-    
   } catch (error) {
-    console.error('调整克隆流程图时出错:', error)
+
   }
 }
 
@@ -265,7 +247,6 @@ const adjustClonedFlow = (container: HTMLElement): void => {
  */
 const captureFlowWithViewport = async (vueFlowContainer: HTMLElement): Promise<string | null> => {
   try {
-    console.log('尝试使用视口边界框方法...')
     
     // 创建临时容器
     const tempContainer = document.createElement('div')
@@ -351,10 +332,10 @@ const captureFlowWithViewport = async (vueFlowContainer: HTMLElement): Promise<s
     })
     
     document.body.removeChild(tempContainer)
-    console.log('视口边界框方法成功')
+
     return canvas.toDataURL('image/png')
   } catch (error) {
-    console.error('视口边界框方法失败:', error)
+
     return null
   }
 }
@@ -364,7 +345,7 @@ const captureFlowWithViewport = async (vueFlowContainer: HTMLElement): Promise<s
  */
 export const captureDetailed = async (vueFlowRef: any): Promise<string | null> => {
   if (!vueFlowRef) {
-    console.error('未找到VueFlow容器')
+
     return null
   }
   
@@ -386,11 +367,11 @@ export const captureDetailed = async (vueFlowRef: any): Promise<string | null> =
     }
     
     if (!vueFlowContainer) {
-      console.error('未找到VueFlow容器元素')
+
       return null
     }
 
-    console.log('开始后台截图完整流程图...')
+
     
     let imageData: string | null = null
     
@@ -399,7 +380,7 @@ export const captureDetailed = async (vueFlowRef: any): Promise<string | null> =
     
     // 如果视口边界框方法失败，尝试克隆方法
     if (!imageData) {
-      console.log('视口边界框方法失败，尝试克隆方法...')
+
       
       // 创建流程图克隆
       const flowClone = createFlowClone(vueFlowContainer)
@@ -429,9 +410,9 @@ export const captureDetailed = async (vueFlowRef: any): Promise<string | null> =
         })
         
         imageData = canvas.toDataURL('image/png')
-        console.log('克隆方法截图成功')
+
       } catch (error) {
-        console.error('克隆方法也失败:', error)
+
       } finally {
         // 清理容器
         if (document.body.contains(centeredContainer)) {
@@ -448,7 +429,7 @@ export const captureDetailed = async (vueFlowRef: any): Promise<string | null> =
     return null
     
   } catch (error) {
-    console.error('完整流程图截图失败:', error)
+
     return null
   }
 }
@@ -464,9 +445,9 @@ export const saveDetailedScreenshot = (imageData: string, projectId: string): vo
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-    console.log('简洁流程图截图已保存')
+
   } catch (error) {
-    console.error('保存简洁截图失败:', error)
+
   }
 }
 
@@ -475,13 +456,13 @@ export const saveDetailedScreenshot = (imageData: string, projectId: string): vo
  */
 export const autoCaptureDetailed = async (vueFlowRef: any): Promise<string | null> => {
   try {
-    console.log('开始自动截图...')
+
     const base64String = await captureDetailed(vueFlowRef)
     if (base64String) {
-      console.log('自动截图完成，Base64 字符串长度:', base64String.length)
+
       return base64String
     } else {
-      console.error('截图失败，返回的 Base64 为 null')
+
       return null
     }
   } catch (error) {

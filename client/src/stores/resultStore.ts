@@ -4,9 +4,14 @@ import { useModalStore } from "./modalStore"
 import AuthenticatedServiceFactory from "@/utils/AuthenticatedServiceFactory"
 import { DataView } from "@/utils/api"
 import Result from "@/components/Result/Result.vue"
+import { useVueFlow } from "@vue-flow/core"
+import { useGraphStore } from "./graphStore"
+
 export const useResultStore = defineStore('result',()=>{
 
     const modalStore = useModalStore();
+    const graphStore = useGraphStore();
+    const {nodes} = useVueFlow('main')
     const authService = AuthenticatedServiceFactory.getService();
 
     const default_content: string = 'no-result'
@@ -29,15 +34,19 @@ export const useResultStore = defineStore('result',()=>{
     const yPosition = ref<number>(marginTop);
 
     interface ResultCacheItem{
+        nodeID: string,
         content: DataView,
         hitCount: number,
-        lastHitTime: number
+        lastHitTime: number,
+        createTime: number
     }
 
     const default_id: number = 12315
 
     const resultCache = ref(new Map<Number,ResultCacheItem>());
     const cacheMaxSize: number = 30;//结果数量最大值30
+    const basicDuration: number = 10*60*1000//10 minutes
+    const toBeDeleted = ref<number[]>([])
 
     const cacheStatus = computed(()=>{
         let hitSum = 0;
@@ -59,6 +68,39 @@ export const useResultStore = defineStore('result',()=>{
         resultCache.value.clear();
     }
 
+    function getCacheItemsToBeDeleted() {
+        const currentNodeIds = new Set(nodes.value.map(node => node.id));
+        console.log('@@@@@@',currentNodeIds)
+        toBeDeleted.value = []
+
+        //delete nodes that has been deleted but remain in the cache
+        resultCache.value.forEach((cacheItem, cacheId) => {
+            if (!currentNodeIds.has(cacheItem.nodeID)) {
+                toBeDeleted.value.push(Number(cacheId));
+            }
+        });
+
+        //delete nodes that live longer than limitation
+        resultCache.value.forEach((cacheItem,cacheId)=>{
+            if(cacheItem.hitCount*basicDuration <= Date.now()-cacheItem.createTime){
+                toBeDeleted.value.push(Number(cacheId))
+            }
+        })
+        
+        return toBeDeleted.value.length; // 返回删除的数量
+    }
+
+    function cacheGarbageRecycle(){
+        // 删除所有标记的缓存项
+        const deleteNumber = getCacheItemsToBeDeleted()
+        console.log(resultCache)
+        console.log('Deleted CacheItems:',deleteNumber)
+        toBeDeleted.value.forEach(cacheId => {
+            resultCache.value.delete(cacheId);
+        });
+        refresh();//确保若删除了当前选中的节点，将会显示默认信息
+    }
+
     function hitResultCacheContent(id: number){
         return resultCache.value.has(id);
     }
@@ -73,9 +115,11 @@ export const useResultStore = defineStore('result',()=>{
             }
             else{
                 const newCacheItem: ResultCacheItem = {
+                    nodeID: graphStore.currentNode?.id as string,
                     content: content,
                     hitCount: 1,
-                    lastHitTime: Date.now()
+                    lastHitTime: Date.now(),
+                    createTime: Date.now()
                 }
                 resultCache.value.set(id,newCacheItem);
             }
@@ -165,6 +209,7 @@ export const useResultStore = defineStore('result',()=>{
         refresh,
         cacheStatus,
         refreshResultCache,
+        cacheGarbageRecycle,
         hitResultCacheContent,
         addResultCacheContent,
         updateResultCacheContent,

@@ -105,6 +105,8 @@
         else {
             modalStore.activateModal('result');
         }
+
+        resultStore.cacheGarbageRecycle()
     }
 
     function animateButton(e: MouseEvent){

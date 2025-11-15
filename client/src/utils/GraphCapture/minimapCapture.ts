@@ -166,7 +166,7 @@ const createWhiteBackgroundMiniMap = (originalMiniMap: HTMLElement): HTMLElement
           svgElement.style.transformOrigin = '0 0'
         }
       } catch (error) {
-        console.warn('节点居中计算失败:', error)
+
       }
     }, 100)
   }
@@ -180,7 +180,7 @@ const createWhiteBackgroundMiniMap = (originalMiniMap: HTMLElement): HTMLElement
  */
 const captureMiniMapDirect = async (miniMapElement: HTMLElement): Promise<string | null> => {
   try {
-    console.log('尝试直接截图方法...')
+
 
     // 创建临时容器用于居中显示
     const tempContainer = document.createElement('div')
@@ -267,10 +267,10 @@ const captureMiniMapDirect = async (miniMapElement: HTMLElement): Promise<string
     })
 
     document.body.removeChild(tempContainer)
-    console.log('直接截图方法成功')
+
     return canvas.toDataURL('image/png')
   } catch (error) {
-    console.error('直接截图方法失败:', error)
+
     return null
   }
 }
@@ -280,7 +280,7 @@ const captureMiniMapDirect = async (miniMapElement: HTMLElement): Promise<string
  */
 export const captureMiniMap = async (vueFlowRef: any): Promise<string | null> => {
   if (!vueFlowRef) {
-    console.error('未找到VueFlow容器')
+
     return null
   }
 
@@ -288,11 +288,11 @@ export const captureMiniMap = async (vueFlowRef: any): Promise<string | null> =>
     // 获取小地图元素
     const miniMapElement = vueFlowRef.querySelector('.vue-flow__minimap') as HTMLElement
     if (!miniMapElement) {
-      console.error('未找到小地图元素')
+
       return null
     }
 
-    console.log('开始截图小地图...')
+
 
     let imageData: string | null = null
 
@@ -301,7 +301,7 @@ export const captureMiniMap = async (vueFlowRef: any): Promise<string | null> =>
 
     // 如果直接截图失败，尝试克隆方法
     if (!imageData) {
-      console.log('直接截图失败，尝试克隆方法...')
+
       const hiddenContainer = createWhiteBackgroundMiniMap(miniMapElement)
       document.body.appendChild(hiddenContainer)
 
@@ -320,9 +320,9 @@ export const captureMiniMap = async (vueFlowRef: any): Promise<string | null> =>
         })
 
         imageData = canvas.toDataURL('image/png')
-        console.log('克隆方法截图成功')
+
       } catch (error) {
-        console.error('克隆方法也失败:', error)
+
       } finally {
         // 清理
         if (document.body.contains(hiddenContainer)) {
@@ -337,7 +337,7 @@ export const captureMiniMap = async (vueFlowRef: any): Promise<string | null> =>
     return null
 
   } catch (error) {
-    console.error('小地图截图失败:', error)
+
     return null
   }
 }
@@ -353,9 +353,9 @@ export const saveMinimapScreenshot = (imageData: string, projectId: string): voi
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-    console.log('流程图截图已保存')
+
   } catch (error) {
-    console.error('保存截图失败:', error)
+
   }
 }
 
@@ -364,13 +364,13 @@ export const saveMinimapScreenshot = (imageData: string, projectId: string): voi
  */
 export const autoCaptureMinimap = async (vueFlowRef: any): Promise<string | null> => {
   try {
-    console.log('开始自动截图...')
+
     const base64String = await captureMiniMap(vueFlowRef)
     if (base64String) {
-      console.log('自动截图完成，Base64 字符串长度:', base64String.length)
+
       return base64String
     } else {
-      console.error('截图失败，返回的 Base64 为 null')
+
       return null
     }
   } catch (error) {
