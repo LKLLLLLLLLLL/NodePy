@@ -11,7 +11,6 @@ import { useResultStore } from '@/stores/resultStore'
 const mutex = new Mutex()
 const {vueFlowRef} = useVueFlow('main')
 const authService = AuthenticatedServiceFactory.getService()
-const resultStore = useResultStore()
 
 
 const syncProject = (p: Project, graphStore: any) => {
@@ -116,6 +115,7 @@ const syncProjectUiState = (p: Project, graphStore: any) => {
 export const sync = async(graphStore: any) => {
 
     try {
+        const resultStore = useResultStore()
         resultStore.cacheGarbageRecycle()
         const p = getProject(graphStore.project)
         const res = await syncProject(p, graphStore)
