@@ -263,7 +263,7 @@ async def update_project_setting(
                     (ProjectRecord.id != project_id) & 
                     (ProjectRecord.owner_id == user_id))
             )
-            if existing_project is not None:
+            if existing_project.first() is not None:
                 raise HTTPException(status_code=400, detail="Project name already exists")
             # update settings
             project_record.name = setting.project_name # type: ignore

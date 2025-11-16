@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from server.lib.ApiLoggerMiddleware import ApiLoggerMiddleware
+# from server.lib.ApiLoggerMiddleware import ApiLoggerMiddleware
 from server.models.database import init_database
 
 from .api import router
@@ -31,8 +31,8 @@ app.add_middleware(
 
 
 # add debug middleware
-if DEBUG:
-    app.add_middleware(ApiLoggerMiddleware)
+# if DEBUG:
+#     app.add_middleware(ApiLoggerMiddleware)
 
 # init database
 init_database()

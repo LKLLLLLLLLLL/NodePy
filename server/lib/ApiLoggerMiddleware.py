@@ -6,6 +6,7 @@ from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
+LOG_HEADERS = False
 
 def skip_thumb(input: str) -> str:
     # Skip the "thumb" field in the input string
@@ -36,7 +37,7 @@ class ApiLoggerMiddleware(BaseHTTPMiddleware):
         logger.debug(
             "\n"
             f"REQUEST: {request.method} {request.url} \n"
-            f"Headers: {json.dumps(headers, indent=2)} \n"
+            f"Headers: {json.dumps(headers, indent=2)} \n" if LOG_HEADERS else ""
             f"Body: {json.dumps(body_content, indent=2) if isinstance(body_content, dict) else body_content}\n\n"
         )
 
@@ -74,7 +75,7 @@ class ApiLoggerMiddleware(BaseHTTPMiddleware):
         logger.debug(
             "\n"
             f"RESPONSE: {response.status_code} for {request.method} {request.url}\n"
-            f"Headers: {json.dumps(headers, indent=2)} \n"
+            f"Headers: {json.dumps(headers, indent=2)} \n" if LOG_HEADERS else ""
             f"Body: {json.dumps(response_body_content, indent=2) if isinstance(response_body_content, dict) else response_body_content}\n\n"
         )
 

@@ -130,8 +130,6 @@ class FileManager:
                    user_id: int
     ) -> File:
         """ Write content to a file for a user, return the file path """
-        logger.debug("@@@@@@@@@@@@@@@@@@@@@")
-        logger.debug(f"Writing file sync: filename={filename}, format={format}, node_id={node_id}, project_id={project_id}, user_id={user_id}")
         if self.db_client is None:
             raise AssertionError("Synchronous DB client is not initialized")
         if isinstance(content, io.BytesIO):
