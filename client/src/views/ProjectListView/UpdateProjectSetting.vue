@@ -29,14 +29,14 @@
 <template>
     <el-form class="update-project-container" :label-position="labelPosition">
         <el-form-item>
-            原项目名称：{{ projectStore.currentProjectName }}
+            原项目名称：{{ projectStore.toBeUpdated.project_name }}
             原项目ID: {{ projectStore.currentProjectId }}
         </el-form-item>
         <el-form-item label="ProjectName">
-            <el-input placeholder="Enter new project name" v-model="projectStore.toBeUpdated.project_name"></el-input>
+            <el-input placeholder="Enter new project name" v-model="projectStore.currentProjectName"></el-input>
         </el-form-item>
         <el-form-item label="Accessible To the Public">
-            <el-switch v-model="projectStore.toBeUpdated.show_to_explore"></el-switch>
+            <el-switch v-model="projectStore.currentWhetherShow"></el-switch>
         </el-form-item>
         <el-form-item>
             <el-button type="primary" @click="onConfirmUpdateProject">Confirm</el-button>
