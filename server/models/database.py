@@ -71,7 +71,7 @@ class ProjectRecord(Base):
     __tablename__ = "projects"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String, unique=False, index=True, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     workflow = Column(JSON, nullable=False)  # Serialized workflow structure
     ui_state = Column(JSON, nullable=False)  # Serialized UI state
@@ -79,6 +79,10 @@ class ProjectRecord(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
     show_in_explore = Column(Boolean, default=False, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('owner_id', 'name', name='_owner_name_uc'),
+    )
 
 class NodeOutputRecord(Base):
     """

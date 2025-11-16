@@ -126,9 +126,10 @@ async def create_project(
             raise HTTPException(status_code=404, detail="User not found")
         # 2. check if project name already exists
         existing_project = await db_client.execute(
-            select(ProjectRecord).where(ProjectRecord.name == project_name)
+            select(ProjectRecord).where(
+                (ProjectRecord.name == project_name) & 
+                (ProjectRecord.owner_id == user_id))
         )
-        logger.log("DEBUG", f"Existing project query result: {existing_project.all}")
         if existing_project.first() is not None:
             raise HTTPException(status_code=400, detail="Project name already exists")
         # 3. create new project
@@ -256,7 +257,12 @@ async def update_project_setting(
             if project_record.owner_id != user_id: # type: ignore
                 raise HTTPException(status_code=403, detail="User has no access to this project")
             # check if new name already exists
-            existing_project = await db_client.get(ProjectRecord, project_id)
+            existing_project = await db_client.execute(
+                select(ProjectRecord).where(
+                    (ProjectRecord.name == setting.project_name) & 
+                    (ProjectRecord.id != project_id) & 
+                    (ProjectRecord.owner_id == user_id))
+            )
             if existing_project is not None:
                 raise HTTPException(status_code=400, detail="Project name already exists")
             # update settings

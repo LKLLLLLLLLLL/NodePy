@@ -9,12 +9,24 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d nodepy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   redis:
     image: redis:alpine
     container_name: nodepy-redis
     volumes:
       - redis_data_prod:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
     restart: unless-stopped
   
   minio:
@@ -29,6 +41,35 @@ services:
       MINIO_ROOT_PASSWORD: minio123
       MINIO_CONSOLE_ADDRESS: ":9001"
     command: server /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  celery-worker:
+    build:
+      context: ..
+      dockerfile: infra/docker/server.Dockerfile
+      target: production
+    container_name: nodepy-celery-worker
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
+      - REDIS_URL=redis://redis:6379
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+      - DEBUG=false
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    command: ["uv", "run", "celery", "-A", "server.celery", "worker", "--beat", "--loglevel=info"]
+    restart: unless-stopped
 
   server:
     build:
@@ -47,29 +88,15 @@ services:
       - SECRET_KEY=a-long-random-secret-key
       - DEBUG=false
     depends_on:
-      - postgres
-      - redis
-      - celery-worker
-      - minio
-
-  celery-worker:
-    build:
-      context: ..
-      dockerfile: infra/docker/server.Dockerfile
-      target: production
-    container_name: nodepy-celery-worker
-    environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
-      - REDIS_URL=redis://redis:6379
-      - MINIO_ENDPOINT=minio:9000
-      - MINIO_ROOT_USER=minio
-      - MINIO_ROOT_PASSWORD=minio123
-      - DEBUG=false
-    depends_on:
-      - postgres
-      - redis
-      - minio
-    command: ["uv", "run", "celery", "-A", "server.celery", "worker", "--beat", "--loglevel=info"]
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      celery-worker:
+        condition: service_started
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:
