@@ -17,7 +17,7 @@
                 <div class="output-port-description">
                     字符串输出端口
                 </div>
-                <Handle id="string" type="source" :position="Position.Right" class="str-handle-color"/>
+                <Handle id="string" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': stringHasErr}]"/>
             </div>
         </div>
         <div class="node-err nodrag" @click.stop>
@@ -29,16 +29,19 @@
 </template>
 
 <script lang="ts" setup>
-    import {ref, watch} from 'vue'
+    import {computed, ref, watch} from 'vue'
+    import type { Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import type {StringNodeData} from '../../types/nodeTypes'
     import NodepyStringInput from './tools/Nodepy-StringInput.vue'
-    import { handleExecError, handleParamError } from './handleError'
+    import { handleExecError, handleParamError, handleOutputError } from './handleError'
 
 
     const props = defineProps<NodeProps<StringNodeData>>()
     const value = ref(props.data.param.value)
+    const schema_type = computed(():Type|'default' => props.data.schema_out?.['string']?.type || 'default')
+    const stringHasErr = computed(() => handleOutputError(props.id, 'string'))
     const errMsg = ref<string[]>([])
     const valueHasErr = ref({
         id: 'value',

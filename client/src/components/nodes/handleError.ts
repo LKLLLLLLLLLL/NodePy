@@ -46,3 +46,11 @@ export const handleExecError = (err: ProjNodeError | null | undefined, errMsg: R
         errMsg.value = [err.message as string]
     }   //  reset outside
 }
+
+export const handleOutputError = (nodeId: string, handleId: string) => {
+    const errEdge = getEdges.value.find(e => e.source === nodeId && e.sourceHandle === handleId)
+    if(errEdge && errEdge.data === 'error') {
+        return true
+    }
+    return false
+}

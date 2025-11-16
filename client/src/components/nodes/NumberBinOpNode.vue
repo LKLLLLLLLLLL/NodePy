@@ -30,7 +30,7 @@
                 <div class="output-port-description">
                     结果输出端口
                 </div>
-                <Handle id="result" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
+                <Handle id="result" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': resultHasErr}]"/>
             </div>
         </div>
         <div class="node-err nodrag" @click.stop>
@@ -49,7 +49,7 @@
     import NodepySelectMany from './tools/Nodepy-selectMany.vue'
     import { getInputType } from './getInputType'
     import type { Type } from '@/utils/api'
-    import { handleValidationError, handleExecError, handleParamError } from './handleError'
+    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
 
 
     const props = defineProps<NodeProps<NumberBinOpNodeData>>()
@@ -58,6 +58,7 @@
     const x_type = computed(() => getInputType(props.id, 'x'))
     const y_type = computed(() => getInputType(props.id, 'y'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['result']?.type || 'default')
+    const resultHasErr = computed(() => handleOutputError(props.id, 'result'))
     const errMsg = ref<string[]>([])
     const opHasErr = ref({
         id: 'op',

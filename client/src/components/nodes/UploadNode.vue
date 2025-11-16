@@ -8,7 +8,7 @@
             </div>
             <div class="output-file port">
                 <div class="output-port-description">文件输出端口</div>
-                <Handle id="file" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
+                <Handle id="file" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': fileOutputHasErr}]"/>
             </div>
         </div>
         <div class="node-err nodrag" @click.stop>
@@ -27,7 +27,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import type { Type } from '@/utils/api'
-    import { handleParamError, handleExecError } from './handleError'
+    import { handleParamError, handleExecError, handleOutputError } from './handleError'
     import type { UploadNodeData } from '@/types/nodeTypes'
     import { useGraphStore } from '@/stores/graphStore'
     import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory'
@@ -36,6 +36,7 @@
     const mdiAddFile: string = mdiFilePlus
     const props = defineProps<NodeProps<UploadNodeData>>()
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['file']?.type || 'default')
+    const fileOutputHasErr = computed(() => handleOutputError(props.id, 'file'))
     const errMsg = ref<string[]>([])
     const fileHasErr = ref({
         id: 'file',

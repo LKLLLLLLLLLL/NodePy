@@ -99,10 +99,10 @@ onConnect((connection) => {
   addEdges(addedEdge)
 })
 
-  watch(()=>graphStore.currentNode?.data.data_out?.result?.data_id,async ()=>{
-    graphStore.url_id = graphStore.currentNode?.data.data_out?.result?.data_id!
-    resultStore.currentResult = await resultStore.getResultCacheContent(graphStore.url_id)
-  })
+watch(()=>graphStore.currentNode?.data.data_out?.result?.data_id,async ()=>{
+  graphStore.url_id = graphStore.currentNode?.data.data_out?.result?.data_id!
+  resultStore.currentResult = await resultStore.getResultCacheContent(graphStore.url_id)
+})
 
   // 双击检测变量
 const lastClickTime = ref<number>(0)
@@ -127,27 +127,27 @@ onNodeClick((event) => {
   }
 })
 
-  async function handleNodeDoubleClick(event){
-    // 获取节点完整信息
-    resultStore.cacheGarbageRecycle()
-    console.log('double click success')
-    graphStore.currentNode = findNode(event.node.id)
-    if(!graphStore.currentNode?.data?.data_out?.result){
-      resultStore.currentInfo = graphStore.currentNode?.data.param
-    }
-    else if(graphStore.currentNode) {
-      graphStore.url_id = graphStore.currentNode?.data?.data_out?.result?.data_id!//waiting multi-result nodes
-      resultStore.currentResult = await resultStore.getResultCacheContent(graphStore.url_id)
-    }
-    if(modalStore.findModal('result')==undefined){
-      resultStore.createResultModal()
-      modalStore.activateModal('result')
-    }
-    else{
-      modalStore.activateModal('result')
-    }
-
+async function handleNodeDoubleClick(event) {
+  // 获取节点完整信息
+  resultStore.cacheGarbageRecycle()
+  console.log('double click success')
+  graphStore.currentNode = findNode(event.node.id)
+  if(!graphStore.currentNode?.data?.data_out?.result){
+    resultStore.currentInfo = graphStore.currentNode?.data.param
   }
+  else if(graphStore.currentNode) {
+    graphStore.url_id = graphStore.currentNode?.data?.data_out?.result?.data_id!//waiting multi-result nodes
+    resultStore.currentResult = await resultStore.getResultCacheContent(graphStore.url_id)
+  }
+  if(modalStore.findModal('result')==undefined){
+    resultStore.createResultModal()
+    modalStore.activateModal('result')
+  }
+  else{
+    modalStore.activateModal('result')
+  }
+
+}
 
 
 const nodeColor = (node: BaseNode) => {

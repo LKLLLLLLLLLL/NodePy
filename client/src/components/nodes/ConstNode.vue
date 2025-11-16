@@ -36,7 +36,7 @@
                 <div class="output-port-description">
                     常量输出端口
                 </div>
-                <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
+                <Handle id="const" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': constHasErr}]"/>
             </div>
         </div>
         <div class="node-err nodrag" @click.stop>
@@ -55,12 +55,13 @@
     import type { Type } from '@/utils/api'
     import NodepyNumberInput from './tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
     import NodepySelectFew from './tools/Nodepy-selectFew.vue'
-    import { handleParamError, handleExecError } from './handleError'
+    import { handleParamError, handleExecError, handleOutputError } from './handleError'
 
 
     const props = defineProps<NodeProps<ConstNodeData>>()
     const value = ref(props.data.param.value)
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
+    const constHasErr = computed(() => handleOutputError(props.id, 'const'))
     const data_type_options = ['int', 'float']
     const defaultSelected = [data_type_options.indexOf(props.data.param.data_type)]
     const data_type = ref(props.data.param.data_type)

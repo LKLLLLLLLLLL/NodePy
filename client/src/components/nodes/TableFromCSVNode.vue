@@ -23,7 +23,7 @@
                     id="table"
                     type="source"
                     :position="Position.Right"
-                    :class="`${schema_type}-handle-color`"
+                    :class="[`${schema_type}-handle-color`, {'node-errhandle': tableHasErr}]"
                 />
             </div>
         </div>
@@ -42,12 +42,13 @@ import { Handle, Position } from '@vue-flow/core'
 import { computed, ref, watch } from 'vue'
 import type { BaseData } from '../../types/nodeTypes'
 import { getInputType } from './getInputType'
-import { handleExecError, handleValidationError } from './handleError'
+import { handleExecError, handleValidationError, handleOutputError } from './handleError'
 
 
     const props = defineProps<NodeProps<BaseData>>()
     const csv_file_type = computed(() => getInputType(props.id, 'csv_file'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['table']?.type || 'default')
+    const tableHasErr = computed(() => handleOutputError(props.id, 'table'))
     const errMsg = ref<string[]>([])
     const csv_fileHaserr = ref({
         handleId: 'csv_file',

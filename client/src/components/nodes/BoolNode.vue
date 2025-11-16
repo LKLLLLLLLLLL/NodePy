@@ -16,7 +16,7 @@
                 <div class="output-port-description">
                     布尔输出端口
                 </div>
-                <Handle id="const" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
+                <Handle id="const" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': constHasErr}]"/>
             </div>
         </div>
         <div class="node-err nodrag" @click.stop>
@@ -34,12 +34,13 @@
     import type {BoolNodeData} from '../../types/nodeTypes'
     import type { Type } from '@/utils/api'
     import NodepyBoolValue from './tools/Nodepy-boolValue.vue'
-    import { handleExecError } from './handleError'
+    import { handleExecError, handleOutputError } from './handleError'
 
 
      const props = defineProps<NodeProps<BoolNodeData>>()
      const value = ref(props.data.param.value)
      const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
+     const constHasErr = computed(() => handleOutputError(props.id, 'const'))
      const errMsg = ref<string[]>([])
 
 

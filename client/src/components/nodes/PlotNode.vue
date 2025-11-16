@@ -31,7 +31,7 @@
             </div>
             <div class="output-plot port">
                 <div class="output-port-description">图形输出端口</div>
-                <Handle id="plot" type="source" :position="Position.Right" :class="`${schema_type}-handle-color`"/>
+                <Handle id="plot" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': plotHasErr}]"/>
             </div>
         </div>
         <div class="node-err nodrag" @click.stop>
@@ -49,7 +49,7 @@
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
     import { getInputType } from './getInputType'
-    import { handleExecError, handleParamError, handleValidationError } from './handleError'
+    import { handleExecError, handleParamError, handleValidationError, handleOutputError } from './handleError'
     import NodepyStringInput from './tools/Nodepy-StringInput.vue'
     import NodepySelectFew from './tools/Nodepy-selectFew.vue'
 
@@ -62,6 +62,7 @@
     const defaultSelected = [plot_type_options.indexOf(props.data.param.plot_type)]
     const table_type = computed(() => getInputType(props.id, 'input'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['plot']?.type || 'default')
+    const plotHasErr = computed(() => handleOutputError(props.id, 'plot'))
     const errMsg = ref<string[]>([])
     const tableHasErr = ref({
         handleId: 'input',
