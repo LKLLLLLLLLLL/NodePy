@@ -117,7 +117,6 @@ export const useProjectStore = defineStore('project', () => {
                 });
             }
             currentProjectId.value = response;
-            initializeProjects();
             return true;
         }
         catch(error){
@@ -169,7 +168,6 @@ export const useProjectStore = defineStore('project', () => {
                     type: 'success'
                 });
             }
-            initializeProjects();
             return true;
         }
         catch(error){
@@ -326,7 +324,6 @@ export const useProjectStore = defineStore('project', () => {
                 message: '项目' + id + '更新成功',
                 type: 'success'
             });
-            initializeProjects();
             return response;
         }
         catch(error){

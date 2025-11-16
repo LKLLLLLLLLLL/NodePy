@@ -9,7 +9,6 @@
 
     async function onCreateProject(){
         projectStore.createProject();
-        await projectStore.initializeProjects();
         modalStore.deactivateModal('create-project');
         modalStore.destroyModal('create-project');
     }

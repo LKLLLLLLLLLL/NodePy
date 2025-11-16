@@ -10,13 +10,11 @@
 
     async function onConfirmUpdateProject(){
         await projectStore.updateProjectSetting(projectStore.currentProjectId)
-        await projectStore.initializeProjects();
         modalStore.deactivateModal('update-modal');
         modalStore.destroyModal('update-modal');
     }
 
     async function onCancleUpdateProject(){
-        await projectStore.initializeProjects();
         modalStore.deactivateModal('update-modal');
         modalStore.destroyModal('update-modal');
     }

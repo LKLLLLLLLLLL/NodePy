@@ -7,13 +7,11 @@
 
     async function onEnsureDelete(){
         await projectStore.deleteProject(projectStore.toBeDeleted.id);
-        await projectStore.initializeProjects();
         modalStore.deactivateModal('delete-modal');
         modalStore.destroyModal('delete-modal');
     }
 
     async function onCancleDelete(){
-        await projectStore.initializeProjects();
         modalStore.deactivateModal('delete-modal');
         modalStore.destroyModal('delete-modal');
     }
