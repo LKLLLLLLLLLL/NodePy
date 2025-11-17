@@ -7,8 +7,6 @@ import re
 import typing
 from typing import Literal, override
 
-import RestrictedPython
-
 from server.lib.utils import timeout
 from server.models.data import Data
 from server.models.exception import (
@@ -75,6 +73,8 @@ class CostumScriptNode(BaseNode):
 
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
+        import RestrictedPython
+        
         kwargs = {name: data.payload for name, data in input.items()}
         # Execute the user-defined script
         try:

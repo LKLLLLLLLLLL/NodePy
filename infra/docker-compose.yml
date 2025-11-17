@@ -58,7 +58,7 @@ services:
   celery-worker:
     build:
       context: ..
-      dockerfile: infra/docker/server.Dockerfile
+      dockerfile: infra/docker/worker.Dockerfile
     container_name: nodepy-celery-worker
     volumes:
       # mount server source code for hot-reload in development
@@ -77,7 +77,6 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-    command: ["uv", "run", "celery", "-A", "server.celery", "worker", "--beat", "--loglevel=info"]
 
   server:
     build:

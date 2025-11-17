@@ -51,7 +51,7 @@ services:
   celery-worker:
     build:
       context: ..
-      dockerfile: infra/docker/server.Dockerfile
+      dockerfile: infra/docker/wroker.Dockerfile
       target: production
     container_name: nodepy-celery-worker
     environment:
@@ -68,7 +68,6 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-    command: ["uv", "run", "celery", "-A", "server.celery", "worker", "--beat", "--loglevel=info"]
     restart: unless-stopped
 
   server:

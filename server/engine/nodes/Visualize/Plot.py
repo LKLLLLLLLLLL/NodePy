@@ -1,7 +1,5 @@
 from typing import Literal, override
 
-import matplotlib.pyplot as plt
-
 from server.models.data import Data, Table
 from server.models.exception import NodeParameterError
 from server.models.schema import ColType, FileSchema, Pattern, Schema
@@ -77,6 +75,8 @@ class PlotNode(BaseNode):
 
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
+        import matplotlib.pyplot as plt
+        
         input_table = input["input"].payload
         assert isinstance(input_table, Table)
 
@@ -85,6 +85,9 @@ class PlotNode(BaseNode):
 
         file_manager = self.global_config.file_manager
         
+        plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Roboto']
+        plt.rcParams['axes.unicode_minus'] = False
+
         plt.figure(figsize=(8, 6))
         if self.plot_type == "scatter":
             plt.scatter(x_data, y_data)

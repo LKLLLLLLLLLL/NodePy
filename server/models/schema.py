@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional
 
-import pandas
-from pandas.api import types as ptypes
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
 
@@ -44,6 +42,7 @@ class ColType(str, Enum):
         return super().__hash__()
 
     def to_ptype(self):
+        import pandas
         coltype_to_dtype = {
             ColType.INT: pandas.Int64Dtype,
             ColType.FLOAT: pandas.Float64Dtype,
@@ -55,6 +54,7 @@ class ColType(str, Enum):
 
     @classmethod
     def from_ptype(cls, dtype) -> "ColType":
+        import pandas.api.types as ptypes
         if ptypes.is_integer_dtype(dtype):
             return ColType.INT
         elif ptypes.is_float_dtype(dtype):

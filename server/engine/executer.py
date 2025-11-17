@@ -1,7 +1,6 @@
 import time
 from typing import Any, Callable, Literal
 
-import networkx as nx
 from pydantic import ValidationError
 
 from server.lib.CacheManager import CacheManager
@@ -29,6 +28,7 @@ class ProjectExecutor:
                  cache_manager: CacheManager,
                  user_id: int,
                 ) -> None:
+        import networkx as nx
         self._topology: WorkflowTopology = topology
         self._nodes: list[TopoNode] = topology.nodes
         self._edges: list[TopoEdge] = topology.edges
@@ -56,6 +56,8 @@ class ProjectExecutor:
         continue_execution = callback(node_id: str, status: Literal["success", "error"], exception: Exception | None) -> bool
         If continue_execution is False, the execution will stop.
         """
+        import networkx as nx
+        
         if self._stage != "init":
             raise AssertionError(f"Graph is already in stage '{self._stage}', cannot construct nodes again.")
         self._exec_queue = list(nx.topological_sort(self._graph))
@@ -109,6 +111,8 @@ class ProjectExecutor:
         
         continue_execution = callback(node_id: str, status: Literal["success", "error"], result: dict[str, Any] | Exception) -> bool
         """
+        import networkx as nx
+
         if self._stage != "constructed":
             raise AssertionError(f"Graph is in stage '{self._stage}', cannot perform static analysis.")
 
@@ -173,6 +177,8 @@ class ProjectExecutor:
         The callafter function will look like:
         continue_execution = callafter(node_id: str, status: Literal["success", "error"], result: dict[str, Any] | Exception, running_time(in ms): float | None) -> bool
         """
+        import networkx as nx
+
         if self._stage != "static_analyzed":
             raise AssertionError(f"Graph is in stage '{self._stage}', cannot run.")
         data_cache : dict[tuple[str, str], Data] = {} # cache for node output data: (node_id, port) -> Data

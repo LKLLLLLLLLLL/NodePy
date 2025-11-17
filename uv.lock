@@ -554,27 +554,17 @@ name = "nodepy"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "argon2-cffi" },
     { name = "asyncpg" },
     { name = "celery" },
-    { name = "email-validator" },
-    { name = "fastapi" },
     { name = "loguru" },
-    { name = "matplotlib" },
     { name = "minio" },
-    { name = "networkx" },
     { name = "numpy" },
     { name = "pandas" },
-    { name = "passlib", extra = ["argon2"] },
     { name = "psycopg2-binary" },
-    { name = "python-jose" },
-    { name = "python-multipart" },
+    { name = "pydantic" },
     { name = "redis" },
     { name = "requests" },
-    { name = "restrictedpython" },
     { name = "sqlalchemy" },
-    { name = "uvicorn" },
-    { name = "websockets" },
 ]
 
 [package.dev-dependencies]
@@ -584,31 +574,35 @@ dev = [
     { name = "stats-code" },
     { name = "taskipy" },
 ]
+server = [
+    { name = "argon2-cffi" },
+    { name = "email-validator" },
+    { name = "fastapi" },
+    { name = "passlib", extra = ["argon2"] },
+    { name = "python-jose" },
+    { name = "python-multipart" },
+    { name = "uvicorn" },
+    { name = "websockets" },
+]
+worker = [
+    { name = "matplotlib" },
+    { name = "networkx" },
+    { name = "restrictedpython" },
+]
 
 [package.metadata]
 requires-dist = [
-    { name = "argon2-cffi", specifier = ">=21.3.0" },
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "celery", specifier = ">=5.5.3" },
-    { name = "email-validator", specifier = ">=2.3.0" },
-    { name = "fastapi", specifier = ">=0.118.3" },
     { name = "loguru", specifier = ">=0.7.3" },
-    { name = "matplotlib", specifier = ">=3.10.7" },
     { name = "minio", specifier = ">=7.2.18" },
-    { name = "networkx", specifier = ">=3.5" },
     { name = "numpy", specifier = ">=2.3.3" },
     { name = "pandas", specifier = ">=2.3.3" },
-    { name = "passlib", specifier = ">=1.7.4" },
-    { name = "passlib", extras = ["argon2"], specifier = ">=1.7.4" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
-    { name = "python-jose", specifier = ">=3.5.0" },
-    { name = "python-multipart", specifier = ">=0.0.20" },
+    { name = "pydantic", specifier = ">=2.12.3" },
     { name = "redis", specifier = ">=6.4.0" },
     { name = "requests", specifier = ">=2.32.5" },
-    { name = "restrictedpython", specifier = ">=8.1" },
     { name = "sqlalchemy", specifier = ">=2.0.44" },
-    { name = "uvicorn", specifier = ">=0.37.0" },
-    { name = "websockets", specifier = ">=15.0.1" },
 ]
 
 [package.metadata.requires-dev]
@@ -617,6 +611,22 @@ dev = [
     { name = "pytest", specifier = ">=8.4.2" },
     { name = "stats-code", specifier = ">=0.1.5" },
     { name = "taskipy", specifier = ">=1.13.0" },
+]
+server = [
+    { name = "argon2-cffi", specifier = ">=21.3.0" },
+    { name = "email-validator", specifier = ">=2.3.0" },
+    { name = "fastapi", specifier = ">=0.118.3" },
+    { name = "passlib", specifier = ">=1.7.4" },
+    { name = "passlib", extras = ["argon2"], specifier = ">=1.7.4" },
+    { name = "python-jose", specifier = ">=3.5.0" },
+    { name = "python-multipart", specifier = ">=0.0.20" },
+    { name = "uvicorn", specifier = ">=0.37.0" },
+    { name = "websockets", specifier = ">=15.0.1" },
+]
+worker = [
+    { name = "matplotlib", specifier = ">=3.10.7" },
+    { name = "networkx", specifier = ">=3.5" },
+    { name = "restrictedpython", specifier = ">=8.1" },
 ]
 
 [[package]]

@@ -6,7 +6,6 @@ import os
 from typing import Literal, cast
 from uuid import uuid4
 
-import pandas
 from loguru import logger
 from minio import Minio, S3Error
 from sqlalchemy import select
@@ -97,6 +96,8 @@ class FileManager:
         return sum(size for size in total)  # type: ignore
 
     def _get_col_types(self, content: bytes) -> dict[str, ColType]:
+        import pandas
+        
         df = pandas.read_csv(io.StringIO(content.decode('utf-8')))
         col_types = {}
         for col in df.columns:

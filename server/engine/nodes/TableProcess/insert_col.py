@@ -1,8 +1,5 @@
 from typing import Dict, Literal, override
 
-import numpy as np
-import pandas
-
 from server.models.data import Data, Table
 from server.models.exception import (
     NodeExecutionError,
@@ -88,6 +85,8 @@ class InsertConstColNode(BaseNode):
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
+        import pandas
+        
         input_table_data = input["table"]
         input_table = input_table_data.payload
         assert isinstance(input_table, Table)
@@ -189,6 +188,8 @@ class InsertRangeColNode(BaseNode):
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
+        import pandas
+        
         input_table_data = input["table"]
         input_table = input_table_data.payload
         assert isinstance(input_table, Table)
@@ -327,7 +328,10 @@ class InsertRandomColNode(BaseNode):
         }
 
     @override
-    def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
+    def process(self, input: Dict[str, Data]) -> Dict[str, Data]:   
+        import numpy as np
+        import pandas
+        
         input_table_data = input["table"]
         input_table = input_table_data.payload
         assert isinstance(input_table, Table)
