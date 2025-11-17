@@ -42,7 +42,7 @@
     const props = withDefaults(defineProps<NumberFieldProps>(), {
         denominator: 1,
         width: '100%',
-        height: '100%'
+        height: 'auto'
     })
     const emit = defineEmits(['updateValue'])
     const model = defineModel<number>()

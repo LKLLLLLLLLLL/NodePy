@@ -25,7 +25,7 @@
         },
         itemHeight: {
             type: String,
-            default: '100%'
+            default: 'auto'
         },
         selectMaxNum: {
             type: Number,

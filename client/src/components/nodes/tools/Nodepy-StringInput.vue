@@ -29,7 +29,7 @@
         },
         height: {
             type: String,
-            default: '100%'
+            default: 'auto'
         },
         width: {
             type: String,

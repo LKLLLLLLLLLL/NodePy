@@ -22,7 +22,6 @@
                     :options="op"
                     :default-selected="defaultSelected"
                     @select-change="onSelectChange"
-                    width="100%"
                     class="nodrag"
                 />
             </div>

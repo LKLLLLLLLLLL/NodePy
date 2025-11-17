@@ -2,10 +2,9 @@
     <div 
         class="NodePySelectManyLayout" 
         ref="root" 
-        :style="{height: height, width: width}"
         @click.stop
     >
-        <div class="value" :class="{close: !open}" @click.stop="toggle">
+        <div class="value" :class="{close: !open}" @click.stop="toggle" :style="{height: itemHeight, width: itemWidth}">
             {{ selectedItem }}
             <span class="arrow" :class="{open}">
                 <svg width="10" height="12" viewBox="0 0 8 8">
@@ -14,11 +13,12 @@
             </span>
         </div>
 
-        <div v-if="open" class="options" :style="optionStyle" @click.stop>
+        <div v-if="open" class="options" @click.stop>
             <div 
                 v-for="(item, idx) in options"
                 class="item"
                 @click.stop="select(idx)"
+                :style="itemStyle"
             >
                 {{ item }}
             </div>
@@ -35,13 +35,13 @@
             type: Array,
             required: true
         },
-        width: {
+        itemWidth: {
             type: String,
             default: '100%'
         },
-        height: {
+        itemHeight: {
             type: String,
-            default: '100%'
+            default: 'auto'
         },
         defaultSelected: {
             type: Number,
@@ -50,7 +50,10 @@
     })
     const emit = defineEmits(['selectChange'])
     const root = ref<HTMLElement>()
-    const optionStyle = ref({})
+    const itemStyle = ref({
+        width: props.itemWidth,
+        height: props.itemHeight
+    })
     const selectedIdx = ref(props.defaultSelected)
     const open = ref(false)
     const selectedItem = computed(() => props.options[selectedIdx.value])
@@ -98,7 +101,7 @@
             }
         }
         .value.close {
-            border-radius: 6px 6px 6px 6px;
+            border-radius: 6px;
         }
         .value:hover {
             background: #ccc;
@@ -110,6 +113,7 @@
             right: 0;
             z-index: 10;
             background: #ddd;
+            border-radius: 0 0 6px 6px;
             .item {
                 padding: 2px 0 2px 10px;
                 background: #ddd;
