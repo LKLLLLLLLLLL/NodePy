@@ -40,7 +40,7 @@
             const dataType = startNode.value.data.schema_out?.[startHandle.value?.id as string]?.type || 'default'
             return dataTypeColor[dataType]
         }
-        return 'default'
+        return dataTypeColor['default']
     })
     const props = defineProps({
       sourceX: {

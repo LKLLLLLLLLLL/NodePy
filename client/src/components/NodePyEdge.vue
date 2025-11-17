@@ -15,9 +15,10 @@ const strokeColor = computed(() => {
         const dataType = sourceNode.value.data.schema_out?.[props.sourceHandleId as string]?.type || 'default'
         return dataTypeColor[dataType]
     }
-    return 'default'
+    return dataTypeColor['default']
 })
 const isErrorEdge = computed(() => props.data === 'error')
+const isSelected = computed(() => props.selected)
 
 </script>
 
@@ -31,7 +32,7 @@ const isErrorEdge = computed(() => props.data === 'error')
       :source-position="sourcePosition"
       :target-position="targetPosition"
       :curvature="0.1"
-      :style="{ stroke: isErrorEdge ? 'red' : strokeColor, strokeWidth: isErrorEdge ? 3 : 3, filter: isErrorEdge ? 'drop-shadow(0 0 3px red)' : 'none' }"
+      :style="{ stroke: isErrorEdge ? 'red' : strokeColor, strokeWidth: isErrorEdge ? 3 : 3, filter: isSelected ? (isErrorEdge ? `drop-shadow(0 0 3px red)` : `drop-shadow(0 0 3px ${strokeColor})`) : 'none' }"
   />
 </template>
 
