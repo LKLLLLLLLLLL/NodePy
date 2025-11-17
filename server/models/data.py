@@ -96,10 +96,10 @@ class Data(BaseModel):
             )
         elif isinstance(self.payload, str):
             return Schema(type=Schema.Type.STR)
-        elif isinstance(self.payload, int):
-            return Schema(type=Schema.Type.INT)
         elif isinstance(self.payload, bool):
             return Schema(type=Schema.Type.BOOL)
+        elif isinstance(self.payload, int):
+            return Schema(type=Schema.Type.INT)
         elif isinstance(self.payload, float):
             return Schema(type=Schema.Type.FLOAT)
         elif isinstance(self.payload, File):
