@@ -141,6 +141,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                 )
                 workflow.apply_patch(patch)
                 return  # stop execution if validation failed
+
             # 3. Construct nodes
             assert graph is not None
             has_exception = False
@@ -196,25 +197,31 @@ def execute_project_task(self, project_id: int, user_id: int):
                     workflow.apply_patch(patch)
                 return True # continue execution for other nodes
             graph.construct_nodes(callback=construct_reporter)
-            if has_exception:
-                # cleanup all data output (schemas have been cleaned in step 1)
-                patches = workflow.generate_del_data_patches()
-                for patch in patches:
-                    workflow.apply_patch(patch)
-                    queue.push_message_sync(
-                        Status.IN_PROGRESS,
-                        {"stage": "CONSTRUCTION",
-                            "status": "IN_PROGRESS",
-                            "patch": [patch.model_dump()]
-                        }
-                    )
-                queue.push_message_sync(
-                    Status.FAILURE, 
-                    {"stage": "CONSTRUCTION", "status": "FAILURE"}
-                )
-                return  # stop execution if construction failed
-            else:
-                queue.push_message_sync(
+            # if has_exception:
+            #     # cleanup all data output (schemas have been cleaned in step 1)
+            #     patches = workflow.generate_del_data_patches()
+            #     for patch in patches:
+            #         workflow.apply_patch(patch)
+            #         queue.push_message_sync(
+            #             Status.IN_PROGRESS,
+            #             {"stage": "CONSTRUCTION",
+            #                 "status": "IN_PROGRESS",
+            #                 "patch": [patch.model_dump()]
+            #             }
+            #         )
+            #     queue.push_message_sync(
+            #         Status.FAILURE, 
+            #         {"stage": "CONSTRUCTION", "status": "FAILURE"}
+            #     )
+            #     return  # stop execution if construction failed
+            # else:
+            #     queue.push_message_sync(
+            #         Status.IN_PROGRESS, 
+            #         {"stage": "CONSTRUCTION", "status": "SUCCESS"}
+            #     )
+            
+            # even if construction has errors, we still proceed to static analysis to report all errors at once
+            queue.push_message_sync(
                     Status.IN_PROGRESS, 
                     {"stage": "CONSTRUCTION", "status": "SUCCESS"}
                 )
@@ -237,7 +244,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                         Status.IN_PROGRESS,
                         {
                             "stage": "STATIC_ANALYSIS", 
-                            "status": "SUCCESS", 
+                            "status": "IN_PROGRESS", 
                             "patch": [patch.model_dump()]
                         }
                     )
@@ -284,25 +291,41 @@ def execute_project_task(self, project_id: int, user_id: int):
                     workflow.apply_patch(patch)
                 return True # continue execution for other nodes
             graph.static_analyse(callback=anl_reporter)
-            if has_exception:
-                # cleanup all data output (schemas have been cleaned in step 1)
-                patches = workflow.generate_del_data_patches()
-                for patch in patches:
-                    workflow.apply_patch(patch)
-                    queue.push_message_sync(
-                        Status.IN_PROGRESS,
-                        {"stage": "STATIC_ANALYSIS",
-                            "status": "IN_PROGRESS",
-                            "patch": [patch.model_dump()]
-                        }
-                    )
+            # if has_exception:
+            #     # cleanup all data output (schemas have been cleaned in step 1)
+            #     patches = workflow.generate_del_data_patches()
+            #     for patch in patches:
+            #         workflow.apply_patch(patch)
+            #         queue.push_message_sync(
+            #             Status.IN_PROGRESS,
+            #             {"stage": "STATIC_ANALYSIS",
+            #                 "status": "IN_PROGRESS",
+            #                 "patch": [patch.model_dump()]
+            #             }
+            #         )
+            #     queue.push_message_sync(
+            #         Status.FAILURE, 
+            #         {"stage": "STATIC_ANALYSIS", "status": "FAILURE"}
+            #     )
+            #     return  # stop execution if static analysis failed
+            # else:
+            #     queue.push_message_sync(Status.IN_PROGRESS, {"stage": "STATIC_ANALYSIS", "status": "SUCCESS"})
+            
+            # even if static analysis has errors, we still proceed to execution to report all errors at once
+            # cleanup unreached nodes' schema output
+            
+            unreached_node_indices = graph.get_unreached_nodes()
+            patches = workflow.generate_del_schema_data_patches(include=unreached_node_indices)
+            for patch in patches:
+                workflow.apply_patch(patch)
                 queue.push_message_sync(
-                    Status.FAILURE, 
-                    {"stage": "STATIC_ANALYSIS", "status": "FAILURE"}
+                    Status.IN_PROGRESS,
+                    {"stage": "STATIC_ANALYSIS",
+                        "status": "IN_PROGRESS",
+                        "patch": [patch.model_dump()]
+                    }
                 )
-                return  # stop execution if static analysis failed
-            else:
-                queue.push_message_sync(Status.IN_PROGRESS, {"stage": "STATIC_ANALYSIS", "status": "SUCCESS"})
+            queue.push_message_sync(Status.IN_PROGRESS, {"stage": "STATIC_ANALYSIS", "status": "SUCCESS"})
 
             # 5. Execute graph
             assert graph is not None
@@ -399,10 +422,30 @@ def execute_project_task(self, project_id: int, user_id: int):
                     workflow.apply_patch(patch)
                     return True
             graph.execute(callbefore=exec_before_reporter, callafter=exec_after_reporter)
-            if has_exception:
-                # cleanup unreached nodes' data output
-                unreached_node_ids = getattr(graph, "_last_unreached_node_ids", [])
-                patches = workflow.generate_del_data_patches(node_indexs=unreached_node_ids)
+            # if has_exception:
+            #     # cleanup unreached nodes' data output
+            #     unreached_node_indices = graph.get_unreached_nodes()
+            #     patches = workflow.generate_del_data_patches(node_indexs=unreached_node_indices)
+            #     for patch in patches:
+            #         workflow.apply_patch(patch)
+            #         queue.push_message_sync(
+            #             Status.IN_PROGRESS,
+            #             {"stage": "EXECUTION",
+            #                 "status": "IN_PROGRESS",
+            #                 "patch": [patch.model_dump()]
+            #             }
+            #         )
+            #     queue.push_message_sync(
+            #         Status.FAILURE, 
+            #         {"stage": "EXECUTION", "status": "FAILURE"}
+            #     )
+            #     return  # stop execution if execution failed
+            # else:
+            #     queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "SUCCESS"})
+            
+            unreached_node_indices = graph.get_unreached_nodes()
+            patches = workflow.generate_del_data_patches(include=unreached_node_indices)
+            if patches:
                 for patch in patches:
                     workflow.apply_patch(patch)
                     queue.push_message_sync(
@@ -412,11 +455,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                             "patch": [patch.model_dump()]
                         }
                     )
-                queue.push_message_sync(
-                    Status.FAILURE, 
-                    {"stage": "EXECUTION", "status": "FAILURE"}
-                )
-                return  # stop execution if execution failed
+                queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "FAILURE"})
             else:
                 queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "SUCCESS"})
 

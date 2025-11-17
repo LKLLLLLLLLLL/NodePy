@@ -136,10 +136,13 @@ class ProjWorkflow(BaseModel):
                 )
         return result
 
-    def generate_del_schema_data_patches(self) -> list["ProjWorkflowPatch"]:
+    def generate_del_schema_data_patches(self, include: list[int] = []) -> list["ProjWorkflowPatch"]:
+        """
+        If node_ids is provided, only delete data_out for those nodes.
+        """
         result = []
-        for node in self.nodes:
-            if node.schema_out:
+        for index, node in enumerate(self.nodes):
+            if node.schema_out and (index in include):
                 result.append(
                     ProjWorkflowPatch(
                         key=[
@@ -152,13 +155,13 @@ class ProjWorkflow(BaseModel):
                 )
         return result
 
-    def generate_del_data_patches(self, node_indexs: list[int] = []) -> list["ProjWorkflowPatch"]:
+    def generate_del_data_patches(self, include: list[int] = []) -> list["ProjWorkflowPatch"]:
         """
         If node_ids is provided, only delete data_out for those nodes.
         """
         result = []
         for index, node in enumerate(self.nodes):
-            if node.data_out and (index not in node_indexs):
+            if node.data_out and (index in include):
                 result.append(
                     ProjWorkflowPatch(
                         key=[

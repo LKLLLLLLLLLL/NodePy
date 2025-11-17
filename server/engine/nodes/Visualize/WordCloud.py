@@ -83,13 +83,8 @@ class WordcloudNode(BaseNode):
         
         file_manager = self.global_config.file_manager
 
-        plt.rcParams['font.sans-serif'] = [
-            'Noto Sans CJK SC',
-            'Noto Sans CJK TC',
-            'Roboto',
-            'DejaVu Sans'
-        ]
-        plt.rcParams['axes.unicode_minus'] = False
+        plt.rcParams["font.sans-serif"] = ["Noto Sans CJK JP", "Roboto"]
+        plt.rcParams["axes.unicode_minus"] = False
 
         # generate word cloud
         word_freq = dict(zip(
