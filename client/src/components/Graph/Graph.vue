@@ -299,10 +299,15 @@ const isValidConnection = (connection: any) => {
     height: 100%;
 }
 
+.vue-flow__nodesselection-rect{
+  display: none;
+} //  hide the selection-rect
+
 </style>
 
 <style lang="scss" scoped>
 @use '../../common/global.scss' as *;
+
 .graphLayout {
     flex: 1;
     .vueFlow {
@@ -310,7 +315,9 @@ const isValidConnection = (connection: any) => {
         height: 100%;
     }
 }
+
 .vue-flow__background {
     background-color: $mix-background-color;
-}
+} //  vue-flow__background must be written here since @use must be written here
+
 </style>

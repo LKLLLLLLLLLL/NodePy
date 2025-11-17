@@ -5,9 +5,10 @@ export interface Position {
   y: number
 }
 
-export function usePointerLock(params: { onMove: (movement: Position) => void, onDragEnd?: () => void }) {
+export function usePointerLock(params: { onMove: (movement: Position, acceleration: number) => void, onDragEnd?: () => void }) {
   const isLocked = ref(false)
   const isDragging = ref(false)
+  const totalMovement = ref(0)
 
   const handleLockChange = () => {
     isLocked.value = document.pointerLockElement !== null
@@ -15,11 +16,14 @@ export function usePointerLock(params: { onMove: (movement: Position) => void, o
 
   const handleMove = (e: PointerEvent) => {
     if (!isLocked.value || !isDragging.value) return
-    params.onMove({ x: e.movementX, y: e.movementY })
+    totalMovement.value += Math.abs(e.movementX)
+    const acceleration = 1 + Math.log1p(totalMovement.value)  //  the farther the user move, the faster the number increases
+    params.onMove({ x: e.movementX, y: e.movementY }, acceleration)
   }
 
   const handleMouseUp = () => {
     isDragging.value = false
+    totalMovement.value = 0 // reset total movement
     document.exitPointerLock()
     document.removeEventListener("pointermove", handleMove)
     document.removeEventListener("mouseup", handleMouseUp)
@@ -38,6 +42,7 @@ export function usePointerLock(params: { onMove: (movement: Position) => void, o
 
   const requestLock = (element: HTMLElement) => {
     isDragging.value = true
+    totalMovement.value = 0 // reset total movement
     element.requestPointerLock()
     document.addEventListener("mouseup", handleMouseUp)
     document.addEventListener("pointermove", handleMove)

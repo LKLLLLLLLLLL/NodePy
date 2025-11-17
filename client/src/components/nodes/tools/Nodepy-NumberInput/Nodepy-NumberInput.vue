@@ -58,7 +58,11 @@
 
 
     const onClick = (n: number) => {
-        update(n)
+        if (model.value === undefined) return
+        const newValue = model.value + n
+        const min = props.min ?? Number.NEGATIVE_INFINITY
+        const max = props.max ?? Number.POSITIVE_INFINITY
+        model.value = Math.min(Math.max(newValue, min), max)
         emit('updateValue')
     }
 
@@ -67,18 +71,19 @@
       return Math.floor(frac * number) / frac
     }
 
-    const update = (relative: number) => {
+    const update = (relative: number, acceleration: number = 1) => {
       if (model.value === undefined) return
     
-      const step = 1 / local.value.denominator;
-      const newValue = normalize(model.value + (relative * step), local.value.denominator)
+      const step = 1 / local.value.denominator
+      const effectiveMovement = relative * acceleration
+      const newValue = normalize(model.value + (effectiveMovement * step), local.value.denominator)
       const min = props.min ?? Number.NEGATIVE_INFINITY
       const max = props.max ?? Number.POSITIVE_INFINITY
       model.value = Math.min(Math.max(newValue, min), max)
     }
 
     const { requestLock } = usePointerLock({
-      onMove: relative => update(relative.x),
+      onMove: (relative, acceleration) => update(relative.x, acceleration),
       onDragEnd: () => {emit('updateValue')}
     })
 
@@ -150,6 +155,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            cursor: pointer;
         }
         .left-arrow:hover {
             background: #ccc;
@@ -158,6 +164,7 @@
             width: 100%;
             text-align: center;
             background: white;
+            cursor: text;
         }
         .value-input {
             width: 100%;
@@ -174,6 +181,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            cursor: pointer;
         }
         .right-arrow:hover {
             background: #ccc;
