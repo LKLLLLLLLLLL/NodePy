@@ -11,7 +11,7 @@
 #       ├── assets/
 #       └── ...
 
-FROM python:3.13 as development
+FROM python:3.13 AS development
 WORKDIR /nodepy
 # install fonts for visualizations
 RUN apt-get upgrade && apt-get update && apt-get install -y \
@@ -29,7 +29,7 @@ RUN uv sync --no-group server --no-group dev --group worker
 # run server
 CMD ["uv", "run", "celery", "-A", "server.celery", "worker", "--beat", "--loglevel=debug"]
 
-FROM python:3.13 as production
+FROM python:3.13 AS production
 WORKDIR /nodepy
 # install fonts for visualizations
 RUN apt-get upgrade && apt-get update && apt-get install -y \

@@ -40,6 +40,7 @@ worker = [
     "networkx>=3.5",
     "matplotlib>=3.10.7",
     "restrictedpython>=8.1",
+    "wordcloud>=1.9.4",
 ]
 
 [tool.taskipy.tasks]

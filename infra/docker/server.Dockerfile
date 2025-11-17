@@ -11,7 +11,7 @@
 #       ├── assets/
 #       └── ...
 
-FROM python:3.13-slim as development
+FROM python:3.13-slim AS development
 WORKDIR /nodepy
 # configure uv
 RUN pip install --no-cache-dir uv
@@ -24,7 +24,7 @@ RUN uv sync --no-group worker --no-group dev --group server
 # run server
 CMD ["uv", "run", "fastapi", "dev", "server/app/main.py", "--host", "0.0.0.0", "--port", "8000", "--access-log"]
 
-FROM python:3.13-slim as production
+FROM python:3.13-slim AS production
 WORKDIR /nodepy
 # configure uv
 RUN pip install --no-cache-dir uv

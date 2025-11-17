@@ -381,6 +381,19 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - plot: 输出的图形，类型为File，格式为PNG。
 
+#### 3.2 WordcloudNode
+词云图节点，支持对表格中的指定列进行词云图绘制。
+
+**参数：**
+- word_col: 词语列名，类型为str，表格中该列的类型必须为str。
+- frequency_col: 频率列名，类型为str，表格中该列的类型必须为int或float。
+
+**输入：**
+- input: 输入的表格，类型为Table。
+
+**输出：**
+- wordcloud_image: 输出的词云图像，类型为File，格式为PNG。
+
 ### 4. 字符串处理节点(stringprocess)
 #### 4.1 StripNode
 节点用于去除字符串首尾的空白字符或指定字符。

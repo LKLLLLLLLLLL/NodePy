@@ -1,5 +1,6 @@
 from typing import Literal, override
 
+from server.config import FIGURE_DPI
 from server.models.data import Data, Table
 from server.models.exception import NodeParameterError
 from server.models.schema import ColType, FileSchema, Pattern, Schema
@@ -103,11 +104,11 @@ class PlotNode(BaseNode):
         plt.tight_layout()      
         # save to byte stream
         buf = file_manager.get_buffer()
-        plt.savefig(buf, format="png", dpi=500)
+        plt.savefig(buf, format="png", dpi=FIGURE_DPI)
         plt.close()
         file = file_manager.write_sync(
             content=buf,
-            filename=f"{self.id}_plot.png",
+            filename=f"{self.id}.png",
             format="png",
             node_id=self.id,
             project_id=self.global_config.project_id,
