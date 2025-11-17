@@ -140,7 +140,7 @@ class FileManager:
         col_types: dict[str, ColType] | None = None
         if format == "csv":
             col_types = self._get_col_types(content)
-        key = uuid4().hex
+        key = uuid4().hex + f".{format}"
         existing_file = self.db_client.query(FileRecord).filter((FileRecord.project_id == project_id) & (FileRecord.node_id == node_id)).first()
         try:
             # check storage limit
@@ -225,7 +225,7 @@ class FileManager:
         col_types: dict[str, ColType] | None = None
         if format == "csv":
             col_types = self._get_col_types(content)
-        key = uuid4().hex
+        key = uuid4().hex + f".{format}"
         stmt = select(FileRecord).where(
             (FileRecord.project_id == project_id) & (FileRecord.node_id == node_id)
         )

@@ -7,6 +7,7 @@ import redis
 from loguru import logger
 
 from server.models.data import Data, DataView
+from server.models.file import File
 
 CACHE_REDIS_URL = os.getenv("REDIS_URL", "") + "/2"
 CACHE_TTL_SECONDS  = 60 * 60 # 1 hour
@@ -91,6 +92,11 @@ class CacheManager:
         cache_key = CacheManager._get_cache_key(node_type, params, inputs)
         outputs_dict = {}
         for key, data in outputs.items():
+            if isinstance(data.payload, File):
+                # do not cache the file content in memory
+                # because the file object is only a reference to the file in MinIO,
+                # it may dereference a null object if the file is deleted in MinIO.
+                return
             outputs_dict[key] = data.to_view().to_dict()
         cache_value = [outputs_dict, running_time]
         self.redis_client.set(cache_key, json.dumps(cache_value))
