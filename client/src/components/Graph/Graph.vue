@@ -31,7 +31,7 @@ const modalStore = useModalStore()
 const graphStore = useGraphStore()
 
 const {params: {projectId}} = useRoute()
-const { onNodeClick, findNode, onConnect, onInit, onNodeDragStop, addEdges } = useVueFlow('main')
+const { onNodeClick, findNode, onConnect, onInit, onNodeDragStop, addEdges, getNodes } = useVueFlow('main')
 const shouldWatch = ref(false)
 const listenNodePosition = ref(true)
 const intervalId = setInterval(() => {
@@ -132,6 +132,17 @@ async function handleNodeDoubleClick(event) {
   resultStore.cacheGarbageRecycle()
   console.log('double click success')
   graphStore.currentNode = findNode(event.node.id)
+
+  getNodes.value.forEach((n) => {
+    if(n.data.dbclicked) {
+      n.data.dbclicked = false
+    }
+  })  //  reset dbclicked so that only one node can be dbclicked
+
+  if(graphStore.currentNode) {
+    graphStore.currentNode.data.dbclicked = true
+  } //  双击状态更新
+
   if(!graphStore.currentNode?.data?.data_out?.result){
     resultStore.currentInfo = graphStore.currentNode?.data.param
   }

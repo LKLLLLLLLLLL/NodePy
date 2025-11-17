@@ -1,5 +1,5 @@
 <template>
-    <div class="StringNodeLayout nodes-style" :class="{'nodes-selected': selected}">
+    <div class="StringNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <div class="node-title-input nodes-topchild-border-radius">{{`字符串节点${props.id.split('_')[1]}`}}</div>
         <div class="data">
             <div class="value">

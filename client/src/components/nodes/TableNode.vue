@@ -1,5 +1,5 @@
 <template>
-    <div class="TableNodeLayout nodes-style" :class="{'nodes-selected': selected}">
+    <div class="TableNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <div class="node-title-input nodes-topchild-border-radius">{{`表格节点${props.id.split('_')[1]}`}}</div>
         <div class="data">
             <Handle id="table" type="source" :position="Position.Right" class="table-handle-color"/>

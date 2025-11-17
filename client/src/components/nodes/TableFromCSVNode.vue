@@ -1,5 +1,5 @@
 <template>
-    <div class="TableFromCSVNodeLayout nodes-style" :class="{'nodes-selected': selected}">
+    <div class="TableFromCSVNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <div class="node-title-input nodes-topchild-border-radius">
             {{`CSV表格节点${props.id.split('_')[1]}`}}
         </div>

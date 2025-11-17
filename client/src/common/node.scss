@@ -39,6 +39,10 @@ $node-description-fontsize: 16px;
 }
 
 .nodes-selected {
+  box-shadow: 5px 2px 35px rgba(128, 128, 128, 0.4);
+}
+
+.nodes-dbclicked {
   outline: 2px solid $stress-color;
 }
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="ConstNodeLayout nodes-style" :class="{'nodes-selected': selected}">
+    <div class="ConstNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <div class="node-title-input nodes-topchild-border-radius">{{`常量节点${props.id.split('_')[1]}`}}</div>
         <div class="data">
             <div class="value">

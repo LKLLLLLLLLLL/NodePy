@@ -9,7 +9,6 @@ export const useGraphStore = defineStore('graph', () => {
   const currentNode = ref<Nodetypes.BaseNode>()
   const default_url_id: number = 12306
   const url_id = ref<number>(default_url_id)
-
   const vueFLowInstance = useVueFlow('main')
   const {addNodes, nodes} = vueFLowInstance
   const project = ref<vueFlowProject>({

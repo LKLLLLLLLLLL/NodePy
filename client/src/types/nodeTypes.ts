@@ -27,7 +27,9 @@ export const nodeCategoryColor = {
 
 export type AbstractNode = Omit<Node, 'data' | 'type'>
 
-export type BaseData = Omit<ProjNode, 'id' | 'type' | 'position'>
+export type BaseData = Omit<ProjNode, 'id' | 'type' | 'position'> & {
+    dbclicked?: boolean
+}
 
 export interface BaseNode<T = BaseData> extends AbstractNode{
     type: string
