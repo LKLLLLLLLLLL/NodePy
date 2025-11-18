@@ -31,7 +31,7 @@ const modalStore = useModalStore()
 const graphStore = useGraphStore()
 
 const {params: {projectId}} = useRoute()
-const { onNodeClick, findNode, onConnect, onInit, onNodeDragStop, addEdges, getNodes } = useVueFlow('main')
+const { onNodeClick, findNode, onConnect, onInit, onNodeDragStop, addEdges, getNodes, onPaneClick } = useVueFlow('main')
 const shouldWatch = ref(false)
 const listenNodePosition = ref(true)
 const intervalId = setInterval(() => {
@@ -107,7 +107,6 @@ watch(()=>graphStore.currentNode?.data.data_out?.result?.data_id,async ()=>{
   // 双击检测变量
 const lastClickTime = ref<number>(0)
 const lastNodeId = ref<string>('default')
-
 // 监听节点点击事件
 onNodeClick((event) => {
   const currentTime = Date.now()
@@ -115,10 +114,10 @@ onNodeClick((event) => {
   
   // 检查是否是双击（300ms 内点击同一节点）
   if (currentTime - lastClickTime.value < 300 && currentNodeId === lastNodeId.value) {
-    // 执行双击处理逻辑
-    handleNodeDoubleClick(event)
     // 重置状态
     lastClickTime.value = 0
+    // 执行双击处理逻辑
+    handleNodeDoubleClick(event)
     lastNodeId.value = 'default'
   } else {
     // 更新状态等待可能的第二次点击
@@ -126,7 +125,6 @@ onNodeClick((event) => {
     lastNodeId.value = currentNodeId
   }
 })
-
 async function handleNodeDoubleClick(event) {
   // 获取节点完整信息
   resultStore.cacheGarbageRecycle()
@@ -158,6 +156,24 @@ async function handleNodeDoubleClick(event) {
     modalStore.activateModal('result')
   }
 
+}
+
+const lastPaneClicktime = ref(0)
+onPaneClick(() => {
+  const currentTime = Date.now()
+  if(currentTime - lastPaneClicktime.value < 300) {
+    lastClickTime.value = 0
+    handlePaneDoubleClick()
+  }else {
+    lastPaneClicktime.value = currentTime
+  }
+})
+const handlePaneDoubleClick = () => {
+  getNodes.value.forEach((n) => {
+    if(n.data.dbclicked) {
+      n.data.dbclicked = false
+    }
+  })  //  cancel node dbclick when dbclicking the pane
 }
 
 
@@ -204,6 +220,7 @@ const isValidConnection = (connection: any) => {
       v-model:edges="graphStore.project.workflow.edges"
       :connection-mode="ConnectionMode.Strict"
       :is-valid-connection="isValidConnection"
+      :zoom-on-double-click="false"
       id="main"
       >
 

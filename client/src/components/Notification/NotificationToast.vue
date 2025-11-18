@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 // Keep types lightweight here to avoid tight coupling; the shared notify module provides the runtime state.
 const props = defineProps<{ msg: any; remove: (id: number) => void }>()
