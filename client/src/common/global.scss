@@ -10,6 +10,7 @@ $bg-color-g: 247;
 $bg-color-b: 250;
 $background-color: rgb($bg-color-r, $bg-color-g, $bg-color-b);
 $stress-background-color: white;
+$error-message-color: rgba(255, 0, 0, 0.6);
 
 // compute background color with some transparency
 $target-a: 0.05;
@@ -35,10 +36,13 @@ $mix-background-color: rgba($computed-r, $computed-g, $computed-b, $target-a);
 }
 
 .error-message{
-    color: rgba(255, 0, 0, 0.6);
+    color: $error-message-color;
 }
 
 .success-message{
     color: rgba(0, 142, 0, 0.6);
 }
 
+@mixin info-message {
+  font-size: 14px;
+}

@@ -57,10 +57,8 @@
 <style lang="scss" scoped>
 @use "../../common/global.scss" as *;
 .graph-info-container {
-    // background-color: rgba(255, 255, 255, 0.9);
+    @include info-message();
     color: rgba(0, 0, 0, 0.3);
-    font-size: 14px;
-    // font-weight: 800;
     padding: 10px 10px;
     margin-left: 10px;
     .gi-workflow-status-error{

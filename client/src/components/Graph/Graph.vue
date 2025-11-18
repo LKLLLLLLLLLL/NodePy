@@ -215,7 +215,7 @@ const isValidConnection = (connection: any) => {
           <GraphControls :id="`${projectId}`"/>
         </Panel>
 
-        <Panel position="top-left">
+        <Panel position="top-left" class="graphinfo">
           <GraphInfo :is_syncing="graphStore.is_syncing" :syncing_err_msg="graphStore.syncing_err_msg"/>
         </Panel>
 
@@ -330,5 +330,10 @@ const isValidConnection = (connection: any) => {
 .vue-flow__background {
     background-color: $mix-background-color;
 } //  vue-flow__background must be written here since @use must be written here
+
+.graphinfo {
+  pointer-events: none !important;
+  user-select: none;
+}
 
 </style>
