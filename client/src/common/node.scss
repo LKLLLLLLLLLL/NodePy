@@ -148,19 +148,6 @@ $node-description-fontsize: 16px;
   text-decoration-thickness: 3px;
 }
 
-.node-err {
-  div {
-    @include info-message;
-    color: $error-message-color;
-    max-width: 2 * $node-width;
-    width: max-content;
-  }
-  max-width: 2 * $node-width;
-  position: absolute;
-  top: 100%;
-  pointer-events: none;
-} //  errmsg style
-
 .node-errhandle {
   background: red !important;
 }

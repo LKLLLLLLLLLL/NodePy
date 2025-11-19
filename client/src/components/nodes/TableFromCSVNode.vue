@@ -27,22 +27,19 @@
                 />
             </div>
         </div>
-        <div class="node-err nodrag" @click.stop>
-            <div v-for="err in errMsg">
-                {{ err }}
-            </div>
-        </div>
+        <ErrorMsg :err-msg="errMsg"/>
     </div>
 </template>
 
 <script lang="ts" setup>
     import type { Type } from '@/utils/api'
-import type { NodeProps } from '@vue-flow/core'
-import { Handle, Position } from '@vue-flow/core'
-import { computed, ref, watch } from 'vue'
-import type { BaseData } from '../../types/nodeTypes'
-import { getInputType } from './getInputType'
-import { handleExecError, handleValidationError, handleOutputError } from './handleError'
+    import type { NodeProps } from '@vue-flow/core'
+    import { Handle, Position } from '@vue-flow/core'
+    import { computed, ref, watch } from 'vue'
+    import type { BaseData } from '../../types/nodeTypes'
+    import { getInputType } from './getInputType'
+    import { handleExecError, handleValidationError, handleOutputError } from './handleError'
+    import ErrorMsg from './tools/ErrorMsg.vue'
 
 
     const props = defineProps<NodeProps<BaseData>>()

@@ -48,7 +48,7 @@
                 <svg-icon type="mdi" :path=mdiWarn></svg-icon>
                 <div>节点图运行失败：</div>
             </div>
-            <div class="gi-workflow-error-message error-message" v-if="proj_err_msg" style="margin-left: 26px;">
+            <div class="gi-workflow-error-message error-message" v-if="proj_err_msg">
                 {{ proj_err_msg }}
             </div>
         </div>
@@ -78,7 +78,6 @@
         align-items: center;
     }
     svg {
-        height: 18px;
         width: 18px;
         vertical-align: middle;
         margin-right: 5px;
@@ -92,13 +91,10 @@
         height: 50px;
     }
 
-    // .error-message {
-    //     color: rgba(249, 103, 103, 0.6);
-    // }
-
-    // .success-message {
-    //     color: rgba(69, 149, 69, 0.6);
-    // }
+    .gi-workflow-error-message {
+        margin-left: 26px;
+        max-width: 33vw;
+    }
 }
 
 </style>

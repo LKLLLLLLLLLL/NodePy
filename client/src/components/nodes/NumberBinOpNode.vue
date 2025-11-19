@@ -32,11 +32,7 @@
                 <Handle id="result" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': resultHasErr}]"/>
             </div>
         </div>
-        <div class="node-err nodrag" @click.stop>
-            <div v-for="err in errMsg">
-                {{ err }}
-            </div>
-        </div>
+        <ErrorMsg :err-msg="errMsg"/>
     </div>
 </template>
 
@@ -49,6 +45,7 @@
     import { getInputType } from './getInputType'
     import type { Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
+    import ErrorMsg from './tools/ErrorMsg.vue'
 
 
     const props = defineProps<NodeProps<NumberBinOpNodeData>>()

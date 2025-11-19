@@ -20,11 +20,7 @@
                 <Handle id="string" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': stringHasErr}]"/>
             </div>
         </div>
-        <div class="node-err nodrag" @click.stop>
-            <div v-for="err in errMsg">
-                {{ err }}
-            </div>
-        </div>
+        <ErrorMsg :err-msg="errMsg"/>
     </div>
 </template>
 
@@ -36,6 +32,7 @@
     import type {StringNodeData} from '../../types/nodeTypes'
     import NodepyStringInput from './tools/Nodepy-StringInput.vue'
     import { handleExecError, handleParamError, handleOutputError } from './handleError'
+    import ErrorMsg from './tools/ErrorMsg.vue'
 
 
     const props = defineProps<NodeProps<StringNodeData>>()

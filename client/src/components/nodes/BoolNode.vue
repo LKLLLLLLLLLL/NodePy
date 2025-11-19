@@ -19,11 +19,7 @@
                 <Handle id="const" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': constHasErr}]"/>
             </div>
         </div>
-        <div class="node-err nodrag" @click.stop>
-            <div v-for="err in errMsg">
-                {{ err }}
-            </div>
-        </div>
+        <ErrorMsg :err-msg="errMsg"/>
     </div>
 </template>
 
@@ -35,6 +31,7 @@
     import type { Type } from '@/utils/api'
     import NodepyBoolValue from './tools/Nodepy-boolValue.vue'
     import { handleExecError, handleOutputError } from './handleError'
+    import ErrorMsg from './tools/ErrorMsg.vue'
 
 
      const props = defineProps<NodeProps<BoolNodeData>>()

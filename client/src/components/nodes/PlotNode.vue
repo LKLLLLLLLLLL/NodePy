@@ -34,11 +34,7 @@
                 <Handle id="plot" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': plotHasErr}]"/>
             </div>
         </div>
-        <div class="node-err nodrag" @click.stop>
-            <div v-for="err in errMsg">
-                {{ err }}
-            </div>
-        </div>
+        <ErrorMsg :err-msg="errMsg"/>
     </div>
 </template>
 
@@ -52,6 +48,7 @@
     import { handleExecError, handleParamError, handleValidationError, handleOutputError } from './handleError'
     import NodepyStringInput from './tools/Nodepy-StringInput.vue'
     import NodepySelectFew from './tools/Nodepy-selectFew.vue'
+    import ErrorMsg from './tools/ErrorMsg.vue'
 
 
     const props = defineProps<NodeProps<PlotNodeData>>()

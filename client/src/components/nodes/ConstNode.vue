@@ -39,11 +39,7 @@
                 <Handle id="const" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': constHasErr}]"/>
             </div>
         </div>
-        <div class="node-err nodrag" @click.stop>
-            <div v-for="err in errMsg">
-                {{ err }}
-            </div>
-        </div>
+        <ErrorMsg :err-msg="errMsg"/>
     </div>
 </template>
 
@@ -56,6 +52,7 @@
     import NodepyNumberInput from './tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
     import NodepySelectFew from './tools/Nodepy-selectFew.vue'
     import { handleParamError, handleExecError, handleOutputError } from './handleError'
+    import ErrorMsg from './tools/ErrorMsg.vue'
 
 
     const props = defineProps<NodeProps<ConstNodeData>>()

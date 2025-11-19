@@ -11,11 +11,7 @@
                 <Handle id="file" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': fileOutputHasErr}]"/>
             </div>
         </div>
-        <div class="node-err nodrag" @click.stop>
-            <div v-for="err in errMsg">
-                {{ err }}
-            </div>
-        </div>
+        <ErrorMsg :err-msg="errMsg"/>
     </div>
 </template>
 
@@ -31,7 +27,7 @@
     import type { UploadNodeData } from '@/types/nodeTypes'
     import { useGraphStore } from '@/stores/graphStore'
     import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory'
-
+    import ErrorMsg from './tools/ErrorMsg.vue'
 
     const mdiAddFile: string = mdiFilePlus
     const props = defineProps<NodeProps<UploadNodeData>>()
