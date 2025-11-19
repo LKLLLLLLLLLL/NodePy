@@ -13,7 +13,7 @@ from server.lib.FileManager import FileManager
 from server.lib.ProjectLock import ProjectLock
 from server.lib.StreamQueue import Status, StreamQueue
 from server.lib.utils import get_project_by_id_sync, set_project_record_sync
-from server.models.data import Data
+from server.models.data import Data, DataView
 from server.models.database import DatabaseTransaction, NodeOutputRecord
 from server.models.exception import (
     NodeExecutionError,
@@ -346,7 +346,23 @@ def execute_project_task(self, project_id: int, user_id: int):
                     output_data = result                  
                     data_zips = {}
                     for port, data in output_data.items():
-                        # 1. store data in database
+                        # 1. get old data in database
+                        old_data_records = db_client.query(NodeOutputRecord).filter_by(
+                            project_id=project_id,
+                            node_id=node_id,
+                            port=port
+                        ).first()
+                        old_data: Data | None
+                        if old_data_records is None:
+                            old_data = None
+                        else:
+                            old_data_view = DataView(**old_data_records.data) # type: ignore
+                            old_data = Data.from_view(old_data_view)
+                        # 2. if data unchanged, reuse old data
+                        if old_data is not None and old_data == data:
+                            data_zips[port] = DataRef(data_id = old_data_records.id) # type: ignore
+                            continue
+                        # 3. if data changed, store data in database
                         db_data = NodeOutputRecord(
                             project_id=project_id,
                             node_id=node_id,
@@ -354,7 +370,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                             data=data.to_view().to_dict()
                         )
                         db_client.add(db_data)
-                        # 2. construct datazip
+                        # construct datazip
                         db_client.flush()
                         id_data = db_data.id
                         data_zips[port] = DataRef(data_id = id_data) # type: ignore

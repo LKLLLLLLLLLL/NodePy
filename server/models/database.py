@@ -98,6 +98,10 @@ class NodeOutputRecord(Base):
     port = Column(String, nullable=False)  # output port name
     data = Column(JSON, nullable=False)  # Arbitrary JSON data
 
+    __table_args__ = (
+        UniqueConstraint('project_id', 'node_id', 'port', name='_project_node_port_uc'),
+    )
+
 class FileRecord(Base):
     __tablename__ = "files"
 
