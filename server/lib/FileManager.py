@@ -1,21 +1,31 @@
 import asyncio
 import datetime
 import io
-import json
 import os
+import time
 from typing import Literal, cast
+from urllib.parse import quote, unquote
 from uuid import uuid4
 
 from loguru import logger
 from minio import Minio, S3Error
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from server.celery import celery_app
-from server.models.database import FileRecord, ProjectRecord, UserRecord, get_session
+from server.models.data import Data, DataRef, DataView
+from server.models.database import (
+    FileRecord,
+    NodeOutputRecord,
+    ProjectRecord,
+    UserRecord,
+    get_session,
+)
 from server.models.exception import InsufficientStorageError
 from server.models.file import File, FileItem, UserFileList
-from server.models.schema import ColType
+from server.models.project import ProjWorkflow
+from server.models.schema import ColType, Schema
 
 
 class FileManager:
@@ -28,7 +38,7 @@ class FileManager:
     When project_id is provided, all operations including writing are enabled.
     When project_id is None, only read, delete, and list operations are permitted.
     """
-    def __init__(self, async_db_session: AsyncSession | None) -> None:
+    def __init__(self, async_db_session: AsyncSession | None = None, sync_db_session: Session | None = None) -> None:
         self.minio_client = Minio(
             endpoint=os.getenv("MINIO_ENDPOINT", ""),
             access_key=os.getenv("MINIO_ROOT_USER", ""),
@@ -38,6 +48,9 @@ class FileManager:
         if async_db_session:
             self.db_client = None
             self.async_db_client = async_db_session
+        elif sync_db_session:
+            self.db_client = sync_db_session
+            self.async_db_client = None
         else:
             self.db_client = next(get_session())
             self.async_db_client = None
@@ -140,8 +153,7 @@ class FileManager:
         col_types: dict[str, ColType] | None = None
         if format == "csv":
             col_types = self._get_col_types(content)
-        key = uuid4().hex + f".{format}"
-        existing_file = self.db_client.query(FileRecord).filter((FileRecord.project_id == project_id) & (FileRecord.node_id == node_id)).first()
+        key = uuid4().hex + f".{format}"        
         try:
             # check storage limit
             user = self.db_client.query(UserRecord).filter(UserRecord.id == user_id).first()
@@ -156,37 +168,20 @@ class FileManager:
                 object_name=key,
                 data=io.BytesIO(content),
                 length=len(content),
-                metadata={"project_id": str(project_id), "user_id": str(user_id), "filename": filename, "node_id": node_id}
+                metadata={"project_id": str(project_id), "user_id": str(user_id), "filename": quote(filename), "node_id": node_id}
             )
             # record in database
-            if existing_file:
-                # replace existing file
-                old_key = existing_file.file_key
-                existing_file.file_key = key    # type: ignore
-                existing_file.filename = filename  # type: ignore
-                existing_file.format = format  # type: ignore
-                existing_file.user_id = user_id  # type: ignore
-                existing_file.project_id = project_id  # type: ignore
-                existing_file.node_id = node_id # type: ignore
-                existing_file.file_size = len(content) # type: ignore
-                try:
-                    self.minio_client.remove_object(
-                        bucket_name=self.bucket,
-                        object_name=old_key # type: ignore
-                    )
-                except Exception:
-                    pass
-            else:
-                file = FileRecord(
-                    file_key=key,
-                    filename=filename,
-                    format=format,
-                    user_id=user_id,
-                    project_id=project_id,
-                    node_id=node_id,
-                    file_size=len(content),
-                )
-                self.db_client.add(file)
+            # no need to replace existing file, they will be cleaned up in periodic task
+            file = FileRecord(
+                file_key=key,
+                filename=filename,
+                format=format,
+                user_id=user_id,
+                project_id=project_id,
+                node_id=node_id,
+                file_size=len(content),
+            )
+            self.db_client.add(file)
             self.db_client.commit()
         except S3Error as e:
             self.db_client.rollback()
@@ -229,8 +224,6 @@ class FileManager:
         stmt = select(FileRecord).where(
             (FileRecord.project_id == project_id) & (FileRecord.node_id == node_id)
         )
-        result = await self.async_db_client.execute(stmt)
-        existing_file = result.scalars().first()
         try:
             # check storage limit
             stmt = select(UserRecord).where(UserRecord.id == user_id)
@@ -248,38 +241,20 @@ class FileManager:
                 object_name=key,
                 data=io.BytesIO(content),
                 length=len(content),
-                metadata={"project_id": str(project_id), "user_id": str(user_id), "filename": filename, "node_id": node_id}
+                metadata={"project_id": str(project_id), "user_id": str(user_id), "filename": quote(filename), "node_id": node_id}
             )
             # record in database
-            if existing_file:
-                # replace existing file
-                old_key = existing_file.file_key
-                existing_file.file_key = key    # type: ignore
-                existing_file.filename = filename  # type: ignore
-                existing_file.format = format  # type: ignore
-                existing_file.user_id = user_id  # type: ignore
-                existing_file.project_id = project_id  # type: ignore
-                existing_file.node_id = node_id # type: ignore
-                existing_file.file_size = len(content) # type: ignore
-                try:
-                    await asyncio.to_thread(
-                        self.minio_client.remove_object,
-                        bucket_name=self.bucket,
-                        object_name=old_key # type: ignore
-                    )
-                except Exception:
-                    pass
-            else:
-                file = FileRecord(
-                    file_key=key,
-                    filename=filename,
-                    format=format,
-                    user_id=user_id,
-                    project_id=project_id,
-                    node_id=node_id,
-                    file_size=len(content),
-                )
-                self.async_db_client.add(file)
+            # no need to replace existing file, they will be cleaned up in periodic task
+            file = FileRecord(
+                file_key=key,
+                filename=filename,
+                format=format,
+                user_id=user_id,
+                project_id=project_id,
+                node_id=node_id,
+                file_size=len(content),
+            )
+            self.async_db_client.add(file)
             await self.async_db_client.commit()
         except S3Error as e:
             await self.async_db_client.rollback()
@@ -537,62 +512,70 @@ def cleanup_orphan_files_task():
     """
     A periodic Celery task to clean up orphan files in MinIO that are not referenced in the database.
     """
+    start_time = time.perf_counter()
     db_client = next(get_session())
-    file_manager = FileManager(async_db_session=None)
+    file_manager = FileManager(async_db_session=None, sync_db_session=db_client)
     minio_client = Minio(
         endpoint=os.getenv("MINIO_ENDPOINT", ""),
         access_key=os.getenv("MINIO_ROOT_USER", ""),
         secret_key=os.getenv("MINIO_ROOT_PASSWORD", ""),
         secure=False  # MinIO in Docker is HTTP, not HTTPS
     )
-    # step 1: delete files for invalid node_id
     try:
+        # step 0: lock projects table and file records table to avoid concurrent modification
+        db_client.execute(text("LOCK TABLE projects IN ACCESS EXCLUSIVE MODE"))
+        db_client.execute(text("LOCK TABLE files IN ACCESS EXCLUSIVE MODE"))
+
+        # step 1: delete files which not exist in projects' workflow
         logger.info("Starting cleanup of orphan files...")
         
-        # 1. get all existing node_id from projects
+        # 1. get all existing file_keys from projects' workflow
         all_projects = db_client.query(ProjectRecord).all()
-        valid_node_ids = set()
+        valid_file_keys = set()
         for project in all_projects:
-            if project.workflow: # type: ignore
-                workflow_data = project.workflow
-                if isinstance(workflow_data, str):
-                    workflow_data = json.loads(workflow_data)
-                for node in workflow_data.get("nodes", []):
-                    node_id = node.get("id")
-                    if node_id:
-                        valid_node_ids.add((project.id, node_id))
-        
+            if not project.workflow: # type: ignore
+                continue
+            workflow_data = project.workflow
+            workflow = ProjWorkflow.model_validate(workflow_data)
+            for node in workflow.nodes:
+                for _, data_ref in node.data_out.items():
+                    assert isinstance(data_ref, DataRef)
+                    # get data record from db
+                    data_record = db_client.query(NodeOutputRecord).filter(NodeOutputRecord.id == data_ref.data_id).first()
+                    data_view = DataView.model_validate(data_record.data)  # type: ignore
+                    data = Data.from_view(data_view)
+                    if data.extract_schema().type != Schema.Type.FILE:
+                        continue
+                    valid_file_keys.add(data.payload.key) # type: ignore
         # 2. list all files keys from db
         all_files = db_client.query(FileRecord).all()
         
-        orphan_files = []
+        orphan_files: list[FileRecord] = []
         for db_file in all_files:
             modify_time = db_file.last_modify_time
-            if (datetime.datetime.now() - modify_time).total_seconds() < 3600: # 1 hour
+            if (datetime.datetime.now(datetime.timezone.utc) - modify_time).total_seconds() < 3600: # 1 hour
                 continue  # skip files modified within the last hour
-            if (db_file.project_id, db_file.node_id) not in valid_node_ids:
+            if db_file.file_key not in valid_file_keys:
                 orphan_files.append(db_file)
         if not orphan_files:
             logger.info("No orphan files found.")
-            return
+        
+        logger.debug(f"Found {len(orphan_files)} orphan files to delete: {[file.filename for file in orphan_files]}")
         
         # 3. delete orphan files from MinIO and database
         for file_record in orphan_files:
             try:
-                file_to_delete = file_manager.get_file_by_key_sync(file_record.file_key)
+                file_to_delete = file_manager.get_file_by_key_sync(file_record.file_key) # type: ignore
                 file_manager.delete_sync(file_to_delete, user_id=None)  # Admin operation
             except Exception as e:
                 logger.error(f"Failed to delete orphan file {file_record.file_key}: {e}")
         db_client.commit()
-
-        logger.info(f"Cleanup completed. Deleted {len(orphan_files)} orphan files.")
-    except Exception as e:
-        logger.exception(f"Failed to clean up orphan files: {e}")
-
-    # step 2: delete files in MinIO not in database
-    try:
+        logger.info(f"Database orphan file cleanup completed. Deleted {len(orphan_files)} orphan files.")
+        
+        # step 2: delete files in MinIO not in database
         objects = file_manager.minio_client.list_objects(bucket_name=file_manager.bucket, recursive=True)
         db_file_keys = set([db_file.file_key for db_file in db_client.query(FileRecord.file_key).all()])
+        deleted_obj = []
         for obj in objects:
             if obj.object_name not in db_file_keys:
                 assert isinstance(obj.object_name, str)
@@ -601,8 +584,13 @@ def cleanup_orphan_files_task():
                         bucket_name=file_manager.bucket,
                         object_name=obj.object_name
                     )
+                    deleted_obj.append(unquote(obj.object_name))
                 except Exception as e:
                     logger.exception(f"Failed to delete orphan MinIO file {obj.object_name}: {e}")
+        logger.debug(f"Deleted {len(deleted_obj)} orphan MinIO files: {deleted_obj}")
         logger.info("MinIO orphan file cleanup completed.")
+    except Exception as e:
+        logger.exception(f"Failed to clean up orphan files: {e}")
     finally:
         db_client.close()
+        logger.info(f"Orphan file cleanup task completed in {time.perf_counter() - start_time:.2f} seconds.")

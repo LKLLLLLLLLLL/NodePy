@@ -31,6 +31,6 @@ celery_app.conf.beat_schedule = {
     "cleanup-orphan-files-every-hour": {
         "task": "server.lib.FileManager.cleanup_orphan_files_task",
         "schedule": 3600.0,  # Every hour
-        # "schedule": 60.0,  # Every minute (for testing purposes)
+        # "schedule": 60.0,  # Every 60 seconds (for testing purposes)
     },
 }

@@ -6,6 +6,7 @@ from typing import Any, Literal
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.result import AsyncResult
 from loguru import logger
+from sqlalchemy.dialects.postgresql import insert
 
 from server.celery import celery_app
 from server.lib.CacheManager import CacheManager
@@ -119,7 +120,7 @@ def execute_project_task(self, project_id: int, user_id: int):
             graph = None
             # 2. Validate data model
             try:
-                file_manager = FileManager(async_db_session=None)  # sync version
+                file_manager = FileManager(sync_db_session=db_client)  # sync version
                 cache_manager = CacheManager()
                 graph = ProjectExecutor(file_manager=file_manager, cache_manager=cache_manager, topology=topo_graph, user_id=user_id)
                 queue.push_message_sync(
@@ -363,17 +364,19 @@ def execute_project_task(self, project_id: int, user_id: int):
                             data_zips[port] = DataRef(data_id = old_data_records.id) # type: ignore
                             continue
                         # 3. if data changed, store data in database
-                        db_data = NodeOutputRecord(
+                        # to avoid conflict, use on conflict method
+                        stmt = insert(NodeOutputRecord).values(
                             project_id=project_id,
                             node_id=node_id,
                             port=port,
                             data=data.to_view().to_dict()
-                        )
-                        db_client.add(db_data)
+                        ).on_conflict_do_update(
+                            index_elements=['project_id', 'node_id', 'port'],
+                            set_=dict(data=data.to_view().to_dict())
+                        ).returning(NodeOutputRecord.id)
+                        data_id = db_client.execute(stmt)
                         # construct datazip
-                        db_client.flush()
-                        id_data = db_data.id
-                        data_zips[port] = DataRef(data_id = id_data) # type: ignore
+                        data_zips[port] = DataRef(data_id = data_id.scalar()) # type: ignore
                     # 3. report to frontend
                     node_index = topo_graph.get_index_by_node_id(node_id)
                     assert node_index is not None

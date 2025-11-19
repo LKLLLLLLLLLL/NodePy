@@ -92,10 +92,11 @@ class NodeOutputRecord(Base):
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     project_id = Column(
-        Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False,
+        index=True
     )
     node_id = Column(String, nullable=False, index=True) # reference the node id in project.graph.nodes[i].id
-    port = Column(String, nullable=False)  # output port name
+    port = Column(String, nullable=False, index=True)  # output port name
     data = Column(JSON, nullable=False)  # Arbitrary JSON data
 
     __table_args__ = (
@@ -107,17 +108,16 @@ class FileRecord(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     filename = Column(String, nullable=False)  # Original file name
-    file_key = Column(String, nullable=False) # MinIO object key
+    file_key = Column(String, index=True, nullable=False) # MinIO object key
     format = Column(Enum("jpg", "png", "csv", "pdf", name="file_format"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), index=True, nullable=False)
     node_id = Column(String, nullable=False, index=True) # ID of the node that generated the file
     file_size = Column(BigInteger, nullable=False) # Byte
-    last_modify_time = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+    last_modify_time = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())   
     
-    __table_args__ = (
-        UniqueConstraint('project_id', 'node_id', name='_project_node_uc'),
-    )
+    # allow to file entry with same(user_id, project_id, node_id)
+    # they will be clean up in periodic task 
 
 # trigers
 def file_size_trigger(conn) -> None:
@@ -210,6 +210,8 @@ class DatabaseTransaction:
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         if self.db:
-            if exc_type is not None:
+            if exc_type is None:
+                self.db.commit()
+            else:
                 self.db.rollback()
             self.db.close()
