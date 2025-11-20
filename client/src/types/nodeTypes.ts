@@ -8,7 +8,7 @@ export const dataTypeColor = {
     str: 'green',
     bool: '#76ab0b',
     Table: 'pink',
-    File: 'brown',
+    File: 'rgb(216, 105, 91)',
     default: 'gray'
 }
 
@@ -238,7 +238,7 @@ export interface BoolColWithColBinOpNode extends BaseNode<BoolColWithColBinOpNod
 export interface PlotNodeParam {
     x_col: string
     y_col: string
-    plot_type: 'scatter' | 'line' | 'bar'
+    plot_type: 'scatter' | 'line' | 'bar' | 'pie'
     title?: string
 }
 export type PlotNodeData = BaseData & {

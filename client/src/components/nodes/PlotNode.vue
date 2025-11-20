@@ -16,12 +16,10 @@
             </div>
             <div class="plot_type">
                 <div class="param-description" :class="{'node-has-paramerr': plot_typeHasErr.value}">图形类型</div>
-                <NodepySelectFew
+                <NodepySelectMany 
                     :options="plot_type_options_chinese"
-                    :select-max-num="1"
-                    :defualt-selected="defaultSelected"
+                    :default-selected="defaultSelected"
                     @select-change="onSelectChange"
-                    item-width="90px"
                     class="nodrag"
                 />
             </div>
@@ -47,7 +45,7 @@
     import { getInputType } from './getInputType'
     import { handleExecError, handleParamError, handleValidationError, handleOutputError } from './handleError'
     import NodepyStringInput from './tools/Nodepy-StringInput.vue'
-    import NodepySelectFew from './tools/Nodepy-selectFew.vue'
+    import NodepySelectMany from './tools/Nodepy-selectMany.vue'
     import ErrorMsg from './tools/ErrorMsg.vue'
 
 
@@ -55,9 +53,9 @@
     const x_col = ref(props.data.param.x_col)
     const y_col = ref(props.data.param.y_col)
     const title = ref(props.data.param.title || '')
-    const plot_type_options = ['bar', 'line', 'scatter']
-    const plot_type_options_chinese = ['条形图', '折线图', '散点图']
-    const defaultSelected = [plot_type_options.indexOf(props.data.param.plot_type)]
+    const plot_type_options = ['bar', 'line', 'scatter', 'pie']
+    const plot_type_options_chinese = ['条形图', '折线图', '散点图', '饼状图']
+    const defaultSelected = plot_type_options.indexOf(props.data.param.plot_type)
     const table_type = computed(() => getInputType(props.id, 'input'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['plot']?.type || 'default')
     const plotHasErr = computed(() => handleOutputError(props.id, 'plot'))
@@ -81,7 +79,7 @@
 
 
     const onSelectChange = (e: any) => {
-        const selected_plot_type = plot_type_options[e] as 'bar'| 'line'| 'scatter'
+        const selected_plot_type = plot_type_options[e] as 'bar'| 'line'| 'scatter' | 'pie'
         props.data.param.plot_type = selected_plot_type
     }
 

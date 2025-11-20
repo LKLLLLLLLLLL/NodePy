@@ -26,7 +26,7 @@
                 </div>
                 <NodepySelectFew 
                     :options="data_type_options_chinese" 
-                    :defualt-selected="defaultSelected"
+                    :default-selected="defaultSelected"
                     @select-change="onSelectChange"
                     item-width="90px"
                     class="nodrag"

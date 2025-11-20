@@ -31,7 +31,7 @@
             type: Number,
             default: 1
         },
-        defualtSelected: {
+        defaultSelected: {
             type: Array as PropType<number[]>,
             required: false
         },
@@ -41,7 +41,7 @@
         }
     })
     const emit = defineEmits(['selectChange'])
-    const selectedIdx = ref<number[]>(props.defualtSelected || [])
+    const selectedIdx = ref<number[]>(props.defaultSelected || [])
 
 
     const onClick = (index: number) => {

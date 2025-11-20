@@ -1,4 +1,5 @@
 @use 'global.scss' as *;
+//  data type color
 $int-color: #1c6bbf;
 $float-color: #ecbc00;
 $str-color: green;
@@ -9,6 +10,7 @@ $default-type-color: gray;
 $node-width: 200px;
 $node-title-height: 30px;
 $node-padding: 10px;
+//  node first category color
 $input-node-color: rgb(255, 102, 255);
 $compute-node-color: #00b688;
 $control-node-color: #d87e00;

@@ -38,12 +38,6 @@ class PlotNode(BaseNode):
                 err_param_key="y_col",
                 err_msg="y_col cannot be empty."
             )
-        if self.title is not None and self.title.strip() == "":
-            raise NodeParameterError(
-                node_id=self.id,
-                err_param_key="title",
-                err_msg="If provided, title cannot be empty."
-            )
         return
 
     @override
