@@ -367,12 +367,12 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 ### 3. 可视化节点(visualize)
 #### 3.1 PlotNode
-绘图节点，支持对表格中的指定列进行绘图操作，支持柱状图(bar)、折线图(line)、散点图(scatter)三种图形类型。
+绘图节点，支持对表格中的指定列进行绘图操作，支持柱状图(bar)、折线图(line)、散点图(scatter)、饼图(pie)四种图形类型。
 
 **参数：**
 - x_col: x轴列名，类型为str，表格中该列的类型必须为int, float或str。
 - y_col: y轴列名，类型为str，表格中该列的类型必须为int或float。
-- plot_type: 图形类型，类型为str，取值为"scatter", "line", "bar"。
+- plot_type: 图形类型，类型为str，取值为"scatter", "line", "bar", "pie"。
 - title: 图形标题，类型为str，可以为空。
 
 **输入：**

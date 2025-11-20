@@ -7,5 +7,5 @@ export enum ColType {
     FLOAT = 'float',
     STR = 'str',
     BOOL = 'bool',
-    DATETIME = 'datetime',
+    DATETIME = 'Datetime',
 }

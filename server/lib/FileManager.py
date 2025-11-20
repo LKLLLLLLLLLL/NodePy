@@ -101,7 +101,11 @@ class FileManager:
         """ Get a File object by its key """
         if not self.db_client:
             raise AssertionError("Synchronous DB client is not initialized")
-        db_file = self.db_client.query(FileRecord).filter(FileRecord.file_key == key).first()
+        db_file = self.db_client.query(FileRecord).filter(
+            FileRecord.file_key == key,
+            FileRecord.is_deleted.is_(False),
+            FileRecord.project_id.isnot(None)
+        ).first()
         if not db_file:
             raise ValueError("File record not found in database")
         return File(
@@ -114,7 +118,11 @@ class FileManager:
     async def get_file_by_key_async(self, key: str) -> File:
         if not self.async_db_client:
             raise AssertionError("Asynchronous DB client is not initialized")
-        stmt = select(FileRecord).where(FileRecord.file_key == key)
+        stmt = select(FileRecord).where(
+            FileRecord.file_key == key,
+            FileRecord.is_deleted.is_(False),
+            FileRecord.project_id.isnot(None)
+        )
         result = await self.async_db_client.execute(stmt)
         db_file = result.scalars().first()
         if not db_file:
@@ -289,7 +297,11 @@ class FileManager:
         if self.db_client is None:
             raise AssertionError("Synchronous DB client is not initialized")
         # validate file ownership
-        db_file = self.db_client.query(FileRecord).filter(FileRecord.file_key == file.key).first()
+        db_file = self.db_client.query(FileRecord).filter(
+            FileRecord.file_key == file.key,
+            FileRecord.is_deleted.is_(False), 
+            FileRecord.project_id.isnot(None)
+        ).first()
         if not db_file:
             raise IOError("File record not found in database")
         if user_id and db_file.user_id != user_id: # type: ignore
@@ -321,7 +333,11 @@ class FileManager:
         if self.async_db_client is None:
             raise AssertionError("Asynchronous DB client is not initialized")
         # validate file ownership
-        stmt = select(FileRecord).where(FileRecord.file_key == file.key)
+        stmt = select(FileRecord).where(
+            FileRecord.file_key == file.key,
+            FileRecord.is_deleted.is_(False), 
+            FileRecord.project_id.isnot(None)
+        )
         result = await self.async_db_client.execute(stmt)
         db_file = result.scalars().first()
         if not db_file:
@@ -413,6 +429,8 @@ class FileManager:
         try:
             db_files = self.db_client.query(FileRecord).filter(
                 FileRecord.user_id == user_id,
+                FileRecord.is_deleted.is_(False),
+                FileRecord.project_id.isnot(None)
             ).all()
             user = self.db_client.query(UserRecord).filter(UserRecord.id == user_id).first()
             if not user:
@@ -449,7 +467,11 @@ class FileManager:
         if self.async_db_client is None:
             raise AssertionError("Asynchronous DB client is not initialized")
         try:
-            stmt = select(FileRecord).where(FileRecord.user_id == user_id)
+            stmt = select(FileRecord).where(
+                FileRecord.user_id == user_id,
+                FileRecord.is_deleted.is_(False),
+                FileRecord.project_id.isnot(None)
+            )
             result = await self.async_db_client.execute(stmt)
             db_files = result.scalars().all()
             stmt = select(UserRecord).where(UserRecord.id == user_id)
@@ -489,7 +511,11 @@ class FileManager:
         """
         if self.db_client is None:
             raise AssertionError("Synchronous DB client is not initialized")
-        db_file = self.db_client.query(FileRecord).filter(FileRecord.file_key == file.key).first()
+        db_file = self.db_client.query(FileRecord).filter(
+            FileRecord.file_key == file.key, 
+            FileRecord.is_deleted.is_(False), 
+            FileRecord.project_id.isnot(None)
+        ).first()
         if not db_file:
             return False
         try:
@@ -508,7 +534,11 @@ class FileManager:
         """
         if self.async_db_client is None:
             raise AssertionError("Asynchronous DB client is not initialized")
-        stmt = select(FileRecord).where(FileRecord.file_key == file.key)
+        stmt = select(FileRecord).where(
+            FileRecord.file_key == file.key,
+            FileRecord.is_deleted.is_(False),
+            FileRecord.project_id.isnot(None)
+        )
         result = await self.async_db_client.execute(stmt)
         db_file = result.scalars().first()
         if not db_file:

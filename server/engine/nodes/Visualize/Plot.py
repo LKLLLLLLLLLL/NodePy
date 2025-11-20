@@ -15,7 +15,7 @@ class PlotNode(BaseNode):
     """
     x_col: str
     y_col: str
-    plot_type: Literal["scatter", "line", "bar"]
+    plot_type: Literal["scatter", "line", "bar", "pie"]
     title: str | None = None
 
     @override
@@ -96,10 +96,12 @@ class PlotNode(BaseNode):
             plt.plot(x_data, y_data)
         elif self.plot_type == "bar":
             plt.bar(x_data, y_data)
+        elif self.plot_type == "pie":
+            plt.pie(y_data, labels=x_data, autopct='%1.1f%%') # type: ignore
         if self.title:
             plt.title(self.title)
-        plt.xlabel(self.x_col)
-        plt.ylabel(self.y_col)
+        plt.xlabel(self.x_col if self.plot_type != "pie" else "")
+        plt.ylabel(self.y_col if self.plot_type != "pie" else "")
         plt.grid()
         plt.tight_layout()      
         # save to byte stream
