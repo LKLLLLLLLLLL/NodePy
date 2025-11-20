@@ -61,12 +61,13 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../../common/global.scss';
-    @use '../../../common/node.scss';
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
     .NodePySelectFewLayout {
         display: flex;
         border: 1.5px solid #ccc;
         overflow: hidden;
+        font-size: $node-description-fontsize;
         .item {
             text-align: center;
             padding: 0 5px;

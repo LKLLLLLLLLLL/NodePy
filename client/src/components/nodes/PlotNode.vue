@@ -111,13 +111,13 @@
     .PlotNodeLayout {
         height: 100%;
         .data {
-            padding-top: $node-padding;
+            padding-top: $node-padding-top;
             padding-bottom: 5px;
             .input-table {
                 margin-bottom: $node-margin;
             }
             .x_col, .y_col, .plot_type, .title {
-                padding: 0 $node-padding;
+                padding: 0 $node-padding-hor;
                 margin-bottom: $node-margin;
             }
         }

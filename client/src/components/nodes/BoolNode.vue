@@ -59,12 +59,12 @@
     .BoolNodeLayout {
         height: 100%;
         .data {
-            padding-top: $node-padding;
+            padding-top: $node-padding-top;
             padding-bottom: 5px;
             .value {
                 display: flex;
                 align-items: center;
-                padding-left: $node-padding;
+                padding-left: $node-padding-hor;
             }
         }
     }

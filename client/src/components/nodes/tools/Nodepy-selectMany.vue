@@ -84,10 +84,11 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../../common/global.scss';
-    @use '../../../common/node.scss';
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
     .NodePySelectManyLayout {
         position: relative;
+        font-size: $node-description-fontsize;
         .value {
             border-radius: 6px 6px 0 0;
             padding: 2px 0 2px 10px;

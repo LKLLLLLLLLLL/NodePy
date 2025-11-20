@@ -92,7 +92,7 @@
     .NumBinComputeNodeLayout {
         height: 100%;
         .data {
-            padding-top: $node-padding;
+            padding-top: $node-padding-top;
             padding-bottom: 5px;
             .input-x {
                 margin-bottom: $node-margin;
@@ -101,7 +101,7 @@
                 margin-bottom: $node-margin;
             }
             .op {
-                padding: 0 $node-padding;
+                padding: 0 $node-padding-hor;
             }
             .output-result {
                 margin-top: $node-margin;

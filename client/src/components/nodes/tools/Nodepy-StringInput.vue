@@ -63,11 +63,12 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../../common/global.scss';
-    @use '../../../common/node.scss';
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
     .NodePyStringInputLayout {
         background: white;
         border: 1.5px solid #ccc;
+        font-size: $node-description-fontsize;
         input {
             width: 100%;
             text-align: center;

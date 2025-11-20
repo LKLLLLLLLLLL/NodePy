@@ -78,10 +78,10 @@
     .UploadNodeLayout {
         height: 100%;
         .data {
-            padding-top: $node-padding;
+            padding-top: $node-padding-top;
             padding-bottom: 5px;
             .file {
-                padding: 0 $node-padding;
+                padding: 0 $node-padding-hor;
                 .file-icon {
                     margin-left: 50%;
                     transform: translateX(-50%);

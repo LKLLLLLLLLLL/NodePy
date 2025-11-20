@@ -67,7 +67,7 @@
     .TableFromCSVNodeLayout {
         height: 100%;
         .data {
-            padding-top: $node-padding;
+            padding-top: $node-padding-top;
             padding-bottom: 5px;
             .output-table {
                 margin-top: $node-margin;

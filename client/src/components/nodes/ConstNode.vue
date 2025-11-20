@@ -99,14 +99,14 @@
     .ConstNodeLayout {
         height: 100%;
         .data {
-            padding-top: $node-padding;
+            padding-top: $node-padding-top;
             padding-bottom: 5px;
             .value {
-                padding: 0 $node-padding;
+                padding: 0 $node-padding-hor;
             }
             .data_type {
                 margin-top: $node-margin;
-                padding: 0 $node-padding;
+                padding: 0 $node-padding-hor;
             }
             .output-const {
                 margin-top: $node-margin;

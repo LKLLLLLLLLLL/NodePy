@@ -65,10 +65,10 @@
     .StringNodeLayout{
         height: 100%;
         .data {
-            padding-top: $node-padding;
+            padding-top: $node-padding-top;
             padding-bottom: 5px;
             .value {
-                padding: 0 $node-padding;
+                padding: 0 $node-padding-hor;
             }
             .output-string {
                 margin-top: $node-margin;

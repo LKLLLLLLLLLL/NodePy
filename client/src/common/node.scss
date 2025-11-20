@@ -9,7 +9,9 @@ $bool-color: #76ab0b;
 $default-type-color: gray;
 $node-width: 200px;
 $node-title-height: 30px;
-$node-padding: 10px;
+$node-padding-top: 7px;
+$node-padding-hor: 15px;
+$node-padding-bottom: 10px;
 //  node first category color
 $input-node-color: rgb(255, 102, 255);
 $compute-node-color: #00b688;
@@ -78,7 +80,7 @@ $node-description-fontsize: 16px;
 
 @mixin node-title-style {
   text-align: left;
-  padding-left: $node-padding;
+  padding-left: $node-padding-hor;
   height: $node-title-height;
   font-size: $node-title-fontsize;
   display: flex;
@@ -130,12 +132,12 @@ $node-description-fontsize: 16px;
 }
 
 .input-port-description {
-  padding-left: $node-padding;
+  padding-left: $node-padding-hor;
   font-size: $node-description-fontsize;
 }
 
 .output-port-description {
-  padding-right: $node-padding;
+  padding-right: $node-padding-hor;
   text-align: right;
   font-size: $node-description-fontsize;
 }

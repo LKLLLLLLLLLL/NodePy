@@ -183,13 +183,13 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.input
     case 'StringNode':
       return nodeCategoryColor.input
-    case 'boolNode':
+    case 'BoolNode':
       return nodeCategoryColor.input
     case 'TableNode':
       return nodeCategoryColor.input
     case 'TableFromCSVNode':
       return nodeCategoryColor.input
-    case 'NumBinComputeNode':
+    case 'NumberBinOpNode':
       return nodeCategoryColor.compute
     case 'PlotNode':
       return nodeCategoryColor.visualize

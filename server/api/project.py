@@ -300,9 +300,8 @@ async def sync_project_ui(
                 raise HTTPException(status_code=404, detail="Project not found")
             # check if ui state corresponds to the workflow by assignment
             project.ui_state = ui_state.model_dump()  # type: ignore
-            project_record = await db_client.get(ProjectRecord, project_id)
-            assert project_record is not None
             await set_project_record(db_client, project, user_id)
+            await db_client.commit()
             return
     except ProjectLockError:
         raise HTTPException(status_code=423, detail="Project is locked, it may be being edited by another process")
@@ -369,6 +368,7 @@ async def sync_project(
 
             if not need_exec:
                 response.status_code = 204  # No Content
+                await db_client.commit()
                 return None
             
             celery_task = cast(CeleryTask, execute_project_task)  # to suppress type checker error

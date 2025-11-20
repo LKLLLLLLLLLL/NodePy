@@ -15,22 +15,21 @@
             @keydown.space.prevent="toggle"
         >
             <rect 
-                class="rect" 
-                x="2" 
-                y="2" 
+                class="rect"
+                :class="{ticked: model}"
+                x="3"
+                y="3"
                 width="20" 
                 height="20" 
-                rx="3" 
-                :stroke="borderColor" 
-                fill="#eee" 
-                stroke-width="2"
+                rx="5" 
+                :fill="model ? '#108efe' : '#ddd'"
             />
             <path
                 class="tick"
-                d="M7 12l3 3 7-7"
+                d="M8 13l3 3 7-7"
                 fill="none"
                 :stroke="tickColor"
-                stroke-width="3"
+                stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 :style="{ opacity: model ? 1 : 0 }"
@@ -52,12 +51,8 @@
         },
         tickColor: {
             type: String,
-            default: '#999'
+            default: 'white'
         },
-        borderColor: {
-            type: String,
-            default: '#aaa'
-        }
     })
     const emit = defineEmits(['updateValue'])
 
@@ -70,18 +65,24 @@
 </script>
 
 <style lang="scss" scoped>
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
     .NodePyBoolValueLayout {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         user-select: none;
         background: white;
+        font-size: $node-description-fontsize;
         .box {
             cursor: pointer;
         }
         .box:hover {
             .rect {
-                fill: #ddd;
+                fill: #ccc;
+            }
+            .rect.ticked {
+                fill: #0d73cd
             }
         }
         &.has-label { 
