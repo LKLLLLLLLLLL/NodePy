@@ -6,11 +6,12 @@
                 <div class="param-description" :class="{'node-has-paramerr': valueHasErr.value}">
                     字符串
                 </div>
-                <NodepyStringInput 
-                    v-model="value" 
-                    :disabled="false" 
-                    @update-value="onUpdateValue" 
+                <NodepyStringInput
+                    v-model="value"
+                    :disabled="false"
+                    @update-value="onUpdateValue"
                     class="nodrag"
+                    placeholder="常量字符串"
                 />
             </div>
             <div class="output-string port">

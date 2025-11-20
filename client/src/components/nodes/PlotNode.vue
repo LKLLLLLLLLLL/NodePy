@@ -8,15 +8,15 @@
             </div>
             <div class="x_col">
                 <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列名</div>
-                <NodepyStringInput v-model="x_col" @update-value="onUpdateX_col" class="nodrag"/>
+                <NodepyStringInput v-model="x_col" @update-value="onUpdateX_col" class="nodrag" placeholder="x轴列名"/>
             </div>
             <div class="y_col">
                 <div class="param-description" :class="{'node-has-paramerr': y_colHasErr.value}">y轴列名</div>
-                <NodepyStringInput v-model="y_col" @update-value="onUpdateY_col" class="nodrag"/>
+                <NodepyStringInput v-model="y_col" @update-value="onUpdateY_col" class="nodrag" placeholder="y轴列名"/>
             </div>
             <div class="plot_type">
                 <div class="param-description" :class="{'node-has-paramerr': plot_typeHasErr.value}">图形类型</div>
-                <NodepySelectMany 
+                <NodepySelectMany
                     :options="plot_type_options_chinese"
                     :default-selected="defaultSelected"
                     @select-change="onSelectChange"
@@ -24,11 +24,11 @@
                 />
             </div>
             <div class="title">
-                <div class="param-description">图形标题</div>
-                <NodepyStringInput v-model="title" @update-value="onUpdateTitle" class="nodrag"/>
+                <div class="param-description">图像标题</div>
+                <NodepyStringInput v-model="title" @update-value="onUpdateTitle" class="nodrag" placeholder="图像标题"/>
             </div>
             <div class="output-plot port">
-                <div class="output-port-description">图形输出端口</div>
+                <div class="output-port-description">图像输出端口</div>
                 <Handle id="plot" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': plotHasErr}]"/>
             </div>
         </div>

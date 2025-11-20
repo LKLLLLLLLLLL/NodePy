@@ -6,16 +6,16 @@
                 <div class="param-description" :class="{'node-has-paramerr': valueHasErr.value}">
                     数值
                 </div>
-                <NodepyNumberInput 
-                    v-if="data_type == 'int'" 
-                    v-model="value" 
-                    class="nodrag" 
+                <NodepyNumberInput
+                    v-if="data_type == 'int'"
+                    v-model="value"
+                    class="nodrag"
                     @update-value="onUpdateValue"
                  />
-                <NodepyNumberInput 
-                    v-else-if="data_type == 'float'" 
-                    v-model="value" 
-                    class="nodrag" 
+                <NodepyNumberInput
+                    v-else-if="data_type == 'float'"
+                    v-model="value"
+                    class="nodrag"
                     @update-value="onUpdateValue"
                     :denominator="1000"
                 />
@@ -24,8 +24,8 @@
                 <div class="param-description">
                     类型
                 </div>
-                <NodepySelectFew 
-                    :options="data_type_options_chinese" 
+                <NodepySelectFew
+                    :options="data_type_options_chinese"
                     :default-selected="defaultSelected"
                     @select-change="onSelectChange"
                     item-width="90px"
@@ -44,15 +44,15 @@
 </template>
 
 <script lang="ts" setup>
-    import {ref, computed, watch } from 'vue'
-    import type { NodeProps } from '@vue-flow/core'
-    import { Position, Handle } from '@vue-flow/core'
-    import type {ConstNodeData} from '../../types/nodeTypes'
     import type { Type } from '@/utils/api'
+    import type { NodeProps } from '@vue-flow/core'
+    import { Handle, Position } from '@vue-flow/core'
+    import { computed, ref, watch } from 'vue'
+    import type { ConstNodeData } from '../../types/nodeTypes'
+    import { handleExecError, handleOutputError, handleParamError } from './handleError'
+    import ErrorMsg from './tools/ErrorMsg.vue'
     import NodepyNumberInput from './tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
     import NodepySelectFew from './tools/Nodepy-selectFew.vue'
-    import { handleParamError, handleExecError, handleOutputError } from './handleError'
-    import ErrorMsg from './tools/ErrorMsg.vue'
 
 
     const props = defineProps<NodeProps<ConstNodeData>>()
@@ -80,7 +80,7 @@
     }
 
     const onUpdateValue = () => {
-        props.data.param.value = Number(value.value)        
+        props.data.param.value = Number(value.value)
     }
 
 
@@ -111,7 +111,7 @@
             .output-const {
                 margin-top: $node-margin;
             }
-        }    
+        }
     }
 
 </style>

@@ -1,24 +1,23 @@
 <template>
-    <div 
-        class="NodePySelectManyLayout" 
-        ref="root" 
+    <div
+        class="NodePySelectManyLayout"
+        ref="root"
         @click.stop
     >
         <div class="value" :class="{close: !open}" @click.stop="toggle" :style="{height: itemHeight, width: itemWidth}">
             {{ selectedItem }}
             <span class="arrow" :class="{open}">
-                <svg width="10" height="12" viewBox="0 0 8 8">
-                    <path d="M1 2 L4 6 L7 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+              <SvgIcon type="mdi" :path="down_path"  />
             </span>
         </div>
 
         <div v-if="open" class="options" @click.stop>
-            <div 
+            <div
                 v-for="(item, idx) in options"
                 class="item"
                 @click.stop="select(idx)"
                 :style="itemStyle"
+                :class="{selected: selectedIdx === idx}"
             >
                 {{ item }}
             </div>
@@ -28,7 +27,11 @@
 
 <script lang="ts" setup>
     import {ref, computed, watchEffect, onBeforeUnmount} from 'vue'
+    // @ts-ignore
+    import SvgIcon from '@jamescoyle/vue-icon';
+    import { mdiMenuDown } from '@mdi/js';
 
+    const down_path = mdiMenuDown;
 
     const props = defineProps({
         options: {
@@ -86,26 +89,35 @@
 <style lang="scss" scoped>
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
+    @use './tools.scss' as *;
     .NodePySelectManyLayout {
+        @include box-tools-style;
         position: relative;
         font-size: $node-description-fontsize;
         .value {
+            @include tool-item-style;
             border-radius: 6px 6px 0 0;
-            padding: 2px 0 2px 10px;
-            background: #ddd;
             .arrow {
                 position: absolute;
                 right: 5px;
+                top: 50%;
+                transform: translateY(-50%);     /* 垂直居中显示 */
+                display: flex;
+                align-items: center;
+                color: rgba(0,0,0,0.4);
+                svg {
+                    width: 18px;
+                }
             }
             .arrow.open {
-                transform: rotate(180deg); 
+                transform: translateY(-50%) rotate(180deg);
             }
         }
         .value.close {
             border-radius: 6px;
         }
         .value:hover {
-            background: #ccc;
+            @include tool-item-style-hover;
         }
         .options {
             position: absolute;
@@ -113,17 +125,25 @@
             left: 0;
             right: 0;
             z-index: 10;
-            background: #ddd;
+            background: #eee;
             border-radius: 0 0 6px 6px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding: 2px 3px;
             .item {
-                padding: 2px 0 2px 10px;
-                background: #ddd;
+                @include tool-item-style;
+                padding: 2px;
+                border-radius: 6px;
+                margin: 0px 1px;
             }
             .item:hover {
                 background: #ccc;
             }
-            .item:last-child {
-                border-radius: 0 0 6px 6px;
+            .item.selected {
+                background: $hover-stress-color;
+                color: white;
             }
         }
     }

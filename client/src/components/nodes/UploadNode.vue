@@ -4,7 +4,12 @@
         <div class="data">
             <div class="file">
                 <div class="param-description" :class="{'node-has-paramerr': fileHasErr.value}">上传文件</div>
-                <svg-icon type="mdi" :path="mdiAddFile" @click="addFile" class="file-icon"></svg-icon>
+                <div class="file-upload-component" @click="addFile">
+                    <div class="file-name" :class="{'has-no-file': !data.param.file}">
+                        {{data.param.file ? data.param.file.filename : '点击上传文件'}}
+                    </div>
+                    <svg-icon type="mdi" :path="mdiAddFile" @click="addFile" class="file-icon"></svg-icon>
+                </div>
             </div>
             <div class="output-file port">
                 <div class="output-port-description">文件输出端口</div>
@@ -18,7 +23,7 @@
 <script lang="ts" setup>
     //@ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon';
-    import { mdiFilePlus } from '@mdi/js';
+    import { mdiPlus } from '@mdi/js';
     import {ref, computed, watch } from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
@@ -29,7 +34,7 @@
     import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory'
     import ErrorMsg from './tools/ErrorMsg.vue'
 
-    const mdiAddFile: string = mdiFilePlus
+    const mdiAddFile: string = mdiPlus
     const props = defineProps<NodeProps<UploadNodeData>>()
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['file']?.type || 'default')
     const fileOutputHasErr = computed(() => handleOutputError(props.id, 'file'))
@@ -75,6 +80,7 @@
 <style lang="scss" scoped>
     @use '../../common/global.scss' as *;
     @use '../../common/node.scss' as *;
+    @use './tools/tools.scss' as *;
     .UploadNodeLayout {
         height: 100%;
         .data {
@@ -82,9 +88,27 @@
             padding-bottom: 5px;
             .file {
                 padding: 0 $node-padding-hor;
-                .file-icon {
-                    margin-left: 50%;
-                    transform: translateX(-50%);
+                .file-upload-component {
+                    @include box-tools-style;
+                    position: relative;
+                    margin-top: 5px;
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+                    .file-name {
+                        @include tool-item-style;
+                        text-align: center;
+                        width: 100%;
+                    }
+                    .has-no-file {
+                        color: rgba(0,0,0,0.2);
+                    }
+                    .file-icon {
+                        position:absolute;
+                        right: 5px;
+                        width:18px;
+                        color: rgba(0,0,0,0.4);
+                    }
                 }
             }
             .output-file {

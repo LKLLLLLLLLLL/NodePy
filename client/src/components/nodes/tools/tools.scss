@@ -1,0 +1,23 @@
+@use '../../../common/global.scss' as *;
+@use '../../../common/node.scss' as *;
+
+@mixin box-tools-style{
+    border-radius: 6px;
+    height: auto;
+    background-color: #eee;
+}
+
+@mixin tool-item-style{
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: #eee;
+    text-align: center;
+    font-size: 14px;
+    padding: 3px 0;
+}
+
+@mixin tool-item-style-hover{
+    @include tool-item-style;
+    background-color: #ddd;
+}
+

@@ -1,6 +1,7 @@
 @use "sass:color";
 @use "sass:math";
 $stress-color: #108efe;
+$hover-stress-color: color.scale($stress-color, $lightness: -10%);
 /* expose SASS variable as a runtime CSS custom property so components can use it */
 :root {
   --stress-color: #{$stress-color};

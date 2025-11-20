@@ -7,21 +7,21 @@
         tabindex="0"
     >
         <span class="label" :style="{lineHeight: height}"><slot/></span>
-        <svg 
-            class="box nodrag" 
-            viewBox="0 0 24 24" 
-            :style="{width: width, height: height}" 
-            @click.stop="toggle" 
+        <svg
+            class="box nodrag"
+            viewBox="0 0 24 24"
+            :style="{width: width, height: height}"
+            @click.stop="toggle"
             @keydown.space.prevent="toggle"
         >
-            <rect 
+            <rect
                 class="rect"
                 :class="{ticked: model}"
                 x="3"
                 y="3"
-                width="20" 
-                height="20" 
-                rx="5" 
+                width="20"
+                height="20"
+                rx="5"
                 :fill="model ? '#108efe' : '#ddd'"
             />
             <path
@@ -56,7 +56,7 @@
     })
     const emit = defineEmits(['updateValue'])
 
-    
+
     const toggle = () => {
         model.value = !model.value
         emit('updateValue')
@@ -82,10 +82,10 @@
                 fill: #ccc;
             }
             .rect.ticked {
-                fill: #0d73cd
+                fill: $hover-stress-color;
             }
         }
-        &.has-label { 
+        &.has-label {
             gap: 6px;
         }
     }

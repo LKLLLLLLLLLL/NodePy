@@ -1,13 +1,14 @@
 <template>
-    <div 
-        class="NodePyStringInputLayout nodes-innertool-border-radius" 
+    <div
+        class="NodePyStringInputLayout nodes-innertool-border-radius"
         :class="{disabled: disabled}"
         :style="{width: width, height: height}"
         @click.stop
     >
-        <input 
+        <input
             ref="inputEl"
-            v-model="editText" 
+            :placeholder="placeholder"
+            v-model="editText"
             :disabled="disabled"
             type="text"
             @focus="startEdit"
@@ -34,6 +35,10 @@
         width: {
             type: String,
             default: '100%'
+        },
+        placeholder: {
+            type: String,
+            default: '请输入...'
         }
     })
     const editText = ref(model.value)
@@ -65,14 +70,20 @@
 <style lang="scss" scoped>
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
+    @use './tools.scss' as *;
     .NodePyStringInputLayout {
-        background: white;
-        border: 1.5px solid #ccc;
+        @include box-tools-style;
+        // background: white;
+        // border: 1.5px solid #ccc;
         font-size: $node-description-fontsize;
         input {
+            @include tool-item-style;
             width: 100%;
             text-align: center;
             outline: none;
+            &::placeholder {
+                color: rgba(0,0,0,0.2);
+            }
         }
     }
     .disabled {

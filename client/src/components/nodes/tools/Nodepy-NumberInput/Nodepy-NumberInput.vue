@@ -1,35 +1,27 @@
 <template>
-    <div 
-        class="NodepyNumberInputLayout nodes-innertool-border-radius" 
-        :style="{width: width, height: height}" 
+    <div
+        class="NodepyNumberInputLayout nodes-innertool-border-radius"
+        :style="{width: width, height: height}"
         @click.stop
     >
         <div class="left-arrow" @click="onClick(-1)">
-            <span>
-                <svg width="10" height="12" viewBox="0 0 8 8">
-                    <path d="M6 1 L2 4 L6 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </span>
+            <SvgIcon type="mdi" :path="mdi_left_path"  />
         </div>
         <div v-if="!isEditing" class="value" @mousedown="handleLeftMouseDown">
             <span>{{ (model ?? 0).toFixed(local.fixed) }}</span>
         </div>
         <div class="value-input" v-else>
-            <input 
-            ref="inputEl" 
-            v-model="editText" 
-            @blur="commitEdit" 
-            @keydown.enter="commitEdit" 
-            @keydown.esc="cancelEdit" 
+            <input
+            ref="inputEl"
+            v-model="editText"
+            @blur="commitEdit"
+            @keydown.enter="commitEdit"
+            @keydown.esc="cancelEdit"
             type="text"
             />
         </div>
         <div class="right-arrow" @click="onClick(1)">
-            <span>
-                <svg width="10" height="12" viewBox="0 0 8 8">
-                    <path d="M2 1 L6 4 L2 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </span>
+            <SvgIcon type="mdi" :path="mdi_right_path"  />
         </div>
     </div>
 </template>
@@ -38,6 +30,12 @@
     import {computed, ref, nextTick} from 'vue'
     import { usePointerLock } from './usePointerLock'
     import type { NumberFieldProps } from './NumberFieldProps'
+    // @ts-ignore
+    import SvgIcon from '@jamescoyle/vue-icon';
+    import { mdiMenuLeft, mdiMenuRight } from '@mdi/js';
+
+    const mdi_left_path = mdiMenuLeft;
+    const mdi_right_path = mdiMenuRight;
 
     const props = withDefaults(defineProps<NumberFieldProps>(), {
         denominator: 1,
@@ -73,7 +71,7 @@
 
     const update = (relative: number, acceleration: number = 1) => {
       if (model.value === undefined) return
-    
+
       const step = 1 / local.value.denominator
       const effectiveMovement = relative * acceleration
       const newValue = normalize(model.value + (effectiveMovement * step), local.value.denominator)
@@ -144,33 +142,37 @@
 <style lang="scss" scoped>
     @use '../../../../common/global.scss' as *;
     @use '../../../../common/node.scss' as *;
+    @use '../tools.scss' as *;
     .NodepyNumberInputLayout {
+        @include box-tools-style;
         display: flex;
         justify-content: center;
         align-items: center;
         overflow: hidden;
-        border: 1.5px solid #ccc;
         font-size: $node-description-fontsize;
         .left-arrow {
             width: 20px;
-            background: #ddd;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            color: rgba(0,0,0,0.4);
+            border-radius: 5px;
+            margin-left: 2px;
         }
         .left-arrow:hover {
-            background: #ccc;
+            background: #ddd;
         }
         .value {
+            @include tool-item-style;
             width: 100%;
             text-align: center;
-            background: white;
-            cursor: text;
+            cursor: ew-resize;
         }
         .value-input {
+            @include tool-item-style;
             width: 100%;
-            background: white;
             input {
                 width: 100%;
                 text-align: center;
@@ -178,15 +180,17 @@
             }
         }
         .right-arrow {
-            width: 20px;
-            background: #ddd;
+            width: 20px;;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            color: rgba(0,0,0,0.4);
+            border-radius: 5px;
+            margin-right: 2px;
         }
         .right-arrow:hover {
-            background: #ccc;
+            background: #ddd;
         }
     }
 </style>

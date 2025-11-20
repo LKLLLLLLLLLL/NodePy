@@ -1,9 +1,9 @@
 <template>
     <div class="NodePySelectFewLayout nodes-innertool-border-radius" @click.stop>
-        <div 
-            class="item" 
-            :class="{selected: selectedIdx.includes(index)}" 
-            :style="{width: itemWidth, height: itemHeight}" 
+        <div
+            class="item"
+            :class="{selected: selectedIdx.includes(index)}"
+            :style="{width: itemWidth, height: itemHeight}"
             @click.stop="onClick(index)"
             v-for="(item, index) in options"
         >
@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-    import {ref, type PropType} from 'vue'
+    import { ref, type PropType } from 'vue'
     const props = defineProps({
         options: {
             type: Array,
@@ -63,24 +63,26 @@
 <style lang="scss" scoped>
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
+    @use './tools.scss' as *;
     .NodePySelectFewLayout {
+      @include box-tools-style;
         display: flex;
-        border: 1.5px solid #ccc;
         overflow: hidden;
+        gap:2px;
         font-size: $node-description-fontsize;
         .item {
-            text-align: center;
-            padding: 0 5px;
-            background: #fff;
+            @include tool-item-style;
         }
         .item:hover:not(.selected) {
-            background: #ccc;
+            @include tool-item-style-hover;
         }
         .item:hover.selected {
-            background: #999;
+            background: $hover-stress-color;
+            color: white;
         }
         .selected {
-            background: #aaa;
+            background: $stress-color;
+            color: white;
         }
     }
 

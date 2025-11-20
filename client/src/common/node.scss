@@ -10,7 +10,7 @@ $default-type-color: gray;
 $node-width: 200px;
 $node-title-height: 30px;
 $node-padding-top: 7px;
-$node-padding-hor: 15px;
+$node-padding-hor: 12px;
 $node-padding-bottom: 10px;
 //  node first category color
 $input-node-color: rgb(255, 102, 255);
@@ -23,7 +23,7 @@ $utils-node-color: rgb(183, 0, 70);
 $visualize-node-color: #7572d2;
 $node-margin: 10px;
 $node-title-fontsize: 18px;
-$node-description-fontsize: 16px;
+$node-description-fontsize: 15px;
 
 
 .nodes-style {
@@ -36,10 +36,6 @@ $node-description-fontsize: 16px;
 
 .nodes-topchild-border-radius {
   border-radius: 9px 9px 0 0;
-}
-
-.nodes-innertool-border-radius {
-  border-radius: 6px;
 }
 
 .nodes-selected {
@@ -134,6 +130,7 @@ $node-description-fontsize: 16px;
 .input-port-description {
   padding-left: $node-padding-hor;
   font-size: $node-description-fontsize;
+  margin-left: 5px;
 }
 
 .output-port-description {
@@ -145,6 +142,7 @@ $node-description-fontsize: 16px;
 .param-description {
   font-size: $node-description-fontsize;
   margin-bottom: 2px;
+  margin-left: 5px;
 }
 
 .node-has-paramerr {
