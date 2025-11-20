@@ -17,7 +17,7 @@
             <div class="plot_type">
                 <div class="param-description" :class="{'node-has-paramerr': plot_typeHasErr.value}">图形类型</div>
                 <NodepySelectFew
-                    :options="plot_type_options"
+                    :options="plot_type_options_chinese"
                     :select-max-num="1"
                     :defualt-selected="defaultSelected"
                     @select-change="onSelectChange"
@@ -56,6 +56,7 @@
     const y_col = ref(props.data.param.y_col)
     const title = ref(props.data.param.title || '')
     const plot_type_options = ['bar', 'line', 'scatter']
+    const plot_type_options_chinese = ['条形图', '折线图', '散点图']
     const defaultSelected = [plot_type_options.indexOf(props.data.param.plot_type)]
     const table_type = computed(() => getInputType(props.id, 'input'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['plot']?.type || 'default')

@@ -19,7 +19,7 @@
                     运算类型
                 </div>
                 <NodepySelectMany 
-                    :options="op"
+                    :options="opChinese"
                     :default-selected="defaultSelected"
                     @select-change="onSelectChange"
                     class="nodrag"
@@ -50,6 +50,7 @@
 
     const props = defineProps<NodeProps<NumberBinOpNodeData>>()
     const op = ['ADD', 'SUB', 'MUL', 'DIV', 'POW']
+    const opChinese = ['加法', '减法', '乘法', '除法', '乘方']
     const defaultSelected = op.indexOf(props.data.param.op)
     const x_type = computed(() => getInputType(props.id, 'x'))
     const y_type = computed(() => getInputType(props.id, 'y'))

@@ -25,7 +25,7 @@
                     类型
                 </div>
                 <NodepySelectFew 
-                    :options="data_type_options" 
+                    :options="data_type_options_chinese" 
                     :defualt-selected="defaultSelected"
                     @select-change="onSelectChange"
                     item-width="90px"
@@ -60,6 +60,7 @@
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
     const constHasErr = computed(() => handleOutputError(props.id, 'const'))
     const data_type_options = ['int', 'float']
+    const data_type_options_chinese = ['整数', '浮点数']
     const defaultSelected = [data_type_options.indexOf(props.data.param.data_type)]
     const data_type = ref(props.data.param.data_type)
     const errMsg = ref<string[]>([])

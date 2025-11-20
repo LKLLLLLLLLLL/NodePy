@@ -84,7 +84,8 @@
 
     const { requestLock } = usePointerLock({
       onMove: (relative, acceleration) => update(relative.x, acceleration),
-      onDragEnd: () => {emit('updateValue')}
+      onDragEnd: () => {emit('updateValue')},
+      denominator: props.denominator
     })
 
     const handleLeftMouseDown = (e: MouseEvent) => {

@@ -5,7 +5,7 @@ export interface Position {
   y: number
 }
 
-export function usePointerLock(params: { onMove: (movement: Position, acceleration: number) => void, onDragEnd?: () => void }) {
+export function usePointerLock(params: { onMove: (movement: Position, acceleration: number) => void, onDragEnd?: () => void, denominator: number }) {
   const isLocked = ref(false)
   const isDragging = ref(false)
   const totalMovement = ref(0)
@@ -17,7 +17,7 @@ export function usePointerLock(params: { onMove: (movement: Position, accelerati
   const handleMove = (e: PointerEvent) => {
     if (!isLocked.value || !isDragging.value) return
     totalMovement.value += Math.abs(e.movementX)
-    const acceleration = 1 + Math.log1p(totalMovement.value)  //  the farther the user move, the faster the number increases
+    const acceleration = 1 + 0.1 * Math.log1p(totalMovement.value) * params.denominator //  the farther the user moves, the faster the number increases
     params.onMove({ x: e.movementX, y: e.movementY }, acceleration)
   }
 
