@@ -569,7 +569,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "pygments" },
     { name = "pytest" },
     { name = "stats-code" },
     { name = "taskipy" },
@@ -608,7 +607,6 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "pygments", specifier = ">=2.19.2" },
     { name = "pytest", specifier = ">=8.4.2" },
     { name = "stats-code", specifier = ">=0.1.5" },
     { name = "taskipy", specifier = ">=1.13.0" },
