@@ -111,10 +111,11 @@ class FileRecord(Base):
     file_key = Column(String, index=True, nullable=False) # MinIO object key
     format = Column(Enum("jpg", "png", "csv", "pdf", name="file_format"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
-    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), index=True, nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="SET NULL"), index=True, nullable=True) # do not cascade delete, the delete will be handled in trigger
     node_id = Column(String, nullable=False, index=True) # ID of the node that generated the file
     file_size = Column(BigInteger, nullable=False) # Byte
     last_modify_time = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())   
+    is_deleted = Column(Boolean, default=False, nullable=False)
     
     # allow to file entry with same(user_id, project_id, node_id)
     # they will be clean up in periodic task 
@@ -128,13 +129,17 @@ def file_size_trigger(conn) -> None:
             total_occupy BIGINT;
             user_limit BIGINT;
         BEGIN
+            -- calculate current total storage used by the user, ignore soft-deleted files
             SELECT COALESCE(SUM(file_size), 0) INTO total_occupy
             FROM files
-            WHERE user_id = NEW.user_id;
+            WHERE user_id = NEW.user_id AND is_deleted = FALSE AND project_id IS NOT NULL;
+
             SELECT file_total_space INTO user_limit
             FROM users
             WHERE id = NEW.user_id;
-            IF total_occupy > user_limit THEN
+
+            -- raise exception if limit exceeded
+            IF (total_occupy + NEW.file_size) > user_limit THEN
                 RAISE EXCEPTION 'User storage limit exceeded';
             END IF;
             RETURN NEW;
@@ -152,47 +157,14 @@ def file_size_trigger(conn) -> None:
     )
     conn.commit()
 
-def data_cleanup_trigger(conn) -> None:
-    conn.execute(
-        text("""
-        CREATE OR REPLACE FUNCTION cleanup_data_on_project_change() RETURNS trigger AS $$
-        DECLARE
-            node_ids TEXT[];
-        BEGIN
-            -- extract all node ids from workflow
-            SELECT ARRAY_AGG(node->>'id') INTO node_ids
-            FROM JSON_ARRAY_ELEMENTS(NEW.workflow->'nodes') AS node;
-
-            -- delete data that belongs to the project and whose node_id is not in the node_ids list
-            DELETE FROM data
-            WHERE project_id = NEW.id
-              AND node_id IS NOT NULL
-              AND node_id <> ALL(node_ids);
-
-            RETURN NEW;
-        END;
-        $$ LANGUAGE plpgsql;
-        """)
-    )
-    conn.execute(
-        text("""
-        DROP TRIGGER IF EXISTS cleanup_data_after_project_update ON projects;
-        CREATE TRIGGER cleanup_data_after_project_update
-        AFTER UPDATE OF workflow ON projects
-        FOR EACH ROW
-        EXECUTE FUNCTION cleanup_data_on_project_change();
-        """)
-    )
-    conn.commit()
-
 def init_database() -> None:
     """ Initialize the database: create tables and triggers """
+    global engine
     # Create database tables
     Base.metadata.create_all(bind=engine)
     # Create triggers
     with engine.connect() as conn:
         file_size_trigger(conn)
-        data_cleanup_trigger(conn)
 
 class DatabaseTransaction:
     """

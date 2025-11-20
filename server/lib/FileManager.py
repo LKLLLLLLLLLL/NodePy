@@ -1,23 +1,22 @@
 import asyncio
-import datetime
 import io
 import os
 import time
 from typing import Literal, cast
-from urllib.parse import quote, unquote
+from urllib.parse import quote
 from uuid import uuid4
 
 from loguru import logger
 from minio import Minio, S3Error
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from server.celery import celery_app
-from server.models.data import Data, DataRef, DataView
+from server.lib.DataManager import DataManager
+from server.models.data import DataRef
 from server.models.database import (
     FileRecord,
-    NodeOutputRecord,
     ProjectRecord,
     UserRecord,
     get_session,
@@ -46,19 +45,58 @@ class FileManager:
             secure=False  # MinIO in Docker is HTTP, not HTTPS
         )
         if async_db_session:
+            assert sync_db_session is None
             self.db_client = None
             self.async_db_client = async_db_session
         elif sync_db_session:
+            assert async_db_session is None
             self.db_client = sync_db_session
             self.async_db_client = None
         else:
-            self.db_client = next(get_session())
-            self.async_db_client = None
+            raise AssertionError("Either async_db_session or sync_db_session must be provided")
         self.bucket = "nodepy-files"
         # Ensure bucket exists
         if not self.minio_client.bucket_exists(self.bucket):
             self.minio_client.make_bucket(self.bucket)
 
+
+    def _cal_user_occupy_sync(self, user_id: int) -> int:
+        """ Calculate the total file occupy for a user """
+        if self.db_client is None:
+            raise AssertionError("Synchronous DB client is not initialized")
+        total = self.db_client.query(FileRecord).with_entities(
+            FileRecord.file_size
+        ).filter(
+            FileRecord.user_id == user_id,
+            FileRecord.is_deleted.is_(False),  # type: ignore
+            FileRecord.project_id.isnot(None)
+        ).all()
+        return sum(size for (size,) in total)  # type: ignore
+
+    async def _cal_user_occupy_async(self, user_id: int) -> int:
+        """ Calculate the total file occupy for a user """
+        if self.async_db_client is None:
+            raise AssertionError("Asynchronous DB client is not initialized")
+        stmt = select(FileRecord.file_size).where(
+            FileRecord.user_id == user_id, 
+            FileRecord.is_deleted.is_(False),  # type: ignore
+            FileRecord.project_id.isnot(None)
+        )
+        result = await self.async_db_client.execute(stmt)
+        total = result.scalars().all()
+        return sum(size for size in total)  # type: ignore
+
+    def _get_col_types(self, content: bytes) -> dict[str, ColType]:
+        import pandas
+        
+        df = pandas.read_csv(io.StringIO(content.decode('utf-8')))
+        col_types = {}
+        for col in df.columns:
+            dtype = df[col].dtype
+            col_type = ColType.from_ptype(dtype)
+            col_types[col] = col_type
+        return col_types
+    
     def get_file_by_key_sync(self, key: str) -> File:
         """ Get a File object by its key """
         if not self.db_client:
@@ -88,36 +126,6 @@ class FileManager:
             size=db_file.file_size,  # type: ignore
         )
 
-    def _cal_user_occupy_sync(self, user_id: int) -> int:
-        """ Calculate the total file occupy for a user """
-        if self.db_client is None:
-            raise AssertionError("Synchronous DB client is not initialized")
-        total = self.db_client.query(FileRecord).with_entities(
-            FileRecord.file_size
-        ).filter(
-            FileRecord.user_id == user_id
-        ).all()
-        return sum(size for (size,) in total)  # type: ignore
-
-    async def _cal_user_occupy_async(self, user_id: int) -> int:
-        """ Calculate the total file occupy for a user """
-        if self.async_db_client is None:
-            raise AssertionError("Asynchronous DB client is not initialized")
-        stmt = select(FileRecord.file_size).where(FileRecord.user_id == user_id)
-        result = await self.async_db_client.execute(stmt)
-        total = result.scalars().all()
-        return sum(size for size in total)  # type: ignore
-
-    def _get_col_types(self, content: bytes) -> dict[str, ColType]:
-        import pandas
-        
-        df = pandas.read_csv(io.StringIO(content.decode('utf-8')))
-        col_types = {}
-        for col in df.columns:
-            dtype = df[col].dtype
-            col_type = ColType.from_ptype(dtype)
-            col_types[col] = col_type
-        return col_types
     """
     For unsupport lib, you can use write method like this:
     ```py
@@ -351,7 +359,11 @@ class FileManager:
         """Read content from a file"""
         if self.db_client is None:
             raise AssertionError("Synchronous DB client is not initialized")
-        db_file = self.db_client.query(FileRecord).filter(FileRecord.file_key == file.key).first()
+        db_file = self.db_client.query(FileRecord).filter(
+            FileRecord.file_key == file.key, 
+            FileRecord.is_deleted.is_(False), 
+            FileRecord.project_id.isnot(None)
+        ).first()
         if not db_file:
             raise ValueError("File record not found in database")
         if user_id and db_file.user_id != user_id: # type: ignore
@@ -371,7 +383,11 @@ class FileManager:
         """Read content from a file"""
         if self.async_db_client is None:
             raise AssertionError("Asynchronous DB client is not initialized")
-        stmt = select(FileRecord).where(FileRecord.file_key == file.key)
+        stmt = select(FileRecord).where(
+            FileRecord.file_key == file.key,
+            FileRecord.is_deleted.is_(False),
+            FileRecord.project_id.isnot(None)
+        )
         result = await self.async_db_client.execute(stmt)
         db_file = result.scalars().first()
         if not db_file:
@@ -506,91 +522,118 @@ class FileManager:
             return True
         except S3Error:
             return False
-    
+
+    def clean_orphan_file_sync(self, project_id: int) -> None:
+        """ Flag files with no project reference it deleted in the database """
+        if self.db_client is None:
+            raise AssertionError("Synchronous DB client is not initialized")
+        data_manager = DataManager(sync_db_session=self.db_client)
+        try:
+            # 1. get workflow of the project
+            project_record = self.db_client.query(ProjectRecord).filter(ProjectRecord.id == project_id).first()
+            if not project_record:
+                raise ValueError("Project not found")
+            workflow = ProjWorkflow.model_validate(project_record.workflow)  # type: ignore
+            # 2. get all dataref from workflow
+            nodes = workflow.nodes
+            referenced_data_ids = set()
+            for node in nodes:
+                for data_ref in node.data_out.values():
+                    referenced_data_ids.add(data_ref.data_id)
+            # 3. get data payloads for file keys
+            referenced_file_keys = set()
+            for data_id in referenced_data_ids:
+                data = data_manager.read_sync(data_ref = DataRef(data_id=data_id))
+                if data.extract_schema().type == Schema.Type.FILE:
+                    file_payload = data.payload
+                    assert isinstance(file_payload, File)
+                    referenced_file_keys.add(file_payload.key)
+            # 4. get file keys referenced in node parameters
+            for node in nodes:
+                for param in node.param.values():
+                    logger.debug(f"Checking param: {param}")
+                    try:
+                        file = File.model_validate(param)
+                        logger.debug(f"Found referenced file {file.filename} with key {file.key}")
+                        referenced_file_keys.add(file.key)
+                    except Exception:
+                        continue
+
+            # 5. flag files not in referenced_file_keys as deleted
+            all_file_records = self.db_client.query(FileRecord).filter(
+                FileRecord.project_id == project_id,
+                FileRecord.is_deleted.is_(False)  # type: ignore
+            ).all()
+            soft_delete_files = []
+            for file_record in all_file_records:
+                if file_record.file_key not in referenced_file_keys:
+                    file_record.is_deleted = True  # type: ignore
+                    soft_delete_files.append(file_record.filename)
+            self.db_client.commit()
+            logger.info(f"Soft deleted {len(soft_delete_files)} orphan files for project {project_id}")
+        except Exception as e:
+            logger.exception(f"Failed to flag orphan files: {e}")
+            self.db_client.rollback()
+            raise IOError(f"Failed to flag orphan files: {e}")
+
 @celery_app.task
-def cleanup_orphan_files_task():
+def cleanup_soft_deleted_files_task():
     """
-    A periodic Celery task to clean up orphan files in MinIO that are not referenced in the database.
+    A periodic Celery task to clean up files that are marked as deleted in the database.
     """
     start_time = time.perf_counter()
     db_client = next(get_session())
-    file_manager = FileManager(async_db_session=None, sync_db_session=db_client)
-    minio_client = Minio(
-        endpoint=os.getenv("MINIO_ENDPOINT", ""),
-        access_key=os.getenv("MINIO_ROOT_USER", ""),
-        secret_key=os.getenv("MINIO_ROOT_PASSWORD", ""),
-        secure=False  # MinIO in Docker is HTTP, not HTTPS
-    )
-    try:
-        # step 0: lock projects table and file records table to avoid concurrent modification
-        db_client.execute(text("LOCK TABLE projects IN ACCESS EXCLUSIVE MODE"))
-        db_client.execute(text("LOCK TABLE files IN ACCESS EXCLUSIVE MODE"))
+    file_manager = FileManager(sync_db_session=db_client)
 
-        # step 1: delete files which not exist in projects' workflow
-        logger.info("Starting cleanup of orphan files...")
-        
-        # 1. get all existing file_keys from projects' workflow
-        all_projects = db_client.query(ProjectRecord).all()
-        valid_file_keys = set()
-        for project in all_projects:
-            if not project.workflow: # type: ignore
-                continue
-            workflow_data = project.workflow
-            workflow = ProjWorkflow.model_validate(workflow_data)
-            for node in workflow.nodes:
-                for _, data_ref in node.data_out.items():
-                    assert isinstance(data_ref, DataRef)
-                    # get data record from db
-                    data_record = db_client.query(NodeOutputRecord).filter(NodeOutputRecord.id == data_ref.data_id).first()
-                    data_view = DataView.model_validate(data_record.data)  # type: ignore
-                    data = Data.from_view(data_view)
-                    if data.extract_schema().type != Schema.Type.FILE:
-                        continue
-                    valid_file_keys.add(data.payload.key) # type: ignore
-        # 2. list all files keys from db
-        all_files = db_client.query(FileRecord).all()
-        
-        orphan_files: list[FileRecord] = []
-        for db_file in all_files:
-            modify_time = db_file.last_modify_time
-            if (datetime.datetime.now(datetime.timezone.utc) - modify_time).total_seconds() < 3600: # 1 hour
-                continue  # skip files modified within the last hour
-            if db_file.file_key not in valid_file_keys:
-                orphan_files.append(db_file)
-        if not orphan_files:
-            logger.info("No orphan files found.")
-        
-        logger.debug(f"Found {len(orphan_files)} orphan files to delete: {[file.filename for file in orphan_files]}")
-        
-        # 3. delete orphan files from MinIO and database
-        for file_record in orphan_files:
+    deleted_count = 0
+    try:
+        # 1. get all files marked as deleted or the project_id is null in database
+        soft_deleted_files = db_client.query(FileRecord).filter(
+            FileRecord.is_deleted.is_(True)  | (FileRecord.project_id.is_(None))  # type: ignore
+        ).all()
+
+        if not soft_deleted_files:
+            logger.info("No soft-deleted files to clean up.")
+            return
+
+        logger.debug(f"Soft-deleted files to delete: {[file.filename for file in soft_deleted_files]}")
+        logger.info(f"Found {len(soft_deleted_files)} soft-deleted files to permanently delete.")
+
+        # 2. Delete them from MinIO and database
+        for file_record in soft_deleted_files:
             try:
-                file_to_delete = file_manager.get_file_by_key_sync(file_record.file_key) # type: ignore
-                file_manager.delete_sync(file_to_delete, user_id=None)  # Admin operation
-            except Exception as e:
-                logger.error(f"Failed to delete orphan file {file_record.file_key}: {e}")
-        db_client.commit()
-        logger.info(f"Database orphan file cleanup completed. Deleted {len(orphan_files)} orphan files.")
-        
-        # step 2: delete files in MinIO not in database
-        objects = file_manager.minio_client.list_objects(bucket_name=file_manager.bucket, recursive=True)
-        db_file_keys = set([db_file.file_key for db_file in db_client.query(FileRecord.file_key).all()])
-        deleted_obj = []
-        for obj in objects:
-            if obj.object_name not in db_file_keys:
-                assert isinstance(obj.object_name, str)
-                try:
-                    minio_client.remove_object(
-                        bucket_name=file_manager.bucket,
-                        object_name=obj.object_name
+                # Delete from MinIO
+                file_manager.minio_client.remove_object(
+                    bucket_name=file_manager.bucket, object_name=file_record.file_key # type: ignore
+                )
+                # Delete from database
+                db_client.delete(file_record)
+                deleted_count += 1
+            except S3Error as e:
+                # If the file does not exist in MinIO, continue deleting the database record
+                if e.code == "NoSuchKey":
+                    logger.warning(
+                        f"File {file_record.file_key} not found in MinIO, but deleting from DB."
                     )
-                    deleted_obj.append(unquote(obj.object_name))
-                except Exception as e:
-                    logger.exception(f"Failed to delete orphan MinIO file {obj.object_name}: {e}")
-        logger.debug(f"Deleted {len(deleted_obj)} orphan MinIO files: {deleted_obj}")
-        logger.info("MinIO orphan file cleanup completed.")
+                    db_client.delete(file_record)
+                    deleted_count += 1
+                else:
+                    logger.error(
+                        f"Failed to delete orphan file {file_record.file_key} from MinIO: {e}"
+                    )
+            except Exception as e:
+                logger.error(
+                    f"Failed to delete orphan file record {file_record.file_key} from DB: {e}"
+                )
+
+        db_client.commit()
+        logger.info(f"Cleanup completed. Permanently deleted {deleted_count} files.")
+
     except Exception as e:
-        logger.exception(f"Failed to clean up orphan files: {e}")
+        logger.exception(f"An error occurred during orphan file cleanup task: {e}")
+        db_client.rollback()
     finally:
         db_client.close()
-        logger.info(f"Orphan file cleanup task completed in {time.perf_counter() - start_time:.2f} seconds.")
+        logger.info(
+            f"Orphan file cleanup task finished in {time.perf_counter() - start_time:.2f} seconds."
+        )

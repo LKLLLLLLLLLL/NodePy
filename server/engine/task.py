@@ -6,23 +6,22 @@ from typing import Any, Literal
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.result import AsyncResult
 from loguru import logger
-from sqlalchemy.dialects.postgresql import insert
 
 from server.celery import celery_app
 from server.lib.CacheManager import CacheManager
+from server.lib.DataManager import DataManager
 from server.lib.FileManager import FileManager
 from server.lib.ProjectLock import ProjectLock
 from server.lib.StreamQueue import Status, StreamQueue
 from server.lib.utils import get_project_by_id_sync, set_project_record_sync
-from server.models.data import Data, DataView
-from server.models.database import DatabaseTransaction, NodeOutputRecord
+from server.models.data import Data
+from server.models.database import DatabaseTransaction
 from server.models.exception import (
     NodeExecutionError,
     NodeParameterError,
     NodeValidationError,
 )
 from server.models.project import (
-    DataRef,
     ProjNodeError,
     ProjWorkflow,
     ProjWorkflowPatch,
@@ -74,6 +73,8 @@ def execute_project_task(self, project_id: int, user_id: int):
           StreamQueue(task_id) as queue, 
           DatabaseTransaction() as db_client
         ):
+        file_manager = FileManager(sync_db_session=db_client)  # sync version
+        data_manager = DataManager(sync_db_session=db_client)  # sync version
         # 0. get old workflow from db
         project = get_project_by_id_sync(db_client, project_id, user_id)
         if project is None:
@@ -120,7 +121,6 @@ def execute_project_task(self, project_id: int, user_id: int):
             graph = None
             # 2. Validate data model
             try:
-                file_manager = FileManager(sync_db_session=db_client)  # sync version
                 cache_manager = CacheManager()
                 graph = ProjectExecutor(file_manager=file_manager, cache_manager=cache_manager, topology=topo_graph, user_id=user_id)
                 queue.push_message_sync(
@@ -198,28 +198,6 @@ def execute_project_task(self, project_id: int, user_id: int):
                     workflow.apply_patch(patch)
                 return True # continue execution for other nodes
             graph.construct_nodes(callback=construct_reporter)
-            # if has_exception:
-            #     # cleanup all data output (schemas have been cleaned in step 1)
-            #     patches = workflow.generate_del_data_patches()
-            #     for patch in patches:
-            #         workflow.apply_patch(patch)
-            #         queue.push_message_sync(
-            #             Status.IN_PROGRESS,
-            #             {"stage": "CONSTRUCTION",
-            #                 "status": "IN_PROGRESS",
-            #                 "patch": [patch.model_dump()]
-            #             }
-            #         )
-            #     queue.push_message_sync(
-            #         Status.FAILURE, 
-            #         {"stage": "CONSTRUCTION", "status": "FAILURE"}
-            #     )
-            #     return  # stop execution if construction failed
-            # else:
-            #     queue.push_message_sync(
-            #         Status.IN_PROGRESS, 
-            #         {"stage": "CONSTRUCTION", "status": "SUCCESS"}
-            #     )
             
             # even if construction has errors, we still proceed to static analysis to report all errors at once
             queue.push_message_sync(
@@ -292,28 +270,6 @@ def execute_project_task(self, project_id: int, user_id: int):
                     workflow.apply_patch(patch)
                 return True # continue execution for other nodes
             graph.static_analyse(callback=anl_reporter)
-            # if has_exception:
-            #     # cleanup all data output (schemas have been cleaned in step 1)
-            #     patches = workflow.generate_del_data_patches()
-            #     for patch in patches:
-            #         workflow.apply_patch(patch)
-            #         queue.push_message_sync(
-            #             Status.IN_PROGRESS,
-            #             {"stage": "STATIC_ANALYSIS",
-            #                 "status": "IN_PROGRESS",
-            #                 "patch": [patch.model_dump()]
-            #             }
-            #         )
-            #     queue.push_message_sync(
-            #         Status.FAILURE, 
-            #         {"stage": "STATIC_ANALYSIS", "status": "FAILURE"}
-            #     )
-            #     return  # stop execution if static analysis failed
-            # else:
-            #     queue.push_message_sync(Status.IN_PROGRESS, {"stage": "STATIC_ANALYSIS", "status": "SUCCESS"})
-            
-            # even if static analysis has errors, we still proceed to execution to report all errors at once
-            # cleanup unreached nodes' schema output
             
             unreached_node_indices = graph.get_unreached_nodes()
             patches = workflow.generate_del_schema_data_patches(include=unreached_node_indices)
@@ -330,6 +286,7 @@ def execute_project_task(self, project_id: int, user_id: int):
 
             # 5. Execute graph
             assert graph is not None
+
             def exec_before_reporter(node_id: str) -> None: # for timer in frontend
                 check_revoke()
                 meta = {
@@ -347,36 +304,9 @@ def execute_project_task(self, project_id: int, user_id: int):
                     output_data = result                  
                     data_zips = {}
                     for port, data in output_data.items():
-                        # 1. get old data in database
-                        old_data_records = db_client.query(NodeOutputRecord).filter_by(
-                            project_id=project_id,
-                            node_id=node_id,
-                            port=port
-                        ).first()
-                        old_data: Data | None
-                        if old_data_records is None:
-                            old_data = None
-                        else:
-                            old_data_view = DataView(**old_data_records.data) # type: ignore
-                            old_data = Data.from_view(old_data_view)
-                        # 2. if data unchanged, reuse old data
-                        if old_data is not None and old_data == data:
-                            data_zips[port] = DataRef(data_id = old_data_records.id) # type: ignore
-                            continue
-                        # 3. if data changed, store data in database
-                        # to avoid conflict, use on conflict method
-                        stmt = insert(NodeOutputRecord).values(
-                            project_id=project_id,
-                            node_id=node_id,
-                            port=port,
-                            data=data.to_view().to_dict()
-                        ).on_conflict_do_update(
-                            index_elements=['project_id', 'node_id', 'port'],
-                            set_=dict(data=data.to_view().to_dict())
-                        ).returning(NodeOutputRecord.id)
-                        data_id = db_client.execute(stmt)
-                        # construct datazip
-                        data_zips[port] = DataRef(data_id = data_id.scalar()) # type: ignore
+                        # write data to database
+                        data_ref = data_manager.write_sync(data=data, node_id=node_id, project_id=project_id, port=port)
+                        data_zips[port] = data_ref
                     # 3. report to frontend
                     node_index = topo_graph.get_index_by_node_id(node_id)
                     assert node_index is not None
@@ -441,26 +371,6 @@ def execute_project_task(self, project_id: int, user_id: int):
                     workflow.apply_patch(patch)
                     return True
             graph.execute(callbefore=exec_before_reporter, callafter=exec_after_reporter)
-            # if has_exception:
-            #     # cleanup unreached nodes' data output
-            #     unreached_node_indices = graph.get_unreached_nodes()
-            #     patches = workflow.generate_del_data_patches(node_indexs=unreached_node_indices)
-            #     for patch in patches:
-            #         workflow.apply_patch(patch)
-            #         queue.push_message_sync(
-            #             Status.IN_PROGRESS,
-            #             {"stage": "EXECUTION",
-            #                 "status": "IN_PROGRESS",
-            #                 "patch": [patch.model_dump()]
-            #             }
-            #         )
-            #     queue.push_message_sync(
-            #         Status.FAILURE, 
-            #         {"stage": "EXECUTION", "status": "FAILURE"}
-            #     )
-            #     return  # stop execution if execution failed
-            # else:
-            #     queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "SUCCESS"})
             
             unreached_node_indices = graph.get_unreached_nodes()
             patches = workflow.generate_del_data_patches(include=unreached_node_indices)
@@ -534,6 +444,8 @@ def execute_project_task(self, project_id: int, user_id: int):
         finally:
             logger.debug(f"Task {task_id} finalized")
             set_project_record_sync(db_client, project, user_id)
+            file_manager.clean_orphan_file_sync(project_id=project_id)
+            data_manager.clean_orphan_data_sync(project_id=project_id)
             if db_client.is_active:
                 db_client.commit()  # Commit the error state to the DB
 

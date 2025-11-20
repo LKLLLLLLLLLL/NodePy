@@ -346,10 +346,9 @@ async def sync_project(
     user_id = int(user_record.id)  # type: ignore
     project_id = project.project_id
     new_project = project
-
+    need_exec: bool = True
     try:
         async with ProjectLock(project_id=project.project_id, max_block_time=5.0, identity=None, scope="all") as lock:            
-            need_exec: bool = True
             # 1. get project object from db
             old_project = await get_project_by_id(db_client, project_id, user_id)
             if old_project is None:
