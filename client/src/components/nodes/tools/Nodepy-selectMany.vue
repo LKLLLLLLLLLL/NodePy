@@ -131,11 +131,11 @@
             z-index: 10;
             background: #eee;
             border-radius: 0 0 6px 6px;
-
             display: flex;
             flex-direction: column;
             gap: 3px;
             padding: 2px 3px;
+            cursor: pointer;
             .item {
                 @include tool-item-style;
                 padding: 2px;

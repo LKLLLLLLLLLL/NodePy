@@ -70,6 +70,7 @@
         overflow: hidden;
         gap:2px;
         font-size: $node-description-fontsize;
+        cursor: pointer;
         .item {
             @include tool-item-style;
         }
