@@ -3,6 +3,7 @@
         class="NodePySelectManyLayout"
         ref="root"
         @click.stop
+        :class="{open}"
     >
         <div class="value" :class="{close: !open}" @click.stop="toggle" :style="{height: itemHeight, width: itemWidth}">
             {{ selectedItem }}
@@ -90,6 +91,9 @@
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
     @use './tools.scss' as *;
+    .NodePySelectManyLayout.open {
+        border-radius: 6px 6px 0 0;
+    }
     .NodePySelectManyLayout {
         @include box-tools-style;
         position: relative;
@@ -139,9 +143,13 @@
                 margin: 0px 1px;
             }
             .item:hover {
-                background: #ccc;
+                background: #ddd;
             }
             .item.selected {
+                background: $stress-color;
+                color: white;
+            }
+            .item:hover.selected {
                 background: $hover-stress-color;
                 color: white;
             }

@@ -1,7 +1,8 @@
 <template>
     <div class="node-err nodrag" @click.stop>
         <div v-for="err in errMsg" class="err-item">
-            <svg-icon type="mdi" :path=mdiWarn class="errIcon"></svg-icon>{{ err }}
+            <svg-icon type="mdi" :path=mdiWarn class="errIcon"></svg-icon>
+            <span class="errText">{{ err }}</span>
         </div>
     </div>
 </template>
@@ -37,6 +38,9 @@
             .errIcon {
                 flex-shrink: 0;
                 width: 14px; 
+            }
+            .errText {
+                transform: translateY(1.2px);
             }
         }
         max-width: 2 * $node-width;

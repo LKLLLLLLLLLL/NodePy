@@ -84,6 +84,7 @@
             &::placeholder {
                 color: rgba(0,0,0,0.2);
             }
+            cursor: text;
         }
     }
     .disabled {
