@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.celery import celery_app
-from server.engine.task import execute_project_task, revoke_project_task
+from server.interpreter.task import execute_project_task, revoke_project_task
 from server.lib.AuthUtils import get_current_user
 from server.lib.ProjectLock import ProjectLock
 from server.lib.StreamQueue import Status, StreamQueue

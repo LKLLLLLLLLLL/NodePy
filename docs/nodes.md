@@ -381,6 +381,10 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - plot: 输出的图形，类型为File，格式为PNG。
 
+**hint：**
+- x_col_choices: 列名列表，类型为List[str]，用于在UI中为x_col参数提供可选值。
+- y_col_choices: 列名列表，类型为List[str]，用于在UI中为y_col参数提供可选值。
+
 #### 3.2 WordcloudNode
 词云图节点，支持对表格中的指定列进行词云图绘制。
 
@@ -662,6 +666,9 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **输出：**
 动态定义的输出端口，根据output_ports参数定义。
+
+**hint：**
+- script_template: str，预定义的脚本模版内容，供用户参考和编辑使用。
 
 ### 9. 控制节点(control)
 TODO

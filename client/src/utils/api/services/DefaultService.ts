@@ -4,7 +4,6 @@
 /* eslint-disable */
 import type { Body_upload_file_api_files_upload__project_id__post } from '../models/Body_upload_file_api_files_upload__project_id__post';
 import type { DataView } from '../models/DataView';
-import type { DeleteResponse } from '../models/DeleteResponse';
 import type { ExploreList } from '../models/ExploreList';
 import type { File } from '../models/File';
 import type { LoginRequest } from '../models/LoginRequest';
@@ -281,31 +280,6 @@ export class DefaultService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/files/{key}',
-            path: {
-                'key': key,
-            },
-            errors: {
-                403: `Forbidden - not allowed to access this file`,
-                404: `File not found`,
-                422: `Validation Error`,
-                500: `Internal Server Error`,
-            },
-        });
-    }
-    /**
-     * Delete File
-     * Delete a file by its key and project id.
-     * The project id is used to verify the access permission.
-     * @param key
-     * @returns DeleteResponse File deleted successfully
-     * @throws ApiError
-     */
-    public static deleteFileApiFilesKeyDelete(
-        key: string,
-    ): CancelablePromise<DeleteResponse> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
             url: '/api/files/{key}',
             path: {
                 'key': key,

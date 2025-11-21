@@ -140,7 +140,7 @@ export const useFileStore = defineStore('file', () => {
                 }
                 fileContentCache.value.set(key,toBeAdded)
             }
-        }  
+        }
     }
 
     function updateCacheContent(key: string,content: any){
@@ -157,7 +157,7 @@ export const useFileStore = defineStore('file', () => {
             fileContentCache.value.delete(key);
         }
     }
-    
+
     async function getCacheContent(key: string){
         const cacheItem = fileContentCache.value.get(key);
         if(!cacheItem){
@@ -169,7 +169,7 @@ export const useFileStore = defineStore('file', () => {
             cacheItem_after.lastHitTime = Date.now();
             return cacheItem_after.content;
     }
-    
+
     function hitCacheContent(key: string){
         return fileContentCache.value.has(key);
     }
@@ -178,7 +178,7 @@ export const useFileStore = defineStore('file', () => {
         let leastHitKey: string = '';
         let minHitCount = Infinity;
         let earliestHitTime = Infinity;
-        
+
         fileContentCache.value.forEach((item: FileCacheItem, key: string) => {
             if (item.hitCount < minHitCount || (item.hitCount === minHitCount && item.lastHitTime < earliestHitTime)) {
                 leastHitKey = key;
@@ -352,7 +352,7 @@ export const useFileStore = defineStore('file', () => {
 
     async function deleteFile(key: string){
         try{
-            const response = await authService.deleteFileApiFilesKeyDelete(key)
+            // const response = await authService.deleteFileApiFilesKeyDelete(key)
             notify({
                 message: '删除文件成功',
                 type: 'error'

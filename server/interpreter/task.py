@@ -28,7 +28,7 @@ from server.models.project import (
 )
 from server.models.project_topology import WorkflowTopology
 
-from .executer import ProjectExecutor
+from .interpreter import ProjectInterpreter
 
 
 class RevokeException(Exception):
@@ -122,7 +122,7 @@ def execute_project_task(self, project_id: int, user_id: int):
             # 2. Validate data model
             try:
                 cache_manager = CacheManager()
-                graph = ProjectExecutor(file_manager=file_manager, cache_manager=cache_manager, topology=topo_graph, user_id=user_id)
+                graph = ProjectInterpreter(file_manager=file_manager, cache_manager=cache_manager, topology=topo_graph, user_id=user_id)
                 queue.push_message_sync(
                     Status.IN_PROGRESS, 
                     {"stage": "VALIDATION", "status": "SUCCESS"}
@@ -143,8 +143,34 @@ def execute_project_task(self, project_id: int, user_id: int):
                 workflow.apply_patch(patch)
                 return  # stop execution if validation failed
 
-            # 3. Construct nodes
+            # 3. get UI hints from nodes
             assert graph is not None
+            def hint_reporter(node_id: str, hint: dict[str, Any]) -> bool:
+                logger.debug(f"Hint reported for node {node_id}: {hint}")
+                check_revoke()
+                node_index = topo_graph.get_index_by_node_id(node_id)
+                assert node_index is not None
+                patch = ProjWorkflowPatch(
+                    key=["nodes", node_index, "hint"],
+                    value=hint
+                )
+                queue.push_message_sync(
+                    Status.IN_PROGRESS,
+                    {
+                        "stage": "UI_HINTS", 
+                        "status": "IN_PROGRESS", 
+                        "patch": [patch.model_dump()]
+                    }
+                )
+                workflow.apply_patch(patch)
+                return True
+            graph.get_ui_hint(callback=hint_reporter)
+            queue.push_message_sync(
+                Status.IN_PROGRESS, 
+                {"stage": "UI_HINTS", "status": "SUCCESS"}
+            )
+
+            # 3. Construct nodes
             has_exception = False
             def construct_reporter(node_id: str, status: Literal["success", "error"], exception: Exception | None) -> bool:
                 check_revoke()

@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Any
 
 from pydantic import BaseModel, PrivateAttr, model_validator
 from typing_extensions import Self
@@ -42,6 +43,16 @@ class BaseNode(BaseModel):
     """
     methods to be implemented by subclasses
     """
+
+    @classmethod
+    def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
+        """ 
+        Provide parameter hints based on input schemas and current parameters.
+        Because hint method may be called befor the node validation condition is met,
+        so you should not rely on any input or params, just return hints as you can.
+        """
+        return {}
+    
     @abstractmethod
     def validate_parameters(self) -> None:
         """ 
@@ -179,6 +190,14 @@ class BaseNode(BaseModel):
                 err_msg=f"Output data schema {output_schema} does not match inferred schema {self._schemas_out}."
             )
         return output
+
+    @classmethod
+    def get_hint(cls, type_name: str, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
+        """ get parameter hints """
+        sub_cls = _NODE_REGISTRY.get(type_name)
+        if sub_cls is None:
+            raise ValueError(f"Node type '{type_name}' is not registered.")
+        return sub_cls.hint(input_schemas, current_params)
 
 _NODE_REGISTRY: dict[str, type[BaseNode]] = {}
 

@@ -5,7 +5,7 @@ import json
 import math
 import re
 import typing
-from typing import Literal, override
+from typing import Literal, override, Any
 
 from server.lib.utils import timeout
 from server.models.data import Data
@@ -141,3 +141,14 @@ class CostumScriptNode(BaseNode):
             output_data[name] = Data(payload=output_payload)
 
         return output_data
+
+    @classmethod
+    @override
+    def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
+        template_str: str = ""
+        with open("./_script_template.py") as f:
+            template_str = f.read()
+        hint = {
+            "script_template": template_str,
+        }
+        return hint

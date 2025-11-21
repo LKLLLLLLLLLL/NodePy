@@ -1,4 +1,4 @@
-from typing import Literal, override
+from typing import Literal, override, Any
 
 from server.config import FIGURE_DPI
 from server.models.data import Data, Table
@@ -111,3 +111,18 @@ class PlotNode(BaseNode):
             user_id=self.global_config.user_id
         )
         return {"plot": Data(payload=file)}
+
+    @classmethod
+    @override
+    def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
+        """
+        Hint x_col and y_col choices based on input schema.
+        """
+        hint = {}
+        if "input" in input_schemas:
+            input_schema = input_schemas["input"]
+            if input_schema.type == Schema.Type.TABLE and input_schema.tab is not None:
+                columns = list(input_schema.tab.col_types.keys())
+                hint["x_col_choices"] = columns
+                hint["y_col_choices"] = columns
+        return hint

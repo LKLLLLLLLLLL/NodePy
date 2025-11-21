@@ -52,6 +52,8 @@ class ProjNode(BaseModel):
     schema_out: dict[str, Schema] = {}
     data_out: dict[str, DataRef] = {}
 
+    hint: dict[str, Any] = {}
+
     error: ProjNodeError | None = None
 
 class ProjEdge(BaseModel):

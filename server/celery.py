@@ -24,7 +24,7 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,  # Fetch one task at a time (avoid long task blocking)
     worker_max_tasks_per_child=100,  # Restart worker after 100 tasks (prevent memory leaks)
     worker_send_task_events=True,  # Send task events
-    include=["server.engine.task"],  # Explicitly include task modules
+    include=["server.interpreter.task"],  # Explicitly include task modules
 )
 
 celery_app.conf.beat_schedule = {

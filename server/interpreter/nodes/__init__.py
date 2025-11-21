@@ -10,11 +10,6 @@ Auto-discovery and registration system for node modules.
 
 This module automatically imports all Python files in the nodes/ directory tree,
 triggering the @register_node decorators to populate the _NODE_REGISTRY.
-
-Adding new nodes:
-- Simply create a new .py file anywhere under nodes/
-- Decorate your node class with @register_node
-- No need to modify this __init__.py file!
 """
 
 
@@ -22,6 +17,7 @@ Adding new nodes:
 _SKIP_FILES = {
     '__init__.py',
     'BaseNode.py',
+    'config.py',
 }
 
 def _auto_import_nodes():

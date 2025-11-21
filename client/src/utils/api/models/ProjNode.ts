@@ -15,6 +15,7 @@ export type ProjNode = {
     runningtime?: (number | null);
     schema_out?: Record<string, Schema>;
     data_out?: Record<string, DataRef>;
+    hint?: Record<string, any>;
     error?: (ProjNodeError | null);
 };
 

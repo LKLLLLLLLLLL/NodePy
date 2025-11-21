@@ -11,7 +11,6 @@ export type { Body_upload_file_api_files_upload__project_id__post } from './mode
 export { ColType } from './models/ColType';
 export type { DataRef } from './models/DataRef';
 export { DataView } from './models/DataView';
-export type { DeleteResponse } from './models/DeleteResponse';
 export type { ExploreList } from './models/ExploreList';
 export type { ExploreListItem } from './models/ExploreListItem';
 export { File } from './models/File';

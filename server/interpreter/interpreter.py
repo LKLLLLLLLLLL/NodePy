@@ -17,9 +17,9 @@ from .nodes.config import GlobalConfig
 Graph classes to analyze and execute node graphs.
 """
 
-class ProjectExecutor:
+class ProjectInterpreter:
     """
-    The class representing the entire graph of nodes and edges.
+    The class to interpret and execute a workflow topology.
     """
 
     def __init__(self, 
@@ -273,3 +273,65 @@ class ProjectExecutor:
             if node.id in self._unreached_node_ids:
                 unreached_node_indices.append(index)
         return unreached_node_indices
+
+    def get_ui_hint(self, callback: Callable[[str, dict[str, Schema]], bool]):
+        """
+        Get UI hints from all nodes.
+        param: 
+        The callback function will look like:
+        continue_execution = callback(node_id: str, hint: dict[str, Schema]) -> bool
+        """
+        # Because the hint method may be called before all parameters are set,
+        # so it should process all node errors transparently.
+        import networkx as nx
+
+        exec_queue = list(nx.topological_sort(self._graph))
+        node_objects: dict[str, BaseNode] = {}
+        # 1. try to construct nodes
+        for node_id in exec_queue:
+            topo_node = self._node_map[node_id]
+            try:
+                node_object = BaseNode.create_from_type(
+                    type=topo_node.type, 
+                    global_config=self._global_config, 
+                    id=topo_node.id, 
+                    **topo_node.params
+                )
+                node_objects[node_id] = node_object
+            except Exception:
+                continue
+
+        schema_cache : dict[tuple[str, str], Schema] = {} # cache for node output schema: (node_id, port) -> Schema
+        for node_id in exec_queue:
+            # 2. get as much as schemas as possible
+            node = node_objects.get(node_id, None)
+            in_edges = list(self._graph.in_edges(node_id, data=True)) # type: ignore
+
+            # get input schema
+            input_schemas : dict[str, Schema] = {}
+            has_full_schemas = True
+            for edge in in_edges:
+                src_id, _, edge_data = edge
+                src_port = edge_data['src_port']
+                tar_port = edge_data['tar_port']
+                if (src_id, src_port) in schema_cache:
+                    src_schema = schema_cache[(src_id, src_port)]
+                    input_schemas[tar_port] = src_schema
+                else:
+                    has_full_schemas = False
+            if has_full_schemas and node is not None:
+                # run schema inference
+                try:
+                    output_schemas = node.infer_schema(input_schemas)
+                    # store output schema
+                    for tar_port, schema in output_schemas.items():
+                        schema_cache[(node_id, tar_port)] = schema
+                except Exception:
+                    pass
+
+            # 3. get UI hint for constructed nodes
+            topo_node = self._node_map[node_id]
+            hint = BaseNode.get_hint(topo_node.type, input_schemas, topo_node.params)
+            continue_execution = callback(node_id, hint)
+            if not continue_execution:
+                break  
