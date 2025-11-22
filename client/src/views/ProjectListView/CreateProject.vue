@@ -8,7 +8,11 @@
     const modalStore = useModalStore();
 
     async function onCreateProject(){
-        projectStore.createProject();
+        const success = await projectStore.createProject();
+        if (success) {
+            // 创建成功后立即刷新项目列表
+            await projectStore.initializeProjects();
+        }
         modalStore.deactivateModal('create-project');
         modalStore.destroyModal('create-project');
     }
@@ -19,9 +23,9 @@
 
 </script>
 <template>
-    <el-form class="create-project-container">
+    <el-form class="create-project-container" @submit.prevent="onCreateProject">
         <el-form-item label="Project Name">
-            <el-input placeholder="Enter project name" v-model="projectStore.currentProjectName"></el-input>
+            <el-input placeholder="Enter project name" v-model="projectStore.currentProjectName" @keyup.enter="onCreateProject"></el-input>
         </el-form-item>
         <!-- <el-form-item label="Description">
             <el-switch></el-switch>

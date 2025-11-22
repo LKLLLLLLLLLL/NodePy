@@ -11,6 +11,7 @@ import { useGraphStore } from "@/stores/graphStore";
 import { useModalStore } from "@/stores/modalStore";
 import Logout from "./Logout.vue";
 import { useLoginStore } from "@/stores/loginStore";
+import UserInfoMenu from "./FloatingMenu/UserInfoMenu.vue";
 
 const graphStore = useGraphStore()
 const modalStore = useModalStore()
@@ -36,32 +37,7 @@ const isActive = (path: string) => {
   return route.path === path
 }
 
-function handleAvatarClick(){
-    loginStore.checkAuthStatus()
-    if(loginStore.loggedIn){
-      modalStore.createModal({
-        id: 'log-out',
-        title: 'log-out',
-        isActive: true,
-        isDraggable: true,
-        isResizable: false,
-        position:{
-          x: 200,
-          y: 200
-        },
-        size:{
-          width: 300,
-          height: 200
-        },
-        component: Logout
-      })
-    }
-    else{
-      router.push({
-        name: 'login'
-      })
-    }
-}
+// 用户头像点击已移至 UserInfoMenu 组件处理
 
 </script>
 
@@ -91,7 +67,7 @@ function handleAvatarClick(){
         </div>
 
         <div class="user-avatar">
-          <el-avatar :icon="Avatar" size="small" @click="handleAvatarClick"></el-avatar>
+          <UserInfoMenu />
         </div>
     </div>
   </div>

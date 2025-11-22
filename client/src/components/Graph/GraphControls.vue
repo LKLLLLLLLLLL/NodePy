@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-    import { ref, watch } from 'vue'
+    import { ref, watch, onUnmounted, onMounted } from 'vue'
     import { useVueFlow } from '@vue-flow/core';
     import { useModalStore } from '@/stores/modalStore';
     import { useGraphStore } from '@/stores/graphStore';
@@ -39,38 +39,55 @@
         }
     },{immediate: true});
 
-    // 在 GraphControls.vue 中修复watch
-    watch(() => {
-        return {
-            width: window.innerWidth,
-            height: window.innerHeight
+    // 监听窗口大小变化，使result-modal右侧边界跟随窗口右侧移动
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null
+    
+    const handleWindowResize = () => {
+        // 防抖处理，避免频繁更新
+        if (resizeTimer) {
+            clearTimeout(resizeTimer)
         }
-    }, () => {
-        const resultModal = modalStore.findModal('result')
-        if (resultModal && resultModal.isActive) {
-            // 使用当前store中的宽度，或者默认值
-            const currentWidth = resultModal.size?.width || resultStore.modalWidth
-            const constrainedWidth = Math.min(currentWidth, window.innerWidth - resultStore.marginRight * 2)
         
-            const constrainedHeight = Math.min(
-                window.innerHeight - resultStore.marginTop - resultStore.marginBottom,
-                resultModal.maxSize?.height || Number.MAX_SAFE_INTEGER
-            )
-        
-            // 计算约束后的位置
-            const newX = Math.max(0, window.innerWidth - constrainedWidth - resultStore.marginRight)
-            const newY = Math.max(0, resultStore.marginTop)
-        
-            modalStore.updateModalSize('result', {
-                width: constrainedWidth,
-                height: constrainedHeight
-            })
-            modalStore.updateModalPosition('result', {
-                x: newX, 
-                y: newY
-            })
-        }
-    }, { immediate: true })
+        resizeTimer = setTimeout(() => {
+            const resultModal = modalStore.findModal('result')
+            if (resultModal && resultModal.isActive) {
+                const currentWidth = resultModal.size?.width || resultStore.modalWidth
+                const currentHeight = resultModal.size?.height || resultStore.modalHeight
+                
+                // 限制高度：不超过窗口高度减去上下边距
+                const maxHeight = window.innerHeight - resultStore.marginTop - resultStore.marginBottom
+                const constrainedHeight = Math.min(currentHeight, maxHeight)
+                
+                // 限制宽度：不超过窗口宽度减去两侧边距
+                const maxWidth = window.innerWidth - resultStore.marginRight * 2
+                const constrainedWidth = Math.min(currentWidth, maxWidth)
+                
+                // 计算X位置：始终将模态框右侧边界放在 marginRight 处
+                // X位置 = 窗口宽度 - 模态框宽度 - marginRight
+                const newX = Math.max(resultStore.marginRight, window.innerWidth - constrainedWidth - resultStore.marginRight)
+                
+                // Y位置保持不变或调整以符合顶部边距
+                const newY = Math.max(resultStore.marginTop, resultModal.position.y)
+                
+                console.log('Window resized - updating modal:', { newX, newY, constrainedWidth, constrainedHeight })
+                
+                // 更新模态框大小和位置
+                modalStore.updateModalSize('result', {
+                    width: constrainedWidth,
+                    height: constrainedHeight
+                })
+                modalStore.updateModalPosition('result', {
+                    x: newX, 
+                    y: newY
+                })
+            }
+        }, 150) // 150ms防抖延迟
+    }
+    
+    // 在挂载时添加 resize 事件监听器
+    onMounted(() => {
+        window.addEventListener('resize', handleWindowResize)
+    })
 
     const {zoomIn,zoomOut,fitView,vueFlowRef} = useVueFlow('main');
 
@@ -118,6 +135,13 @@
         }, { once: true });
     }
 
+    // 在组件卸载时清理定时器和事件监听器
+    onUnmounted(() => {
+        if (resizeTimer) {
+            clearTimeout(resizeTimer)
+        }
+        window.removeEventListener('resize', handleWindowResize)
+    })
 
 </script>
 <template>

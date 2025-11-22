@@ -3,10 +3,53 @@
     import FileView from './FileView.vue';
     import ValueView from './ValueView.vue';
     import NodeInfo from './NodeInfo.vue';
-    import { ref,computed } from 'vue';
+    import { ref,computed, onMounted } from 'vue';
     import { useResultStore } from '@/stores/resultStore';
+    import { useGraphStore } from '@/stores/graphStore';
 
     const resultStore = useResultStore();
+    const graphStore = useGraphStore()
+    const resultId = computed(()=>{
+        const dataOut = graphStore.currentNode?.data.data_out
+        if (!dataOut) {
+            console.log('Result: 当前节点没有 data_out')
+            return undefined
+        }
+        
+        if (dataOut.plot?.data_id) {
+            console.log('Result: 检测到 plot 类型，data_id:', dataOut.plot.data_id)
+            return dataOut.plot.data_id
+        }
+        else if (dataOut.const?.data_id) {
+            console.log('Result: 检测到 const 类型，data_id:', dataOut.const.data_id)
+            return dataOut.const.data_id
+        }
+        else if (dataOut.file?.data_id) {
+            console.log('Result: 检测到 file 类型，data_id:', dataOut.file.data_id)
+            return dataOut.file.data_id
+        }
+        else if (dataOut.table?.data_id) {
+            console.log('Result: 检测到 table 类型，data_id:', dataOut.table.data_id)
+            return dataOut.table.data_id
+        }
+        console.log('Result: 无法找到有效的 data_id')
+        return undefined
+    })
+
+    onMounted(async ()=>{
+        try {
+            if (!resultId.value) {
+                console.log('Result: resultId 不存在，无法加载结果')
+                return
+            }
+            console.log('Result: 开始加载结果，resultId:', resultId.value)
+            resultStore.currentResult = await resultStore.getResultCacheContent(resultId.value)
+            console.log('Result: 结果已加载，类型:', resultStore.currentResult.type)
+            console.log('Result: 结果内容:', resultStore.currentResult)
+        } catch (error) {
+            console.error('Result: 加载结果失败:', error)
+        }
+    })
     
 </script>
 <template>
@@ -42,7 +85,7 @@
     .result-container{
         width: 100%;
         height: calc(100% - 30px);
-        color: white;
+        color: grey;
         padding: 20px;
         padding-top: 10px;
         border-radius: 10px;

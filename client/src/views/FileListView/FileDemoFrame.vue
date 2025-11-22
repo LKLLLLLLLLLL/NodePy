@@ -14,9 +14,9 @@
         file: FileItem;
     }>()
 
-    async function handleDelete(key: string){
-        fileStore.deleteFile(key)
-    }
+    // async function handleDelete(key: string){
+    //     fileStore.deleteFile(key)
+    // }
 
     async function handleUpload(){
         modalStore.createModal({
@@ -82,7 +82,7 @@
         </div>
         <div class="file-right">
             <el-button @click="handlePreview(file)">预览</el-button>
-            <el-button @click="handleDelete(file.key)">删除</el-button>
+            <!-- <el-button @click="handleDelete(file.key)">删除</el-button> -->
         </div>
     </div>
     <!-- <div class="file-container-new" v-else @click="handleUpload">

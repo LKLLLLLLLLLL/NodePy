@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-    import { ref, onMounted, computed } from 'vue';
-    import { useRouter } from 'vue-router';
+    import { ref, onMounted, computed, watch } from 'vue';
+    import { useRouter, useRoute } from 'vue-router';
     import { useModalStore } from '@/stores/modalStore';
     import { useProjectStore } from '@/stores/projectStore';
     import { usePageStore } from '@/stores/pageStore';
@@ -14,6 +14,7 @@
     const pageStore = usePageStore();
     const loginStore = useLoginStore();
     const router = useRouter();
+    const route = useRoute();
 
     onMounted(()=>{
         loginStore.checkAuthStatus()
@@ -24,6 +25,13 @@
             router.replace({
                 name: 'login'
             })
+        }
+    });
+
+    // 监听路由变化，当进入项目列表页面时刷新数据
+    watch(() => route.name, (newRoute) => {
+        if (newRoute === 'project-list' && loginStore.loggedIn) {
+            projectStore.initializeProjects()
         }
     });
 
