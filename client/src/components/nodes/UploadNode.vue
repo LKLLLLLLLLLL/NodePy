@@ -4,7 +4,7 @@
         <div class="data">
             <div class="file">
                 <div class="param-description" :class="{'node-has-paramerr': fileHasErr.value}">上传文件</div>
-                <div class="file-upload-component" @click="addFile">
+                <div class="file-upload-component nodrag" @click.stop="addFile">
                     <div class="file-name" :class="{'has-no-file': !data.param.file}">
                         {{data.param.file ? data.param.file.filename : '点击上传文件'}}
                     </div>

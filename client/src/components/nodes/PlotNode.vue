@@ -8,11 +8,23 @@
             </div>
             <div class="x_col">
                 <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列名</div>
-                <NodepyStringInput v-model="x_col" @update-value="onUpdateX_col" class="nodrag" placeholder="x轴列名"/>
+                <NodepySelectMany 
+                :options="x_col_hint"
+                :default-selected="-1"
+                @select-change="onUpdateX_col"
+                item-height="27px"
+                class="nodrag"
+                />
             </div>
             <div class="y_col">
                 <div class="param-description" :class="{'node-has-paramerr': y_colHasErr.value}">y轴列名</div>
-                <NodepyStringInput v-model="y_col" @update-value="onUpdateY_col" class="nodrag" placeholder="y轴列名"/>
+                <NodepySelectMany 
+                :options="y_col_hint"
+                :default-selected="-1"
+                @select-change="onUpdateY_col"
+                item-height="27px"
+                class="nodrag"
+                />
             </div>
             <div class="plot_type">
                 <div class="param-description" :class="{'node-has-paramerr': plot_typeHasErr.value}">图形类型</div>
@@ -50,8 +62,8 @@
 
 
     const props = defineProps<NodeProps<PlotNodeData>>()
-    const x_col = ref(props.data.param.x_col)
-    const y_col = ref(props.data.param.y_col)
+    const x_col_hint = computed(() => props.data.hint?.x_col_choices || [''])
+    const y_col_hint = computed(() => props.data.hint?.y_col_choices || [''])
     const title = ref(props.data.param.title || '')
     const plot_type_options = ['bar', 'line', 'scatter', 'pie']
     const plot_type_options_chinese = ['条形图', '折线图', '散点图', '饼状图']
@@ -83,12 +95,14 @@
         props.data.param.plot_type = selected_plot_type
     }
 
-    const onUpdateX_col = () => {
-        props.data.param.x_col = x_col.value
+    const onUpdateX_col = (e: any) => {
+        const x_col = x_col_hint.value[e]
+        props.data.param.x_col = x_col
     }
 
-    const onUpdateY_col = () => {
-        props.data.param.y_col = y_col.value
+    const onUpdateY_col = (e: any) => {
+        const y_col = y_col_hint.value[e]
+        props.data.param.y_col = y_col
     }
 
     const onUpdateTitle = () => {

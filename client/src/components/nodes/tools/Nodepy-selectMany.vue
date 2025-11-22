@@ -18,8 +18,8 @@
                 class="item"
                 @click.stop="select(idx)"
                 :style="itemStyle"
-                :class="{selected: selectedIdx === idx}"
-            >
+                :class="{selected: selectedIdx === idx && options[selectedIdx]}" 
+            >   <!-- options[selectedIdx] means empty value cannot be accepted-->
                 {{ item }}
             </div>
         </div>
@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-    import {ref, computed, watchEffect, onBeforeUnmount} from 'vue'
+    import {ref, computed, watchEffect, onBeforeUnmount, watch} from 'vue'
     // @ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon';
     import { mdiMenuDown } from '@mdi/js';
@@ -49,7 +49,7 @@
         },
         defaultSelected: {
             type: Number,
-            default: 1
+            default: 0
         }
     })
     const emit = defineEmits(['selectChange'])
@@ -60,13 +60,14 @@
     })
     const selectedIdx = ref(props.defaultSelected)
     const open = ref(false)
-    const selectedItem = computed(() => props.options[selectedIdx.value])
+    const selectedItem = computed(() => selectedIdx.value >= 0 ? props.options[selectedIdx.value] : '')
 
 
     const select = (idx: number) => {
+        open.value = false
+        if(!props.options[idx])return
         selectedIdx.value = idx
         emit('selectChange', idx)
-        open.value = false
     }
 
     const toggle = () => {
@@ -82,6 +83,10 @@
         ? document.addEventListener('click', clickOutside, true)
         : document.removeEventListener('click', clickOutside, true)
     )
+
+    watch(() => JSON.stringify(props.options), (newValue, oldValue) => {
+        selectedIdx.value = props.defaultSelected
+    }, {immediate: false})
 
     onBeforeUnmount(() => document.removeEventListener('click', clickOutside, true))
 

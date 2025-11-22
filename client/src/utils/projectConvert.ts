@@ -16,7 +16,8 @@ export const getProject = (vp: vueFlowProject): Project => {
             runningtime: n.data.runningtime,
             schema_out: n.data.schema_out,
             data_out: n.data.data_out,
-            error: n.data.error
+            error: n.data.error,
+            hint: n.data.hint
         }
     })
     const ui_state = vp.workflow.nodes.map(n => {
@@ -68,7 +69,8 @@ export const initVueFlowProject = (p: Project, vp: vueFlowProject) => {
                 runningtime: p.workflow.nodes[i]?.runningtime,
                 schema_out: p.workflow.nodes[i]?.schema_out,
                 data_out: p.workflow.nodes[i]?.data_out,
-                error: p.workflow.nodes[i]?.error
+                error: p.workflow.nodes[i]?.error,
+                hint: p.workflow.nodes[i]?.hint
             }
         })
     }
@@ -104,7 +106,8 @@ export const writeBackVueFLowProject = (p: Project, vp: vueFlowProject) => {
         vp.workflow.nodes[i].data.data_out = p.workflow.nodes[i]?.data_out  //@ts-ignore
         vp.workflow.nodes[i].data.error = p.workflow.nodes[i]?.error    //@ts-ignore
         vp.workflow.nodes[i].data.runningtime = p.workflow.nodes[i]?.runningtime    //@ts-ignore
-        vp.workflow.nodes[i].data.schema_out = p.workflow.nodes[i]?.schema_out
+        vp.workflow.nodes[i].data.schema_out = p.workflow.nodes[i]?.schema_out  //@ts-ignore
+        vp.workflow.nodes[i].data.hint = p.workflow.nodes[i]?.hint
     }
     vp.workflow.error_message = p.workflow.error_message
 }
