@@ -28,7 +28,6 @@
                     :options="data_type_options_chinese"
                     :default-selected="defaultSelected"
                     @select-change="onSelectChange"
-                    item-width="90px"
                     class="nodrag"
                 />
             </div>

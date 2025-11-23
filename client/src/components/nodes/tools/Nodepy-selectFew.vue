@@ -1,9 +1,13 @@
 <template>
-    <div class="NodePySelectFewLayout nodes-innertool-border-radius" @click.stop>
+    <div 
+    class="NodePySelectFewLayout 
+    nodes-innertool-border-radius" 
+    @click.stop
+    :style="{width, height}"
+    >
         <div
             class="item"
             :class="{selected: selectedIdx.includes(index)}"
-            :style="{width: itemWidth, height: itemHeight}"
             @click.stop="onClick(index)"
             v-for="(item, index) in options"
         >
@@ -19,11 +23,11 @@
             type: Array,
             required: true
         },
-        itemWidth: {
+        width: {
             type: String,
-            default: '100%'
+            default: 'auto'
         },
-        itemHeight: {
+        height: {
             type: String,
             default: 'auto'
         },
@@ -73,6 +77,7 @@
         cursor: pointer;
         .item {
             @include tool-item-style;
+            flex: 1;
         }
         .item:hover:not(.selected) {
             @include tool-item-style-hover;
