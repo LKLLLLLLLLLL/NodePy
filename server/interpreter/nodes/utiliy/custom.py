@@ -5,6 +5,7 @@ import json
 import math
 import re
 import typing
+import os
 from typing import Literal, override, Any
 
 from server.lib.utils import timeout
@@ -19,8 +20,10 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 
 AllowedTypes = Literal["STR", "INT", "FLOAT", "BOOL"]
 
+_TEMPLATE_CACHE = None
+
 @register_node
-class CostumScriptNode(BaseNode):
+class CustomScriptNode(BaseNode):
     """
     This node allows users to define custom Script using Python code.
     The function should take inputs as defined in the input ports and return outputs as defined in the output ports.
@@ -145,9 +148,15 @@ class CostumScriptNode(BaseNode):
     @classmethod
     @override
     def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
+        global _TEMPLATE_CACHE
         template_str: str = ""
-        with open("./_script_template.py") as f:
-            template_str = f.read()
+        if _TEMPLATE_CACHE is None:
+            base_path = os.path.dirname(__file__)
+            with open(os.path.join(base_path, "_script_template.py")) as f:
+                template_str = f.read()
+            _TEMPLATE_CACHE = template_str
+        else:
+            template_str = _TEMPLATE_CACHE
         hint = {
             "script_template": template_str,
         }

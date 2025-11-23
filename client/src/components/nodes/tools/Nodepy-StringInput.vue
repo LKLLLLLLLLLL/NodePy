@@ -73,8 +73,6 @@
     @use './tools.scss' as *;
     .NodePyStringInputLayout {
         @include box-tools-style;
-        // background: white;
-        // border: 1.5px solid #ccc;
         font-size: $node-description-fontsize;
         input {
             @include tool-item-style;

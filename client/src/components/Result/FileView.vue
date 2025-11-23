@@ -5,7 +5,7 @@
     import { type File } from '@/utils/api'
 
     const props = defineProps<{
-        value: (string | number | boolean | File)
+        value: (string | number | boolean | File | any)
     }>()
 
     const fileStore = useFileStore()
@@ -77,7 +77,7 @@
 
     // 用于显示的图片或 PDF URL
     const displaySrc = ref<string>('')
-    
+
     // CSV 数据
     const csvData = ref<string>('')
 
@@ -104,7 +104,7 @@
             console.log('FileView: 获取到内容')
             console.log('FileView: 内容类型:', typeof content)
             console.log('FileView: 内容是否为 Blob:', content instanceof Blob)
-            
+
             if (!content) {
                 error.value = '文件内容为空或加载失败'
                 console.warn('FileView: 内容为空')
@@ -146,7 +146,7 @@
             }
 
             console.log('FileView: 文件加载成功')
-            
+
         } catch (err) {
             error.value = `加载文件失败: ${err instanceof Error ? err.message : String(err)}`
             console.error('FileView 加载失败:', err)

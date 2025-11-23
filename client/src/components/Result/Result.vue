@@ -15,7 +15,7 @@
             console.log('Result: 当前节点没有 data_out')
             return undefined
         }
-        
+
         if (dataOut.plot?.data_id) {
             console.log('Result: 检测到 plot 类型，data_id:', dataOut.plot.data_id)
             return dataOut.plot.data_id
@@ -50,7 +50,7 @@
             console.error('Result: 加载结果失败:', error)
         }
     })
-    
+
 </script>
 <template>
     <div :style="{width: '100%',height: '100%'}">

@@ -274,9 +274,10 @@ class ProjectInterpreter:
                 unreached_node_indices.append(index)
         return unreached_node_indices
 
-    def get_ui_hint(self, callback: Callable[[str, dict[str, Schema]], bool]):
+    def get_ui_hint(self, callback: Callable[[str, dict[str, Schema]], bool]) -> None:
         """
         Get UI hints from all nodes.
+        For this method, there is no need to clean up unreached nodes, because it traverses all nodes anyway.
         param: 
         The callback function will look like:
         continue_execution = callback(node_id: str, hint: dict[str, Schema]) -> bool
@@ -309,7 +310,6 @@ class ProjectInterpreter:
 
             # get input schema
             input_schemas : dict[str, Schema] = {}
-            has_full_schemas = True
             for edge in in_edges:
                 src_id, _, edge_data = edge
                 src_port = edge_data['src_port']
@@ -317,9 +317,7 @@ class ProjectInterpreter:
                 if (src_id, src_port) in schema_cache:
                     src_schema = schema_cache[(src_id, src_port)]
                     input_schemas[tar_port] = src_schema
-                else:
-                    has_full_schemas = False
-            if has_full_schemas and node is not None:
+            if node is not None:
                 # run schema inference
                 try:
                     output_schemas = node.infer_schema(input_schemas)

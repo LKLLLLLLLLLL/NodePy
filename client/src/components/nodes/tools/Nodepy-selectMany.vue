@@ -18,7 +18,7 @@
                 class="item"
                 @click.stop="select(idx)"
                 :style="itemStyle"
-                :class="{selected: selectedIdx === idx && options[selectedIdx]}" 
+                :class="{selected: selectedIdx === idx && options[selectedIdx]}"
             >   <!-- options[selectedIdx] means empty value cannot be accepted-->
                 {{ item }}
             </div>
@@ -45,7 +45,7 @@
         },
         itemHeight: {
             type: String,
-            default: 'auto'
+            default: '25px'
         },
         defaultSelected: {
             type: Number,
@@ -56,7 +56,7 @@
     const root = ref<HTMLElement>()
     const itemStyle = ref({
         width: props.itemWidth,
-        height: props.itemHeight
+        height: `calc(${props.itemHeight} - 4px)`  //-4 for the gap between items
     })
     const selectedIdx = ref(props.defaultSelected)
     const open = ref(false)
@@ -138,14 +138,14 @@
             border-radius: 0 0 6px 6px;
             display: flex;
             flex-direction: column;
-            gap: 3px;
-            padding: 2px 3px;
+            gap: 2px;
+            padding: 2px 2px;
             cursor: pointer;
             .item {
                 @include tool-item-style;
-                padding: 2px;
+                padding: 0px;
                 border-radius: 6px;
-                margin: 0px 1px;
+                // margin: 0px 1px;
             }
             .item:hover {
                 background: #ddd;

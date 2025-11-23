@@ -22,7 +22,7 @@ $table-node-color: $table-color;
 $utils-node-color: rgb(183, 0, 70);
 $visualize-node-color: #7572d2;
 $node-margin: 10px;
-$node-title-fontsize: 18px;
+$node-title-fontsize: 14px;
 $node-description-fontsize: 15px;
 
 
@@ -81,45 +81,46 @@ $node-description-fontsize: 15px;
   font-size: $node-title-fontsize;
   display: flex;
   align-items: center;
+  font-weight: bold;
 }
 
 .node-title-input {
-  @include node-title-style();
+  @include node-title-style;
   background: $input-node-color;
 }
 
 .node-title-compute {
-  @include node-title-style();
+  @include node-title-style;
   background: $compute-node-color;
 }
 
 .node-title-control {
-  @include node-title-style();
+  @include node-title-style;
   background: $control-node-color;
 }
 
 .node-title-file {
-  @include node-title-style();
+  @include node-title-style;
   background: $file-node-color;
 }
 
 .node-title-stringProcess {
-  @include node-title-style();
+  @include node-title-style;
   background: $str-node-color;
 }
 
 .node-title-tableProcess {
-  @include node-title-style();
+  @include node-title-style;
   background: $table-node-color;
 }
 
 .node-title-tool {
-  @include node-title-style();
+  @include node-title-style;
   background: $utils-node-color;
 }
 
 .node-title-visualize {
-  @include node-title-style();
+  @include node-title-style;
   background: $visualize-node-color;
 }
 

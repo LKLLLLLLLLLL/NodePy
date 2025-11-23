@@ -170,7 +170,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                 {"stage": "UI_HINTS", "status": "SUCCESS"}
             )
 
-            # 3. Construct nodes
+            # 4. Construct nodes
             has_exception = False
             def construct_reporter(node_id: str, status: Literal["success", "error"], exception: Exception | None) -> bool:
                 check_revoke()
@@ -231,7 +231,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                     {"stage": "CONSTRUCTION", "status": "SUCCESS"}
                 )
 
-            # 4. Static analysis
+            # 5. Static analysis
             assert graph is not None
             def anl_reporter(node_id: str, status: Literal["success", "error"], result: dict[str, Any] | Exception) -> bool:
                 check_revoke()
@@ -310,7 +310,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                 )
             queue.push_message_sync(Status.IN_PROGRESS, {"stage": "STATIC_ANALYSIS", "status": "SUCCESS"})
 
-            # 5. Execute graph
+            # 6. Execute graph
             assert graph is not None
 
             def exec_before_reporter(node_id: str) -> None: # for timer in frontend
@@ -414,7 +414,7 @@ def execute_project_task(self, project_id: int, user_id: int):
             else:
                 queue.push_message_sync(Status.SUCCESS, {"stage": "EXECUTION", "status": "SUCCESS"})
 
-            # 6. Finalize and save workflow
+            # 7. Finalize and save workflow
             set_project_record_sync(db_client, project, user_id)
             db_client.commit()
             logger.debug(f"Task {task_id} completed successfully")
