@@ -1,6 +1,6 @@
 <template>
     <div class="NumBinComputeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-compute nodes-topchild-border-radius">{{`数字二元运算节点${props.id.split('_')[1]}`}}</div>
+        <div class="node-title-compute nodes-topchild-border-radius">数字二元运算节点</div>
         <div class="data">
             <div class="input-x port">
                 <div class="input-port-description">

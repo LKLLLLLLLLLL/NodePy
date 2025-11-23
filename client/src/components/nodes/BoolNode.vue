@@ -1,6 +1,6 @@
 <template>
     <div class="BoolNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-input nodes-topchild-border-radius">{{`布尔节点${props.id.split('_')[1]}`}}</div>
+        <div class="node-title-input nodes-topchild-border-radius">布尔节点</div>
         <div class="data">
             <div class="value">
                 <NodepyBoolValue

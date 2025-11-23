@@ -1,6 +1,6 @@
 <template>
     <div class="PlotNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-visualize nodes-topchild-border-radius">{{`绘图节点${props.id.split('_')[1]}`}}</div>
+        <div class="node-title-visualize nodes-topchild-border-radius">绘图节点</div>
         <div class="data">
             <div class="input-table port">
                 <div class="input-port-description">表格输入端口</div>
