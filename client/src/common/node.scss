@@ -22,8 +22,8 @@ $table-node-color: $table-color;
 $utils-node-color: rgb(183, 0, 70);
 $visualize-node-color: #7572d2;
 $node-margin: 10px;
-$node-title-fontsize: 14px;
-$node-description-fontsize: 15px;
+$node-title-fontsize: 15px;
+$node-description-fontsize: 14px;
 
 
 .nodes-style {
@@ -76,12 +76,17 @@ $node-description-fontsize: 15px;
 
 @mixin node-title-style {
   text-align: left;
-  padding-left: $node-padding-hor;
+  padding-left: $node-padding-hor - 4px;
   height: $node-title-height;
   font-size: $node-title-fontsize;
   display: flex;
   align-items: center;
   font-weight: bold;
+  svg{
+    width: 18px;
+    margin-right: 6px;
+    opacity: 0.8;
+  }
 }
 
 .node-title-input {
@@ -132,18 +137,21 @@ $node-description-fontsize: 15px;
   padding-left: $node-padding-hor;
   font-size: $node-description-fontsize;
   margin-left: 5px;
+  font-weight: bold;
 }
 
 .output-port-description {
   padding-right: $node-padding-hor;
   text-align: right;
   font-size: $node-description-fontsize;
+  font-weight: bold;
 }
 
 .param-description {
   font-size: $node-description-fontsize;
   margin-bottom: 2px;
   margin-left: 5px;
+  font-weight: bold;
 }
 
 .node-has-paramerr {

@@ -240,17 +240,17 @@
             </div>
         </div>
         <div class = "modal-footer">
-            
+
         </div>
     </div>
 </template>
 <style scoped lang = "scss">
+    @use '../common/global.scss' as *;
     .modal-container{
         position: fixed;
         display: flex;
         flex-direction: column;
-        background-color: white !important;
-        color: black;
+        border-radius: 15px;
     }
     .modal-head{
         display: flex;
@@ -360,8 +360,4 @@
         left: -6px;
         cursor: nw-resize;
     }
-</style>
-
-<style lang="scss" scoped>
-@use '../common/global.scss';
 </style>

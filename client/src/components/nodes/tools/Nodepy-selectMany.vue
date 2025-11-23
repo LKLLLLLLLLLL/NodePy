@@ -56,7 +56,7 @@
     const root = ref<HTMLElement>()
     const itemStyle = ref({
         width: props.itemWidth,
-        height: `calc(${props.itemHeight} - 4px)`  //-4 for the gap between items
+        height: `calc(${props.itemHeight} - 2px)`  //-4 for the gap between items
     })
     const selectedIdx = ref(props.defaultSelected)
     const open = ref(false)
@@ -143,9 +143,9 @@
             cursor: pointer;
             .item {
                 @include tool-item-style;
-                padding: 0px;
+                padding: 1px 0px;
                 border-radius: 6px;
-                // margin: 0px 1px;
+                font-size: 13px;
             }
             .item:hover {
                 background: #ddd;

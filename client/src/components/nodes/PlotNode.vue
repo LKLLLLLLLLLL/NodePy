@@ -1,6 +1,8 @@
 <template>
     <div class="PlotNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-visualize nodes-topchild-border-radius">绘图节点</div>
+        <div class="node-title-visualize nodes-topchild-border-radius">
+            <svg-icon type="mdi" :path="chart_scatter_plot_path"></svg-icon>绘图节点
+        </div>
         <div class="data">
             <div class="input-table port">
                 <div class="input-port-description">表格输入端口</div>
@@ -8,7 +10,7 @@
             </div>
             <div class="x_col">
                 <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列名</div>
-                <NodepySelectMany 
+                <NodepySelectMany
                 :options="x_col_hint"
                 :default-selected="-1"
                 @select-change="onUpdateX_col"
@@ -18,7 +20,7 @@
             </div>
             <div class="y_col">
                 <div class="param-description" :class="{'node-has-paramerr': y_colHasErr.value}">y轴列名</div>
-                <NodepySelectMany 
+                <NodepySelectMany
                 :options="y_col_hint"
                 :default-selected="-1"
                 @select-change="onUpdateY_col"
@@ -59,6 +61,10 @@
     import NodepyStringInput from './tools/Nodepy-StringInput.vue'
     import NodepySelectMany from './tools/Nodepy-selectMany.vue'
     import ErrorMsg from './tools/ErrorMsg.vue'
+
+    import SvgIcon from '@jamescoyle/vue-icon';
+    import { mdiChartScatterPlot } from '@mdi/js';
+    const chart_scatter_plot_path = mdiChartScatterPlot;
 
 
     const props = defineProps<NodeProps<PlotNodeData>>()
