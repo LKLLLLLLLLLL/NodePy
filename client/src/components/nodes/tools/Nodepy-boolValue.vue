@@ -1,6 +1,6 @@
 <template>
     <span
-        class="NodePyBoolValueLayout"
+        class="NodePyBoolValueLayout param-description"
         :class="{'has-label': $slots.default }"
         role="checkbox"
         :aria-checked="model"
