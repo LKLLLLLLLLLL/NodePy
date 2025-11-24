@@ -1,6 +1,6 @@
 <template>
     <div class="TableNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-input nodes-topchild-border-radius">表格节点</div>
+        <NodeTitle node-category="input">表格节点</NodeTitle>
         <div class="data">
             <Handle id="table" type="source" :position="Position.Right" class="table-handle-color"/>
             渲染表格的地方
@@ -13,6 +13,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import type {TableNodeData} from '../../types/nodeTypes'
+    import NodeTitle from './tools/NodeTitle.vue'
 
 
     const props = defineProps<NodeProps<TableNodeData>>()

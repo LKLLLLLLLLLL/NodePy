@@ -1,8 +1,6 @@
 <template>
     <div class="TableFromCSVNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-input nodes-topchild-border-radius">
-            CSV表格节点
-        </div>
+        <NodeTitle node-category="input">CSV表格节点</NodeTitle>
         <div class="data">
             <div class="input-csv_file port">
                 <div class="input-port-description">
@@ -40,6 +38,7 @@
     import { getInputType } from './getInputType'
     import { handleExecError, handleValidationError, handleOutputError } from './handleError'
     import ErrorMsg from './tools/ErrorMsg.vue'
+    import NodeTitle from './tools/NodeTitle.vue'
 
 
     const props = defineProps<NodeProps<BaseData>>()

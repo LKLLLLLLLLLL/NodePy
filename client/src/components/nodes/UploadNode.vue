@@ -1,8 +1,6 @@
 <template>
     <div class="UploadNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-file nodes-topchild-border-radius">
-            <svg-icon type="mdi" :path="file_outline_path"></svg-icon>文件上传节点
-        </div>
+        <NodeTitle node-category="file">文件上传节点</NodeTitle>
         <div class="data">
             <div class="file">
                 <div class="param-description" :class="{'node-has-paramerr': fileHasErr.value}">上传文件</div>
@@ -35,9 +33,8 @@
     import { useGraphStore } from '@/stores/graphStore'
     import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory'
     import ErrorMsg from './tools/ErrorMsg.vue'
+    import NodeTitle from './tools/NodeTitle.vue'
 
-    import { mdiFileOutline } from '@mdi/js';
-    const file_outline_path = mdiFileOutline;
 
     const mdiAddFile: string = mdiPlus
     const props = defineProps<NodeProps<UploadNodeData>>()

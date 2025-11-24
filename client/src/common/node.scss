@@ -34,10 +34,6 @@ $node-description-fontsize: 14px;
   position: relative;
 }
 
-.nodes-topchild-border-radius {
-  border-radius: 9px 9px 0 0;
-}
-
 .nodes-selected {
   box-shadow: 5px 2px 35px rgba(128, 128, 128, 0.4);
 }
@@ -75,6 +71,7 @@ $node-description-fontsize: 14px;
 }
 
 @mixin node-title-style {
+  border-radius: 9px 9px 0 0;
   text-align: left;
   padding-left: $node-padding-hor - 4px;
   height: $node-title-height;
@@ -119,7 +116,7 @@ $node-description-fontsize: 14px;
   background: $table-node-color;
 }
 
-.node-title-tool {
+.node-title-util {
   @include node-title-style;
   background: $utils-node-color;
 }

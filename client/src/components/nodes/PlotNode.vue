@@ -1,8 +1,6 @@
 <template>
     <div class="PlotNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-visualize nodes-topchild-border-radius">
-            <svg-icon type="mdi" :path="chart_scatter_plot_path"></svg-icon>绘图节点
-        </div>
+        <NodeTitle node-category="visualize">绘图节点</NodeTitle>
         <div class="data">
             <div class="input-table port">
                 <div class="input-port-description">表格输入端口</div>
@@ -61,10 +59,7 @@
     import NodepyStringInput from './tools/Nodepy-StringInput.vue'
     import NodepySelectMany from './tools/Nodepy-selectMany.vue'
     import ErrorMsg from './tools/ErrorMsg.vue'
-
-    import SvgIcon from '@jamescoyle/vue-icon';
-    import { mdiChartScatterPlot } from '@mdi/js';
-    const chart_scatter_plot_path = mdiChartScatterPlot;
+    import NodeTitle from './tools/NodeTitle.vue'
 
 
     const props = defineProps<NodeProps<PlotNodeData>>()

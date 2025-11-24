@@ -1,6 +1,6 @@
 <template>
     <div class="StringNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-input nodes-topchild-border-radius">字符串节点</div>
+        <NodeTitle node-category="input">字符串节点</NodeTitle>
         <div class="data">
             <div class="value">
                 <div class="param-description" :class="{'node-has-paramerr': valueHasErr.value}">
@@ -34,6 +34,7 @@
     import NodepyStringInput from './tools/Nodepy-StringInput.vue'
     import { handleExecError, handleParamError, handleOutputError } from './handleError'
     import ErrorMsg from './tools/ErrorMsg.vue'
+    import NodeTitle from './tools/NodeTitle.vue'
 
 
     const props = defineProps<NodeProps<StringNodeData>>()

@@ -1,8 +1,6 @@
 <template>
     <div class="NumBinComputeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-compute nodes-topchild-border-radius">
-           <svg-icon type="mdi" :path="math_compass_path"></svg-icon>数字二元运算节点
-        </div>
+        <NodeTitle node-category="compute">数字二元运算节点</NodeTitle>
         <div class="data">
             <div class="input-x port">
                 <div class="input-port-description">
@@ -48,10 +46,7 @@
     import type { Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
     import ErrorMsg from './tools/ErrorMsg.vue'
-
-    import SvgIcon from '@jamescoyle/vue-icon';
-    import { mdiMathCompass } from '@mdi/js';
-    const math_compass_path = mdiMathCompass
+    import NodeTitle from './tools/NodeTitle.vue'
 
 
     const props = defineProps<NodeProps<NumberBinOpNodeData>>()

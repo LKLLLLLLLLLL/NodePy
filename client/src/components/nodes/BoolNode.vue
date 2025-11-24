@@ -1,6 +1,6 @@
 <template>
     <div class="BoolNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-input nodes-topchild-border-radius">布尔节点</div>
+        <NodeTitle node-category="input">布尔节点</NodeTitle>
         <div class="data">
             <div class="value">
                 <NodepyBoolValue
@@ -32,6 +32,7 @@
     import NodepyBoolValue from './tools/Nodepy-boolValue.vue'
     import { handleExecError, handleOutputError } from './handleError'
     import ErrorMsg from './tools/ErrorMsg.vue'
+    import NodeTitle from './tools/NodeTitle.vue'
 
 
      const props = defineProps<NodeProps<BoolNodeData>>()

@@ -1,8 +1,6 @@
 <template>
     <div class="ConstNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <div class="node-title-input nodes-topchild-border-radius">
-            <svg-icon type="mdi" :path="import_path"></svg-icon>常量节点
-        </div>
+        <NodeTitle node-category="input">常量节点</NodeTitle>
         <div class="data">
             <div class="value">
                 <div class="param-description" :class="{'node-has-paramerr': valueHasErr.value}">
@@ -54,10 +52,7 @@
     import ErrorMsg from './tools/ErrorMsg.vue'
     import NodepyNumberInput from './tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
     import NodepySelectFew from './tools/Nodepy-selectFew.vue'
-
-    import SvgIcon from '@jamescoyle/vue-icon';
-    import { mdiImport } from '@mdi/js';
-    const import_path = mdiImport;
+    import NodeTitle from './tools/NodeTitle.vue'
 
 
     const props = defineProps<NodeProps<ConstNodeData>>()
