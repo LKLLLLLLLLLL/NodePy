@@ -1,6 +1,7 @@
 <template>
     <div class="UploadNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <NodeTitle node-category="file">文件上传节点</NodeTitle>
+        <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="file">
                 <div class="param-description" :class="{'node-has-paramerr': fileHasErr.value}">上传文件</div>
@@ -34,6 +35,7 @@
     import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory'
     import ErrorMsg from './tools/ErrorMsg.vue'
     import NodeTitle from './tools/NodeTitle.vue'
+    import Timer from './tools/Timer.vue'
 
 
     const mdiAddFile: string = mdiPlus

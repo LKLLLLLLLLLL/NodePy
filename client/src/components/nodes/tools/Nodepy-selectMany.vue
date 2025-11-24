@@ -29,8 +29,8 @@
 <script lang="ts" setup>
     import {ref, computed, watchEffect, onBeforeUnmount, watch} from 'vue'
     // @ts-ignore
-    import SvgIcon from '@jamescoyle/vue-icon';
-    import { mdiMenuDown } from '@mdi/js';
+    import SvgIcon from '@jamescoyle/vue-icon'
+    import { mdiMenuDown } from '@mdi/js'
 
     const down_path = mdiMenuDown;
 
@@ -52,7 +52,7 @@
             default: 0
         }
     })
-    const emit = defineEmits(['selectChange'])
+    const emit = defineEmits(['selectChange', 'clearSelect'])
     const root = ref<HTMLElement>()
     const itemStyle = ref({
         width: props.itemWidth,
@@ -86,6 +86,7 @@
 
     watch(() => JSON.stringify(props.options), (newValue, oldValue) => {
         selectedIdx.value = props.defaultSelected
+        emit('clearSelect') //  if options have changed, the selection should be cleared
     }, {immediate: false})
 
     onBeforeUnmount(() => document.removeEventListener('click', clickOutside, true))

@@ -1,6 +1,7 @@
 <template>
     <div class="ConstNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <NodeTitle node-category="input">常量节点</NodeTitle>
+        <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="value">
                 <div class="param-description" :class="{'node-has-paramerr': valueHasErr.value}">
@@ -53,6 +54,7 @@
     import NodepyNumberInput from './tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
     import NodepySelectFew from './tools/Nodepy-selectFew.vue'
     import NodeTitle from './tools/NodeTitle.vue'
+    import Timer from './tools/Timer.vue'
 
 
     const props = defineProps<NodeProps<ConstNodeData>>()

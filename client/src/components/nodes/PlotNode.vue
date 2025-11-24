@@ -1,6 +1,7 @@
 <template>
     <div class="PlotNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <NodeTitle node-category="visualize">绘图节点</NodeTitle>
+        <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
                 <div class="input-port-description">表格输入端口</div>
@@ -12,6 +13,7 @@
                 :options="x_col_hint"
                 :default-selected="-1"
                 @select-change="onUpdateX_col"
+                @clear-select="clearSelectX"
                 item-height="27px"
                 class="nodrag"
                 />
@@ -22,6 +24,7 @@
                 :options="y_col_hint"
                 :default-selected="-1"
                 @select-change="onUpdateY_col"
+                @clear-select="clearSelectY"
                 item-height="27px"
                 class="nodrag"
                 />
@@ -60,6 +63,7 @@
     import NodepySelectMany from './tools/Nodepy-selectMany.vue'
     import ErrorMsg from './tools/ErrorMsg.vue'
     import NodeTitle from './tools/NodeTitle.vue'
+    import Timer from './tools/Timer.vue'
 
 
     const props = defineProps<NodeProps<PlotNodeData>>()
@@ -108,6 +112,14 @@
 
     const onUpdateTitle = () => {
         props.data.param.title = title.value
+    }
+
+    const clearSelectX = () => {
+        props.data.param.x_col = ''
+    }
+
+    const clearSelectY = () => {
+        props.data.param.y_col = ''
     }
 
 

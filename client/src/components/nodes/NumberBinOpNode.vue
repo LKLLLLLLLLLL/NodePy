@@ -1,6 +1,7 @@
 <template>
     <div class="NumBinComputeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <NodeTitle node-category="compute">数字二元运算节点</NodeTitle>
+        <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-x port">
                 <div class="input-port-description">
@@ -47,6 +48,7 @@
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
     import ErrorMsg from './tools/ErrorMsg.vue'
     import NodeTitle from './tools/NodeTitle.vue'
+    import Timer from './tools/Timer.vue'
 
 
     const props = defineProps<NodeProps<NumberBinOpNodeData>>()

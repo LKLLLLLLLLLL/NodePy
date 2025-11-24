@@ -1,6 +1,7 @@
 <template>
     <div class="BoolNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <NodeTitle node-category="input">布尔节点</NodeTitle>
+        <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="value">
                 <NodepyBoolValue
@@ -33,13 +34,14 @@
     import { handleExecError, handleOutputError } from './handleError'
     import ErrorMsg from './tools/ErrorMsg.vue'
     import NodeTitle from './tools/NodeTitle.vue'
+    import Timer from './tools/Timer.vue'
 
 
-     const props = defineProps<NodeProps<BoolNodeData>>()
-     const value = ref(props.data.param.value)
-     const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
-     const constHasErr = computed(() => handleOutputError(props.id, 'const'))
-     const errMsg = ref<string[]>([])
+    const props = defineProps<NodeProps<BoolNodeData>>()
+    const value = ref(props.data.param.value)
+    const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
+    const constHasErr = computed(() => handleOutputError(props.id, 'const'))
+    const errMsg = ref<string[]>([])
 
 
     const onUpdateValue = () => {

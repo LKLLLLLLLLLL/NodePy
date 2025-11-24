@@ -1,6 +1,7 @@
 import type { Project } from '@/utils/api'
 
 
+// apply patch
 function setDeep<O extends Record<string, any>>(
   obj: O,
   path: any[],
@@ -23,6 +24,20 @@ export class TaskCancelledError extends Error {
         this.name = 'TaskCancelledError'
     }
 }
+
+
+//  timer message
+type TimerMsg = {action: 'start' | 'stop'; nodeId: string}
+const timerListeners = new Set<(msg: TimerMsg) => void>()
+export const onTimerMsg = (callback: (msg: TimerMsg) => void) => {
+  timerListeners.add(callback)
+  return () => timerListeners.delete(callback)
+}
+const broadcastTimer = (msg: TimerMsg) => {
+  console.log('broadcastTimer:', msg)
+  timerListeners.forEach(callback => callback(msg))
+}
+
 
 class TaskManager {
   private currentTaskId: string | null = null
@@ -70,12 +85,21 @@ class TaskManager {
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data)
         messages.push(message)
+
         const patch = message.patch as any[]
         if (patch && patch.length > 0) {
           patch.forEach(p => {
             setDeep(project.workflow, p.key, p.value)
           })
         }
+
+        if(message.timer === 'start' || message.timer === 'stop') {
+          broadcastTimer({
+            action: message.timer,
+            nodeId: message.node_id
+          })
+        }
+
       }
 
       ws.onclose = (event) => {

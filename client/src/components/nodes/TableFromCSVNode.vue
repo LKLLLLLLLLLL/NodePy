@@ -1,6 +1,7 @@
 <template>
     <div class="TableFromCSVNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <NodeTitle node-category="input">CSV表格节点</NodeTitle>
+        <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-csv_file port">
                 <div class="input-port-description">
@@ -39,6 +40,7 @@
     import { handleExecError, handleValidationError, handleOutputError } from './handleError'
     import ErrorMsg from './tools/ErrorMsg.vue'
     import NodeTitle from './tools/NodeTitle.vue'
+    import Timer from './tools/Timer.vue'
 
 
     const props = defineProps<NodeProps<BaseData>>()

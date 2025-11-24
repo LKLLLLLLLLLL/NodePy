@@ -1,6 +1,7 @@
 <template>
     <div class="StringNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <NodeTitle node-category="input">字符串节点</NodeTitle>
+        <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="value">
                 <div class="param-description" :class="{'node-has-paramerr': valueHasErr.value}">
@@ -35,6 +36,7 @@
     import { handleExecError, handleParamError, handleOutputError } from './handleError'
     import ErrorMsg from './tools/ErrorMsg.vue'
     import NodeTitle from './tools/NodeTitle.vue'
+    import Timer from './tools/Timer.vue'
 
 
     const props = defineProps<NodeProps<StringNodeData>>()
