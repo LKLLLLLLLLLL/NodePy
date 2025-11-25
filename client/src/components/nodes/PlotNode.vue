@@ -14,7 +14,6 @@
                 :default-selected="x_col_default_selected"
                 @select-change="onUpdateX_col"
                 @clear-select="clearSelectX"
-                item-height="27px"
                 class="nodrag"
                 />
             </div>
@@ -25,7 +24,6 @@
                 :default-selected="y_col_default_selected"
                 @select-change="onUpdateY_col"
                 @clear-select="clearSelectY"
-                item-height="27px"
                 class="nodrag"
                 />
             </div>
