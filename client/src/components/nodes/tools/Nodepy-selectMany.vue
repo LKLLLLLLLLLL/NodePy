@@ -84,9 +84,11 @@
         : document.removeEventListener('click', clickOutside, true)
     )
 
-    watch(() => JSON.stringify(props.options), (newValue, oldValue) => {
+    watch(() => JSON.stringify(props.options), async (newValue, oldValue) => {
+        await new Promise(resolve => {
+            emit('clearSelect', resolve)    //  if options have changed, the selection should be cleared
+        })
         selectedIdx.value = props.defaultSelected
-        emit('clearSelect') //  if options have changed, the selection should be cleared
     }, {immediate: false})
 
     onBeforeUnmount(() => document.removeEventListener('click', clickOutside, true))
