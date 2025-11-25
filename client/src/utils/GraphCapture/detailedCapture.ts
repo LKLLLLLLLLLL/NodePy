@@ -341,6 +341,20 @@ const captureFlowWithViewport = async (vueFlowContainer: HTMLElement): Promise<s
 }
 
 /**
+ * 等待DOM更新完成
+ */
+const waitForDOMUpdate = (): Promise<void> => {
+  return new Promise(resolve => {
+    // 使用requestAnimationFrame确保DOM更新完成
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+  });
+}
+
+/**
  * 完整流程图截图功能 - 纯白背景，只显示节点和边，所有节点居中显示
  */
 export const captureDetailed = async (vueFlowRef: any): Promise<string | null> => {
@@ -350,6 +364,9 @@ export const captureDetailed = async (vueFlowRef: any): Promise<string | null> =
   }
   
   try {
+    // 等待DOM更新完成，确保新增节点已经渲染
+    await waitForDOMUpdate();
+    
     // 尝试多种方式查找VueFlow容器元素
     let vueFlowContainer: HTMLElement | null = null
     
@@ -456,6 +473,8 @@ export const saveDetailedScreenshot = (imageData: string, projectId: string): vo
  */
 export const autoCaptureDetailed = async (vueFlowRef: any): Promise<string | null> => {
   try {
+    // 在自动截图前增加额外的等待时间，确保DOM完全更新
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const base64String = await captureDetailed(vueFlowRef)
     if (base64String) {

@@ -1,6 +1,20 @@
 import html2canvas from 'html2canvas'
 
 /**
+ * 等待DOM更新完成
+ */
+const waitForDOMUpdate = (): Promise<void> => {
+  return new Promise(resolve => {
+    // 使用requestAnimationFrame确保DOM更新完成
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+  });
+}
+
+/**
  * 创建纯白色背景的小地图副本用于截图，并确保节点居中显示
  */
 const createWhiteBackgroundMiniMap = (originalMiniMap: HTMLElement): HTMLElement => {
@@ -285,6 +299,9 @@ export const captureMiniMap = async (vueFlowRef: any): Promise<string | null> =>
   }
 
   try {
+    // 等待DOM更新完成，确保新增节点已经渲染
+    await waitForDOMUpdate();
+    
     // 获取小地图元素
     const miniMapElement = vueFlowRef.querySelector('.vue-flow__minimap') as HTMLElement
     if (!miniMapElement) {
@@ -364,6 +381,8 @@ export const saveMinimapScreenshot = (imageData: string, projectId: string): voi
  */
 export const autoCaptureMinimap = async (vueFlowRef: any): Promise<string | null> => {
   try {
+    // 在自动截图前增加额外的等待时间，确保DOM完全更新
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const base64String = await captureMiniMap(vueFlowRef)
     if (base64String) {
