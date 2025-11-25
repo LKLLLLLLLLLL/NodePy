@@ -27,15 +27,26 @@ export class TaskCancelledError extends Error {
 
 
 //  timer message
-type TimerMsg = {action: 'start' | 'stop'; nodeId: string}
+type TimerMsg = {action: 'start' | 'stop' | 'error'; nodeId: string}
 const timerListeners = new Set<(msg: TimerMsg) => void>()
+const runningNodes = new Set<string>()
 export const onTimerMsg = (callback: (msg: TimerMsg) => void) => {
   timerListeners.add(callback)
   return () => timerListeners.delete(callback)
 }
 const broadcastTimer = (msg: TimerMsg) => {
+  if(msg.action === 'start') runningNodes.add(msg.nodeId)
+  if(msg.action === 'error' || msg.action === 'stop') runningNodes.delete(msg.nodeId)
   console.log('broadcastTimer:', msg)
   timerListeners.forEach(callback => callback(msg))
+}
+const stopAllRunningTimers = () => {
+  ;[...runningNodes].forEach(nodeId => {
+    broadcastTimer({
+      action: 'error',
+      nodeId
+    })
+  })
 }
 
 
@@ -80,7 +91,7 @@ class TaskManager {
         ws.close()
         this.cleanup()
         resolve(messages)
-      }, 120000)
+      }, 600000)
 
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data)
@@ -107,6 +118,7 @@ class TaskManager {
           clearTimeout(this.timeoutId)
           this.timeoutId = null
         }
+        stopAllRunningTimers()
         console.log(`WebSocket 关闭: code=${event.code}, reason=${event.reason}, wasClean=${event.wasClean}, taskid=${task_id}`)
         this.cleanup()
         resolve(messages)

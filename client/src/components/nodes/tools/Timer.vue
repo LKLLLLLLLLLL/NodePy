@@ -1,6 +1,10 @@
 <template>
     <span class="timer">
-        <svg-icon type="mdi" :path="timerPath"></svg-icon>{{ display }}
+        <svg-icon type="mdi" :path="waitingPath" v-if="timerStatus === 'waiting'"></svg-icon>
+        <svg-icon type="mdi" :path="runningPath" v-if="timerStatus === 'running'" class="running"></svg-icon>
+        <svg-icon type="mdi" :path="finishedPath" v-if="timerStatus === 'finished'"></svg-icon>
+        <svg-icon type="mdi" :path="errorPath" v-if="timerStatus === 'error'"></svg-icon>
+        {{ timerStatus === 'waiting' ? '' : display }}
     </span>
 </template>
 
@@ -8,16 +12,20 @@
     import { ref, computed, onMounted, onUnmounted } from 'vue'
     import { onTimerMsg } from '@/utils/task'   //@ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon'
-    import { mdiTimerOutline } from '@mdi/js'
-    import { mdiUpdate } from '@mdi/js'; // waiting
-    import { mdiCached } from '@mdi/js'; // running
-    import { mdiCheckCircleOutline } from '@mdi/js'; // finished
+    import { mdiUpdate } from '@mdi/js' // waiting
+    import { mdiCached } from '@mdi/js' // running
+    import { mdiCheck } from '@mdi/js' // finished
+    import { mdiClose } from '@mdi/js'  //  error
 
     const props = defineProps<{
         nodeId: string,
         defaultTime?: number | null
     }>()
-    const timerPath = mdiTimerOutline
+    const waitingPath = mdiUpdate
+    const runningPath = mdiCached
+    const finishedPath = mdiCheck
+    const errorPath = mdiClose
+    const timerStatus = ref<'waiting' | 'running' | 'finished' | 'error'>((props.defaultTime !== null && props.defaultTime !== undefined) ? 'finished' : 'waiting')
     const startAt = ref(0)
     const now = ref(0)
     let off = () => {}
@@ -27,9 +35,10 @@
         if (ms < 100) return `${ms.toFixed(1)}ms`                // < 100 ms
         const s = ms / 1000
         if (s < 60) return `${s.toFixed(1)}s`                    // < 1 min
-        const m = Math.floor(Math.floor(s) / 60)
-        const sec = Math.floor(s) % 60
-        return `${m}:${String(sec).padStart(2, '0')}`
+        const m = Math.floor(s / 60)
+        const sec = s - 60 * m
+        const displaySec = String(sec.toFixed(1)).padStart(4, '0') + 's'
+        return `${m}m ${displaySec === '00.0s' ? '' : displaySec}`
     })
 
 
@@ -49,9 +58,10 @@
             rafId = null
         }
     }
-    const timerMsgHandler = (msg: {action: 'start'|'stop'; nodeId: string}) => {
+    const timerMsgHandler = (msg: {action: 'start'|'stop'|'error'; nodeId: string}) => {
         if(msg.nodeId !== props.nodeId) return
         msg.action === 'start' ? startCount() : stopCount()
+        timerStatus.value = msg.action === 'start' ? 'running' : msg.action === 'stop' ? 'finished' : 'error'
     }
 
 
@@ -75,6 +85,16 @@
     @use './tools.scss' as *;
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
+
+    @keyframes spin {
+        from {
+            transform: rotate(360deg);
+        }
+        to {
+            transform: rotate(0deg);
+        }
+    }
+
     .timer {
         display: flex;
         align-items: flex-end;
@@ -85,5 +105,8 @@
         top: 0;
         left: 0;
         transform: translate(0, -95%);
+        .running {
+            animation: spin 1s linear infinite;
+        }
     }
 </style>

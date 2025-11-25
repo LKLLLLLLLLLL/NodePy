@@ -484,7 +484,7 @@ async def project_status(task_id: str, websocket: WebSocket) -> None:
                         
                         if status == Status.TIMEOUT:
                             timeout_count += 1
-                            if timeout_count >= 12: # 1 minute timeout for one node
+                            if timeout_count >= 12 * 10: # 10 minutes timeout for one node
                                 await revoke_project_task(task_id)
                                 # avoid dead loop for user provided workflow
                                 await websocket.close(code=4400, reason="Task timed out.")
