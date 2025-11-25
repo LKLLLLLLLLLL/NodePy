@@ -6,6 +6,7 @@ $str-color: green;
 $table-color: pink;
 $file-color: rgb(216, 105, 91);
 $bool-color: #76ab0b;
+$datetime-color: #00c8ff;
 $default-type-color: gray;
 $node-width: 200px;
 $node-title-height: 30px;
@@ -21,6 +22,7 @@ $str-node-color: $str-color;
 $table-node-color: $table-color;
 $utils-node-color: rgb(183, 0, 70);
 $visualize-node-color: #7572d2;
+$datetime-node-color: $datetime-color;
 $node-margin: 10px;
 $node-title-fontsize: 15px;
 $node-description-fontsize: 14px;
@@ -42,6 +44,7 @@ $node-description-fontsize: 14px;
   outline: 2px solid $stress-color;
 }
 
+//  handle colors according to datatypes
 .int-handle-color {
   background: $int-color;
 }
@@ -66,6 +69,10 @@ $node-description-fontsize: 14px;
   background: $file-color;
 }
 
+.Datetime-handle-color {
+  background: $datetime-color;
+}
+
 .default-handle-color {
   background: $default-type-color;
 }
@@ -86,6 +93,7 @@ $node-description-fontsize: 14px;
   }
 }
 
+//  title colors according to node categories
 .node-title-input {
   @include node-title-style;
   background: $input-node-color;
@@ -124,6 +132,11 @@ $node-description-fontsize: 14px;
 .node-title-visualize {
   @include node-title-style;
   background: $visualize-node-color;
+}
+
+.node-title-datetimeProcess {
+  @include node-title-style;
+  background: $datetime-node-color;
 }
 
 .port {

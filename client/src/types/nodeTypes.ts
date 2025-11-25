@@ -9,6 +9,7 @@ export const dataTypeColor = {
     bool: '#76ab0b',
     Table: 'pink',
     File: 'rgb(216, 105, 91)',
+    Datetime: '#00c8ff',
     default: 'gray'
 }
 
@@ -21,6 +22,7 @@ export const nodeCategoryColor = {
     table: dataTypeColor.Table,
     utils: 'rgb(183, 0, 70)',
     visualize: '#7572d2',
+    datetime: dataTypeColor.Datetime,
     default: 'gray'
 }
 
@@ -88,6 +90,40 @@ export interface TableFromCSVNode extends BaseNode {
     type: 'TableFromCSVNode'
 }
 
+
+export interface RandomNodeParam {
+    col_name: string,
+    col_type: 'int'|'float'|'str'|'bool'
+}
+export type RandomNodeData = BaseData & {
+    param: RandomNodeParam
+}
+export interface RandomNode extends BaseNode<RandomNodeData> {
+    type: 'RandomNode'
+}
+
+
+export interface RangeNodeParam {
+    col_name: string,
+    col_type: 'int'|'float'
+}
+export type RangeNodeData = BaseData & {
+    param: RangeNodeParam
+}
+export interface RangeNode extends BaseNode<RangeNodeData> {
+    type: 'RangeNode'
+}
+
+
+export interface DateTimeNodeParam {
+    value: string
+}
+export type DateTimeNodeData = BaseData & {
+    param: DateTimeNodeParam
+}
+export interface DateTimeNode extends BaseNode<DateTimeNodeData> {
+    type: 'DateTimeNode'
+}
 
 /**************  Compute Nodes  ****************/
 export const NumBinOpList = ['ADD', 'SUB', 'MUL', 'DIV', 'POW'] as const
@@ -234,6 +270,32 @@ export interface BoolColWithColBinOpNode extends BaseNode<BoolColWithColBinOpNod
 }
 
 
+export interface ToStringNode extends BaseNode {
+    type: 'ToStringNode'
+}
+
+
+export interface ToIntNodeParam {
+    method: 'FLOOR'|'CEIL'|'ROUND'
+}
+export type ToIntNodeData = BaseData & {
+    param: ToIntNodeParam
+}
+export interface ToIntNode extends BaseNode<ToIntNodeData> {
+    type: 'ToIntNode'
+}
+
+
+export interface ToFloatNode extends BaseNode {
+    type: 'ToFloatNode'
+}
+
+
+export interface ToBoolNode extends BaseNode {
+    type: 'ToBoolNode'
+}
+
+
 /*********************  Visualize Nodes  **************************/
 export interface PlotNodeParam {
     x_col: string
@@ -246,6 +308,18 @@ export type PlotNodeData = BaseData & {
 }
 export interface PlotNode extends BaseNode<PlotNodeData>{
     type: 'PlotNode'
+}
+
+
+export interface WordcloudNodeParam {
+    word_col: string
+    frequency_col: string
+}
+export type WordcloudNodeData = BaseData & {
+    param: WordcloudNodeParam
+}
+export interface WordcloudNode extends BaseNode<WordcloudNodeData> {
+    type: 'WordcloudNode'
 }
 
 
@@ -328,6 +402,73 @@ export interface BatchConcatNode extends BaseNode<BatchConcatNodeData> {
 
 
 /*********************  TableProcess Nodes  **************************/
+export interface InsertConstColNodeParam {
+    col_name: string,
+    col_type: 'int'|'float'|'bool'|'str'|'Datetime'
+}
+export type InsertConstColNodeData = BaseData & {
+    param: InsertConstColNodeParam
+}
+export interface InsertConstColNode extends BaseNode<InsertConstColNodeData> {
+    type: 'InsertConstColNode'
+}
+
+
+export interface InsertRangeColNodeParam {
+    col_name: string,
+    col_type: 'int'|'float'|'Datetime'
+}
+export type InsertRangeColNodeData = BaseData & {
+    param: InsertRangeColNodeParam
+}
+export interface InsertRangeColNode extends BaseNode<InsertRangeColNodeData> {
+    type: 'InsertRangeColNode'
+}
+
+
+export interface InsertRandomColNodeParam {
+    col_name: string,
+    col_type: 'int'|'float'
+}
+export type InsertRandomColNodeData = BaseData & {
+    param: InsertRandomColNodeParam
+}
+export interface InsertRandomColNode extends BaseNode<InsertRandomColNodeData> {
+    type: 'InsertRandomColNode'
+}
+
+
+export interface FilterNodeParam {
+    cond_col: string
+}
+export type FilterNodeData = BaseData & {
+    param: FilterNodeParam
+}
+export interface FilterNode extends BaseNode<FilterNodeData> {
+    type: 'FilterNode'
+}
+
+
+export interface DropDuplicatesNodeParam {
+    subset_cols: string[]
+}
+export type DropDuplicatesNodeData = BaseData & {
+    param: DropDuplicatesNodeParam
+}
+export interface DropDuplicatesNode extends BaseNode<DropDuplicatesNodeData> {
+    type: 'DropDuplicatesNode'
+}
+
+
+export interface DropNaNValueNodeParam {
+    subset_cols: string[]
+}
+export type DropNaNValueNodeData = BaseData & {
+    param: DropNaNValueNodeParam
+}
+export interface DropNaNValueNode extends BaseNode<DropNaNValueNodeData> {
+    type: 'DropNaNValueNode'
+}
 
 
 /*********************  File Nodes  **************************/
@@ -345,3 +486,70 @@ export interface UploadNode extends BaseNode<UploadNodeData>{
 export interface DisplayNode extends BaseNode {
     type: 'DisplayNode'
 }
+
+
+/*********************  DatetimeProcess Nodes  **************************/
+export interface DatetimeComputeNodeParam {
+    op: 'ADD'|'SUB'
+    unit: 'DAYS'|'HOURS'|'MINUTES'|'SECONDS'
+}
+export type DatetimeComputeNodeData = BaseData & {
+    param: DatetimeComputeNodeParam
+}
+export interface DatetimeComputeNode extends BaseNode<DatetimeComputeNodeData> {
+    type: 'DatetimeComputeNode'
+}
+
+
+export interface DatetimeDiffNodeParam {
+    unit: 'DAYS'|'HOURS'|'MINUTES'|'SECONDS'
+}
+export type DatetimeDiffNodeData = BaseData & {
+    param: DatetimeDiffNodeParam
+}
+export interface DatetimeDiffNode extends BaseNode<DatetimeDiffNodeData> {
+    type: 'DatetimeDiffNode'
+}
+
+
+export interface ToDatetimeNodeParam {
+    unit: 'DAYS'|'HOURS'|'MINUTES'|'SECONDS'
+}
+export type ToDatetimeNodeData = BaseData & {
+    param: ToDatetimeNodeParam
+}
+export interface ToDatetimeNode extends BaseNode<ToDatetimeNodeData> {
+    type: 'ToDatetimeNode'
+}
+
+
+export interface StrToDatetimeNode extends BaseNode {
+    type: 'StrToDatetimeNode'
+}
+
+
+export interface DatetimePrintNodeParam {
+    format: string
+}
+export type DatetimePrintNodeData = BaseData & {
+    param: DatetimePrintNodeParam
+}
+export interface DatetimePrintNode extends BaseNode<DatetimePrintNodeData> {
+    type: 'DatetimePrintNode'
+}
+
+
+export interface DatetimeToTimestampNodeParam {
+    unit: 'DAYS'|'HOURS'|'MINUTES'|'SECONDS'
+}
+export type DatetimeToTimestampNodeData = BaseData & {
+    param: DatetimeToTimestampNodeParam
+}
+export interface DatetimeToTimestampNode extends BaseNode<DatetimeToTimestampNodeData> {
+    type: 'DatetimeToTimestampNode'
+}
+
+
+/*********************  Utility Nodes  **************************/
+
+/*********************  Control Nodes  **************************/
