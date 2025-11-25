@@ -36,6 +36,7 @@
     import ErrorMsg from './tools/ErrorMsg.vue'
     import NodeTitle from './tools/NodeTitle.vue'
     import Timer from './tools/Timer.vue'
+    import notify from '../Notification/notify'
 
 
     const mdiAddFile: string = mdiPlus
@@ -67,6 +68,10 @@
                 props.data.param.file = f
             }catch(err) {
                 console.error('文件上传失败:', err)
+                notify({
+                    message: '文件上传失败',
+                    type: 'error'
+                })
             }
         }
         input.click()

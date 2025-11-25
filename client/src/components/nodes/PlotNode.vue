@@ -11,7 +11,7 @@
                 <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列名</div>
                 <NodepySelectMany
                 :options="x_col_hint"
-                :default-selected="-1"
+                :default-selected="x_col_default_selected"
                 @select-change="onUpdateX_col"
                 @clear-select="clearSelectX"
                 item-height="27px"
@@ -22,7 +22,7 @@
                 <div class="param-description" :class="{'node-has-paramerr': y_colHasErr.value}">y轴列名</div>
                 <NodepySelectMany
                 :options="y_col_hint"
-                :default-selected="-1"
+                :default-selected="y_col_default_selected"
                 @select-change="onUpdateY_col"
                 @clear-select="clearSelectY"
                 item-height="27px"
@@ -69,6 +69,10 @@
     const props = defineProps<NodeProps<PlotNodeData>>()
     const x_col_hint = computed(() => props.data.hint?.x_col_choices || [''])
     const y_col_hint = computed(() => props.data.hint?.y_col_choices || [''])
+    const x_col = ref(props.data.param.x_col)
+    const y_col = ref(props.data.param.y_col)
+    const x_col_default_selected = computed(() => x_col_hint.value.indexOf(x_col.value))
+    const y_col_default_selected = computed(() => y_col_hint.value.indexOf(y_col.value))
     const title = ref(props.data.param.title || '')
     const plot_type_options = ['bar', 'line', 'scatter', 'pie']
     const plot_type_options_chinese = ['条形图', '折线图', '散点图', '饼状图']
@@ -101,13 +105,11 @@
     }
 
     const onUpdateX_col = (e: any) => {
-        const x_col = x_col_hint.value[e]
-        props.data.param.x_col = x_col
+        props.data.param.x_col = x_col_hint.value[e]
     }
 
     const onUpdateY_col = (e: any) => {
-        const y_col = y_col_hint.value[e]
-        props.data.param.y_col = y_col
+        props.data.param.y_col = y_col_hint.value[e]
     }
 
     const onUpdateTitle = () => {
