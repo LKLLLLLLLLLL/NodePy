@@ -32,8 +32,8 @@ class InsertConstColNode(BaseNode):
         if not self.type == "InsertConstColNode":
             raise NodeParameterError(
                 node_id=self.id,
-                err_param_key="col_type",
-                err_msg="Node type and col_type parameter mismatch.",
+                err_param_key="type",
+                err_msg="Node type parameter mismatch.",
             )
         if not check_no_illegal_cols([self.col_name]):
             raise NodeParameterError(

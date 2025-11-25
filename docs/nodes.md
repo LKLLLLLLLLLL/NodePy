@@ -546,6 +546,52 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的随机列。
 
+#### 5.4 FilterNode
+表格过滤节点，根据指定的列中的值来过滤：如果该列的值为True，则将该行输出到True表格中，否则输出到False表格中。
+
+**参数：**
+- cond_col: 要操作的表格列名，类型为str，该列必须为布尔类型(bool)。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- true_table: 过滤结果为True的表格，类型为Table。
+- false_table: 过滤结果为False的表格，类型为Table。
+
+**hint：**
+- cond_col_choices: 列名列表，类型为List[str]，用于在UI中为cond_col参数提供可选值。
+
+#### 5.5 DropDuplicatesNode
+表格去重节点，根据指定的列名列表对表格进行去重操作。
+
+**参数：**
+- subset_cols: 列名列表，类型为List[str]，指定用于去重的列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- deduplicated_table: 去重后的表格，类型为Table。
+
+**hint：**
+- subset_col_choices: 列名列表，类型为List[str]，用于在UI中为subset_cols参数提供可选值。
+
+#### 5.6 DropNaNValueNode
+表格缺失值删除节点，根据指定的列名列表删除包含NaN值的行。
+
+**参数：**
+- subset_cols: 列名列表，类型为List[str]，指定用于检查NaN值的列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- cleaned_table: 删除NaN值后的表格，类型为Table。
+
+**hint：**
+- subset_col_choices: 列名列表，类型为List[str]，用于在UI中为subset_cols参数提供可选值。
+
 ### 6. 文件处理节点(file)
 #### 6.1 UploadNode
 文件上传节点，支持上传本地文件并输出为File类型。
