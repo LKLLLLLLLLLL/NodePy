@@ -5,6 +5,7 @@ from server.models.exception import (
     NodeParameterError,
 )
 from server.models.schema import (
+    ColType,
     Pattern,
     Schema,
 )
@@ -34,7 +35,7 @@ class GroupNode(BaseNode):
     @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         input_table_cols = {col: set() for col in self.group_cols}
-        input_table_cols |= {agg_col: set() for agg_col in self.agg_cols}
+        input_table_cols |= {agg_col: {ColType.FLOAT, ColType.INT} for agg_col in self.agg_cols}
         return [
             InPort(
                 name="table",
@@ -55,7 +56,7 @@ class GroupNode(BaseNode):
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         table_schema = input_schemas["table"]
         assert table_schema.tab is not None
-        # 2. only keep the grouping column and the aggregated column
+        # only keep the grouping column and the aggregated column
         new_col_types = {}
         for col_name in self.group_cols:
             new_col_types[col_name] = table_schema.tab.col_types[col_name]

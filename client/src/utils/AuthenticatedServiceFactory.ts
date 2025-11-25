@@ -21,7 +21,6 @@ class AuthenticatedServiceFactory {
    * 初始化工厂
    */
   static init() {
-    isDev && console.log('🔧 初始化认证服务工厂...');
     initAuthToken();
     this._authenticatedService = createAuthenticatedService();
   }
@@ -40,7 +39,6 @@ class AuthenticatedServiceFactory {
    * 刷新认证服务
    */
   static refreshService(): AuthenticatedService {
-    isDev && console.log('🔄 刷新认证服务');
     this._authenticatedService = createAuthenticatedService();
     return this._authenticatedService;
   }

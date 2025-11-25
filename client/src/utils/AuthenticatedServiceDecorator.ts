@@ -67,7 +67,6 @@ export const setAuthToken = (token: string): void => {
 export const clearAuthToken = (): void => {
   OpenAPI.TOKEN = undefined;
   localStorage.removeItem('access_token');
-  isDev && console.log('✅ Token 已清除');
 };
 
 /**
@@ -77,7 +76,6 @@ export const initAuthToken = (): void => {
   const savedToken = localStorage.getItem('access_token');
   if (savedToken) {
     OpenAPI.TOKEN = savedToken;
-    isDev && console.log('✅ 从本地存储恢复 Token');
   }
 };
 
@@ -108,7 +106,6 @@ export function withAuthMethod<T extends any[], R>(
         
         if (isAuthError && retryCount < 1) {
           try {
-            console.log('🔄 Token过期，尝试自动刷新...');
             const tokenResponse = await DefaultService.refreshAccessTokenApiAuthRefreshPost();
             
             if (tokenResponse.access_token) {
@@ -166,17 +163,9 @@ export function createAuthenticatedService(): AuthenticatedService {
     'spaFallbackFullPathGet'
   ];
   
-  if (isDev) {
-    console.log('🔧 开始创建认证服务...');
-  }
-  
   // 获取并过滤方法
   const methodNames = getStaticMethodNames(DefaultService)
     .filter(methodName => !excludedMethods.includes(methodName as ExcludedMethods));
-  
-  if (isDev) {
-    console.log(`🔧 需要包装 ${methodNames.length} 个方法`);
-  }
   
   // 包装方法
   methodNames.forEach(methodName => {
@@ -188,10 +177,6 @@ export function createAuthenticatedService(): AuthenticatedService {
       console.error(`❌ 为方法 ${methodName} 添加认证功能失败:`, error);
     }
   });
-  
-  if (isDev) {
-    console.log('✅ 认证服务创建完成');
-  }
   
   return authenticatedService;
 }

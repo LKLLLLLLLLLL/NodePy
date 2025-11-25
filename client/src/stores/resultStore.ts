@@ -14,6 +14,8 @@ export const useResultStore = defineStore('result',()=>{
     const {nodes} = useVueFlow('main')
     const authService = AuthenticatedServiceFactory.getService();
 
+    const openCache = true
+
     const default_content: string = 'no-result'
     const default_dataview: DataView = {
         type: DataView.type.STR,
@@ -70,7 +72,6 @@ export const useResultStore = defineStore('result',()=>{
 
     function getCacheItemsToBeDeleted() {
         const currentNodeIds = new Set(nodes.value.map(node => node.id));
-        console.log('@@@@@@',currentNodeIds)
         toBeDeleted.value = []
 
         //delete nodes that has been deleted but remain in the cache
@@ -93,8 +94,6 @@ export const useResultStore = defineStore('result',()=>{
     function cacheGarbageRecycle(){
         // 删除所有标记的缓存项
         const deleteNumber = getCacheItemsToBeDeleted()
-        console.log(resultCache)
-        console.log('Deleted CacheItems:',deleteNumber)
         toBeDeleted.value.forEach(cacheId => {
             resultCache.value.delete(cacheId);
         });
@@ -159,15 +158,20 @@ export const useResultStore = defineStore('result',()=>{
     }
 
     async function getResultCacheContent(id: number){
-        const cacheItem = resultCache.value.get(id);
-        if(!cacheItem){
-            const content = await authService.getNodeDataApiDataDataIdGet(id);
-            addResultCacheContent(id,content);
+        if(openCache){
+            const cacheItem = resultCache.value.get(id);
+            if(!cacheItem){
+                const content = await authService.getNodeDataApiDataDataIdGet(id);
+                addResultCacheContent(id,content);
+            }
+            const cacheItem_after = resultCache.value.get(id) as ResultCacheItem;
+            cacheItem_after.hitCount++;
+            cacheItem_after.lastHitTime = Date.now();
+            return cacheItem_after.content;
         }
-        const cacheItem_after = resultCache.value.get(id) as ResultCacheItem;
-        cacheItem_after.hitCount++;
-        cacheItem_after.lastHitTime = Date.now();
-        return cacheItem_after.content;
+        else {
+            return await authService.getNodeDataApiDataDataIdGet(id);
+        }
     }
 
     function refresh(){

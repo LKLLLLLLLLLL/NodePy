@@ -626,6 +626,69 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - group_col_choices: 列名列表，类型为List[str]，用于在UI中为group_cols参数提供可选值。
 - agg_col_choices: 列名列表，类型为List[str]，用于在UI中为agg_col参数提供可选值。
 
+#### 5.9 MergeNode
+表格合并节点，将两个有着相同列的表格合并为一个表格。
+
+**参数：**
+无
+
+**输入：**
+- table_1: 第一个输入表格，类型为Table。
+- table_2: 第二个输入表格，类型为Table。
+
+**输出：**
+- merged_table: 合并后的表格，类型为Table。
+
+#### 5.10 SelectColNode
+表格列选择节点，根据指定的列名列表从表格中选择对应的列。
+
+**参数：**
+- selected_cols: 列名列表，类型为List[str]，指定要选择的列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- selected_table: 选择后的表格，类型为Table。
+- dropped_table: 被删除列后的表格，类型为Table。
+
+**hint：**
+- selected_col_choices: 列名列表，类型为List[str]，用于在UI中为selected_cols参数提供可选值。
+
+#### 5.11 JoinNode
+表格连接节点，根据指定的键列将两个表格进行连接操作。
+
+**参数：**
+- left_on: 左表的键列名，类型为str。
+- right_on: 右表的键列名，类型为str。
+- how: 连接方式，类型为str，取值为"INNER", "LEFT", "RIGHT", "OUTER"。
+
+**输入：**
+- left_table: 左表，类型为Table。
+- right_table: 右表，类型为Table。
+
+**输出：**
+- joined_table: 连接后的表格，类型为Table。
+
+**hint：**
+- left_on_choices: 列名列表，类型为List[str]，用于在UI中为left_on参数提供可选值。
+- right_on_choices: 列名列表，类型为List[str]，用于在UI中为right_on参数提供可选值。
+
+#### 5.12 RenameColNode
+表格列重命名节点，根据指定的列名映射关系对表格中的列进行重命名操作。
+
+**参数：**
+- rename_map: 列名映射关系，类型为dict[str, str]，键为原列名，值为新列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- renamed_table: 重命名后的表格，类型为Table。
+
+**hint：**
+- rename_col_choices: 列名列表，类型为List[str]，用于在UI中为rename_map参数提供可选值。
+
 ### 6. 文件处理节点(file)
 #### 6.1 UploadNode
 文件上传节点，支持上传本地文件并输出为File类型。

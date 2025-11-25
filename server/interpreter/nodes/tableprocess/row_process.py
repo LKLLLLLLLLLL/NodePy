@@ -13,7 +13,7 @@ from server.models.schema import (
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
 """
-This file defines some node to filter and drop some rows from a table.
+This file defines some node to split, merge, delete the rows in tables.
 """
 
 @register_node
@@ -22,6 +22,7 @@ class FilterNode(BaseNode):
     Filter rows with specified columns.
     Requires the condition column to be of boolean type.
     """
+
     cond_col: str
 
     @override
@@ -43,44 +44,45 @@ class FilterNode(BaseNode):
                 accept=Pattern(
                     types={Schema.Type.TABLE},
                     table_columns={self.cond_col: {ColType.BOOL}},
-                )
+                ),
             )
         ], [
             OutPort(
                 name="true_table",
-                description="Output table with rows where the condition is true."
+                description="Output table with rows where the condition is true.",
             ),
             OutPort(
                 name="false_table",
-                description="Output table with rows where the condition is false."
-            )
+                description="Output table with rows where the condition is false.",
+            ),
         ]
 
     @override
-    def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
+    def infer_output_schemas(
+        self, input_schemas: Dict[str, Schema]
+    ) -> Dict[str, Schema]:
         table_schema = input_schemas["table"]
-        return {
-            "true_table": table_schema,
-            "false_table": table_schema
-        }
+        return {"true_table": table_schema, "false_table": table_schema}
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         table_data = input["table"]
         assert isinstance(table_data.payload, Table)
         df = table_data.payload.df
-        
+
         true_df = df[df[self.cond_col].eq(True)]
         false_df = df[df[self.cond_col].eq(False)]
-        
+
         return {
             "true_table": Data.from_df(true_df),
-            "false_table": Data.from_df(false_df)
+            "false_table": Data.from_df(false_df),
         }
 
     @override
     @classmethod
-    def hint(cls, input_schemas: Dict[str, Schema], current_params: Dict) -> Dict[str, Any]:
+    def hint(
+        cls, input_schemas: Dict[str, Schema], current_params: Dict
+    ) -> Dict[str, Any]:
         cond_col_choices = []
         if "table" in input_schemas:
             table_schema = input_schemas["table"]
@@ -88,9 +90,8 @@ class FilterNode(BaseNode):
             for col, type in table_schema.tab.col_types.items():
                 if type == ColType.BOOL:
                     cond_col_choices.append(col)
-        return {
-            "cond_col_choices": cond_col_choices
-        }
+        return {"cond_col_choices": cond_col_choices}
+
 
 @register_node
 class DropDuplicatesNode(BaseNode):
@@ -222,3 +223,72 @@ class DropNaNValueNode(BaseNode):
             assert table_schema.tab is not None
             subset_col_choices = list(table_schema.tab.col_types.keys())
         return {"subset_col_choices": subset_col_choices}
+
+
+@register_node
+class MergeNode(BaseNode):
+    """
+    Merge two tables with same columns.
+    """
+    
+    @override
+    def validate_parameters(self) -> None:
+        if not self.type == "MergeNode":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Node type parameter mismatch.",
+            )
+        return
+
+    @override
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
+        return [
+            InPort(
+                name="table_1",
+                description="First input table to be merged.",
+                accept=Pattern(
+                    types={Schema.Type.TABLE},
+                ),
+            ),
+            InPort(
+                name="table_2",
+                description="Second input table to be merged.",
+                accept=Pattern(
+                    types={Schema.Type.TABLE},
+                ),
+            )
+        ], [
+            OutPort(
+                name="merged_table",
+                description="Output table after merging the two input tables.",
+            )
+        ]
+
+    @override
+    def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
+        # validate if the two tables have the same schema
+        table_schema_1 = input_schemas["table_1"]
+        table_schema_2 = input_schemas["table_2"]
+        if table_schema_1 != table_schema_2:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="input_schemas",
+                err_msg="Input tables have different schemas and cannot be merged.",
+            )
+        return {"merged_table": table_schema_1}
+
+    @override
+    def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
+        import pandas as pd
+
+        table_data_1 = input["table_1"]
+        table_data_2 = input["table_2"]
+        assert isinstance(table_data_1.payload, Table)
+        assert isinstance(table_data_2.payload, Table)
+        df_1 = table_data_1.payload.df
+        df_2 = table_data_2.payload.df
+
+        merged_df = pd.concat([df_1, df_2], ignore_index=True)
+
+        return {"merged_table": Data.from_df(merged_df)}

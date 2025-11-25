@@ -3,7 +3,7 @@
     import FileView from './FileView.vue';
     import ValueView from './ValueView.vue';
     import NodeInfo from './NodeInfo.vue';
-    import { ref,computed, onMounted } from 'vue';
+    import { watch, ref,computed, onMounted } from 'vue';
     import { useResultStore } from '@/stores/resultStore';
     import { useGraphStore } from '@/stores/graphStore';
 
@@ -32,29 +32,43 @@
             console.log('Result: 检测到 table 类型，data_id:', dataOut.table.data_id)
             return dataOut.table.data_id
         }
-        console.log('Result: 无法找到有效的 data_id')
         return undefined
     })
 
-    onMounted(async ()=>{
+    watch([() => graphStore.currentNode, resultId], async ([newNode, newResultId]) => {
         try {
-            if (!resultId.value) {
-                console.log('Result: resultId 不存在，无法加载结果')
-                return
+            console.log('节点或resultId发生变化:', { newNode, newResultId });
+            
+            if (!newResultId) {
+                console.log('Result: resultId 不存在，显示节点信息');
+                resultStore.currentInfo = newNode?.data?.param || {};
+                resultStore.currentResult = resultStore.default_dataview;
+                return;
             }
-            console.log('Result: 开始加载结果，resultId:', resultId.value)
-            resultStore.currentResult = await resultStore.getResultCacheContent(resultId.value)
-            console.log('Result: 结果已加载，类型:', resultStore.currentResult.type)
-            console.log('Result: 结果内容:', resultStore.currentResult)
+            
+            console.log('Result: 开始加载结果，resultId:', newResultId);
+            resultStore.currentInfo = resultStore.default_info;
+            
+            // 先设置为默认值，避免显示旧数据
+            resultStore.currentResult = resultStore.default_dataview;
+            
+            // 获取新结果
+            const result = await resultStore.getResultCacheContent(newResultId);
+            resultStore.currentResult = result;
+            console.log('Result: 结果已加载，类型:', result.type);
+            
         } catch (error) {
-            console.error('Result: 加载结果失败:', error)
+            console.error('Result: 加载结果失败:', error);
+            resultStore.currentInfo = newNode?.data?.param || {};
+            resultStore.currentResult = resultStore.default_dataview;
         }
-    })
+    }, { immediate: true });
 
 </script>
 <template>
     <div :style="{width: '100%',height: '100%'}">
         <div class = "result-control">
+            Control
         </div>
         <div class = "result-container">
             <div class="if-result" v-if="resultStore.currentResult!=resultStore.default_dataview">

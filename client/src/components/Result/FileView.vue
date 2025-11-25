@@ -1,31 +1,34 @@
 <script lang="ts" setup>
     import { useFileStore } from '@/stores/fileStore'
-    import { onMounted, onUnmounted, ref, computed } from 'vue'
+    import { onMounted, onUnmounted, ref, computed, watch } from 'vue'
     import Loading from '@/components/Loading.vue'
-    import { type File } from '@/utils/api'
+    import { type File, type TableView } from '@/utils/api'
 
+    // 修改 props 定义，允许 null
     const props = defineProps<{
-        value: (string | number | boolean | File | any)
+        value: (string | number | boolean | File | TableView | null)
     }>()
 
     const fileStore = useFileStore()
-    const loading = ref(true)
+    const loading = ref(false)
     const error = ref<string>('')
     let objectUrl: string | null = null
 
-    // 判断是否是文件对象（类型守卫）
-    const isFileObject = computed(() => {
+    // 判断是否是有效的文件对象
+    const isValidFile = computed(() => {
         return (
-            typeof props.value === 'object' &&
             props.value !== null &&
+            typeof props.value === 'object' &&
             'key' in props.value &&
-            'filename' in props.value
+            'filename' in props.value &&
+            (props.value as File).key && // key 不能为空
+            (props.value as File).key !== 'loading' // 排除 loading 占位符
         )
     })
 
     // 获取文件 key
     const fileKey = computed(() => {
-        if (isFileObject.value) {
+        if (isValidFile.value) {
             return (props.value as File).key
         }
         return null
@@ -33,7 +36,7 @@
 
     // 获取文件名
     const fileName = computed(() => {
-        if (isFileObject.value) {
+        if (isValidFile.value) {
             return (props.value as File).filename
         }
         return 'file'
@@ -41,7 +44,7 @@
 
     // 获取文件格式
     const fileFormat = computed(() => {
-        if (isFileObject.value) {
+        if (isValidFile.value) {
             return (props.value as File).format.toLowerCase()
         }
         return 'unknown'
@@ -81,33 +84,32 @@
     // CSV 数据
     const csvData = ref<string>('')
 
-    onMounted(async () => {
+    // 加载文件的函数
+    const loadFile = async () => {
+        // 重置状态
+        loading.value = false
+        error.value = ''
+        if (objectUrl) {
+            URL.revokeObjectURL(objectUrl)
+            objectUrl = null
+        }
+        displaySrc.value = ''
+        csvData.value = ''
+
+        // 检查是否是有效的文件对象
+        if (!isValidFile.value) {
+            return
+        }
+
         try {
             loading.value = true
             error.value = ''
 
-            // 检查是否是文件对象
-            if (!isFileObject.value || !fileKey.value) {
-                error.value = '不是有效的文件对象或文件 key 不存在'
-                console.warn('FileView: 接收到的不是文件对象', props.value)
-                return
-            }
-
-            console.log('FileView: 开始加载文件')
-            console.log('FileView: 文件 key:', fileKey.value)
-            console.log('FileView: 文件格式:', fileFormat.value)
-            console.log('FileView: 文件名:', fileName.value)
-
             // 从 fileStore 获取文件内容
-            const content = await fileStore.getCacheContent(fileKey.value)
-
-            console.log('FileView: 获取到内容')
-            console.log('FileView: 内容类型:', typeof content)
-            console.log('FileView: 内容是否为 Blob:', content instanceof Blob)
+            const content = await fileStore.getCacheContent(fileKey.value!)
 
             if (!content) {
                 error.value = '文件内容为空或加载失败'
-                console.warn('FileView: 内容为空')
                 return
             }
 
@@ -115,20 +117,16 @@
 
             if (content instanceof Blob) {
                 blob = content
-                console.log('FileView: 内容已是 Blob，大小:', blob.size, '字节')
             } else if (content instanceof ArrayBuffer) {
                 const mimeType = getMimeType(fileFormat.value)
                 blob = new Blob([content], { type: mimeType })
-                console.log('FileView: ArrayBuffer 已转换为 Blob，大小:', blob.size, '字节')
             } else {
-                console.warn('FileView: 未知类型:', typeof content)
                 const mimeType = getMimeType(fileFormat.value)
                 blob = new Blob([String(content)], { type: mimeType })
             }
 
             if (!blob || blob.size === 0) {
                 error.value = 'Blob 为空或大小为 0'
-                console.warn('FileView: Blob 为空或大小为 0')
                 return
             }
 
@@ -137,30 +135,27 @@
                 // 读取 CSV 内容
                 const text = await blob.text()
                 csvData.value = text
-                console.log('FileView: CSV 文件内容已读取')
             } else {
                 // 图片和 PDF 创建 Object URL
                 objectUrl = URL.createObjectURL(blob)
                 displaySrc.value = objectUrl
-                console.log('FileView: Object URL 已创建')
             }
-
-            console.log('FileView: 文件加载成功')
 
         } catch (err) {
             error.value = `加载文件失败: ${err instanceof Error ? err.message : String(err)}`
-            console.error('FileView 加载失败:', err)
         } finally {
             loading.value = false
         }
-    })
+    }
+
+    // 监听 props.value 变化
+    watch(() => props.value, loadFile, { immediate: true })
 
     onUnmounted(() => {
         // 清理 Object URL
         if (objectUrl) {
             URL.revokeObjectURL(objectUrl)
             objectUrl = null
-            console.log('FileView: Object URL 已清理')
         }
     })
 
@@ -256,7 +251,7 @@
 
         <!-- 无内容 -->
         <div v-else class="file-placeholder">
-            无法显示该文件或文件为空
+            请选择有效的文件
         </div>
     </div>
 </template>

@@ -22,30 +22,15 @@ import 'element-plus/dist/index.css'
 //authenticated service factory
 import AuthenticatedServiceFactory from './utils/AuthenticatedServiceFactory.ts'
 
-/**
- * 应用启动初始化
- */
-console.group('应用启动初始化');
-console.log('环境:', import.meta.env.MODE);
-
 // 开发环境特殊处理
 if (import.meta.env.DEV) {
-  console.log('开发模式：刷新认证服务以确保使用最新API');
 
   // 关键调用：刷新认证服务
   AuthenticatedServiceFactory.refreshService();
 
-  console.log('认证服务已更新到最新版本');
-
-  // 开发环境额外提示
-  console.log('开发提示:');
-  console.log('   - 在控制台输入 AuthenticatedServiceFactory.devRefresh() 手动刷新服务');
-  console.log('   - 输入 AuthenticatedServiceFactory.getServiceStatus() 查看服务状态');
 } else {
   console.log('生产模式：使用缓存的服务实例');
 }
-
-console.groupEnd();
 
 const vuetify = createVuetify({
   components,

@@ -262,6 +262,7 @@
         height: calc(100% - max(30px, 5%) - max(20px, 5%));
         display: flex;
         flex-direction: column;
+        overflow: auto;
     }
     .modal-footer{
         width: 100%;

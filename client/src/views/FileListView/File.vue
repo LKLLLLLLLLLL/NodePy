@@ -105,8 +105,6 @@
         loginStore.checkAuthStatus();
         if(loginStore.loggedIn){
             fileStore.initializeFiles();
-            console.log(fileStore.userFileList);
-            console.log(fileStore.userFileList.files);
         }
         else{
             router.replace({

@@ -9,6 +9,8 @@ export const useFileStore = defineStore('file', () => {
     //authenticated service factory
     const authService = AuthenticatedServiceFactory.getService();
 
+    const openCache = true
+
     //fileList default
     const default_file1: FileItem ={
         key: '123',
@@ -138,7 +140,6 @@ export const useFileStore = defineStore('file', () => {
                     lastHitTime: Date.now()
                 }
                 fileContentCache.value.set(key, toBeAdded)
-                console.log('fileStore: 已添加缓存，key:', key, '内容类型:', typeof content, '缓存大小:', fileContentCache.value.size)
             }
         }
     }
@@ -149,37 +150,39 @@ export const useFileStore = defineStore('file', () => {
             cacheItem.content = content;
             cacheItem.lastHitTime = Date.now();
             cacheItem.hitCount++;
-            console.log('fileStore: 已更新缓存，key:', key)
         }
     }
 
     function removeCacheContent(key: string) {
         if (hitCacheContent(key)) {
             fileContentCache.value.delete(key);
-            console.log('fileStore: 已移除缓存，key:', key)
         }
     }
 
-    async function getCacheContent(key: string): Promise<any> {
-        try {
-            const cacheItem = fileContentCache.value.get(key);
-            if (!cacheItem) {
-                console.log('fileStore: 缓存未命中，从 API 获取:', key)
-                await getFileContent(key);
-                // 直接缓存原始数据，不进行转换
-                addCacheContent(key, currentContent.value)
+    async function getCacheContent(key: string) {
+        if(openCache){
+            try {
+                const cacheItem = fileContentCache.value.get(key);
+                if (!cacheItem) {
+                    await getFileContent(key);
+                    // 直接缓存原始数据，不进行转换
+                    addCacheContent(key, currentContent.value)
+                }
+                const cacheItem_after = fileContentCache.value.get(key) as FileCacheItem;
+                if (cacheItem_after) {
+                    cacheItem_after.hitCount++;
+                    cacheItem_after.lastHitTime = Date.now();
+                    console.log('fileStore: 从缓存返回内容，key:', key, '类型:', typeof cacheItem_after.content)
+                    return cacheItem_after.content;
+                }
+                return null;
+            } catch (error) {
+                console.error('fileStore: getCacheContent 失败:', error)
+                return null
             }
-            const cacheItem_after = fileContentCache.value.get(key) as FileCacheItem;
-            if (cacheItem_after) {
-                cacheItem_after.hitCount++;
-                cacheItem_after.lastHitTime = Date.now();
-                console.log('fileStore: 从缓存返回内容，key:', key, '类型:', typeof cacheItem_after.content)
-                return cacheItem_after.content;
-            }
-            return null;
-        } catch (error) {
-            console.error('fileStore: getCacheContent 失败:', error)
-            return null
+        }
+        else {
+            return await getFileContent(key);
         }
     }
 
@@ -357,11 +360,9 @@ export const useFileStore = defineStore('file', () => {
             
             // 获取 ArrayBuffer
             const arrayBuffer = await response.arrayBuffer();
-            console.log('fileStore: 成功获取到 ArrayBuffer，大小:', arrayBuffer.byteLength)
             
             // 诊断：显示前 10 个字节
             const uint8Array = new Uint8Array(arrayBuffer);
-            console.log('fileStore: 前 10 个字节:', Array.from(uint8Array.slice(0, 10)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '))
             
             // 转换为 Blob
             const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
@@ -369,7 +370,6 @@ export const useFileStore = defineStore('file', () => {
             return currentContent.value;
             
         } catch (error) {
-            console.error('fileStore: 获取文件失败:', error)
             notify({
                 message: '获取文件失败: ' + (error instanceof Error ? error.message : String(error)),
                 type: 'error'

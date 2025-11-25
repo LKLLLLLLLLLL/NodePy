@@ -5,6 +5,7 @@ from server.models.exception import (
     NodeParameterError,
 )
 from server.models.schema import (
+    ColType,
     Pattern,
     Schema,
 )
@@ -38,7 +39,7 @@ class SortNode(BaseNode):
                 description="Input table to be sorted.",
                 accept=Pattern(
                     types={Schema.Type.TABLE},
-                    table_columns={self.sort_col: set()},
+                    table_columns={self.sort_col: {ColType.INT, ColType.FLOAT, ColType.STR, ColType.DATETIME}},
                 )
             )
         ], [

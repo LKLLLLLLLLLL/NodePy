@@ -39,9 +39,6 @@
 
     async function handlePreview(file :any){
         fileStore.changeCurrentFile(file);
-        const content = await fileStore.getFileContent(file.key);
-        fileStore.addCacheContent(file.key,content);
-        console.log(fileStore.getCacheStatus)
         modalStore.createModal({
             id: 'file-preview',
             title: 'flie-preview',
