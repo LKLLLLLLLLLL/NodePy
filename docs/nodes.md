@@ -130,9 +130,9 @@ table:
 - col_type: 列的数据类型，类型为str，取值为"int"或"float"或"Datetime"。
 
 **输入：**
-- start: 起始值，类型为int或float。
-- end: 结束值，类型为int或float。
-- step: 步长，类型为int或float，可选，如果未提供则默认为1.0/1/1Day。
+- start: 起始值，类型为int或float或Datetime。
+- end: 结束值，类型为int或float或Datetime。
+- step: 步长，类型为int或float或Datetime，可选，如果未提供则默认为1.0/1/1Day。
 
 **输出：**
 - table: 输出的表格，类型为Table。

@@ -483,9 +483,14 @@ class RangeNode(BaseNode):
                 step = 1.0
             assert isinstance(step, float)
             current = start
-            while current < end:
-                data_rows.append({self.col_name: current})
-                current += step
+            if step <= 0:
+                while current > end:
+                    data_rows.append({self.col_name: current})
+                    current += step
+            else:
+                while current < end:
+                    data_rows.append({self.col_name: current})
+                    current += step
         elif self.col_type == "int":
             assert isinstance(start, int)
             assert isinstance(end, int)
@@ -493,9 +498,14 @@ class RangeNode(BaseNode):
                 step = 1
             assert isinstance(step, int)
             current = start
-            while current < end:
-                data_rows.append({self.col_name: current})
-                current += step
+            if step <= 0:
+                while current > end:
+                    data_rows.append({self.col_name: current})
+                    current += step
+            else:
+                while current < end:
+                    data_rows.append({self.col_name: current})
+                    current += step
         elif self.col_type == "Datetime":
             assert isinstance(start, datetime)
             assert isinstance(end, datetime)
@@ -503,9 +513,14 @@ class RangeNode(BaseNode):
                 step = timedelta(days=1)
             assert isinstance(step, timedelta)
             current = start.replace(tzinfo=DEFAULT_TIMEZONE) if start.tzinfo is None else start
-            while current < end:
-                data_rows.append({self.col_name: current})
-                current += step
+            if step.total_seconds() <= 0:
+                while current > end:
+                    data_rows.append({self.col_name: current})
+                    current += step
+            else:
+                while current < end:
+                    data_rows.append({self.col_name: current})
+                    current += step
         df = DataFrame(data_rows, columns=[self.col_name])
         out_table = Data.from_df(df)
         return {"table": out_table}
