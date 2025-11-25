@@ -3,10 +3,10 @@ import fractions
 import itertools
 import json
 import math
+import os
 import re
 import typing
-import os
-from typing import Literal, override, Any
+from typing import Any, Literal, override
 
 from server.lib.utils import timeout
 from server.models.data import Data
@@ -18,7 +18,7 @@ from server.models.schema import Pattern, Schema
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
-AllowedTypes = Literal["STR", "INT", "FLOAT", "BOOL"]
+AllowedTypes = Literal["STR", "INT", "FLOAT", "BOOL", "DATETIME"]
 
 _TEMPLATE_CACHE = None
 
@@ -35,11 +35,11 @@ class CustomScriptNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "CostumScriptNode":
+        if not self.type == "CustomScriptNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Type must be 'CostumScriptNode'",
+                err_msg="Type must be 'CustomScriptNode'",
             )
         return
 
