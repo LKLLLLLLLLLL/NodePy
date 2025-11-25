@@ -102,7 +102,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
         top: 0;
         left: 7px;
         transform: translate(0, -120%);
-        color: rgba(0, 0, 0, 0.4);
+        color: rgba(0, 0, 0, 0.3);
         font-weight: bold;
         .running {
             animation: spin 1s linear infinite;

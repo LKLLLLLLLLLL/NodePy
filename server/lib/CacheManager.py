@@ -10,7 +10,7 @@ from server.models.data import Data, DataView
 from server.models.file import File
 
 CACHE_REDIS_URL = os.getenv("REDIS_URL", "") + "/2"
-CACHE_TTL_SECONDS  = 60 * 60 # 1 hour
+CACHE_TTL_SECONDS  = 24 * 60 * 60 # 24 hour
 
 class CacheManager:
     """

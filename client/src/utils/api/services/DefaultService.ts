@@ -390,21 +390,6 @@ export class DefaultService {
         });
     }
     /**
-     * Get Current User Info
-     * Get current authenticated user's information, FOR DEBUGGING
-     * @returns any Current user information retrieved successfully
-     * @throws ApiError
-     */
-    public static getCurrentUserInfoApiAuthMeGet(): CancelablePromise<Record<string, any>> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/auth/me',
-            errors: {
-                401: `Unauthorized`,
-            },
-        });
-    }
-    /**
      * Get Explore Projects
      * Get the list of projects that are marked as 'show in explore'.
      * @returns ExploreList Successful Response
@@ -414,6 +399,22 @@ export class DefaultService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/explore/explore/projects',
+        });
+    }
+    /**
+     * Get Current User Info
+     * Get current authenticated user's information.
+     * @returns any Current user information retrieved successfully
+     * @throws ApiError
+     */
+    public static getCurrentUserInfoApiUserMeGet(): CancelablePromise<Record<string, any>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/user/me',
+            errors: {
+                401: `Unauthorized`,
+                500: `Internal server error`,
+            },
         });
     }
     /**

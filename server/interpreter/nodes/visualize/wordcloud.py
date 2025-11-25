@@ -1,12 +1,11 @@
 from typing import override
 
 from server.config import FIGURE_DPI
-from server.engine.nodes.base_node import InPort, OutPort
 from server.models.data import Data, Table
 from server.models.exception import NodeParameterError
 from server.models.schema import ColType, FileSchema, Pattern, Schema
 
-from ..base_node import BaseNode, register_node
+from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
 @register_node

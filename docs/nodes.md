@@ -107,19 +107,7 @@ table:
 | Alice    | 30  | 70000.0 | False     |
 | Bob      | 35  | 80000.0 | True      |
 
-#### 1.5 TableFromCSVNode
-从CSV文件加载表格节点，可以读取上传的CSV文件并将其转换为Table类型。
-
-**参数：**
-无
-
-**输入：**
-- csv_file: 输入的CSV文件，类型为File，格式为CSV。
-
-**输出：**
-- table: 输出的表格，类型为Table。
-
-#### 1.6 RandomNode
+#### 1.5 RandomNode
 随机表格生成节点，可以生成一个包含一个由随机数构成的列的表格。
 
 **参数：**
@@ -134,7 +122,7 @@ table:
 **输出：**
 - table: 输出的表格，类型为Table。
 
-#### 1.7 RangeNode
+#### 1.6 RangeNode
 范围表格生成节点，可以生成一个包含一个由指定范围内数值构成的列的表格。
 
 **参数：**
@@ -149,7 +137,7 @@ table:
 **输出：**
 - table: 输出的表格，类型为Table。
 
-#### 1.8 DateTimeNode
+#### 1.7 DateTimeNode
 日期时间输入节点，可以输出一个固定的日期时间值。
 
 **参数：**
@@ -614,7 +602,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **参数：**
 - group_cols: 列名列表，类型为List[str]，指定用于分组的列名。
 - agg_cols: 要聚合的列名，类型为List[str]。
-- agg_func: 聚合函数，类型为str，取值为"SUM", "MEAN", "COUNT", "MAX", "MIN", "STD", "FIRST", "LAST"。
+- agg_func: 聚合函数，类型为str，取值为"SUM", "MEAN", "COUNT", "MAX", "MIN", "STD"。
 
 **输入：**
 - table: 输入的表格，类型为Table。
@@ -714,6 +702,18 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 无
 
+#### 6.3 TableFromCSVNode
+从CSV文件加载表格节点，可以读取上传的CSV文件并将其转换为Table类型。
+
+**参数：**
+无
+
+**输入：**
+- csv_file: 输入的CSV文件，类型为File，格式为CSV。
+
+**输出：**
+- table: 输出的表格，类型为Table。
+
 
 ### 7. 日期时间处理节点(datetimeprocess)
 #### 7.1 DatetimeComputeNode
@@ -791,8 +791,32 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - timestamp: 输出的时间戳，类型为float。
 
-### 8. 工具节点(utility)
-#### 8.1 CustomScriptNode
+### 8. 分析节点(analysis)
+#### 8.1 StatsNode
+统计分析节点，计算输入表格中指定列的基本统计信息，包括计数(count)、均值(mean)、标准差(std)、最小值(min)、 最大值(max)、总和(sum)、25%分位数(25%), 中位数(50%), 75%分位数(75%)。
+
+**参数：**
+- col: 要分析的表格列名，类型为str。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- mean: 均值，类型为float或int，取决于输入列的数据类型。
+- count: 计数，类型为int。
+- std: 标准差，类型为float或int，取决于输入列的数据类型。
+- min: 最小值，类型为float或int，取决于输入列的数据类型。
+- max: 最大值，类型为float或int，取决于输入列的数据类型。
+- sum: 总和，类型为float或int，取决于输入列的数据类型。
+- quantile_25: 25%分位数，类型为float或int，取决于输入列的数据类型。
+- quantile_50: 50%分位数（中位数），类型为float或int，取决于输入列的数据类型。
+- quantile_75: 75%分位数，类型为float或int，取决于输入列的数据类型。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
+### 9. 控制节点(control)
+#### 9.1 CustomScriptNode
 用户自定义脚本节点，允许用户编写自定义的Python脚本来处理输入数据并生成输出数据。注意，为了安全起见，用户脚本将在受限的环境中执行，且只能使用预定义的安全库和函数。
 
 注意：在节点中的代码编辑器中，应该为用户提供基本的模版，即`server/engine/nodes/utiliy/custom_template.py`文件中的内容。
@@ -812,6 +836,3 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **hint：**
 - script_template: str，预定义的脚本模版内容，供用户参考和编辑使用。
-
-### 9. 控制节点(control)
-TODO

@@ -20,7 +20,7 @@ class GroupNode(BaseNode):
     """
     group_cols: list[str]
     agg_cols: list[str]
-    agg_func: Literal["SUM", "MEAN", "COUNT", "MAX", "MIN", "STD", "FIRST", "LAST"]
+    agg_func: Literal["SUM", "MEAN", "COUNT", "MAX", "MIN", "STD"]
 
     @override
     def validate_parameters(self) -> None:
@@ -81,8 +81,6 @@ class GroupNode(BaseNode):
             "MAX": "max",
             "MIN": "min",
             "STD": "std",
-            "FIRST": "first",
-            "LAST": "last"
         }
         
         grouped_df = df.groupby(self.group_cols)[self.agg_cols].agg(agg_func_map[self.agg_func]).reset_index()

@@ -1,4 +1,3 @@
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from loguru import logger
@@ -6,7 +5,7 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from server.lib.AuthUtils import AuthUtils, get_current_user
+from server.lib.AuthUtils import AuthUtils
 from server.models.database import UserRecord, get_async_session
 
 router = APIRouter()
@@ -213,17 +212,3 @@ async def logout(response: Response) -> dict[str, str]:
     """Logout user by clearing the Refresh Token"""
     response.delete_cookie(key="refresh_token", path="/api/auth")
     return {"message": "Logged out successfully"}
-
-@router.get(
-    "/me",
-    responses={
-        200: {"description": "Current user information retrieved successfully"},
-        401: {"description": "Unauthorized"},
-    })
-async def get_current_user_info(current_user: UserRecord = Depends(get_current_user)) -> dict[str, Any]:
-    """Get current authenticated user's information, FOR DEBUGGING"""
-    return {
-        "id": current_user.id,
-        "username": current_user.username,
-        "email": current_user.email,
-    }
