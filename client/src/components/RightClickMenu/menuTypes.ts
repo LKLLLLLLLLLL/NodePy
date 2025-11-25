@@ -25,10 +25,6 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格节点',
                 value: 'TableNode'
             },
-            {
-                label: 'CSV表格节点',
-                value: 'TableFromCSVNode'
-            }
         ]
     },
     {
@@ -97,6 +93,10 @@ export const nodeMenuItems: MenuNode[] = [
             {
                 label: '文件显示节点',
                 value: 'DisplayNode'
+            },
+            {
+                label: 'CSV表格节点',
+                value: 'TableFromCSVNode'
             }
         ]
     },

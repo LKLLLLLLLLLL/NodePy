@@ -1,6 +1,6 @@
 <template>
     <div class="TableFromCSVNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="input">CSV表格节点</NodeTitle>
+        <NodeTitle node-category="file">CSV表格节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-csv_file port">
