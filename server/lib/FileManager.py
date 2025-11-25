@@ -581,7 +581,6 @@ class FileManager:
             # 4. get file keys referenced in node parameters
             for node in nodes:
                 for param in node.param.values():
-                    logger.debug(f"Checking param: {param}")
                     try:
                         file = File.model_validate(param)
                         logger.debug(f"Found referenced file {file.filename} with key {file.key}")
