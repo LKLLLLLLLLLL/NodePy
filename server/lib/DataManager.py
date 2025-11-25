@@ -1,5 +1,4 @@
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
@@ -59,35 +58,40 @@ class DataManager:
     def write_sync(self, data: Data, node_id: str, project_id: int, port: str) -> DataRef:
         """ Write data synchronously to database, return a DataRef """
         # Notice: for cache system in frontend, if data not chaged, we should reuse old data_id
-        # 1. get old data in database
-        old_data_records = self.db_client.query(NodeOutputRecord).filter_by(
+        if self.db_client is None:
+            raise AssertionError("Synchronous DB client is not initialized")
+
+        # 1. get old data record in database
+        old_data_record = self.db_client.query(NodeOutputRecord).filter_by(
             project_id=project_id,
             node_id=node_id,
             port=port
         ).first()
-        old_data: Data | None
-        if old_data_records is None:
-            old_data = None
-        else:
-            old_data_view = DataView(**old_data_records.data) # type: ignore
+
+        # 2. if an old record exists, compare data
+        if old_data_record:
+            old_data_view = DataView(**old_data_record.data) # type: ignore
             old_data = Data.from_view(old_data_view)
-        # 2. if data unchanged, reuse old data
-        if old_data is not None and old_data == data:
-            return DataRef(data_id = old_data_records.id) # type: ignore
-        # 3. if data changed, store data in database
-        # to avoid conflict, use on conflict method
-        stmt = insert(NodeOutputRecord).values(
+            # 2.1. if data is unchanged, reuse old data_id and return
+            if old_data == data:
+                return DataRef(data_id=old_data_record.id) # type: ignore
+            # 2.2. if data has changed, delete the old record.
+            # A new record will be inserted later.
+            self.db_client.delete(old_data_record)
+            self.db_client.flush() # Use flush to execute the delete without committing the transaction
+
+        # 3. Insert a new record for the new/changed data
+        new_data_record = NodeOutputRecord(
             project_id=project_id,
             node_id=node_id,
             port=port,
             data=data.to_view().to_dict()
-        ).on_conflict_do_update(
-            index_elements=['project_id', 'node_id', 'port'],
-            set_=dict(data=data.to_view().to_dict())
-        ).returning(NodeOutputRecord.id)
-        data_id = self.db_client.execute(stmt)
-        # construct datazip
-        data_ref = DataRef(data_id = data_id.scalar()) # type: ignore
+        )
+        self.db_client.add(new_data_record)
+        self.db_client.flush() # Flush to assign the new ID to the object
+
+        # 4. Construct and return the new DataRef
+        data_ref = DataRef(data_id=new_data_record.id) # type: ignore
         return data_ref
 
     def clean_orphan_data_sync(self, project_id: int) -> None:
