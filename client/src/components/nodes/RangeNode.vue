@@ -137,10 +137,7 @@
             }
         }
     }
-    .all-handle-color[data-handleid="start"], .all-handle-color[data-handleid="end"] {
-        background: linear-gradient(to bottom, $int-color 0 50%, $float-color 50% 100%);
-    }
-    .all-handle-color[data-handleid="step"] {
+    .all-handle-color {
         background: conic-gradient(
             $int-color 0 120deg,
             $float-color 0 240deg,

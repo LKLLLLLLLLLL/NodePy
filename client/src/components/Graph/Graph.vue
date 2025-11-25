@@ -20,6 +20,7 @@ import BoolNode from '../nodes/BoolNode.vue'
 import TableFromCSVNode from '../nodes/TableFromCSVNode.vue'
 import RandomNode from '../nodes/RandomNode.vue'
 import RangeNode from '../nodes/RangeNode.vue'
+import DateTimeNode from '../nodes/DateTimeNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
 import UploadNode from '../nodes/UploadNode.vue'
 import PlotNode from '../nodes/PlotNode.vue'
@@ -205,6 +206,8 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.input
     case 'RangeNode':
       return nodeCategoryColor.input
+    case 'DateTimeNode':
+      return nodeCategoryColor.input
     case 'NumberBinOpNode':
       return nodeCategoryColor.compute
     case 'PlotNode':
@@ -289,6 +292,10 @@ const isValidConnection = (connection: any) => {
 
         <template #node-RangeNode="RangeNodeProps">
           <RangeNode v-bind="RangeNodeProps"/>
+        </template>
+
+        <template #node-DateTimeNode="DateTimeNodeProps">
+          <DateTimeNode v-bind="DateTimeNodeProps"/>
         </template>
 
         <template #node-NumberBinOpNode="NumberBinOpNodeProps">

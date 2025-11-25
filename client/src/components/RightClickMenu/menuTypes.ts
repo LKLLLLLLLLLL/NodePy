@@ -33,6 +33,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '范围表格生成节点',
                 value: 'RangeNode'
             },
+            {
+                label: '日期时间输入节点',
+                value: 'DateTimeNode'
+            },
         ]
     },
     {

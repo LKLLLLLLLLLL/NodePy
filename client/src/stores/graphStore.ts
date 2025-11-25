@@ -140,6 +140,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedRangeNode)
         break
+      case 'DateTimeNode':
+        const addedDateTimeNode: Nodetypes.DateTimeNode = {
+          id,
+          position,
+          type: 'DateTimeNode',
+          data: {
+            param: {
+              value: ''
+            }
+          }
+        }
+        addNodes(addedDateTimeNode)
+        break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
           id,
