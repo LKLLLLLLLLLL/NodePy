@@ -124,7 +124,6 @@ export const useFileStore = defineStore('file', () => {
 
     function refreshCache() {
         fileContentCache.value.clear();
-        console.log('fileStore: 缓存已清空')
     }
 
     function addCacheContent(key: string, content: any) {
@@ -172,12 +171,10 @@ export const useFileStore = defineStore('file', () => {
                 if (cacheItem_after) {
                     cacheItem_after.hitCount++;
                     cacheItem_after.lastHitTime = Date.now();
-                    console.log('fileStore: 从缓存返回内容，key:', key, '类型:', typeof cacheItem_after.content)
                     return cacheItem_after.content;
                 }
                 return null;
             } catch (error) {
-                console.error('fileStore: getCacheContent 失败:', error)
                 return null
             }
         }
@@ -205,7 +202,6 @@ export const useFileStore = defineStore('file', () => {
 
         removeCacheContent(leastHitKey);
         addCacheContent(key, content);
-        console.log('fileStore: 已替换最少使用缓存，移除:', leastHitKey, '添加:', key)
     }
 
     //file functions
@@ -215,12 +211,10 @@ export const useFileStore = defineStore('file', () => {
         usedSize.value = default_usedsize;
         currentFile.value = default_file;
         currentKey.value = default_key;
-        console.log('fileStore: 文件信息已重置')
     }
 
     function changeCurrentFile(file: FileItem) {
         currentFile.value = file;
-        console.log('fileStore: 当前文件已切换，key:', file.key, '格式:', file.format)
     }
 
     function getCurrentFile() {
@@ -229,16 +223,13 @@ export const useFileStore = defineStore('file', () => {
 
     async function initializeFiles() {
         try {
-            console.log('fileStore: 开始初始化文件列表...')
             const response = await authService.listFilesApiFilesListGet();
             userFileList.value = response;
             userFiles.value = response.files || default_files;
             totalSize.value = response.total_size || default_totalsize;
             usedSize.value = response.used_size || default_usedsize;
             refreshCache();
-            console.log('fileStore: 文件列表初始化成功，共', userFiles.value.length, '个文件')
         } catch (error) {
-            console.error('fileStore: initializeFiles 失败:', error)
             if (error instanceof ApiError) {
                 switch (error.status) {
                     case (404):
@@ -260,15 +251,12 @@ export const useFileStore = defineStore('file', () => {
 
     async function getUserFileList() {
         try {
-            console.log('fileStore: 获取用户文件列表...')
             const response = await authService.listFilesApiFilesListGet();
             userFileList.value = response;
             userFiles.value = response.files || default_files;
             totalSize.value = response.total_size || default_totalsize;
             usedSize.value = response.used_size || default_usedsize;
-            console.log('fileStore: 文件列表已更新，共', userFiles.value.length, '个文件')
         } catch (error) {
-            console.error('fileStore: getUserFileList 失败:', error)
             if (error instanceof ApiError) {
                 switch (error.status) {
                     case (404):
@@ -290,16 +278,13 @@ export const useFileStore = defineStore('file', () => {
 
     async function uploadFile(pid: number, nodeid: string, formData: Body_upload_file_api_files_upload__project_id__post) {
         try {
-            console.log('fileStore: 开始上传文件到项目', pid)
             const response = await authService.uploadFileApiFilesUploadProjectIdPost(pid, nodeid, formData);
             notify({
                 message: '文件上传成功',
                 type: 'success'
             });
             await getUserFileList();
-            console.log('fileStore: 文件上传成功')
         } catch (error) {
-            console.error('fileStore: uploadFile 失败:', error)
             if (error instanceof ApiError) {
                 switch (error.status) {
                     case (400):
@@ -339,7 +324,6 @@ export const useFileStore = defineStore('file', () => {
 
     async function getFileContent(key: string) {
         try {
-            console.log('fileStore: 开始获取文件内容，key:', key)
             
             // 获取 token
             const token = localStorage.getItem('access_token') || '';

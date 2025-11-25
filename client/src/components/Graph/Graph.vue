@@ -140,12 +140,10 @@ async function handleNodeDoubleClick(event) {
   if(graphStore.currentNode) {
     graphStore.currentNode.data.dbclicked = true
   } //  双击状态更新
-  console.log('@@@currentNode', graphStore.currentNode)
 
   if(graphStore.currentNode?.data?.data_out===undefined){
     resultStore.currentInfo = graphStore.currentNode?.data.param
     resultStore.currentResult = resultStore.default_dataview
-    console.log('@@@undefined-currentResult', resultStore.currentResult)
   }
   else if (graphStore.currentNode?.data?.data_out !== undefined) {
     // 获取第一个包含data_id的子对象
@@ -159,8 +157,6 @@ async function handleNodeDoubleClick(event) {
       graphStore.url_id = value.data_id; // waiting multi-result nodes
       resultStore.currentResult = await resultStore.getResultCacheContent(graphStore.url_id);
       resultStore.currentInfo = graphStore.currentNode?.data.param;
-      console.log('@@@!undefined-currentResult', resultStore.currentResult);
-      console.log('@@@!undefined-currentInfo', resultStore.currentInfo);
     }
   }
   if(modalStore.findModal('result')==undefined){

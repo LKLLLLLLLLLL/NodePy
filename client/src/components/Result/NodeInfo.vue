@@ -10,6 +10,7 @@
         if (!props.data) {
             return null
         }
+        console.log("@@@@nodeInfo",props.data)
         return props.data
     })
 

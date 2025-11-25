@@ -17,19 +17,15 @@
         }
 
         if (dataOut.plot?.data_id) {
-            console.log('Result: 检测到 plot 类型，data_id:', dataOut.plot.data_id)
             return dataOut.plot.data_id
         }
         else if (dataOut.const?.data_id) {
-            console.log('Result: 检测到 const 类型，data_id:', dataOut.const.data_id)
             return dataOut.const.data_id
         }
         else if (dataOut.file?.data_id) {
-            console.log('Result: 检测到 file 类型，data_id:', dataOut.file.data_id)
             return dataOut.file.data_id
         }
         else if (dataOut.table?.data_id) {
-            console.log('Result: 检测到 table 类型，data_id:', dataOut.table.data_id)
             return dataOut.table.data_id
         }
         return undefined
@@ -37,7 +33,6 @@
 
     watch([() => graphStore.currentNode, resultId], async ([newNode, newResultId]) => {
         try {
-            console.log('节点或resultId发生变化:', { newNode, newResultId });
             
             if (!newResultId) {
                 console.log('Result: resultId 不存在，显示节点信息');
@@ -46,7 +41,6 @@
                 return;
             }
             
-            console.log('Result: 开始加载结果，resultId:', newResultId);
             resultStore.currentInfo = resultStore.default_info;
             
             // 先设置为默认值，避免显示旧数据
@@ -55,7 +49,6 @@
             // 获取新结果
             const result = await resultStore.getResultCacheContent(newResultId);
             resultStore.currentResult = result;
-            console.log('Result: 结果已加载，类型:', result.type);
             
         } catch (error) {
             console.error('Result: 加载结果失败:', error);

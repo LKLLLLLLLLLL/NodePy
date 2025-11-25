@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-    import { ref, watch, onUnmounted, onMounted } from 'vue'
+    import { ref, watch, onUnmounted, onMounted, nextTick } from 'vue'
     import { useVueFlow } from '@vue-flow/core';
     import { useModalStore } from '@/stores/modalStore';
     import { useGraphStore } from '@/stores/graphStore';
@@ -64,12 +64,13 @@
                 
                 // 计算X位置：始终将模态框右侧边界放在 marginRight 处
                 // X位置 = 窗口宽度 - 模态框宽度 - marginRight
-                const newX = Math.max(resultStore.marginRight, window.innerWidth - constrainedWidth - resultStore.marginRight)
+                const newX = Math.max(
+                    resultStore.marginRight, 
+                    window.innerWidth - constrainedWidth - resultStore.marginRight
+                )
                 
                 // Y位置保持不变或调整以符合顶部边距
-                const newY = Math.max(resultStore.marginTop, resultModal.position.y)
-                
-                console.log('Window resized - updating modal:', { newX, newY, constrainedWidth, constrainedHeight })
+                const newY = resultStore.marginTop
                 
                 // 更新模态框大小和位置
                 modalStore.updateModalSize('result', {
@@ -81,12 +82,16 @@
                     y: newY
                 })
             }
-        }, 150) // 150ms防抖延迟
+        }, 0)
     }
     
     // 在挂载时添加 resize 事件监听器
     onMounted(() => {
         window.addEventListener('resize', handleWindowResize)
+        // 初始化时也调用一次，确保弹窗位置正确
+        nextTick(() => {
+            handleWindowResize()
+        })
     })
 
     const {zoomIn,zoomOut,fitView,vueFlowRef} = useVueFlow('main');
@@ -115,12 +120,20 @@
         if(!result_modal){
             resultStore.createResultModal();
             modalStore.activateModal('result');
+            // 创建后立即调整位置
+            setTimeout(() => {
+                handleWindowResize()
+            }, 0) // 增加延迟确保DOM更新完成
         }
         else if(result_modal.isActive){
             modalStore.deactivateModal('result');
         }
         else {
             modalStore.activateModal('result');
+            // 激活后立即调整位置
+            setTimeout(() => {
+                handleWindowResize()
+            }, 0) // 增加延迟确保DOM更新完成
         }
 
         resultStore.cacheGarbageRecycle()

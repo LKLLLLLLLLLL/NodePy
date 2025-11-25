@@ -1,10 +1,15 @@
 <script lang="ts" setup>
-    import { computed } from 'vue';
+    import { computed, ref } from 'vue';
     import type { TableView } from '@/utils/api'
+    import Loading from '@/components/Loading.vue'
 
     const props = defineProps<{
         value: any
     }>()
+
+    // 添加loading和error状态
+    const loading = ref(false)
+    const error = ref<string>('')
 
     // 类型守卫：检查是否是 TableView
     const isTableView = computed(() => {
@@ -65,8 +70,19 @@
 </script>
 <template>
     <div class='table-view-container'>
+        <!-- 加载中 -->
+        <div v-if="loading" class="table-loading">
+            <Loading></Loading>
+            <span>加载中...</span>
+        </div>
+
         <!-- 错误提示 -->
-        <div v-if="!isTableView" class='table-error'>
+        <div v-else-if="error" class='table-error'>
+            {{ error }}
+        </div>
+
+        <!-- 无效数据提示 -->
+        <div v-else-if="!isTableView" class='table-error'>
             无效的表格数据
         </div>
 
@@ -109,6 +125,18 @@
         width: 100%;
         overflow: hidden;
         background: #fafafa;
+    }
+
+    .table-loading {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        color: #909399;
+        font-size: 14px;
+        padding: 16px;
     }
 
     .table-error,

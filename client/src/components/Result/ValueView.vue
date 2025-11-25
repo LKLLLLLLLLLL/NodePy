@@ -1,9 +1,14 @@
 <script lang="ts" setup>
-    import { computed } from 'vue';
+    import { computed, ref } from 'vue';
+    import Loading from '@/components/Loading.vue'
     
     const props = defineProps<{
         value: any
     }>()
+
+    // 添加loading和error状态
+    const loading = ref(false)
+    const error = ref<string>('')
 
     // 格式化值的显示
     const displayValue = computed(() => {
@@ -46,11 +51,25 @@
 </script>
 <template>
     <div class='value-view-container'>
-        <div class='value-header'>
-            <span class='value-type'>{{ valueType }}</span>
+        <!-- 加载中 -->
+        <div v-if="loading" class="value-loading">
+            <Loading></Loading>
+            <span>加载中...</span>
         </div>
-        <div class='value-content'>
-            {{ displayValue }}
+
+        <!-- 错误提示 -->
+        <div v-else-if="error" class='value-error'>
+            {{ error }}
+        </div>
+
+        <!-- 正常显示 -->
+        <div v-else>
+            <div class='value-header'>
+                <span class='value-type'>{{ valueType }}</span>
+            </div>
+            <div class='value-content'>
+                {{ displayValue }}
+            </div>
         </div>
     </div>
 </template>
@@ -64,6 +83,31 @@
         box-sizing: border-box;
         background: #fafafa;
         border-radius: 4px;
+    }
+
+    .value-loading {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        color: #909399;
+        font-size: 14px;
+    }
+
+    .value-error {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f56c6c;
+        background: #fef0f0;
+        border: 1px solid #fde2e2;
+        border-radius: 4px;
+        font-size: 14px;
+        padding: 16px;
+        margin: 16px;
     }
 
     .value-header {

@@ -27,13 +27,19 @@ export const useResultStore = defineStore('result',()=>{
     const currentInfo = ref<any>(default_info)
 
     //result modal default 
-    const marginRight = 30;
+    const marginRight = 20;
     const marginTop = 60;
     const marginBottom = 65;
     const modalWidth = ref<number>(500);
     const modalHeight = ref<number>(window.innerHeight - marginTop - marginBottom);
-    const xPosition = ref<number>(window.innerWidth - modalWidth.value - marginRight);
-    const yPosition = ref<number>(marginTop);
+    
+    // 使用函数来动态计算位置，而不是静态值
+    const getXPosition = () => {
+        // 确保不会出现负数坐标
+        const x = window.innerWidth - modalWidth.value - marginRight;
+        return Math.max(marginRight, x);
+    };
+    const getYPosition = () => marginTop;
 
     interface ResultCacheItem{
         nodeID: string,
@@ -180,6 +186,7 @@ export const useResultStore = defineStore('result',()=>{
     }
 
     function createResultModal(){
+        // 每次创建时都重新计算位置
         modalStore.createModal({
             id: 'result',
             title: '结果查看',
@@ -187,8 +194,8 @@ export const useResultStore = defineStore('result',()=>{
             isDraggable: false,
             isResizable: true,
             position:{
-                x: xPosition.value,
-                y: yPosition.value
+                x: getXPosition(),
+                y: getYPosition()
             },
             size: {
                 width: modalWidth.value,
@@ -209,6 +216,8 @@ export const useResultStore = defineStore('result',()=>{
         marginRight,
         marginTop,
         marginBottom,
+        getXPosition,
+        getYPosition,
         createResultModal, 
         refresh,
         cacheStatus,
