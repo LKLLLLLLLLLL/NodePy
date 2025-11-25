@@ -81,10 +81,10 @@
                             class = "view-content value-view">
                 </ValueView>
             </div>
-            <div class="if-info" v-if="resultStore.currentInfo!=resultStore.default_info">
+            <!-- <div class="if-info" v-if="resultStore.currentInfo!=resultStore.default_info">
                 <NodeInfo :data="resultStore.currentInfo">
                 </NodeInfo>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>

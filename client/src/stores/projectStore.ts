@@ -159,7 +159,6 @@ export const useProjectStore = defineStore('project', () => {
     }
 
     async function deleteProject(id: number){
-        console.log('Deleting project by ID:', id);
         try{
             const response = await authService.deleteProjectApiProjectProjectIdDelete(id);
             if(response==null){

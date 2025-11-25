@@ -1,6 +1,5 @@
 <script lang="ts" setup>
     import type { FileItem } from '@/utils/api';
-    import { Plus, Edit, Delete, Files } from '@element-plus/icons-vue';
     import FileIcon from './FileIcon.vue';
     import { useFileStore } from '@/stores/fileStore';
     import { useModalStore } from '@/stores/modalStore';
@@ -13,6 +12,31 @@
     const props = defineProps<{
         file: FileItem;
     }>()
+
+    // 格式化文件大小的函数
+    const formatFileSize = (bytes: number): string => {
+        if (bytes < 1024) {
+            return bytes + ' B';
+        } else if (bytes < 1024 * 1024) {
+            return (bytes / 1024).toFixed(2) + ' KB';
+        } else if (bytes < 1024 * 1024 * 1024) {
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        } else {
+            return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+        }
+    }
+
+    // 格式化时间的函数
+    const formatDateTime = (timestamp: number): string => {
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
 
     // async function handleDelete(key: string){
     //     fileStore.deleteFile(key)
@@ -71,10 +95,10 @@
                 {{ file.project_name }}
             </div>
             <div class="fileinfo filesize-container">
-                {{ file.size }}MB
+                {{ formatFileSize(file.size) }}
             </div>
             <div class="fileinfo filemodifiedat-container">
-                {{ file.modified_at }}
+                {{ formatDateTime(file.modified_at) }}
             </div>
         </div>
         <div class="file-right">
@@ -126,7 +150,7 @@
     .file-right{
         display: flex;
         align-items: center;
-        justify-content: flex-end;
+        justify-content: center;
         width: 200px;
         gap: 8px;
         padding: 0 4px;
@@ -135,6 +159,10 @@
     .fileinfo{
         color: #4a5568;
         font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
     }
     
     .filepname-container{
@@ -157,6 +185,14 @@
         font-weight: 600;
         color: #2d3748;
         font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .file-icon {
+        width: 16px;
+        height: 16px;
     }
     
     .file-container-new{
