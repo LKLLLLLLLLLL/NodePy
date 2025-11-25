@@ -9,7 +9,9 @@
     import { onTimerMsg } from '@/utils/task'   //@ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon'
     import { mdiTimerOutline } from '@mdi/js'
-
+    import { mdiUpdate } from '@mdi/js'; // waiting
+    import { mdiCached } from '@mdi/js'; // running
+    import { mdiCheckCircleOutline } from '@mdi/js'; // finished
 
     const props = defineProps<{
         nodeId: string,
@@ -22,7 +24,7 @@
     let rafId: number | null = null
     const display = computed(() => {
         const ms = now.value - startAt.value          //ms
-        if (ms < 100) return `${Math.floor(ms)}ms`                // < 100 ms
+        if (ms < 100) return `${ms.toFixed(1)}ms`                // < 100 ms
         const s = ms / 1000
         if (s < 60) return `${s.toFixed(1)}s`                    // < 1 min
         const m = Math.floor(Math.floor(s) / 60)
@@ -55,9 +57,9 @@
 
     onMounted(() => {
         if(props.defaultTime) {
-            const offsetMs = props.defaultTime * 1000
+            const offsetMs = props.defaultTime
             const tmp = performance.now()
-            startAt.value = tmp 
+            startAt.value = tmp
             now.value     = tmp + offsetMs
         }
         off = onTimerMsg(timerMsgHandler)
