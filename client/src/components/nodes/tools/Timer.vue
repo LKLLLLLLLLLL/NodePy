@@ -9,13 +9,10 @@
 </template>
 
 <script lang="ts" setup>
-    import { ref, computed, onMounted, onUnmounted } from 'vue'
-    import { onTimerMsg } from '@/utils/task'   //@ts-ignore
-    import SvgIcon from '@jamescoyle/vue-icon'
-    import { mdiUpdate } from '@mdi/js' // waiting
-    import { mdiCached } from '@mdi/js' // running
-    import { mdiCheck } from '@mdi/js' // finished
-    import { mdiClose } from '@mdi/js'  //  error
+    import { onTimerMsg } from '@/utils/task'; //@ts-ignore
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiCached, mdiCheck, mdiClose, mdiUpdate } from '@mdi/js'; // waiting
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
     const props = defineProps<{
         nodeId: string,
@@ -97,16 +94,23 @@
 
     .timer {
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         font-size: 13px;
         position: absolute;
         white-space: nowrap;
         pointer-events: none;
         top: 0;
-        left: 0;
-        transform: translate(0, -95%);
+        left: 7px;
+        transform: translate(0, -120%);
+        color: rgba(0, 0, 0, 0.4);
+        font-weight: bold;
         .running {
             animation: spin 1s linear infinite;
+        }
+        svg {
+            margin-right: 4px;
+            width: 18px;
+            height: 18px;
         }
     }
 </style>
