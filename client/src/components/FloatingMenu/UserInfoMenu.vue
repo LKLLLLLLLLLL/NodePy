@@ -80,6 +80,7 @@
         <button class="action-btn logout" @click="handleLogout">
           <span class="icon" @click="">🚪</span> 登出
         </button>
+        <button @click="handleEdit">点我测试编辑器弹窗</button>
       </div>
     </div>
   </FloatingMenu>
@@ -91,6 +92,7 @@ import FloatingMenu from './FloatingMenu.vue'
 import { useLoginStore } from '@/stores/loginStore'
 import notify from '@/components/Notification/notify'
 import { Avatar } from '@element-plus/icons-vue'
+import { useModalStore } from '@/stores/modalStore'
 
 
 // 类型定义
@@ -115,6 +117,27 @@ const userInfo = ref<UserInfo>({
   storageUsed: '2.4 GB / 10 GB',
   tier: 'pro',
 })
+
+import PyEditor from '../PyEditor.vue'
+const modalStore = useModalStore()
+function handleEdit(){
+  modalStore.createModal({
+    component: PyEditor,
+    title: '编辑代码',
+    isActive: true,
+    isResizable: false,
+    isDraggable: true,
+    position:{
+        x: 400,
+        y: 400
+    },
+    size:{
+        width: 400,
+        height: 600
+    },
+    id: 'edit-modal',
+  })
+}
 
 // 头像 URL（当没有用户头像时为空）
 const avatarUrl = computed(() => {

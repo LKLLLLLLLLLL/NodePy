@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
 import { useModalStore } from './modalStore';
-import { ApiError, type ProjectSetting } from '@/utils/api';
+import { ApiError, type ProjectListItem, type ProjectSetting } from '@/utils/api';
 import notify from '@/components/Notification/notify';
 import { type ProjectList, type Project, type ProjUIState } from '@/utils/api';
 
@@ -44,8 +44,10 @@ export const useProjectStore = defineStore('project', () => {
     const toBeRenamed = ref<{id: number,name: string}>({id: default_rename_pid,name: default_rename_pname});
     const toBeUpdated = ref<ProjectSetting>(default_project_setting)
 
-    const modalStore = useModalStore();
+    // 项目ID到名称的映射
+    const projectIdToNameMap = ref<Map<number, string>>(new Map());
 
+    const modalStore = useModalStore();
     const authService = AuthenticatedServiceFactory.getService();
 
     // async function openProject(id: number){
@@ -76,11 +78,21 @@ export const useProjectStore = defineStore('project', () => {
         toBeUpdated.value = default_project_setting
     }
 
+    // 更新项目ID到名称的映射
+    function updateProjectIdToNameMap(projects: ProjectListItem[]) {
+        projectIdToNameMap.value.clear();
+        projects.forEach(project => {
+            projectIdToNameMap.value.set(project.project_id, project.project_name);
+        });
+    }
+
     async function initializeProjects(){
         console.log('Getting all projects');
         try{
             const response = await authService.listProjectsApiProjectListGet();
             projectList.value = response;
+            // 初始化项目ID到名称的映射
+            updateProjectIdToNameMap(response.projects);
             refresh();
             return true;
         }
@@ -115,6 +127,8 @@ export const useProjectStore = defineStore('project', () => {
                     message: '项目' + name + '创建成功',
                     type: 'success'
                 });
+                // 在映射中添加新创建的项目
+                projectIdToNameMap.value.set(response, name);
             }
             currentProjectId.value = response;
             return true;
@@ -160,12 +174,16 @@ export const useProjectStore = defineStore('project', () => {
 
     async function deleteProject(id: number){
         try{
+            // 获取要删除的项目名称
+            const projectName = projectIdToNameMap.value.get(id) || '未知项目';
             const response = await authService.deleteProjectApiProjectProjectIdDelete(id);
             if(response==null){
                 notify({
-                    message: '项目' + id + '删除成功',
+                    message: '项目' + projectName + '删除成功',
                     type: 'success'
                 });
+                // 从映射中删除项目
+                projectIdToNameMap.value.delete(id);
             }
             return true;
         }
@@ -319,8 +337,14 @@ export const useProjectStore = defineStore('project', () => {
                 show_to_explore: currentWhetherShow.value
             }
             const response = await authService.updateProjectSettingApiProjectUpdateSettingPost(id,setting);
+            
+            // 更新映射中的项目名称
+            if (projectIdToNameMap.value.has(id)) {
+                projectIdToNameMap.value.set(id, currentProjectName.value);
+            }
+            
             notify({
-                message: '项目' + id + '更新成功',
+                message: '项目' + setting.project_name + '更新成功',
                 type: 'success'
             });
             return response;
@@ -384,6 +408,7 @@ export const useProjectStore = defineStore('project', () => {
         toBeDeleted,
         toBeRenamed,
         toBeUpdated,
+        projectIdToNameMap, // 导出映射
         getProject,
         createProject,
         deleteProject,
