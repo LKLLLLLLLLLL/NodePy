@@ -1,0 +1,80 @@
+from typing import Any, Dict, override
+
+from server.models.data import Data, Table
+from server.models.exception import (
+    NodeParameterError,
+)
+from server.models.schema import (
+    Pattern,
+    Schema,
+)
+
+from ..base_node import BaseNode, InPort, OutPort, register_node
+
+
+@register_node
+class SortNode(BaseNode):
+    """
+    A node to sort rows of a table by given column.
+    """
+    sort_col: str
+    ascending: bool
+
+    @override
+    def validate_parameters(self) -> None:
+        if not self.type == "SortNode":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Node type parameter mismatch.",
+            )
+        return
+
+    @override
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
+        return [
+            InPort(
+                name="table",
+                description="Input table to be sorted.",
+                accept=Pattern(
+                    types={Schema.Type.TABLE},
+                    table_columns={self.sort_col: set()},
+                )
+            )
+        ], [
+            OutPort(
+                name="sorted_table",
+                description="Output table with rows sorted."
+            )
+        ]
+
+    @override
+    def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
+        table_schema = input_schemas["table"]
+        return {
+            "sorted_table": table_schema
+        }
+
+    @override
+    def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
+        table_data = input["table"]
+        assert isinstance(table_data.payload, Table)
+        df = table_data.payload.df
+
+        sorted_df = df.sort_values(by=self.sort_col, ascending=self.ascending)
+
+        return {
+            "sorted_table": Data.from_df(sorted_df)
+        }
+
+    @override
+    @classmethod
+    def hint(cls, input_schemas: Dict[str, Schema], current_params: Dict) -> Dict[str, Any]:
+        sort_col_choices = []
+        if "table" in input_schemas:
+            table_schema = input_schemas["table"]
+            assert table_schema.tab is not None
+            sort_col_choices = list(table_schema.tab.col_types.keys())
+        return {
+            "sort_col_choices": sort_col_choices
+        }

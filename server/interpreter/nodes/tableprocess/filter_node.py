@@ -12,6 +12,9 @@ from server.models.schema import (
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
+"""
+This file defines some node to filter and drop some rows from a table.
+"""
 
 @register_node
 class FilterNode(BaseNode):
@@ -88,3 +91,134 @@ class FilterNode(BaseNode):
         return {
             "cond_col_choices": cond_col_choices
         }
+
+@register_node
+class DropDuplicatesNode(BaseNode):
+    """
+    Drop duplicate rows based on specified columns.
+    """
+
+    subset_cols: list[str]
+
+    @override
+    def validate_parameters(self) -> None:
+        if not self.type == "DropDuplicatesNode":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Node type parameter mismatch.",
+            )
+        return
+
+    @override
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
+        return [
+            InPort(
+                name="table",
+                description="Input table to drop duplicates from.",
+                accept=Pattern(
+                    types={Schema.Type.TABLE},
+                    table_columns={col: set() for col in self.subset_cols},
+                ),
+            )
+        ], [
+            OutPort(
+                name="deduplicated_table",
+                description="Output table with duplicate rows dropped.",
+            )
+        ]
+
+    @override
+    def infer_output_schemas(
+        self, input_schemas: Dict[str, Schema]
+    ) -> Dict[str, Schema]:
+        table_schema = input_schemas["table"]
+        return {"deduplicated_table": table_schema}
+
+    @override
+    def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
+        table_data = input["table"]
+        assert isinstance(table_data.payload, Table)
+        df = table_data.payload.df
+
+        deduplicated_df = df.drop_duplicates(subset=self.subset_cols)
+
+        return {"deduplicated_table": Data.from_df(deduplicated_df)}
+
+    @override
+    @classmethod
+    def hint(
+        cls, input_schemas: Dict[str, Schema], current_params: Dict
+    ) -> Dict[str, Any]:
+        subset_col_choices = []
+        if "table" in input_schemas:
+            table_schema = input_schemas["table"]
+            assert table_schema.tab is not None
+            subset_col_choices = list(table_schema.tab.col_types.keys())
+        return {"subset_col_choices": subset_col_choices}
+
+
+@register_node
+class DropNaNValueNode(BaseNode):
+    """
+    Drop rows with NaN values in specified columns.
+    """
+
+    subset_cols: list[str]
+
+    @override
+    def validate_parameters(self) -> None:
+        if not self.type == "DropNaNValueNode":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Node type parameter mismatch.",
+            )
+        return
+
+    @override
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
+        return [
+            InPort(
+                name="table",
+                description="Input table to drop NaN values from.",
+                accept=Pattern(
+                    types={Schema.Type.TABLE},
+                    table_columns={col: set() for col in self.subset_cols},
+                ),
+            )
+        ], [
+            OutPort(
+                name="cleaned_table",
+                description="Output table with rows containing NaN values dropped.",
+            )
+        ]
+
+    @override
+    def infer_output_schemas(
+        self, input_schemas: Dict[str, Schema]
+    ) -> Dict[str, Schema]:
+        table_schema = input_schemas["table"]
+        return {"cleaned_table": table_schema}
+
+    @override
+    def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
+        table_data = input["table"]
+        assert isinstance(table_data.payload, Table)
+        df = table_data.payload.df
+
+        cleaned_df = df.dropna(subset=self.subset_cols)
+
+        return {"cleaned_table": Data.from_df(cleaned_df)}
+
+    @override
+    @classmethod
+    def hint(
+        cls, input_schemas: Dict[str, Schema], current_params: Dict
+    ) -> Dict[str, Any]:
+        subset_col_choices = []
+        if "table" in input_schemas:
+            table_schema = input_schemas["table"]
+            assert table_schema.tab is not None
+            subset_col_choices = list(table_schema.tab.col_types.keys())
+        return {"subset_col_choices": subset_col_choices}

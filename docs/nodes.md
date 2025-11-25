@@ -592,6 +592,40 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **hint：**
 - subset_col_choices: 列名列表，类型为List[str]，用于在UI中为subset_cols参数提供可选值。
 
+#### 5.7 SortNode
+表格排序节点，根据指定的列名列表对表格进行排序操作。
+
+**参数：**
+- sort_cols: 列名列表，类型为str，指定用于排序的列名。
+- ascending: 布尔列表，类型为bool，指定每个排序列的排序顺序，True表示升序，False表示降序。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- sorted_table: 排序后的表格，类型为Table。
+
+**hint：**
+- sort_col_choices: 列名列表，类型为List[str]，用于在UI中为sort_cols参数提供可选值。
+
+#### 5.8 GroupNode
+表格分组节点，根据指定的列名列表对表格进行分组操作，并对每个分组应用聚合函数。
+
+**参数：**
+- group_cols: 列名列表，类型为List[str]，指定用于分组的列名。
+- agg_cols: 要聚合的列名，类型为List[str]。
+- agg_func: 聚合函数，类型为str，取值为"SUM", "MEAN", "COUNT", "MAX", "MIN", "STD", "FIRST", "LAST"。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- grouped_table: 分组并聚合后的表格，类型为Table。
+
+**hint：**
+- group_col_choices: 列名列表，类型为List[str]，用于在UI中为group_cols参数提供可选值。
+- agg_col_choices: 列名列表，类型为List[str]，用于在UI中为agg_col参数提供可选值。
+
 ### 6. 文件处理节点(file)
 #### 6.1 UploadNode
 文件上传节点，支持上传本地文件并输出为File类型。
@@ -701,11 +735,11 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 注意：在节点中的代码编辑器中，应该为用户提供基本的模版，即`server/engine/nodes/utiliy/custom_template.py`文件中的内容。
 
 **参数：**
-- input_ports: 输入端口定义，类型为List[List[str, type]]，每个输入端口由名称和类型组成。
-- output_ports: 输出端口定义，类型为List[List[str, type]]，每个输出端口由名称和类型组成。
+- input_ports: 输入端口定义，类型为List[Dict[str, type]]，每个输入端口由名称和类型组成。
+- output_ports: 输出端口定义，类型为List[Dict[str, type]]，每个输出端口由名称和类型组成。
 - script: 用户自定义的Python脚本，类型为str。脚本必须定义一个名为`script`的函数。
 
-注：上述输入输出类型允许使用："STR", "INT", "FLOAT", "BOOL", "DATETIME"。
+注：上述输入输出类型(Type)允许使用："STR", "INT", "FLOAT", "BOOL", "DATETIME"。
 
 **输入：**
 动态定义的输入端口，根据input_ports参数定义。
