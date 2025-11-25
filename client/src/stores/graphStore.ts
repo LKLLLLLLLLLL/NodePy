@@ -112,6 +112,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedTableFromCSVNode)
         break
+      case 'RandomNode':
+        const addedRandomNode: Nodetypes.RandomNode = {
+          id,
+          position,
+          type: 'RandomNode',
+          data: {
+            param: {
+              col_name: '',
+              col_type: 'int'
+            }
+          }
+        }
+        addNodes(addedRandomNode)
+        break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
           id,

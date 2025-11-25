@@ -18,6 +18,7 @@ import StringNode from '../nodes/StringNode.vue'
 import TableNode from '../nodes/TableNode.vue'
 import BoolNode from '../nodes/BoolNode.vue'
 import TableFromCSVNode from '../nodes/TableFromCSVNode.vue'
+import RandomNode from '../nodes/RandomNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
 import UploadNode from '../nodes/UploadNode.vue'
 import PlotNode from '../nodes/PlotNode.vue'
@@ -25,6 +26,7 @@ import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
 import { useRoute } from 'vue-router'
+
 
 const resultStore = useResultStore()
 const modalStore = useModalStore()
@@ -198,13 +200,15 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.input
     case 'TableNode':
       return nodeCategoryColor.input
-    case 'TableFromCSVNode':
+    case 'RandomNode':
       return nodeCategoryColor.input
     case 'NumberBinOpNode':
       return nodeCategoryColor.compute
     case 'PlotNode':
       return nodeCategoryColor.visualize
     case 'UploadNode':
+      return nodeCategoryColor.file
+    case 'TableFromCSVNode':
       return nodeCategoryColor.file
     default:
       return nodeCategoryColor.default
@@ -274,6 +278,10 @@ const isValidConnection = (connection: any) => {
 
         <template #node-TableFromCSVNode="TableFromCSVNodeProps">
           <TableFromCSVNode v-bind="TableFromCSVNodeProps"/>
+        </template>
+
+        <template #node-RandomNode="RandomNodeProps">
+          <RandomNode v-bind="RandomNodeProps"/>
         </template>
 
         <template #node-NumberBinOpNode="NumberBinOpNodeProps">
