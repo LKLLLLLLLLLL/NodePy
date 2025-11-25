@@ -7,7 +7,7 @@ from server.models.schema import Schema
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
-@register_node
+@register_node()
 class StringNode(BaseNode):
     """
     A node to generate a string.

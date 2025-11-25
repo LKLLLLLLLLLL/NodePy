@@ -8,7 +8,7 @@ from server.models.schema import ColType, FileSchema, Pattern, Schema
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
-@register_node
+@register_node()
 class WordcloudNode(BaseNode):
     """
     Node to generate a word cloud from table.

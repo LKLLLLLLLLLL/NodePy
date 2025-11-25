@@ -27,7 +27,7 @@ Each node corresponds to a specific node in ComputeNode.py.
 Calculate between primitive and table column.
 """
 
-@register_node
+@register_node()
 class ColWithNumberBinOpNode(BaseNode):
     """
     Compute binary numeric operation on a table column a primitive number.
@@ -164,7 +164,7 @@ class ColWithNumberBinOpNode(BaseNode):
         out_table = Data.from_df(df)
         return {'table': out_table}
 
-@register_node
+@register_node()
 class ColWithBoolBinOpNode(BaseNode):
     """
     Compute binary boolean operation on a table column a primitive number.
@@ -283,7 +283,7 @@ class ColWithBoolBinOpNode(BaseNode):
 Calculate in one column.
 """
 
-@register_node
+@register_node()
 class NumberColUnaryOpNode(BaseNode):
     """
     Compute unary numeric operation on a table column.
@@ -394,7 +394,7 @@ class NumberColUnaryOpNode(BaseNode):
         out_table = Data.from_df(df)
         return {'table': out_table}
 
-@register_node
+@register_node()
 class BoolColUnaryOpNode(BaseNode):
     """
     Compute unary boolean operation on a table column.
@@ -491,7 +491,7 @@ class BoolColUnaryOpNode(BaseNode):
 Calculate between two table columns.
 """
 
-@register_node
+@register_node()
 class NumberColWithColBinOpNode(BaseNode):
     """
     Compute binary numeric operation on two table columns.
@@ -636,7 +636,7 @@ class NumberColWithColBinOpNode(BaseNode):
         out_table = Data.from_df(df)
         return {'table': out_table}
 
-@register_node
+@register_node()
 class BoolColWithColBinOpNode(BaseNode):
     """
     Compute binary boolean operation on two table columns.
@@ -755,7 +755,7 @@ class BoolColWithColBinOpNode(BaseNode):
         out_table = Data.from_df(df)
         return {'table': out_table}
 
-@register_node
+@register_node()
 class ColCmpNode(BaseNode):
     """
     A node to compare two columns in a table and output a boolean column.

@@ -127,7 +127,7 @@ table:
 
 **参数：**
 - col_name: 列名，类型为str。
-- col_type: 列的数据类型，类型为str，取值为"int"或"float"。
+- col_type: 列的数据类型，类型为str，取值为"int"或"float"或"Datetime"。
 
 **输入：**
 - start: 起始值，类型为int或float。
@@ -836,3 +836,32 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **hint：**
 - script_template: str，预定义的脚本模版内容，供用户参考和编辑使用。
+
+#### 9.2 ForEachRowNode
+表格逐行处理节点。该节点包含两个实际的节点：ForEachRowBeginNode, ForEachRowEndNode。前者标志循环体的开始，后者标志循环体的结束。用户可以在这两个节点之间插入任意数量的处理节点，这些节点将对输入表格的每一行依次进行处理。
+
+*注意：这两个节点以及循环体都被视为一个节点，它的runningtime、data_out等运行数据都会储存在begin节点上。*
+
+##### (1) ForEachRowBeginNode
+表格逐行处理开始节点，标志循环体的开始。
+
+**参数：**
+无
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- row: 当前处理的表格行，类型为Table，但只有一行。
+
+##### (2) ForEachRowEndNode
+表格逐行处理结束节点，标志循环体的结束。
+
+**参数：**
+无
+
+**输入：**
+- row: 当前处理的表格行，类型为Table，但只有一行。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含所有处理后的行。

@@ -14,7 +14,7 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 This file defines compute nodes between primitive(float, int, str, bool) data.
 """
 
-@register_node
+@register_node()
 class NumberBinOpNode(BaseNode):
     """
     A class for binary compute between two numeric inputs(int or float).
@@ -88,8 +88,8 @@ class NumberBinOpNode(BaseNode):
                 err_msg=f"Unsupported operation '{self.op}' in node {self.id}."
             )
         return {'result': Data(payload=res)}
-    
-@register_node
+
+@register_node()
 class NumberUnaryOpNode(BaseNode):
     """
     A node for unary compute on a numeric input(int or float).
@@ -145,7 +145,7 @@ class NumberUnaryOpNode(BaseNode):
             )
         return {'result': Data(payload=res)}
 
-@register_node
+@register_node()
 class PrimitiveCompareNode(BaseNode):
     """
     A node for primitive comparison.
@@ -217,7 +217,8 @@ class PrimitiveCompareNode(BaseNode):
             )
         return {'result': Data(payload=res)}
 
-@register_node
+
+@register_node()
 class BoolBinOpNode(BaseNode):
     """
     Node to compute binary boolean operations.
@@ -268,7 +269,8 @@ class BoolBinOpNode(BaseNode):
             )
         return {'result': Data(payload=res)}
 
-@register_node
+
+@register_node()
 class BoolUnaryOpNode(BaseNode):
     """
     Node to compute unary boolean operations.

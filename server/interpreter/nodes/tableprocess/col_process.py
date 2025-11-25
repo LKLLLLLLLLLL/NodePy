@@ -10,7 +10,7 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 This file defines some node for columns operations in tables.
 """
 
-@register_node
+@register_node()
 class SelectColNode(BaseNode):
     """
     The node to select specified columns from the input table.
@@ -101,7 +101,7 @@ class SelectColNode(BaseNode):
             "selected_col_choices": selected_col_choices
         }
 
-@register_node
+@register_node()
 class JoinNode(BaseNode):
     """
     The node to join two tables on specified columns.
@@ -232,7 +232,7 @@ class JoinNode(BaseNode):
             "right_on_choices": right_col_choices
         }
 
-@register_node
+@register_node()
 class RenameColNode(BaseNode):
     """
     The node to rename columns in the input table.

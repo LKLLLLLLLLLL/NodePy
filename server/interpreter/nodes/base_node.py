@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, PrivateAttr, model_validator
 from typing_extensions import Self
@@ -149,6 +149,26 @@ class BaseNode(BaseModel):
             raise ValueError(f"Node type '{type}' is not registered.")
         return node_type(type=type, **data, global_config=global_config)
     
+    def is_pair(self) -> bool:
+        """ check if this node is a pair node """
+        return _NODE_PAIR_REGISTRY.get(self.type, False)
+
+    def get_pair_info(self) -> tuple[int, Literal["BEGIN", "END"]] | None:
+        """
+        Get pair info if this node is a pair node
+        If not a pair node, return None
+        Else return (pair_id, "BEGIN" or "END")
+        """
+        is_pair = self.is_pair()
+        if not is_pair:
+            return None
+        assert hasattr(self, "pair_id")
+        assert hasattr(self, "_PAIR_TYPE")
+        pair_id = getattr(self, "pair_id")
+        pair_type = getattr(self, "_PAIR_TYPE")
+        assert pair_type in ("BEGIN", "END")
+        return (pair_id, pair_type)
+
     def get_port(self):
         """ get all ports definition """
         in_ports, out_ports = self.port_def()
@@ -200,12 +220,16 @@ class BaseNode(BaseModel):
         return sub_cls.hint(input_schemas, current_params)
 
 _NODE_REGISTRY: dict[str, type[BaseNode]] = {}
+_NODE_PAIR_REGISTRY: dict[str, bool] = {}
 
-def register_node(cls):
-    """ Decorator to register node classes by their type name """
-    def _wrap(cls: type[BaseNode]) -> type[BaseNode]:
-        if not issubclass(cls, BaseNode):
-            raise TypeError("Can only register subclasses of BaseNode.")
-        _NODE_REGISTRY[cls.__name__] = cls
-        return cls
-    return _wrap(cls)
+def register_node(pair: bool = False):
+    def _register_node(cls):
+        """ Decorator to register node classes by their type name """
+        def _wrap(cls: type[BaseNode]) -> type[BaseNode]:
+            if not issubclass(cls, BaseNode):
+                raise TypeError("Can only register subclasses of BaseNode.")
+            _NODE_REGISTRY[cls.__name__] = cls
+            _NODE_PAIR_REGISTRY[cls.__name__] = pair
+            return cls
+        return _wrap(cls)
+    return _register_node

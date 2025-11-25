@@ -17,7 +17,7 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 This file defines string processing nodes for simple string type data.
 """
 
-@register_node
+@register_node()
 class StripNode(BaseNode):
     """
     Node to strip leading and trailing whitespace or specified characters from string columns in a table.
@@ -74,7 +74,7 @@ class StripNode(BaseNode):
         res = input_str.strip(strip_chars)
         return {"output": Data(payload=res)}
 
-@register_node
+@register_node()
 class SliceNode(BaseNode):
     """
     Sliece the input string from start index to end index.
@@ -158,7 +158,7 @@ class SliceNode(BaseNode):
         res = input_str[start:end]
         return {"output": Data(payload=res)}
 
-@register_node
+@register_node()
 class ReplaceNode(BaseNode):
     """
     Node to replace occurrences of a substring with another substring in a string.
@@ -250,7 +250,7 @@ class ReplaceNode(BaseNode):
         res = input_str.replace(old, new)
         return {"output": Data(payload=res)}
 
-@register_node
+@register_node()
 class LowerOrUpperNode(BaseNode):
     """
     Node to convert string to lower case or upper case.
@@ -302,7 +302,7 @@ class LowerOrUpperNode(BaseNode):
             )
         return {"output": Data(payload=res)}
 
-@register_node
+@register_node()
 class ConcatNode(BaseNode):
     """
     Node to concatenate two strings.

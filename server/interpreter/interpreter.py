@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from server.lib.CacheManager import CacheManager
 from server.lib.FileManager import FileManager
 from server.lib.utils import safe_hash
-from server.models.data import Data, Schema
+from server.models.data import Data, Schema, Table
 from server.models.exception import NodeParameterError
 from server.models.project import TopoEdge, TopoNode, WorkflowTopology
 
@@ -47,7 +47,7 @@ class ProjectInterpreter:
         self._global_config = GlobalConfig(file_manager=file_manager, user_id=user_id, project_id=topology.project_id)
         # cache unreached node ids, each period will only process nodes not in this list, and may append more unreached nodes 
         self._unreached_node_ids: set[str] = set()
-    
+
     def construct_nodes(self, callback: Callable[[str, Literal["success", "error"], Exception | None], bool]) -> None:
         """ 
         Construct node instances from node definitions to test if there are parameter errors .
@@ -107,6 +107,10 @@ class ProjectInterpreter:
                     return
                 else:
                     continue
+
+        # analyze control structures
+        self._analyze_control_structures()
+
         self._stage = "constructed"
         return
 
@@ -186,12 +190,25 @@ class ProjectInterpreter:
             raise AssertionError(f"Graph is in stage '{self._stage}', cannot run.")
         data_cache : dict[tuple[str, str], Data] = {} # cache for node output data: (node_id, port) -> Data
 
+        body_node_ids = set()
+        for pair_info in self._control_structures.values():
+            body_node_ids.update(pair_info["body_node_ids"])
+        end_node_ids = set()
+        for pair_info in self._control_structures.values():
+            end_node_ids.add(pair_info["end_node_id"])
+
         for node_id in self._exec_queue:
             if node_id in self._unreached_node_ids:
                 continue
+            if node_id in body_node_ids:
+                # body nodes are executed in control structure execution
+                continue
+            if node_id in end_node_ids:
+                # end nodes' outputs are set in control structure execution
+                continue
             node = self._node_objects[node_id]
             in_edges = list(self._graph.in_edges(node_id, data=True)) # type: ignore
-            
+
             # 1. get input data
             input_data : dict[str, Data] = {}
             for edge in in_edges:
@@ -210,6 +227,46 @@ class ProjectInterpreter:
 
             output_data: dict[str, Data]
             running_time: float
+            
+            if node_id in self._control_structures:
+                end_node_id = self._control_structures[node_id]["end_node_id"]
+                # 3. execute control structure
+                try:
+                    callbefore(node_id)
+                    start_time = time.perf_counter()
+                    output_data = self._execute_control_structure(node_id, input_data)
+                    running_time = (time.perf_counter() - start_time) * 1000  # in ms
+                
+                # 4. call callafter
+                except Exception as e:
+                    self._unreached_node_ids.update(
+                        [node_id, *nx.descendants(self._graph, node_id)]
+                    )
+                    continue_execution = callafter(node_id, "error", e, None)
+                    if not continue_execution:
+                        self._unreached_node_ids.update(
+                            [node_id, *nx.descendants(self._graph, node_id)]
+                        )
+                        return
+                    else:
+                        continue
+                else:
+                    continue_execution = callafter(node_id, "success", output_data, running_time)
+                    if not continue_execution:
+                        return
+                    else:
+                        pass
+                
+                # 5. store output data as the output data from end node to self cache
+                for tar_port, data in output_data.items():
+                    if data_cache.get((end_node_id, tar_port)) is not None:
+                        raise RuntimeError(f"Node '{end_node_id}' output on port '{tar_port}' already exists in cache.")
+                    data_cache[(end_node_id, tar_port)] = data
+                
+                # 6. store to CacheManager
+                # pass
+                continue
+            
             try:
                 # 3. execute node if cache miss
                 if cache_data is None:
@@ -333,3 +390,152 @@ class ProjectInterpreter:
             continue_execution = callback(node_id, hint)
             if not continue_execution:
                 break  
+
+    """
+    Helper methods to process control structures in the graph.
+    """
+    def _analyze_control_structures(self) -> None:
+        """
+        Scan the graph to find all begin/end pairs and their bodies.
+        """
+        import networkx as nx
+
+        # 1. find out all begin/end pairs
+        pair_nodes: dict[int, tuple[str, str]] = {}  # pair_id -> (begin_node_id, end_node_id)
+        for node_id, node_object in self._node_objects.items():
+            if node_object.is_pair():
+                pair_info = node_object.get_pair_info()
+                assert pair_info is not None
+                pair_id, pair_type = pair_info
+                old_begin_node_id, old_end_node_id = pair_nodes.get(pair_id, ("", ""))
+                if pair_type == "BEGIN":
+                    if old_begin_node_id != "":
+                        raise ValueError(f"Duplicate begin node for pair id {pair_id}.")
+                    pair_nodes[pair_id] = (node_id, old_end_node_id)
+                elif pair_type == "END":
+                    if old_end_node_id != "":
+                        raise ValueError(f"Duplicate end node for pair id {pair_id}.")
+                    pair_nodes[pair_id] = (old_begin_node_id, node_id)
+        
+        # 2. for each pair, find its body nodes
+        body_graphs: dict[int, set[str]] = {}  # pair_id -> set of body node ids
+        for pair_id, (begin_node_id, end_node_id) in pair_nodes.items():
+            if begin_node_id == "" or end_node_id == "":
+                raise ValueError(f"Unmatched begin/end node for pair id {pair_id}.")
+            # find all nodes reachable from begin_node_id without passing through end_node_id
+            body_nodes = set()
+            for node in self._exec_queue[self._exec_queue.index(begin_node_id) + 1: self._exec_queue.index(end_node_id)]:
+                if nx.has_path(self._graph, begin_node_id, node) and nx.has_path(self._graph, node, end_node_id):
+                    body_nodes.add(node)
+            body_graphs[pair_id] = body_nodes
+
+        # 3. get exec_queue for each body
+        body_exec_queues: dict[int, list[str]] = {}  # pair_id -> list of body node ids in exec order
+        for pair_id, body_nodes in body_graphs.items():
+            subgraph = self._graph.subgraph(body_nodes).copy()
+            subgraph = nx.MultiDiGraph(subgraph)
+            body_exec_queue = list(nx.topological_sort(subgraph))
+            body_exec_queues[pair_id] = body_exec_queue
+
+        # 4. store results
+        self._control_structures: dict[str, dict] = {}
+        for pair_id, (begin_node_id, end_node_id) in pair_nodes.items():
+            self._control_structures[begin_node_id] = {
+                "end_node_id": end_node_id,
+                "body_node_ids": body_graphs[pair_id],
+                "body_exec_queue": body_exec_queues[pair_id],
+            }
+
+    def _execute_control_structure(self, begin_node_id: str, inputs: dict[str, Data]) -> dict[str, Data]:
+        """
+        Execute a control structure starting from the given begin node id.
+        You can call it like a normal node's execute method.
+        """
+        import pandas as pd
+        if begin_node_id not in self._control_structures:
+            raise ValueError(f"Node {begin_node_id} is not a begin node of a control structure.")
+        control_info = self._control_structures[begin_node_id]
+        control_structure_begin_type = self._node_objects[begin_node_id].type
+        
+        if control_structure_begin_type == "ForEachRowBeginNode":
+            # ForEachRow control structure
+            input_table_data = inputs.get("table")
+            assert input_table_data is not None
+            assert isinstance(input_table_data.payload, Table)
+            input_table_df = input_table_data.payload.df
+            output_rows: list[Data] = []
+            for index in range(0, len(input_table_df)):
+                res_cache: dict[tuple[str, str], Data] = {} # local cache for exec result in this iteration: (node_id, port) -> Data
+
+                # set the current row data to the output port of the begin node
+                row_data = Data.from_df(input_table_df.iloc[index: index + 1])
+                res_cache[(begin_node_id, "row")] = row_data
+
+                # a sample interpreter to execute body nodes
+                for node_id in control_info["body_exec_queue"]:
+                    node = self._node_objects[node_id]
+                    in_edges = list(self._graph.in_edges(node_id, data=True)) # type: ignore
+
+                    # 1. get input data
+                    input_data : dict[str, Data] = {}
+                    for src_id, _, edge_data in in_edges:
+                        src_port = edge_data['src_port']
+                        tar_port = edge_data['tar_port']
+                        input_data[tar_port] = res_cache[(src_id, src_port)]
+
+                    # 2. search cache in cache manager
+                    cache_data = self.cache_manager.get(
+                        node.type, 
+                        self._node_map[node_id].params, 
+                        input_data
+                    )
+
+                    output_data: dict[str, Data]
+                    if cache_data is not None:
+                        output_data, execution_time = cache_data
+                    else:
+                        # 3. execute node if cache miss
+                        start_time = time.perf_counter()
+                        output_data = node.execute(input_data)
+                        end_time = time.perf_counter()
+                        execution_time = (end_time - start_time) * 1000  # in ms
+
+                    # 4. store output data to local cache
+                    for tar_port, data in output_data.items():
+                        res_cache[(node_id, tar_port)] = data
+                    
+                    # 5. store to CacheManager
+                    if output_data is not None:
+                        self.cache_manager.set(
+                            node_type=self._node_map[node_id].type,
+                            params=self._node_map[node_id].params,
+                            inputs=input_data,
+                            outputs=output_data,
+                            running_time=execution_time,
+                        )
+                    
+                # collect output from the input of the end node
+                end_node_id = control_info["end_node_id"]
+                end_in_edges = list(self._graph.in_edges(end_node_id, data=True)) # type: ignore
+                for src_id, _, edge_data in end_in_edges:
+                    src_port = edge_data['src_port']
+                    tar_port = edge_data['tar_port']
+                    output_rows.append(res_cache[(src_id, src_port)])
+            # combine all output rows into a single table
+            for row in output_rows:
+                assert isinstance(row.payload, Table)
+            combined_df = pd.concat([row.payload.df for row in output_rows], ignore_index=True) # type: ignore
+            
+            # find the output port name of the end node
+            end_node_id = control_info["end_node_id"]
+            end_node = self._node_objects[end_node_id]
+            _, out_ports = end_node.port_def()
+            if not out_ports:
+                return {} # End node has no output
+            output_port_name = out_ports[0].name
+            
+            return {
+                output_port_name: Data.from_df(combined_df)
+            }
+        else:
+            raise NotImplementedError(f"Control structure type '{control_structure_begin_type}' is not implemented yet.")

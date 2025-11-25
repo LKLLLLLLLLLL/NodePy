@@ -13,7 +13,7 @@ from server.models.schema import (
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
-@register_node
+@register_node()
 class SortNode(BaseNode):
     """
     A node to sort rows of a table by given column.

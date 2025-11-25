@@ -18,7 +18,7 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 """
 This file defines nodes for inserting columns into tables.
 """
-@register_node
+@register_node()
 class InsertConstColNode(BaseNode):
     """
     Insert a constant value column into the input table.
@@ -105,7 +105,7 @@ class InsertConstColNode(BaseNode):
             "table": Data(payload=new_table)
         }
 
-@register_node
+@register_node()
 class InsertRangeColNode(BaseNode):
     """
     Insert a range of values as a new column into the input table. No need to specify the end, it will be inferred from the table length.
@@ -248,7 +248,7 @@ class InsertRangeColNode(BaseNode):
             "table": Data(payload=new_table)
         }
 
-@register_node
+@register_node()
 class InsertRandomColNode(BaseNode):
     """
     Insert a column with random values into the input table.

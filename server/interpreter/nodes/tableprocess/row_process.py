@@ -16,7 +16,7 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 This file defines some node to split, merge, delete the rows in tables.
 """
 
-@register_node
+@register_node()
 class FilterNode(BaseNode):
     """
     Filter rows with specified columns.
@@ -93,7 +93,7 @@ class FilterNode(BaseNode):
         return {"cond_col_choices": cond_col_choices}
 
 
-@register_node
+@register_node()
 class DropDuplicatesNode(BaseNode):
     """
     Drop duplicate rows based on specified columns.
@@ -159,7 +159,7 @@ class DropDuplicatesNode(BaseNode):
         return {"subset_col_choices": subset_col_choices}
 
 
-@register_node
+@register_node()
 class DropNaNValueNode(BaseNode):
     """
     Drop rows with NaN values in specified columns.
@@ -225,7 +225,7 @@ class DropNaNValueNode(BaseNode):
         return {"subset_col_choices": subset_col_choices}
 
 
-@register_node
+@register_node()
 class MergeNode(BaseNode):
     """
     Merge two tables with same columns.

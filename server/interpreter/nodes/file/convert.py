@@ -20,7 +20,7 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 This file defies nodes to convert from files or to files.
 """
 
-@register_node
+@register_node()
 class TableFromCSVNode(BaseNode):
     """
     A node to generate a table from a CSV file.

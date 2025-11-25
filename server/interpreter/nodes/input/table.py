@@ -28,7 +28,7 @@ A series of node that generates a table.
 Such as generate by user input, generate by range, generate by random, etc.
 """
 
-@register_node
+@register_node()
 class TableNode(BaseNode):
     """
     A node to generate a table from user provided data.
@@ -167,7 +167,7 @@ class TableNode(BaseNode):
         return {"table": out_table}
 
 
-@register_node
+@register_node()
 class RandomNode(BaseNode):
     """
     Node to generate a table, with a random column of specified type and range.
@@ -325,7 +325,7 @@ class RandomNode(BaseNode):
         out_table = Data.from_df(df)
         return {"table": out_table}
 
-@register_node
+@register_node()
 class RangeNode(BaseNode):
     """
     Node to generate a table, with a range column of specified type and range.

@@ -22,7 +22,7 @@ AllowedTypes = Literal["STR", "INT", "FLOAT", "BOOL", "DATETIME"]
 
 _TEMPLATE_CACHE = None
 
-@register_node
+@register_node()
 class CustomScriptNode(BaseNode):
     """
     This node allows users to define custom Script using Python code.

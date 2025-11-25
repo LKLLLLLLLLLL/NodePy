@@ -14,7 +14,7 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 This file defines nodes for converting data types.
 """
 
-@register_node
+@register_node()
 class ToStringNode(BaseNode):
     """
     Convert input data to string type.
@@ -66,7 +66,7 @@ class ToStringNode(BaseNode):
             output = str(input_data)
         return {'output': Data(payload=output)}
 
-@register_node
+@register_node()
 class ToIntNode(BaseNode):
     """
     Convert input data to integer type. Inputs of type float will be rounded down.
@@ -148,7 +148,7 @@ class ToIntNode(BaseNode):
             )
         return {'output': Data(payload=output)}
 
-@register_node
+@register_node()
 class ToFloatNode(BaseNode):
     """
     Convert input data to float type.
@@ -212,7 +212,7 @@ class ToFloatNode(BaseNode):
             )
         return {'output': Data(payload=output)}
 
-@register_node
+@register_node()
 class ToBoolNode(BaseNode):
     """
     Convert input data to boolean type.

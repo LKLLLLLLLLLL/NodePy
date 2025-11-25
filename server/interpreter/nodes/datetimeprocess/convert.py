@@ -15,7 +15,7 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 This file defines conversion nodes between datetime data and other type data.
 """
 
-@register_node
+@register_node()
 class ToDatetimeNode(BaseNode):
     """
     This node converts input data of num types to datetime type.
@@ -72,7 +72,7 @@ class ToDatetimeNode(BaseNode):
         result_datetime = epoch + delta
         return {"datetime": Data(payload=result_datetime)}
 
-@register_node
+@register_node()
 class StrToDatetimeNode(BaseNode):
     """
     This node converts input data of string type to datetime type.
@@ -121,7 +121,7 @@ class StrToDatetimeNode(BaseNode):
             )
         return {"datetime": Data(payload=result_datetime)}
 
-@register_node
+@register_node()
 class DatetimePrintNode(BaseNode):
     """
     A node to print datetime value to string output.
@@ -163,7 +163,7 @@ class DatetimePrintNode(BaseNode):
         formatted_string = datetime_value.strftime(self.pattern)
         return {"string": Data(payload=formatted_string)}
 
-@register_node
+@register_node()
 class DatetimeToTimestampNode(BaseNode):
     """
     Convert input datetime data to float timestamp.

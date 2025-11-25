@@ -4,9 +4,10 @@ from server.models.data import Data
 from server.models.exception import NodeParameterError
 from server.models.schema import Pattern, Schema
 
-from ..base_node import BaseNode, InPort, OutPort
+from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
+@register_node()
 class DisplayNode(BaseNode):
     """
     Node which allows users to display files.

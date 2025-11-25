@@ -1,4 +1,4 @@
-from typing import Literal, override, Any
+from typing import Any, Literal, override
 
 from server.config import FIGURE_DPI
 from server.models.data import Data, Table
@@ -8,7 +8,7 @@ from server.models.schema import ColType, FileSchema, Pattern, Schema
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
-@register_node
+@register_node()
 class PlotNode(BaseNode):
     """
     Node to visualize data from input table using matplotlib.

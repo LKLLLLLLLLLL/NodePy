@@ -15,7 +15,7 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 This file defines compute nodes between datetime data.
 """
 
-@register_node
+@register_node()
 class DatetimeComputeNode(BaseNode):
     """
     This node performs computations between datetime data and float/int data.
@@ -95,7 +95,7 @@ class DatetimeComputeNode(BaseNode):
             result_datetime = result_datetime.replace(tzinfo=DEFAULT_TIMEZONE)
         return {"result": Data(payload=result_datetime)}
     
-@register_node
+@register_node()
 class DatetimeDiffNode(BaseNode):
     """
     This node computes the difference between two datetime values in specified units.

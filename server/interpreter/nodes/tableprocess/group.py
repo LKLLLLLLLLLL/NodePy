@@ -13,7 +13,7 @@ from server.models.schema import (
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
-@register_node
+@register_node()
 class GroupNode(BaseNode):
     """
     A node to group by specified columns, and aggregate other columns with specified aggregation functions.

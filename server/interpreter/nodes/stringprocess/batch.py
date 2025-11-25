@@ -16,7 +16,7 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 This file defines some batch string processing nodes for string columns in tables.
 """
 
-@register_node
+@register_node()
 class BatchStripNode(BaseNode):
     """
     Node to strip leading and trailing whitespace or specified characters from string columns in a table.
@@ -102,7 +102,7 @@ class BatchStripNode(BaseNode):
         output_data = Data.from_df(df)
         return {"output": output_data}
 
-@register_node
+@register_node()
 class BatchConcatNode(BaseNode):
     """
     Node to Concat two string columns in input table.

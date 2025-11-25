@@ -13,7 +13,7 @@ from server.models.schema import (
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
-@register_node
+@register_node()
 class StatsNode(BaseNode):
     """
     A node to calculate basic statistics (mean, count, sum, std, min, max, 25%-quantile, 50%-quantile, 75%-quantile) for specified columns in a table.
@@ -158,4 +158,3 @@ class StatsNode(BaseNode):
         return {
             "col_choices": col_choices,
         }
-

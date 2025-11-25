@@ -9,7 +9,7 @@ from server.models.schema import Schema
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
-@register_node
+@register_node()
 class DateTimeNode(BaseNode):
     """
     A node to generate current date and time.

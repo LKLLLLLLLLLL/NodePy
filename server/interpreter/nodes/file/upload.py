@@ -7,7 +7,7 @@ from server.models.schema import FileSchema, Schema
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
-@register_node
+@register_node()
 class UploadNode(BaseNode):
     """
     Node which allows users to upload files.
