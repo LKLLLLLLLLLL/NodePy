@@ -126,6 +126,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedRandomNode)
         break
+      case 'RangeNode':
+        const addedRangeNode: Nodetypes.RangeNode = {
+          id,
+          position,
+          type: 'RangeNode',
+          data: {
+            param: {
+              col_name: '',
+              col_type: 'int'
+            }
+          }
+        }
+        addNodes(addedRangeNode)
+        break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
           id,

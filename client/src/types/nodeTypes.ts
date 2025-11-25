@@ -105,7 +105,7 @@ export interface RandomNode extends BaseNode<RandomNodeData> {
 
 export interface RangeNodeParam {
     col_name: string,
-    col_type: 'int'|'float'
+    col_type: 'int'|'float'|'Datetime'
 }
 export type RangeNodeData = BaseData & {
     param: RangeNodeParam

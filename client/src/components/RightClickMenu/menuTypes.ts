@@ -29,6 +29,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '随机表格生成节点',
                 value: 'RandomNode'
             },
+            {
+                label: '范围表格生成节点',
+                value: 'RangeNode'
+            },
         ]
     },
     {
