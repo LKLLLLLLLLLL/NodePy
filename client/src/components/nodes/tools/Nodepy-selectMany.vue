@@ -6,7 +6,7 @@
         :class="{open}"
     >
         <div class="value" :class="{close: !open}" @click.stop="toggle" :style="{height: itemHeight, width: itemWidth}">
-            {{ selectedItem }}
+            <span class="selectedItem">{{ selectedItem }}</span>
             <span class="arrow" :class="{open}">
               <SvgIcon type="mdi" :path="down_path"  />
             </span>
@@ -109,11 +109,21 @@
         .value {
             @include tool-item-style;
             border-radius: 6px 6px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            .selectedItem {
+                flex: 1;
+                padding: 0 17px;
+                text-align: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
             .arrow {
                 position: absolute;
-                right: 5px;
-                top: 50%;
-                transform: translateY(-50%);     /* 垂直居中显示 */
+                right: 1px;
                 display: flex;
                 align-items: center;
                 color: rgba(0,0,0,0.4);
@@ -122,7 +132,7 @@
                 }
             }
             .arrow.open {
-                transform: translateY(-50%) rotate(180deg);
+                transform: rotate(180deg);
             }
         }
         .value.close {
