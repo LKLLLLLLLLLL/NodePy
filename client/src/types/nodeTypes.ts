@@ -181,7 +181,7 @@ export type BoolUnaryOpNodeData = BaseData & {
     param: BoolUnaryOpNodeParam
 }
 export interface BoolUnaryOpNode extends BaseNode<BoolUnaryOpNodeData>{
-    type: 'BoolNotNode'
+    type: 'BoolUnaryOpNode'
 }
 
 

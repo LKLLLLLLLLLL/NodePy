@@ -25,6 +25,7 @@ import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
 import BoolBinOpNode from '../nodes/BoolBinOpNode.vue'
 import NumberUnaryOpNode from '../nodes/NumberUnaryOpNode.vue'
 import PrimitiveCompareNode from '../nodes/PrimitiveCompareNode.vue'
+import BoolUnaryOpNode from '../nodes/BoolUnaryOpNode.vue'
 import UploadNode from '../nodes/UploadNode.vue'
 import PlotNode from '../nodes/PlotNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -220,6 +221,8 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.compute
     case 'BoolBinOpNode':
       return nodeCategoryColor.compute
+    case 'BoolUnaryOpNode':
+      return nodeCategoryColor.compute
     case 'PlotNode':
       return nodeCategoryColor.visualize
     case 'UploadNode':
@@ -322,6 +325,10 @@ const isValidConnection = (connection: any) => {
 
         <template #node-BoolBinOpNode="BoolBinOpNodeProps">
           <BoolBinOpNode v-bind="BoolBinOpNodeProps"/>
+        </template>
+
+        <template #node-BoolUnaryOpNode="BoolUnaryOpNodeProps">
+          <BoolUnaryOpNode v-bind="BoolUnaryOpNodeProps"/>
         </template>
 
         <template #node-PlotNode="PlotNodeProps">
