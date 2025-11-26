@@ -3,15 +3,20 @@
     import { useProjectStore } from '@/stores/projectStore';
     import { useModalStore } from '@/stores/modalStore';
     import { useUserStore } from '@/stores/userStore';
-    import { onUnmounted } from 'vue';
+    import { onMounted, onUnmounted } from 'vue';
 
     const projectStore = useProjectStore();
     const modalStore = useModalStore();
     const userStore = useUserStore()
     const labelPosition = ref<string>('top')
 
+    onMounted( async ()=>{
+        await projectStore.getProjectSettings(projectStore.currentProjectId)
+    })
+
     async function onConfirmUpdateProject(){
         await projectStore.updateProjectSetting(projectStore.currentProjectId)
+        projectStore.initializeProjects()
         modalStore.deactivateModal('update-modal');
         modalStore.destroyModal('update-modal');
     }
@@ -31,7 +36,6 @@
     <el-form class="update-project-container" :label-position="labelPosition">
         <el-form-item>
             原项目名称：{{ projectStore.toBeUpdated.project_name }}
-            原项目ID: {{ projectStore.currentProjectId }}
         </el-form-item>
         <el-form-item label="ProjectName">
             <el-input placeholder="Enter new project name" v-model="projectStore.currentProjectName"></el-input>

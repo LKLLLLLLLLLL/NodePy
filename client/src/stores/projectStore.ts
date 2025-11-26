@@ -289,6 +289,7 @@ export const useProjectStore = defineStore('project', () => {
         try{
             const response = await authService.getProjectSettingApiProjectSettingProjectIdGet(id)
             toBeUpdated.value = response
+            currentWhetherShow.value = response.show_to_explore!
             currentProjectName.value = response.project_name
         }
         catch(error){
