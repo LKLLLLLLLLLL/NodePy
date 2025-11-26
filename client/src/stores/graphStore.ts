@@ -207,16 +207,16 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedUploadNode)
         break
-      case 'TableFromCSVNode':
-        const addedTableFromCSVNode: Nodetypes.TableFromCSVNode = {
+      case 'TableFromFileNode':
+        const addedTableFromFileNode: Nodetypes.TableFromFileNode = {
           id,
           position,
-          type: 'TableFromCSVNode',
+          type: 'TableFromFileNode',
           data: {
             param: {}
           }
         }
-        addNodes(addedTableFromCSVNode)
+        addNodes(addedTableFromFileNode)
         break
       case 'PlotNode':
         const addedPlotNode: Nodetypes.PlotNode = {

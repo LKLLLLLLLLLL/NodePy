@@ -107,8 +107,8 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'DisplayNode'
             },
             {
-                label: 'CSV表格节点',
-                value: 'TableFromCSVNode'
+                label: '文件表格节点',
+                value: 'TableFromFileNode'
             }
         ]
     },

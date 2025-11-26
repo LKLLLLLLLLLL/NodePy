@@ -1,17 +1,17 @@
 <template>
     <div class="TableFromCSVNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="file">CSV表格节点</NodeTitle>
+        <NodeTitle node-category="file">文件表格节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
-            <div class="input-csv_file port">
+            <div class="input-file port">
                 <div class="input-port-description">
-                    CSV文件输入端口
+                    文件输入端口
                 </div>
                 <Handle
-                    id="csv_file"
+                    id="file"
                     type="target"
                     :position="Position.Left"
-                    :class="[`${csv_file_type}-handle-color`, {'node-errhandle': csv_fileHaserr.value}]"
+                    :class="[`${file_type}-handle-color`, {'node-errhandle': fileHaserr.value}]"
                 />
             </div>
             <div class="output-table port">
@@ -44,12 +44,12 @@
 
 
     const props = defineProps<NodeProps<BaseData>>()
-    const csv_file_type = computed(() => getInputType(props.id, 'csv_file'))
+    const file_type = computed(() => getInputType(props.id, 'file'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['table']?.type || 'default')
     const tableHasErr = computed(() => handleOutputError(props.id, 'table'))
     const errMsg = ref<string[]>([])
-    const csv_fileHaserr = ref({
-        handleId: 'csv_file',
+    const fileHaserr = ref({
+        handleId: 'file',
         value: false
     })
 
@@ -57,7 +57,7 @@
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
-        handleValidationError(props.id, props.data.error, errMsg, csv_fileHaserr)
+        handleValidationError(props.id, props.data.error, errMsg, fileHaserr)
     }, {immediate: true})
 
 </script>

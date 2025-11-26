@@ -86,8 +86,8 @@ export interface TableNode extends BaseNode<TableNodeData>{
 }
 
 
-export interface TableFromCSVNode extends BaseNode {
-    type: 'TableFromCSVNode'
+export interface TableFromFileNode extends BaseNode {
+    type: 'TableFromFileNode'
 }
 
 

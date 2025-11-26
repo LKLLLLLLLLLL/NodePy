@@ -17,7 +17,6 @@ import ConstNode from '../nodes/ConstNode.vue'
 import StringNode from '../nodes/StringNode.vue'
 import TableNode from '../nodes/TableNode.vue'
 import BoolNode from '../nodes/BoolNode.vue'
-import TableFromCSVNode from '../nodes/TableFromCSVNode.vue'
 import RandomNode from '../nodes/RandomNode.vue'
 import RangeNode from '../nodes/RangeNode.vue'
 import DateTimeNode from '../nodes/DateTimeNode.vue'
@@ -27,6 +26,7 @@ import NumberUnaryOpNode from '../nodes/NumberUnaryOpNode.vue'
 import PrimitiveCompareNode from '../nodes/PrimitiveCompareNode.vue'
 import BoolUnaryOpNode from '../nodes/BoolUnaryOpNode.vue'
 import UploadNode from '../nodes/UploadNode.vue'
+import TableFromFileNode from '../nodes/TableFromFileNode.vue'
 import PlotNode from '../nodes/PlotNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
@@ -227,7 +227,7 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.visualize
     case 'UploadNode':
       return nodeCategoryColor.file
-    case 'TableFromCSVNode':
+    case 'TableFromFileNode':
       return nodeCategoryColor.file
     default:
       return nodeCategoryColor.default
@@ -295,8 +295,8 @@ const isValidConnection = (connection: any) => {
           <BoolNode v-bind="BoolNodeProps"/>
         </template>
 
-        <template #node-TableFromCSVNode="TableFromCSVNodeProps">
-          <TableFromCSVNode v-bind="TableFromCSVNodeProps"/>
+        <template #node-TableFromFileNode="TableFromFileNodeProps">
+          <TableFromFileNode v-bind="TableFromFileNodeProps"/>
         </template>
 
         <template #node-RandomNode="RandomNodeProps">
