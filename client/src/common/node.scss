@@ -8,11 +8,15 @@ $file-color: rgb(216, 105, 91);
 $bool-color: #76ab0b;
 $datetime-color: #00c8ff;
 $default-type-color: gray;
+//  node element style
 $node-width: 200px;
 $node-title-height: 30px;
 $node-padding-top: 7px;
 $node-padding-hor: 12px;
 $node-padding-bottom: 5px;
+$node-margin: 10px; //  margin between child elements
+$node-title-fontsize: 15px;
+$node-description-fontsize: 14px;
 //  node first category color
 $input-node-color: rgb(255, 102, 255);
 $compute-node-color: #00b688;
@@ -23,9 +27,6 @@ $table-node-color: $table-color;
 $utils-node-color: rgb(183, 0, 70);
 $visualize-node-color: #7572d2;
 $datetime-node-color: $datetime-color;
-$node-margin: 10px;
-$node-title-fontsize: 15px;
-$node-description-fontsize: 14px;
 
 
 .nodes-style {

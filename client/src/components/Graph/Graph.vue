@@ -22,6 +22,7 @@ import RandomNode from '../nodes/RandomNode.vue'
 import RangeNode from '../nodes/RangeNode.vue'
 import DateTimeNode from '../nodes/DateTimeNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
+import BoolBinOpNode from '../nodes/BoolBinOpNode.vue'
 import NumberUnaryOpNode from '../nodes/NumberUnaryOpNode.vue'
 import PrimitiveCompareNode from '../nodes/PrimitiveCompareNode.vue'
 import UploadNode from '../nodes/UploadNode.vue'
@@ -217,6 +218,8 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.compute
     case 'PrimitiveCompareNode':
       return nodeCategoryColor.compute
+    case 'BoolBinOpNode':
+      return nodeCategoryColor.compute
     case 'PlotNode':
       return nodeCategoryColor.visualize
     case 'UploadNode':
@@ -315,6 +318,10 @@ const isValidConnection = (connection: any) => {
 
         <template #node-PrimitiveCompareNode="PrimitiveCompareNodeProps">
           <PrimitiveCompareNode v-bind="PrimitiveCompareNodeProps"/>
+        </template>
+
+        <template #node-BoolBinOpNode="BoolBinOpNodeProps">
+          <BoolBinOpNode v-bind="BoolBinOpNodeProps"/>
         </template>
 
         <template #node-PlotNode="PlotNodeProps">

@@ -168,6 +168,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedPrimitiveCompareNode)
         break
+      case 'BoolBinOpNode':
+        const addedBoolBinOpNode: Nodetypes.BoolBinOpNode = {
+          id,
+          position,
+          type: 'BoolBinOpNode',
+          data: {
+            param: {
+              op: 'AND'
+            }
+          }
+        }
+        addNodes(addedBoolBinOpNode)
+        break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
           id,
