@@ -2,7 +2,7 @@ import asyncio
 import io
 import os
 import time
-from typing import Literal, cast
+from typing import cast
 from urllib.parse import quote
 from uuid import uuid4
 
@@ -22,7 +22,7 @@ from server.models.database import (
     get_session,
 )
 from server.models.exception import InsufficientStorageError
-from server.models.file import File, FileItem, UserFileList
+from server.models.file import FILE_FORMATS_TYPE, File, FileItem, UserFileList
 from server.models.project import ProjWorkflow
 from server.models.schema import ColType, Schema
 
@@ -32,7 +32,7 @@ class FileManager:
     The unified library for managing files for nodes,
     including uploading, downloading, reading, writing, deleting files.
     Each file manager is bind to a user_id and project_id.
-    Can be used in multiple containers.
+    And can be used in multiple containers.
 
     When project_id is provided, all operations including writing are enabled.
     When project_id is None, only read, delete, and list operations are permitted.
@@ -86,10 +86,17 @@ class FileManager:
         total = result.scalars().all()
         return sum(size for size in total)  # type: ignore
 
-    def _get_col_types(self, content: bytes) -> dict[str, ColType]:
+    def _get_col_types(self, content: bytes, format: FILE_FORMATS_TYPE) -> dict[str, ColType]:
         import pandas
         
-        df = pandas.read_csv(io.StringIO(content.decode('utf-8')))
+        if format == "csv":
+            df = pandas.read_csv(io.StringIO(content.decode('utf-8')))
+        elif format == "xlsx":
+            df = pandas.read_excel(io.BytesIO(content))
+        elif format == "json":
+            df = pandas.read_json(io.StringIO(content.decode('utf-8')))
+        else:
+            raise ValueError(f"Unsupported format for column type detection: {format}")
         col_types = {}
         for col in df.columns:
             dtype = df[col].dtype
@@ -111,7 +118,7 @@ class FileManager:
         return File(
             key=db_file.file_key, # type: ignore
             filename=db_file.filename, # type: ignore
-            format=cast(Literal["png", "jpg", "pdf", "csv"], db_file.format),
+            format=cast(FILE_FORMATS_TYPE, db_file.format),
             size=db_file.file_size, # type: ignore
         )
     
@@ -128,9 +135,9 @@ class FileManager:
         if not db_file:
             raise ValueError("File record not found in database")
         return File(
-            key=db_file.file_key, # type: ignore
-            filename=db_file.filename, # type: ignore
-            format=cast(Literal["png", "jpg", "pdf", "csv"], db_file.format),
+            key=db_file.file_key,  # type: ignore
+            filename=db_file.filename,  # type: ignore
+            format=cast(FILE_FORMATS_TYPE, db_file.format),
             size=db_file.file_size,  # type: ignore
         )
 
@@ -154,7 +161,7 @@ class FileManager:
     def write_sync(self, 
                    filename: str, 
                    content: bytes | io.BytesIO, 
-                   format: Literal["png", "jpg", "pdf", "csv"], 
+                   format: FILE_FORMATS_TYPE, 
                    node_id: str, 
                    project_id: int, 
                    user_id: int
@@ -165,10 +172,15 @@ class FileManager:
         if isinstance(content, io.BytesIO):
             content.seek(0)
             content = content.getvalue()
-        # detect col_types for csv
+        # detect col_types for csv, xlsx, json
         col_types: dict[str, ColType] | None = None
-        if format == "csv":
-            col_types = self._get_col_types(content)
+        if format in (
+            "csv",
+            "csv",
+            "xlsx",
+            "json",
+        ):
+            col_types = self._get_col_types(content, format)
         key = uuid4().hex + f".{format}"        
         try:
             # check storage limit
@@ -218,13 +230,14 @@ class FileManager:
             raise IOError(f"Failed to write file: {e}")
         return File(key=key, col_types=col_types, filename=filename, format=format, size=len(content))
     
-    async def write_async(self, 
-                          filename: str, 
-                          content: bytes | io.BytesIO, 
-                          format: Literal["png", "jpg", "pdf", "csv"], 
-                          node_id: str, 
-                          project_id: int, 
-                          user_id: int
+    async def write_async(
+        self,
+        filename: str,
+        content: bytes | io.BytesIO,
+        format: FILE_FORMATS_TYPE,
+        node_id: str,
+        project_id: int,
+        user_id: int,
     ) -> File:
         """ Write content to a file for a user, return the file path """
         if self.async_db_client is None:
@@ -232,10 +245,15 @@ class FileManager:
         if isinstance(content, io.BytesIO):
             content.seek(0)
             content = content.getvalue()
-        # detect col_types for csv
+        # detect col_types for csv, xlsx, json
         col_types: dict[str, ColType] | None = None
-        if format == "csv":
-            col_types = self._get_col_types(content)
+        if format in (
+            "csv",
+            "csv",
+            "xlsx",
+            "json",
+        ):
+            col_types = self._get_col_types(content, format)
         key = uuid4().hex + f".{format}"
         stmt = select(FileRecord).where(
             (FileRecord.project_id == project_id) & (FileRecord.node_id == node_id)
@@ -445,7 +463,7 @@ class FileManager:
                         key=db_file.file_key,  # type: ignore
                         filename=db_file.filename,  # type: ignore
                         format=cast(
-                            Literal["png", "jpg", "pdf", "csv"], db_file.format
+                            FILE_FORMATS_TYPE, db_file.format
                         ),
                         size=db_file.file_size,  # type: ignore
                         modified_at=int(db_file.last_modify_time.timestamp() * 1000),  # type: ignore
@@ -489,7 +507,7 @@ class FileManager:
                 file_items.append(FileItem(
                     key=db_file.file_key, # type: ignore
                     filename=db_file.filename, # type: ignore
-                    format=cast(Literal["png", "jpg", "pdf", "csv"], db_file.format),
+                    format=cast(FILE_FORMATS_TYPE, db_file.format),
                     size=db_file.file_size, # type: ignore
                     modified_at=int(db_file.last_modify_time.timestamp() * 1000), # type: ignore
                     project_name=project_name # type: ignore

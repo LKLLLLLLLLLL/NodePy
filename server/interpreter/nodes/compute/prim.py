@@ -217,7 +217,7 @@ class PrimitiveCompareNode(BaseNode):
             )
         return {'result': Data(payload=res)}
 
-
+ 
 @register_node()
 class BoolBinOpNode(BaseNode):
     """
@@ -280,11 +280,11 @@ class BoolUnaryOpNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "BoolUnaryComputeNode":
+        if not self.type == "BoolUnaryOpNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'BoolUnaryComputeNode'."
+                err_msg="Node type must be 'BoolUnaryOpNode'."
             )
 
     @override

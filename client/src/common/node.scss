@@ -171,5 +171,7 @@ $datetime-node-color: $datetime-color;
 }
 
 .node-errhandle {
-  background: red !important;
+  // background: red !important;
+  outline: 1.5px solid red;
+  outline-offset: 1px;
 }

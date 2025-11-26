@@ -106,7 +106,13 @@ class FileRecord(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     filename = Column(String, nullable=False)  # Original file name
     file_key = Column(String, index=True, nullable=False) # MinIO object key
-    format = Column(Enum("jpg", "png", "csv", "pdf", name="file_format"), nullable=False)
+    format = Column(
+        Enum(
+            "png", "jpg", "pdf", "csv", "txt", "xlsx", "json", "word",
+            name="file_format",
+        ),
+        nullable=False,
+    )
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id", ondelete="SET NULL"), index=True, nullable=True) # do not cascade delete, the delete will be handled in trigger
     node_id = Column(String, nullable=False, index=True) # ID of the node that generated the file

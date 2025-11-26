@@ -50,9 +50,25 @@ async def upload_file(
     # validate file format
     if file.filename is None:
         raise HTTPException(status_code=400, detail="Filename is required")
-    if not file.filename.endswith(('.png', '.jpg', '.pdf', '.csv')):
+    exts_to_format = {
+        # pictures
+        "png": "png",
+        "jpg": "jpg",
+        # documents
+        "pdf": "pdf",
+        "doc": "word",
+        "docx": "word",
+        "txt": "txt",
+        # sheets
+        "csv": "csv",
+        "xlsx": "xlsx",
+        "xls": "xlsx",
+        "json": "json",
+    }
+    format = exts_to_format.get(file.filename.split('.')[-1])
+    if format is None:
         raise HTTPException(status_code=400, detail="Unsupported file format")
-    format = cast(Literal['png', 'jpg', 'pdf', 'csv'], file.filename.split('.')[-1])
+    format = cast(Literal['png', 'jpg', 'pdf', 'word', 'txt', 'csv', 'xlsx', 'json'], format)
 
     user_id = int(user_record.id) # type: ignore
     try:

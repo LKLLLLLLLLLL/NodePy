@@ -2,8 +2,22 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel
 
-from server.models.schema import ColType
+from server.models.types import ColType
 
+FILE_FORMATS = [
+    # pictures
+    "png",
+    "jpg",
+    # documents
+    "pdf",
+    "word",
+    "txt",
+    # sheets
+    "csv",
+    "xlsx",
+    "json",
+]
+FILE_FORMATS_TYPE = Literal["png", "jpg", "pdf", "word", "txt", "csv", "xlsx", "json"]
 
 class File(BaseModel):
     """
@@ -12,7 +26,7 @@ class File(BaseModel):
 
     key: str  # for minio object key
     filename: str  # original file name
-    format: Literal["png", "jpg", "pdf", "csv"]
+    format: FILE_FORMATS_TYPE
     col_types: Optional[dict[str, ColType]] = None  # only for csv files
     size: int  # file size in bytes
 
@@ -29,7 +43,7 @@ class FileItem(BaseModel):
     """
     key: str
     filename: str
-    format: Literal["png", "jpg", "pdf", "csv"]
+    format: FILE_FORMATS_TYPE
     size: int  # file size in bytes
     modified_at: int  # timestamp in milliseconds
     project_name: str

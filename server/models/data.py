@@ -5,8 +5,9 @@ from pandas import DataFrame, Series
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
 
-from .file import File
-from .schema import ColType, FileSchema, Schema, TableSchema, check_no_illegal_cols
+from server.models.file import File
+from server.models.schema import FileSchema, Schema, TableSchema, check_no_illegal_cols
+from server.models.types import ColType
 
 """
 Actual runtime data passed between nodes.

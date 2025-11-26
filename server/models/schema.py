@@ -1,72 +1,15 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional
+from typing import Any, ClassVar, Literal, Optional
 
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
 
-if TYPE_CHECKING:
-    from .file import File
+from server.models.file import FILE_FORMATS_TYPE, File
+from server.models.types import ColType
 
 """
 This file defined schema passed between nodes during static analysis stage.
 """
-
-
-class ColType(str, Enum):
-    INT = "int"  # int64
-    FLOAT = "float"  # float64
-    STR = "str"  # str
-    BOOL = "bool"  # bool
-    DATETIME = "Datetime"  # datetime64[ns]
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, ColType):
-            return self.value == other.value
-        elif isinstance(other, Schema):
-            if other.type == Schema.Type.INT and self == ColType.INT:
-                return True
-            elif other.type == Schema.Type.FLOAT and self == ColType.FLOAT:
-                return True
-            elif other.type == Schema.Type.STR and self == ColType.STR:
-                return True
-            elif other.type == Schema.Type.BOOL and self == ColType.BOOL:
-                return True
-            else:
-                return False
-        else:
-            if isinstance(other, str):
-                return self.value == other
-            raise NotImplementedError(f"Cannot compare ColType with {type(other)}")
-
-    def __hash__(self) -> int:
-        return super().__hash__()
-
-    def to_ptype(self):
-        import pandas
-        coltype_to_dtype = {
-            ColType.INT: pandas.Int64Dtype,
-            ColType.FLOAT: pandas.Float64Dtype,
-            ColType.STR: pandas.StringDtype,
-            ColType.BOOL: pandas.BooleanDtype,
-            ColType.DATETIME: "datetime64[ns]",
-        }
-        return coltype_to_dtype[self]
-
-    @classmethod
-    def from_ptype(cls, dtype) -> "ColType":
-        import pandas.api.types as ptypes
-        if ptypes.is_integer_dtype(dtype):
-            return ColType.INT
-        elif ptypes.is_float_dtype(dtype):
-            return ColType.FLOAT
-        elif ptypes.is_string_dtype(dtype):
-            return ColType.STR
-        elif ptypes.is_bool_dtype(dtype):
-            return ColType.BOOL
-        elif ptypes.is_datetime64_any_dtype(dtype):
-            return ColType.DATETIME
-        else:
-            raise ValueError(f"Unsupported pandas dtype: {dtype}")
 
 class TableSchema(BaseModel):
     """
@@ -149,11 +92,12 @@ def generate_default_col_name(id: str, annotation: str) -> str:
     #     base_name = base_name + "_1"
     return base_name
 
+
 class FileSchema(BaseModel):
     """
     The schema of File data, including file format and other metadata.
     """
-    format: Literal["csv", "png", "jpg", "pdf"]
+    format: FILE_FORMATS_TYPE
     col_types: Optional[dict[str, ColType]] = None  # only for csv files
     
     def __hash__(self) -> int:
@@ -233,7 +177,7 @@ class Schema(BaseModel):
                 return self.file == other.file
             return True
         else:
-            raise NotImplementedError(f"Cannot compare Schema with {type(other)}")
+            return NotImplemented
 
     def append_col(self, new_col: str, col_type: ColType) -> "Schema":
         if self.type != self.Type.TABLE or self.tab is None:
