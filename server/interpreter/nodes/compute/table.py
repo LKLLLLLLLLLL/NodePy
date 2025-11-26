@@ -170,7 +170,7 @@ class ColWithNumberBinOpNode(BaseNode):
         hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
-            hint["col_choices"] = input_schemas['table'].tab.col_types.keys()
+            hint["col_choices"] = list(input_schemas['table'].tab.col_types.keys())
         return hint
 
 @register_node()
@@ -295,7 +295,7 @@ class ColWithBoolBinOpNode(BaseNode):
         hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
-            hint['col_choices'] = input_schemas['table'].tab.col_types.keys()
+            hint['col_choices'] = list(input_schemas['table'].tab.col_types.keys())
         return hint
 
 """
@@ -419,7 +419,7 @@ class NumberColUnaryOpNode(BaseNode):
         hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
-            hint['col_choices'] = input_schemas['table'].tab.col_types.keys()
+            hint['col_choices'] = list(input_schemas['table'].tab.col_types.keys())
         return hint
 
 @register_node()
@@ -520,7 +520,7 @@ class BoolColUnaryOpNode(BaseNode):
         hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
-            hint['col_choices'] = input_schemas['table'].tab.col_types.keys()
+            hint['col_choices'] = list(input_schemas['table'].tab.col_types.keys())
         return hint
 
 
