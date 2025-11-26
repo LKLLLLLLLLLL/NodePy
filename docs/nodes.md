@@ -344,7 +344,7 @@ table:
 - col1_choices: 列名列表，类型为List[str]，用于在UI中为col1参数提供可选值。
 - col2_choices: 列名列表，类型为List[str]，用于在UI中为col2参数提供可选值。
 
-#### 2.12 ToStringNode
+#### 2.13 ToStringNode
 节点将输入的任意类型转换为字符串类型。
 
 **参数：**
@@ -356,7 +356,7 @@ table:
 **输出：**
 - output: 输出的字符串，类型为str。
 
-#### 2.13 ToIntNode
+#### 2.14 ToIntNode
 节点将输入的任意类型转换为整数类型。
 
 **参数：**
@@ -368,7 +368,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - output: 输出的整数，类型为int。
 
-#### 2.14 ToFloatNode
+#### 2.15 ToFloatNode
 节点将输入的任意类型转换为浮点数类型。
 
 **参数：**
@@ -380,7 +380,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - output: 输出的浮点数，类型为float。
 
-#### 2.15 ToBoolNode
+#### 2.16 ToBoolNode
 节点将输入的任意类型转换为布尔类型。
 
 **参数：**
@@ -742,18 +742,30 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 无
 
-#### 6.3 TableFromCSVNode
-从CSV文件加载表格节点，可以读取上传的CSV文件并将其转换为Table类型。
+#### 6.3 TableFromFileNode
+从文件加载表格节点，可以读取上传的文件并将其转换为Table类型。文件格式支持CSV, JSON, Excel格式。
 
 **参数：**
 无
 
 **输入：**
-- csv_file: 输入的CSV文件，类型为File，格式为CSV。
+- file: 输入的文件对象，类型为File。
 
 **输出：**
 - table: 输出的表格，类型为Table。
 
+#### 6.4 TableToFileNode
+将表格保存为文件节点，可以将Table类型的数据保存为指定格式的文件。
+
+**参数：**
+- filename: 输出文件名，可选，无需包含扩展名，如果不提供，使用默认值。
+- format：文件格式类型为Literal["csv", "xlsx", "json"]。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- file: 输出的文件对象，类型为File。
 
 ### 7. 日期时间处理节点(datetimeprocess)
 #### 7.1 DatetimeComputeNode

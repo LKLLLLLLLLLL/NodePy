@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, ClassVar, Literal, Optional
+from typing import Any, ClassVar, Optional
 
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
@@ -205,7 +205,7 @@ class Pattern(BaseModel):
 
     types: set[Schema.Type]
     table_columns: dict[str, set[ColType]] | None = None  # only for TABLE type
-    file_formats: set[Literal["csv", "png", "jpg", "pdf"]] | None = None  # only for FILE type
+    file_formats: set[FILE_FORMATS_TYPE] | None = None  # only for FILE type
 
     @model_validator(mode="after")
     def verify(self) -> Self:
