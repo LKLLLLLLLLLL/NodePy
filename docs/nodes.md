@@ -527,6 +527,47 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - output: 输出的表格，类型为Table，包含新增的结果列。
 
+#### 4.8 RegexMatchNode
+对于输入的字符串应用正则表达式匹配，输出是否匹配。
+
+**参数：**
+- pattern: 正则表达式模式，类型为str。
+
+**输入：**
+- string: 输入的字符串，类型为str。
+
+**输出：**
+- is_match: 是否匹配，类型为bool。
+
+#### 4.9 BatchRegexMatchNode
+对于输入的表格中的指定字符串列应用正则表达式匹配，输出是否匹配的结果列。
+
+**参数：**
+- pattern: 正则表达式模式，类型为str。
+- col: 要操作的表格列名，类型为str，该列必须为字符串类型(str)。
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+
+**输入：**
+- input: 输入的表格，类型为Table。
+
+**输出：**
+- output: 输出的表格，类型为Table，包含新增的结果列。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
+#### 4.10 RegexExtractNode
+对于输入的字符串应用正则表达式提取，输出提取的子串，将字串放到一个表格中，每一行是一次匹配，每一列表示一个捕获组。
+
+**参数：**
+- pattern: 正则表达式模式，类型为str。
+
+**输入：**
+- string: 输入的字符串，类型为str。
+
+**输出：**
+- matches: 提取结果，类型为Table。
+
 ### 5. 表格处理节点(tableprocess)
 #### 5.1 InsertConstColNode
 在表格中插入常量列节点。

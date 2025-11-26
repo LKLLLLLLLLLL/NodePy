@@ -598,8 +598,6 @@ dependencies = [
     { name = "pandas" },
     { name = "psycopg2-binary" },
     { name = "pydantic" },
-    { name = "pypdf2" },
-    { name = "python-docx" },
     { name = "redis" },
     { name = "requests" },
     { name = "sqlalchemy" },
@@ -624,6 +622,8 @@ server = [
 worker = [
     { name = "matplotlib" },
     { name = "networkx" },
+    { name = "pypdf2" },
+    { name = "python-docx" },
     { name = "restrictedpython" },
     { name = "wordcloud" },
 ]
@@ -639,8 +639,6 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
     { name = "pydantic", specifier = ">=2.12.3" },
-    { name = "pypdf2", specifier = ">=3.0.1" },
-    { name = "python-docx", specifier = ">=1.2.0" },
     { name = "redis", specifier = ">=6.4.0" },
     { name = "requests", specifier = ">=2.32.5" },
     { name = "sqlalchemy", specifier = ">=2.0.44" },
@@ -666,6 +664,8 @@ server = [
 worker = [
     { name = "matplotlib", specifier = ">=3.10.7" },
     { name = "networkx", specifier = ">=3.5" },
+    { name = "pypdf2", specifier = ">=3.0.1" },
+    { name = "python-docx", specifier = ">=1.2.0" },
     { name = "restrictedpython", specifier = ">=8.1" },
     { name = "wordcloud", specifier = ">=1.9.4" },
 ]
