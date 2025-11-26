@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-    import type { ExploreListItem } from '@/utils/api';
-    import { useRouter } from 'vue-router';
-    import { computed } from 'vue';
     import { useUserStore } from '@/stores/userStore';
+import type { ExploreListItem } from '@/utils/api';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 
     const props = defineProps<{
         item: ExploreListItem
@@ -15,12 +15,12 @@
     // 计算属性：将 Base64 转换为完整的 Data URL
     const thumbSrc = computed(() => {
         if (!props.item.thumb) return null
-        
+
         // 如果已经是 Data URL，直接返回
         if (props.item.thumb.startsWith('data:image')) {
             return props.item.thumb
         }
-        
+
         // 如果是纯 Base64，添加前缀
         return `data:image/png;base64,${props.item.thumb}`
     })
@@ -35,10 +35,10 @@
     function formatDate(v: number | null) {
         const d = parseDate(v);
         if (!d) return '';
-        return new Intl.DateTimeFormat('zh-CN', { 
-            year: 'numeric', 
-            month: '2-digit', 
-            day: '2-digit' 
+        return new Intl.DateTimeFormat('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
         }).format(d);
     }
 
@@ -75,7 +75,7 @@
             <div class="project-meta">
                 <span class="meta-item">修改: {{ formatDate(item.updated_at) }}</span>
                 <span class="meta-item">创建: {{ formatDate(item.created_at) }}</span>
-                <span class="meta-item">作者: {{ item.owner }}</span>
+                <span class="meta-item">作者: {{ item.owner_name }}</span>
             </div>
         </div>
     </div>

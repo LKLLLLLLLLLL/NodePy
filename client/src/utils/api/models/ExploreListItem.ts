@@ -5,7 +5,8 @@
 export type ExploreListItem = {
     project_id: number;
     project_name: string;
-    owner: number;
+    owner_id: number;
+    owner_name: string;
     created_at: number;
     updated_at: number;
     thumb?: (string | null);

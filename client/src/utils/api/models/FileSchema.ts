@@ -12,10 +12,14 @@ export type FileSchema = {
 };
 export namespace FileSchema {
     export enum format {
-        CSV = 'csv',
         PNG = 'png',
         JPG = 'jpg',
         PDF = 'pdf',
+        WORD = 'word',
+        TXT = 'txt',
+        CSV = 'csv',
+        XLSX = 'xlsx',
+        JSON = 'json',
     }
 }
 
