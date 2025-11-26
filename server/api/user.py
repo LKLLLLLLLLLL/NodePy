@@ -6,7 +6,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.lib.AuthUtils import get_current_user
-from server.models.database import UserRecord, get_async_session
+from server.models.database import (
+    FileRecord,
+    ProjectRecord,
+    UserRecord,
+    get_async_session,
+)
 
 router = APIRouter()
 
@@ -27,7 +32,7 @@ async def get_current_user_info(
     try:
         # get projects count
         projects_record = await db_client.execute(
-            select(UserRecord).where(UserRecord.id == current_user.id)
+            select(ProjectRecord).where(ProjectRecord.owner_id == current_user.id)
         )
         projects_count = len(projects_record.scalars().all())
 
@@ -35,10 +40,12 @@ async def get_current_user_info(
         user_record = await db_client.get(UserRecord, current_user.id)
         assert user_record is not None
         file_space_total = user_record.file_total_space
-        file_records = await db_client.execute(
-            select(UserRecord).where(UserRecord.id == current_user.id)
+        files_result = await db_client.execute(
+            select(FileRecord.file_size).where(
+                FileRecord.user_id == current_user.id, FileRecord.is_deleted.is_(False)
+            )
         )
-        file_space_used = sum([0 for _ in file_records.scalars().all()])
+        file_space_used = sum(row[0] for row in files_result.all())
 
         return {
             "id": current_user.id,
