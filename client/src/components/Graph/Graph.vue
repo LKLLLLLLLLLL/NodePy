@@ -146,6 +146,14 @@ async function handleNodeDoubleClick(event) {
     graphStore.currentNode.data.dbclicked = true
   } //  双击状态更新
 
+  if(modalStore.findModal('result')===undefined){
+    resultStore.createResultModal()
+    modalStore.activateModal('result')
+  }
+  else{
+    modalStore.activateModal('result')
+  }
+
   if(graphStore.currentNode?.data?.data_out===undefined){
     resultStore.currentInfo = graphStore.currentNode?.data.param
     resultStore.currentResult = resultStore.default_dataview
@@ -163,13 +171,6 @@ async function handleNodeDoubleClick(event) {
       resultStore.currentResult = await resultStore.getResultCacheContent(graphStore.url_id);
       resultStore.currentInfo = graphStore.currentNode?.data.param;
     }
-  }
-  if(modalStore.findModal('result')==undefined){
-    resultStore.createResultModal()
-    modalStore.activateModal('result')
-  }
-  else{
-    modalStore.activateModal('result')
   }
 
 }
