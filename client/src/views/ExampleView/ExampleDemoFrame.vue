@@ -2,12 +2,15 @@
     import type { ExploreListItem } from '@/utils/api';
     import { useRouter } from 'vue-router';
     import { computed } from 'vue';
+    import { useUserStore } from '@/stores/userStore';
 
     const props = defineProps<{
         item: ExploreListItem
     }>()
 
     const router = useRouter()
+
+    const userStore = useUserStore()
 
     // 计算属性：将 Base64 转换为完整的 Data URL
     const thumbSrc = computed(() => {
@@ -53,125 +56,116 @@
 
 </script>
 <template>
-    <div class="example-card">
+    <div class="project-card">
         <!-- 缩略图区域 -->
-        <div class="example-thumb">
-            <div v-if="thumbSrc" class="thumb-content">
-                <img :src="thumbSrc" alt="项目缩略图" class="thumb-img">
-            </div>
-            <div v-else class="thumb-placeholder">
-                E
+        <div class="project-thumb">
+            <div class="thumb-content">
+                <template v-if="thumbSrc">
+                    <img :src="thumbSrc" alt="thumb" class="thumb-img" />
+                </template>
+                <template v-else>
+                    <div class="thumb-placeholder-large">{{ (props.item.project_name || '').charAt(0) || 'E' }}</div>
+                </template>
             </div>
         </div>
 
         <!-- 项目信息区域 -->
-        <div class="example-info">
-            <div class="example-title">{{ item.project_name }}</div>
-            <div class="example-meta">
+        <div class="project-info">
+            <div class="project-title">{{ item.project_name }}</div>
+            <div class="project-meta">
                 <span class="meta-item">修改: {{ formatDate(item.updated_at) }}</span>
                 <span class="meta-item">创建: {{ formatDate(item.created_at) }}</span>
+                <span class="meta-item">作者: {{ item.owner }}</span>
             </div>
-        </div>
-
-        <!-- 操作按钮区域 -->
-        <div class="example-actions">
-            <el-button type="primary" @click="handleOpenExample">打开示例</el-button>
-            <!-- <el-button @click="handleCopy">复制</el-button> -->
         </div>
     </div>
 </template>
 <style lang="scss" scoped>
-    .example-card {
-        width: 100%;
-        max-width: 420px;
-        background: #ffffff;
-        border-radius: 12px;
-        color: #1f2d3d;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        cursor: pointer;
-        box-shadow: 0 6px 25px rgba(31,45,61,0.08);
-        transition: transform 140ms cubic-bezier(.2,.9,.3,1), box-shadow 140ms cubic-bezier(.2,.9,.3,1);
-    }
+.project-card{
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 12px;
+    color: #1f2d3d;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 6px 25px rgba(31,45,61,0.08);
+    transition: transform 140ms cubic-bezier(.2,.9,.3,1), box-shadow 140ms cubic-bezier(.2,.9,.3,1);
+}
+.project-card:focus{
+    outline: 2px solid rgba(26,115,190,0.12);
+    outline-offset: 2px;
+}
+.project-card:hover{
+    transform: translateY(-4px) scale(1.015);
+    box-shadow: 0 12px 28px rgba(31,45,61,0.12);
+}
+.project-thumb{
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 */
+    display: block;
+    background: #f6f9fb;
+}
+.thumb-content{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.thumb-content > img.thumb-img{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.thumb-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+.thumb-placeholder-large{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: #4b5d6a;
+    font-size:48px;
+    font-weight:700;
+}
+.project-info{
+    padding: 14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-height: 75px; /* ensure new-card height matches cards with meta */
+}
+.project-title{
+    font-weight:700;
+    font-size:15px;
+    color:#102335;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.project-meta{
+    display:flex;
+    gap:10px;
+    font-size:12px;
+    color:#6b7f8f;
+}
+.meta-item{opacity:0.95}
 
-    .example-card:hover {
-        transform: translateY(-4px) scale(1.015);
-        box-shadow: 0 12px 28px rgba(31,45,61,0.12);
-    }
-
-    .example-thumb {
-        position: relative;
-        width: 100%;
-        padding-top: 56.25%; /* 16:9 */
-        display: block;
-        background: #f6f9fb;
-    }
-
-    .thumb-content {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .thumb-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .thumb-placeholder {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 28px;
-        color: #6b7f8f;
-    }
-
-    .example-info {
-        padding: 16px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .example-title {
-        color: #102335;
-        font-weight: 600;
-        font-size: 18px;
-        margin-bottom: 12px;
-        word-break: break-word;
-    }
-
-    .example-meta {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        font-size: 12px;
-        color: #6b7f8f;
-        margin-top: auto;
-    }
-
-    .meta-item {
-        display: flex;
-        align-items: center;
-    }
-
-    .example-actions {
-        padding: 0 16px 16px;
-        display: flex;
-        gap: 10px;
-    }
-
-    .example-actions .el-button {
-        flex: 1;
-    }
+@media (max-width: 480px){
+    .project-card{ max-width: 100%; }
+}
 </style>

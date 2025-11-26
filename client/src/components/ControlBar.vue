@@ -108,7 +108,7 @@ const isActive = (path: string) => {
     .nav-bar {
       display: flex;
       align-items: center;
-      gap: 32px;
+      gap: 6px;
       flex: 1;
       justify-content: center;
 
@@ -121,6 +121,8 @@ const isActive = (path: string) => {
         margin: 0 0.4%;
         border-bottom: 2px solid transparent;
         transition: all 0.3s ease;
+        width: 105px;
+        text-align: center;
 
         &:hover {
           color: #108EFE;
