@@ -151,7 +151,7 @@ class PrimitiveCompareNode(BaseNode):
     A node for primitive comparison.
     The input must be the type of int, float, str or bool.
     """
-    op: Literal["EQ", "NE", "GT", "LT", "GE", "LE"]
+    op: Literal["EQ", "NEQ", "GT", "LT", "GTE", "LTE"]
 
     @override
     def validate_parameters(self) -> None:
@@ -200,15 +200,15 @@ class PrimitiveCompareNode(BaseNode):
         res = None
         if self.op == "EQ":
             res = x == y
-        elif self.op == "NE":
+        elif self.op == "NEQ":
             res = x != y
         elif self.op == "GT":
             res = x > y  # type: ignore
         elif self.op == "LT":
             res = x < y  # type: ignore
-        elif self.op == "GE":
+        elif self.op == "GTE":
             res = x >= y  # type: ignore
-        elif self.op == "LE":
+        elif self.op == "LTE":
             res = x <= y  # type: ignore
         else:
             raise NodeExecutionError(
