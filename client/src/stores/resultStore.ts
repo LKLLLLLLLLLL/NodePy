@@ -2,10 +2,13 @@ import { defineStore } from "pinia"
 import {ref,computed} from 'vue'
 import { useModalStore } from "./modalStore"
 import AuthenticatedServiceFactory from "@/utils/AuthenticatedServiceFactory"
-import { DataView } from "@/utils/api"
+import { DataView, type TableView } from "@/utils/api"
+import type { File } from "@/utils/api"
 import Result from "@/components/Result/Result.vue"
 import { useVueFlow } from "@vue-flow/core"
 import { useGraphStore } from "./graphStore"
+
+export type ResultType = string | number | boolean | File | TableView | null
 
 export const useResultStore = defineStore('result',()=>{
 

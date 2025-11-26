@@ -1,9 +1,10 @@
 <script lang="ts" setup>
     import { computed, ref } from 'vue';
     import Loading from '@/components/Loading.vue'
+    import type { ResultType } from '@/stores/resultStore';
     
     const props = defineProps<{
-        value: any
+        value: ResultType
     }>()
 
     // 添加loading和error状态
@@ -17,7 +18,7 @@
         }
         
         if (typeof props.value === 'boolean') {
-            return props.value ? '是' : '否'
+            return props.value ? 'True' : 'False'
         }
         
         if (typeof props.value === 'number') {

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+    import type { ResultType } from '@/stores/resultStore';
     import TableView from './TableView.vue';
     import FileView from './FileView.vue';
     import ValueView from './ValueView.vue';
@@ -66,7 +67,7 @@
             Control
         </div>
         <div class = "result-container">
-            <div class="if-result" v-if="resultStore.currentResult!=resultStore.default_dataview">
+            <div class="if-result" v-if="resultStore.currentResult !== resultStore.default_dataview">
                 <TableView v-if="resultStore.currentResult.type === 'Table'"
                             :value="resultStore.currentResult.value"
                             class = "view-content chart-view">
@@ -76,9 +77,9 @@
                             class = "view-content file-view">
                 </FileView>
                 <ValueView v-else-if="resultStore.currentResult.type === 'int'
-                            ||resultStore.currentResult.type  === 'str'
-                            ||resultStore.currentResult.type  === 'bool'
-                            ||resultStore.currentResult.type  === 'float'"
+                            || resultStore.currentResult.type  === 'str'
+                            || resultStore.currentResult.type  === 'bool'
+                            || resultStore.currentResult.type  === 'float'"
                             :value="resultStore.currentResult.value"
                             class = "view-content value-view">
                 </ValueView>

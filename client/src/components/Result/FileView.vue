@@ -5,10 +5,11 @@
     import { type File, type TableView } from '@/utils/api'
     // 引入 vue-pdf-embed 组件
     import VuePdfEmbed from 'vue-pdf-embed'
+    import type { ResultType } from '@/stores/resultStore'
 
     // 修改 props 定义，允许 null
     const props = defineProps<{
-        value: (string | number | boolean | File | TableView | null)
+        value: ResultType
     }>()
 
     const fileStore = useFileStore()
@@ -20,15 +21,24 @@
     const currentPage = ref<number>(1)
     const pageCount = ref<number>(0)
 
-    // 判断是否是有效的文件对象
-    const isValidFile = computed(() => {
+    // 类型守卫：检查是否是 File 类型
+    const isFile = computed(() => {
         return (
             props.value !== null &&
             typeof props.value === 'object' &&
             'key' in props.value &&
             'filename' in props.value &&
-            (props.value as File).key && // key 不能为空
-            (props.value as File).key !== 'loading' // 排除 loading 占位符
+            'format' in props.value
+        )
+    })
+
+    // 判断是否是有效的文件对象
+    const isValidFile = computed(() => {
+        if (!isFile.value) return false
+        const file = props.value as File
+        return (
+            file.key && // key 不能为空
+            file.key !== 'loading' // 排除 loading 占位符
         )
     })
 

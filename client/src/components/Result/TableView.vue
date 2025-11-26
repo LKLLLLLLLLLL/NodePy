@@ -2,9 +2,10 @@
     import { computed, ref } from 'vue';
     import type { TableView } from '@/utils/api'
     import Loading from '@/components/Loading.vue'
+    import type { ResultType } from '@/stores/resultStore';
 
     const props = defineProps<{
-        value: any
+        value: ResultType
     }>()
 
     // 添加loading和error状态
