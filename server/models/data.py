@@ -125,8 +125,8 @@ class Data(BaseModel):
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, Data):
             raise NotImplementedError(f"Cannot compare Data with {type(value)}")
-        self_dict = self.to_dict()
-        other_dict = value.to_dict()
+        self_dict = self.to_view().to_dict()
+        other_dict = value.to_view().to_dict()
         return self_dict == other_dict
 
     @classmethod

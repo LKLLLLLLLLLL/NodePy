@@ -815,6 +815,21 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **hint：**
 - col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
 
+#### 8.2 DiffNode
+差分计算节点，计算输入表格中指定列的相邻行之间的差值。
+
+**参数：**
+- col: 要计算差分的表格列名，类型为str。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含新增的差分列。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
 ### 9. 控制节点(control)
 #### 9.1 CustomScriptNode
 用户自定义脚本节点，允许用户编写自定义的Python脚本来处理输入数据并生成输出数据。注意，为了安全起见，用户脚本将在受限的环境中执行，且只能使用预定义的安全库和函数。
