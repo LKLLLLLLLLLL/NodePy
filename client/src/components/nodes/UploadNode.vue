@@ -106,6 +106,10 @@
                     cursor: pointer;
                     .file-name {
                         @include tool-item-style;
+                        padding: 2px 5px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis; // display ellipsis(...) when overflow 
                         text-align: center;
                         width: 100%;
                     }
@@ -113,10 +117,10 @@
                         color: rgba(0,0,0,0.2);
                     }
                     .file-icon {
-                        position:absolute;
-                        right: 5px;
                         width:18px;
                         color: rgba(0,0,0,0.4);
+                        flex-shrink: 0;
+                        margin-right: 10px;
                     }
                 }
             }
