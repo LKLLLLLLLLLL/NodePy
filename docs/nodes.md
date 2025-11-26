@@ -325,6 +325,25 @@ table:
 - col1_choices: 列名列表，类型为List[str]，用于在UI中为col1参数提供可选值。
 - col2_choices: 列名列表，类型为List[str]，用于在UI中为col2参数提供可选值。
 
+#### 2.12 ColCompareNode
+表格列比较节点，支持对表格中的两个指定列进行`EQ`, `NEQ`, `LT`, `LTE`, `GT`, `GTE`六种比较运算，将结果存储在新的表格列中。
+
+**参数：**
+- op: 运算类型，类型为str，取值为"EQ", "NEQ", "LT", "LTE", "GT", "GTE"。
+- col1: 第一个要操作的表格列名，类型为str，该列必须为Prim类型(int, float, bool, datetime)。
+- col2: 第二个要操作的表格列名，类型为str，该列必须为Prim类型(int, float, bool, datetime)。
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含新增的结果列。
+
+**hint：**
+- col1_choices: 列名列表，类型为List[str]，用于在UI中为col1参数提供可选值。
+- col2_choices: 列名列表，类型为List[str]，用于在UI中为col2参数提供可选值。
+
 #### 2.12 ToStringNode
 节点将输入的任意类型转换为字符串类型。
 
@@ -372,6 +391,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **输出：**
 - output: 输出的布尔值，类型为bool。
+
 
 ### 3. 可视化节点(visualize)
 #### 3.1 PlotNode

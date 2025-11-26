@@ -839,7 +839,152 @@ class BoolColWithColBinOpNode(BaseNode):
         }
 
 @register_node()
-class ColCmpNode(BaseNode):
+class ColCompareNode(BaseNode):
     """
     A node to compare two columns in a table and output a boolean column.
     """
+
+    op: Literal["EQ", "NEQ", "GT", "LT", "GTE", "LTE"]
+    col1: str  # the first column to compare
+    col2: str  # the second column to compare
+    result_col: str | None = None  # if None, use default result col name
+
+    @override
+    def validate_parameters(self) -> None:
+        if not self.type == "ColCompareNode":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Node type must be 'ColCompareNode'."
+            )
+        if self.col1.strip() == "":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col1",
+                err_msg="First column name cannot be empty."
+            )
+        if self.col2.strip() == "":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col2",
+                err_msg="Second column name cannot be empty."
+            )
+        if self.col1 == self.col2:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col2",
+                err_msg="Second column name cannot be the same as first column name."
+            )
+        if self.result_col is None:
+            self.result_col = generate_default_col_name(self.id, "result")
+        if self.result_col.strip() == "":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="result_col",
+                err_msg="Result column name cannot be empty."
+            )
+        if self.result_col in {self.col1, self.col2}:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="result_col",
+                err_msg="Result column name cannot be the same as input column names."
+            )
+        if check_no_illegal_cols([self.result_col]) is False:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="result_col",
+                err_msg="Result column name cannot start with reserved prefix '_' or be whitespace only."
+            )
+        return
+
+    @override
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
+        return [
+            InPort(
+                name='table',
+                description='Input table',
+                accept=Pattern(
+                    types={Schema.Type.TABLE},
+                    table_columns={self.col1: {ColType.INT, ColType.FLOAT, ColType.BOOL, ColType.DATETIME},
+                                   self.col2: {ColType.INT, ColType.FLOAT, ColType.BOOL, ColType.DATETIME}}),
+                optional=False)
+        ], [
+            OutPort(name='table', description='Output table with comparison result column')
+        ]
+
+    @override
+    def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
+        assert input_schemas['table'].tab is not None
+        in_tab = input_schemas['table'].tab
+
+        # 1. check if new column name is exists
+        assert self.result_col is not None
+        if not in_tab.validate_new_col_name(self.result_col):
+            raise NodeValidationError(
+                node_id=self.id,
+                err_input='table',
+                err_msg=f"Result column name '{self.result_col}' already exists in input table."
+            )
+        # 2. check if the two columns are in same type
+        col1_type = in_tab.col_types.get(self.col1)
+        col2_type = in_tab.col_types.get(self.col2)
+        assert col1_type is not None
+        assert col2_type is not None
+        if col1_type != col2_type:
+            raise NodeValidationError(
+                node_id=self.id,
+                err_input='table',
+                err_msg=f"Table column '{self.col1}' type '{col1_type}' does not match column '{self.col2}' type '{col2_type}'."
+            )
+        # 3. build output schema
+        output_schema = input_schemas['table'].append_col(self.result_col, ColType.BOOL)
+
+        return {'table': output_schema}
+
+    @override
+    def process(self, input: dict[str, Data]) -> dict[str, Data]:
+        table = input['table'].payload
+        assert isinstance(table, Table)
+        assert self.result_col is not None
+
+        df = table.df.copy()
+        series1 = df[self.col1]
+        series2 = df[self.col2]
+
+        if self.op == "EQ":
+            df[self.result_col] = series1 == series2
+        elif self.op == "NEQ":
+            df[self.result_col] = series1 != series2
+        elif self.op == "GT":
+            df[self.result_col] = series1 > series2
+        elif self.op == "LT":
+            df[self.result_col] = series1 < series2
+        elif self.op == "GTE":
+            df[self.result_col] = series1 >= series2
+        elif self.op == "LTE":
+            df[self.result_col] = series1 <= series2
+        else:
+            raise NodeExecutionError(
+                node_id=self.id,
+                err_msg=f"Unsupported operation '{self.op}'."
+            )
+
+        # convert back to Table
+        out_table = Data.from_df(df)
+        return {'table': out_table}
+
+    @override
+    @classmethod
+    def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
+        col1_choices = []
+        col2_choices = []
+        if "table" in input_schemas:
+            assert input_schemas["table"].tab is not None
+            for col_name, col_type in input_schemas["table"].tab.col_types.items():
+                if col_type in {ColType.INT, ColType.FLOAT, ColType.BOOL}:
+                    col1_choices.append(col_name)
+                    col2_choices.append(col_name)
+        return {
+            "col1_choices": col1_choices,
+            "col2_choices": col2_choices
+        }
