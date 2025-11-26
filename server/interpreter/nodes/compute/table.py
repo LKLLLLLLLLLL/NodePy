@@ -167,15 +167,11 @@ class ColWithNumberBinOpNode(BaseNode):
     @override
     @classmethod
     def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
-        col_choices = []
+        hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
-            for col_name, col_type in input_schemas["table"].tab.col_types.items():
-                if col_type in {ColType.INT, ColType.FLOAT}:
-                    col_choices.append(col_name)
-        return {
-            "col_choices": col_choices
-        }
+            hint["col_choices"] = input_schemas['table'].tab.col_types.keys()
+        return hint
 
 @register_node()
 class ColWithBoolBinOpNode(BaseNode):
@@ -296,13 +292,11 @@ class ColWithBoolBinOpNode(BaseNode):
     def hint(
         cls, input_schemas: dict[str, Schema], current_params: dict
     ) -> dict[str, Any]:
-        col_choices = []
+        hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
-            for col_name, col_type in input_schemas["table"].tab.col_types.items():
-                if col_type in {ColType.BOOL}:
-                    col_choices.append(col_name)
-        return {"col_choices": col_choices}
+            hint['col_choices'] = input_schemas['table'].tab.col_types.keys()
+        return hint
 
 """
 Calculate in one column.
@@ -422,15 +416,11 @@ class NumberColUnaryOpNode(BaseNode):
     @override
     @classmethod
     def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
-        col_choices = []
+        hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
-            for col_name, col_type in input_schemas["table"].tab.col_types.items():
-                if col_type in {ColType.INT, ColType.FLOAT}:
-                    col_choices.append(col_name)
-        return {
-            "col_choices": col_choices
-        }
+            hint['col_choices'] = input_schemas['table'].tab.col_types.keys()
+        return hint
 
 @register_node()
 class BoolColUnaryOpNode(BaseNode):
@@ -527,15 +517,11 @@ class BoolColUnaryOpNode(BaseNode):
     @override
     @classmethod
     def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
-        col_choices = []
+        hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
-            for col_name, col_type in input_schemas["table"].tab.col_types.items():
-                if col_type in {ColType.BOOL}:
-                    col_choices.append(col_name)
-        return {
-            "col_choices": col_choices
-        }
+            hint['col_choices'] = input_schemas['table'].tab.col_types.keys()
+        return hint
 
 
 """
@@ -690,18 +676,16 @@ class NumberColWithColBinOpNode(BaseNode):
     @override
     @classmethod
     def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
-        col1_choices = []
-        col2_choices = []
+        hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
+            hint['col1_choices'] = []
+            hint['col2_choices'] = []
             for col_name, col_type in input_schemas["table"].tab.col_types.items():
                 if col_type in {ColType.INT, ColType.FLOAT}:
-                    col1_choices.append(col_name)
-                    col2_choices.append(col_name)
-        return {
-            "col1_choices": col1_choices,
-            "col2_choices": col2_choices
-        }
+                    hint['col1_choices'].append(col_name)
+                    hint['col2_choices'].append(col_name)
+        return hint
 
 @register_node()
 class BoolColWithColBinOpNode(BaseNode):
@@ -825,18 +809,16 @@ class BoolColWithColBinOpNode(BaseNode):
     @override
     @classmethod
     def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
-        col1_choices = []
-        col2_choices = []
+        hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
+            hint['col1_choices'] = []
+            hint['col2_choices'] = []
             for col_name, col_type in input_schemas["table"].tab.col_types.items():
                 if col_type in {ColType.BOOL}:
-                    col1_choices.append(col_name)
-                    col2_choices.append(col_name)
-        return {
-            "col1_choices": col1_choices,
-            "col2_choices": col2_choices
-        }
+                    hint['col1_choices'].append(col_name)
+                    hint['col2_choices'].append(col_name)
+        return hint
 
 @register_node()
 class ColCompareNode(BaseNode):
@@ -976,15 +958,13 @@ class ColCompareNode(BaseNode):
     @override
     @classmethod
     def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
-        col1_choices = []
-        col2_choices = []
+        hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
+            hint['col1_choices'] = []
+            hint['col2_choices'] = []
             for col_name, col_type in input_schemas["table"].tab.col_types.items():
                 if col_type in {ColType.INT, ColType.FLOAT, ColType.BOOL}:
-                    col1_choices.append(col_name)
-                    col2_choices.append(col_name)
-        return {
-            "col1_choices": col1_choices,
-            "col2_choices": col2_choices
-        }
+                    hint['col1_choices'].append(col_name)
+                    hint['col2_choices'].append(col_name)
+        return hint
