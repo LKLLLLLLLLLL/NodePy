@@ -19,6 +19,7 @@ from server.models.schema import (
     Schema,
     TableSchema,
     check_no_illegal_cols,
+    generate_default_col_name,
 )
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
@@ -175,7 +176,7 @@ class RandomNode(BaseNode):
     The row_count and min_value and max_value can be got from inputs.
     If col_type is "str" or "bool", min_value and max_value must be None
     """
-    col_name: str
+    col_name: str | None
     col_type: Literal["float", "int", "str", "bool"]
     
     @override
@@ -186,6 +187,8 @@ class RandomNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type must be 'RandomNode'."
             )
+        if self.col_name is None or self.col_name.strip() == "":
+            self.col_name = generate_default_col_name(self.id, self.col_type)
         if not check_no_illegal_cols([self.col_name]):
             raise NodeParameterError(
                 node_id=self.id,
@@ -271,6 +274,7 @@ class RandomNode(BaseNode):
                 err_input="row_count",
                 err_msg="row_count must be provided as input."
             )
+        assert self.col_name is not None
         return {
             "table": Schema(
                 type=Schema.Type.TABLE,
@@ -282,35 +286,42 @@ class RandomNode(BaseNode):
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
-        min_value = input["min_value"].payload
-        max_value = input["max_value"].payload
-        row_count = input["row_count"].payload
-        assert isinstance(row_count, int)
+        min_value_data = input.get("min_value")
+        max_value_data = input.get("max_value")
+        row_count_data = input.get("row_count")
+        assert row_count_data is not None
+        assert isinstance(row_count_data.payload, int)
+
+        if row_count_data.payload > 100000:
+            raise NodeExecutionError(
+                node_id=self.id,
+                err_msg="row_count too large, maximum allowed is 100000."
+            )
+        
+        if min_value_data is not None and max_value_data is not None:
+            if isinstance(min_value_data.payload, (int, float)) and isinstance(max_value_data.payload, (int, float)):
+                if min_value_data.payload >= max_value_data.payload:
+                    raise NodeExecutionError(
+                        node_id=self.id,
+                        err_msg="min_value must be less than max_value."
+                    )
 
         data_rows = []
-        for _ in range(row_count):
+        for _ in range(row_count_data.payload):
             if self.col_type == "float":
+                assert min_value_data is not None and max_value_data is not None
+                min_value = min_value_data.payload
+                max_value = max_value_data.payload
                 assert isinstance(min_value, float)
                 assert isinstance(max_value, float)
-                if min_value is not None and max_value is not None:
-                    val = random.uniform(min_value, max_value)
-                elif min_value is not None:
-                    val = random.uniform(min_value, min_value + 1000.0)
-                elif max_value is not None:
-                    val = random.uniform(max_value - 1000.0, max_value)
-                else:
-                    val = random.uniform(0.0, 1000.0)
+                val = random.uniform(min_value, max_value)
             elif self.col_type == "int":
+                assert min_value_data is not None and max_value_data is not None
+                min_value = min_value_data.payload
+                max_value = max_value_data.payload
                 assert isinstance(min_value, int)
                 assert isinstance(max_value, int)
-                if min_value is not None and max_value is not None:
-                    val = random.randint(int(min_value), int(max_value) - 1)
-                elif min_value is not None:
-                    val = random.randint(int(min_value), int(min_value) + 1000)
-                elif max_value is not None:
-                    val = random.randint(int(max_value) - 1000, int(max_value) - 1)
-                else:
-                    val = random.randint(0, 1000)
+                val = random.randint(int(min_value), int(max_value) - 1)
             elif self.col_type == "str":
                 val = ''.join(random.choices('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=8))
             elif self.col_type == "bool":
@@ -321,9 +332,18 @@ class RandomNode(BaseNode):
                     err_msg=f"Unsupported col_type: {self.col_type}."
                 )
             data_rows.append({self.col_name: val})
-        df = DataFrame(data_rows, columns=[self.col_name])
+        col_dtype_map = {
+            "float": "float64",
+            "int": "int64",
+            "str": "object",
+            "bool": "bool",
+        }
+        df = DataFrame(
+            data_rows, columns=[self.col_name], dtype=col_dtype_map[self.col_type]
+        )
         out_table = Data.from_df(df)
         return {"table": out_table}
+
 
 @register_node()
 class RangeNode(BaseNode):
@@ -331,7 +351,7 @@ class RangeNode(BaseNode):
     Node to generate a table, with a range column of specified type and range.
     Parameters start, end, step can be specified by parameters or inputs.
     """
-    col_name: str
+    col_name: str | None
     col_type: Literal["float", "int", "Datetime"]
     
     @override
@@ -342,6 +362,8 @@ class RangeNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type must be 'RangeNode'."
             )
+        if self.col_name is None or self.col_name.strip() == "":
+            self.col_name = generate_default_col_name(self.id, self.col_type)
         if not check_no_illegal_cols([self.col_name]):
             raise NodeParameterError(
                 node_id=self.id,
@@ -456,6 +478,7 @@ class RangeNode(BaseNode):
                         err_input="step",
                         err_msg=f"step input type {step_schema.type} incompatible with col_type {self.col_type}."
                 )
+        assert self.col_name is not None
         return {
             "table": Schema(
                 type=Schema.Type.TABLE,
@@ -475,6 +498,35 @@ class RangeNode(BaseNode):
             step = None
         assert start is not None
         assert end is not None
+        
+        # limit the number of rows to 100000
+        total_steps: int = 0
+        if step is None:
+            if self.col_type == "float" or self.col_type == "int":
+                step = 1 if self.col_type == "int" else 1.0
+            elif self.col_type == "Datetime":
+                step = timedelta(days=1)
+        if self.col_type == "float":
+            assert isinstance(start, float)
+            assert isinstance(end, float)
+            assert isinstance(step, float)
+            total_steps = int(abs((end - start) / step))
+        elif self.col_type == "int":
+            assert isinstance(start, int)
+            assert isinstance(end, int)
+            assert isinstance(step, int)
+            total_steps = int(abs((end - start) // step))
+        elif self.col_type == "Datetime":
+            assert isinstance(start, datetime)
+            assert isinstance(end, datetime)
+            assert isinstance(step, timedelta)
+            total_steps = int(abs((end - start).total_seconds() / step.total_seconds()))
+        if total_steps > 100000:
+            raise NodeExecutionError(
+                node_id=self.id,
+                err_msg="The generated range is too large, maximum allowed number of rows is 100000."
+            )
+        
         data_rows = []
         if self.col_type == "float":
             assert isinstance(start, float)
@@ -521,6 +573,13 @@ class RangeNode(BaseNode):
                 while current < end:
                     data_rows.append({self.col_name: current})
                     current += step
-        df = DataFrame(data_rows, columns=[self.col_name])
+        col_dtype_map = {
+            "float": "float64",
+            "int": "int64",
+            "Datetime": "datetime64[ns, UTC]",
+        }
+        df = DataFrame(
+            data_rows, columns=[self.col_name], dtype=col_dtype_map[self.col_type]
+        )
         out_table = Data.from_df(df)
         return {"table": out_table}

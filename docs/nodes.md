@@ -111,7 +111,7 @@ table:
 随机表格生成节点，可以生成一个包含一个由随机数构成的列的表格。
 
 **参数：**
-- col_name: 列名，类型为str。
+- col_name: 列名，类型为str或None，如果为None则生成默认列名。
 - col_type: 列的数据类型，类型为str，取值为"int"或"float"或"str"或"bool"。
 
 **输入：**
@@ -126,7 +126,7 @@ table:
 范围表格生成节点，可以生成一个包含一个由指定范围内数值构成的列的表格。
 
 **参数：**
-- col_name: 列名，类型为str。
+- col_name: 列名，类型为str或None，如果为None则生成默认列名。
 - col_type: 列的数据类型，类型为str，取值为"int"或"float"或"Datetime"。
 
 **输入：**

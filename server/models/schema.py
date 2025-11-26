@@ -144,9 +144,9 @@ def check_no_illegal_cols(col_names: list[str], allow_index: bool = False) -> bo
 
 
 def generate_default_col_name(id: str, annotation: str) -> str:
-    base_name = f"_{id}_{annotation}"
-    if not check_no_illegal_cols([base_name]):
-        base_name = base_name + "-"
+    base_name = f"{id}_{annotation}"
+    # if not check_no_illegal_cols([base_name]):
+    #     base_name = base_name + "_1"
     return base_name
 
 class FileSchema(BaseModel):

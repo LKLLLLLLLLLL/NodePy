@@ -42,6 +42,7 @@ class Table(BaseModel):
         # 2. check if index column exists, if not, add it
         if self.INDEX_COL not in self.df.columns:
             self.df[self.INDEX_COL] = range(len(self.df))
+            self.col_types[self.INDEX_COL] = ColType.INT
         # 3. check if the colnames is not illegal
         if check_no_illegal_cols(list(self.col_types.keys()), allow_index=True) is False:
             raise ValueError(f"Column names cannot start with reserved prefix '_' or be whitespace only: {list(self.col_types.keys())}")
@@ -135,13 +136,26 @@ class Data(BaseModel):
 
     def to_view(self) -> "DataView":
         if isinstance(self.payload, Table):
+            # Serialize Table payload
+            cols = {}
+            for col in self.payload.df.columns:
+                # Convert Timestamp objects to ISO format strings
+                if self.payload.col_types[col] == ColType.DATETIME:
+                    cols[col] = [v.isoformat() if isinstance(v, datetime) else v for v in self.payload.df[col].tolist()]
+                else:
+                    cols[col] = self.payload.df[col].tolist()
             table_view = DataView.TableView(
-                cols={k: self.payload.df[k].tolist() for k in self.payload.df.columns},
+                cols=cols,
                 col_types={k: v.value for k, v in self.payload.col_types.items()}
             )
             return DataView(
                 type="Table",
                 value=table_view
+            )
+        elif isinstance(self.payload, datetime):
+            return DataView(
+                type="Datetime",
+                value=self.payload.isoformat(),
             )
         else:
             # Map Python types to allowed Literal values
@@ -150,8 +164,7 @@ class Data(BaseModel):
                 int: "int",
                 float: "float",
                 bool: "bool",
-                File: "File",
-                datetime: "Datetime",
+                File: "File"
             }
             payload_type = type_map.get(type(self.payload))
             if payload_type is None:
@@ -162,7 +175,7 @@ class Data(BaseModel):
                 value = self.payload.isoformat()
             return DataView(
                 type=cast(
-                    Literal["bool", "int", "float", "str", "File", "Datetime"],
+                    Literal["bool", "int", "float", "str", "File"],
                     payload_type,
             ),
                 value=value,
@@ -213,7 +226,7 @@ class DataView(BaseModel):
     A dict-like view of data, for transmitting or json serialization.
     """
     class TableView(BaseModel):
-        cols: dict[str, list[str | bool | int | float | datetime]]
+        cols: dict[str, list[str | bool | int | float]] # the datetime columns are serialized as ISO format strings
         col_types: dict[str, str]  # col name -> col type
         
         def model_dump(self, **kwargs):
@@ -228,7 +241,7 @@ class DataView(BaseModel):
             return result
 
     type: Literal["int", "float", "str", "bool", "Table", "File", "Datetime"]
-    value: Union[TableView, str, int, bool, float, File, datetime]
+    value: Union[TableView, str, int, bool, float, File] # datetime is serialized as str
 
     model_config = {"arbitrary_types_allowed": True}
 
