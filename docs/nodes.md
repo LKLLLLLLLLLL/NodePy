@@ -232,6 +232,9 @@ table:
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的结果列。
 
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
 #### 2.7 ColWithBoolBinOpNode
 表格列与布尔二元运算节点，支持对表格中的指定列与一个布尔类型(bool)的输入进行`AND`, `OR`, `XOR`, `SUB`四种基本运算，将结果存储在新的表格列中。
 
@@ -247,6 +250,9 @@ table:
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的结果列。
 
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
 #### 2.8 NumberColUnaryOpNode
 表格列与数值一元运算节点，支持对表格中的指定列进行`ABS`, `NEG`, `EXP`, `LOG`, `SQRT`五种基本运算，将结果存储在新的表格列中。
 
@@ -261,6 +267,9 @@ table:
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的结果列。
 
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
 #### 2.9 BoolColUnaryOpNode
 表格列与布尔一元运算节点，支持对表格中的指定列进行`NOT`运算，将结果存储在新的表格列中。
 
@@ -274,6 +283,9 @@ table:
 
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的结果列。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
 
 #### 2.10 NumberColWithColBinOpNode
 表格列与表格列二元运算节点，支持对表格中的两个指定列进行`ADD`, `SUB`, `MUL`, `DIV`, `POW`五种基本运算，将结果存储在新的表格列中。
@@ -290,6 +302,10 @@ table:
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的结果列。
 
+**hint：**
+- col1_choices: 列名列表，类型为List[str]，用于在UI中为col1参数提供可选值。
+- col2_choices: 列名列表，类型为List[str]，用于在UI中为col2参数提供可选值。
+
 #### 2.11 BoolColWithColBinOpNode
 表格列与表格列二元布尔运算节点，支持对表格中的两个指定列进行`AND`, `OR`, `XOR`, `SUB`四种基本运算，将结果存储在新的表格列中。
 
@@ -304,6 +320,10 @@ table:
 
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的结果列。
+
+**hint：**
+- col1_choices: 列名列表，类型为List[str]，用于在UI中为col1参数提供可选值。
+- col2_choices: 列名列表，类型为List[str]，用于在UI中为col2参数提供可选值。
 
 #### 2.12 ToStringNode
 节点将输入的任意类型转换为字符串类型。
