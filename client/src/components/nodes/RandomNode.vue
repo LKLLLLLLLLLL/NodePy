@@ -58,7 +58,7 @@
     import NodeTitle from './tools/NodeTitle.vue'
     import type { Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
-    import { Handle, Position } from '@vue-flow/core'
+    import { Handle, Position, useVueFlow } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
     import ErrorMsg from './tools/ErrorMsg.vue'
@@ -69,6 +69,7 @@
     import type { RandomNodeData } from '@/types/nodeTypes'
 
 
+    const {removeEdges} = useVueFlow('main')
     const props = defineProps<NodeProps<RandomNodeData>>()
     const col_type = ['int', 'float', 'str', 'bool']
     const col_typeChinese = ['整数', '浮点数', '字符串', '布尔值']
@@ -104,7 +105,12 @@
 
 
     const onSelectChange = (e: any) => {
-        props.data.param.col_type = col_type[e] as 'int'|'float'|'str'|'bool'
+        const oldType = props.data.param.col_type
+        const newType = col_type[e]   
+        if((oldType === 'int' || oldType === 'float') && (newType === 'str' || newType === 'bool')) {
+            removeEdges(edges => edges.filter(e => e.target === props.id && (e.targetHandle === 'min_value' || e.targetHandle === 'max_value')))
+        }   //  if from 'int'|'float' to 'str'|'bool'，remove min_value and max_value connections(if exists)
+        props.data.param.col_type = newType as 'int'|'float'|'str'|'bool'
     }
 
     const onUpdateValue = (e: any) => {
