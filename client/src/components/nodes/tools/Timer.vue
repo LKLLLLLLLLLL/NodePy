@@ -100,8 +100,8 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
         white-space: nowrap;
         pointer-events: none;
         top: 0;
-        left: 7px;
-        transform: translate(0, -120%);
+        left: 0;
+        transform: translate(7px, -25px);
         color: rgba(0, 0, 0, 0.3);
         font-weight: bold;
         .running {
