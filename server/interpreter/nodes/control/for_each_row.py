@@ -60,7 +60,7 @@ class ForEachRowBeginNode(BaseNode):
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         # Processing is handled in the interpreter's loop control logic
-        return {}
+        raise NotImplementedError("Processing is handled in the interpreter's loop control logic.")
 
 
 @register_node(pair=True)

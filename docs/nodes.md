@@ -880,3 +880,30 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **输出：**
 - table: 输出的表格，类型为Table，包含所有处理后的行。
+
+#### 9.3 ForRollingWindowNode
+表格滚动窗口处理节点。该节点包含两个实际的节点：ForRollingWindowBeginNode, ForRollingWindowEndNode。前者标志滚动窗口循环体的开始，后者标志滚动窗口循环体的结束。用户可以在这两个节点之间插入任意数量的处理节点，这些节点将对输入表格的每一个滚动窗口依次进行处理。
+
+##### (1) ForRollingWindowBeginNode
+表格滚动窗口处理开始节点，标志滚动窗口循环体的开始。
+
+**参数：**
+- window_size: 窗口大小，类型为int，表示每个滚动窗口包含的行数。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- window: 当前处理的滚动窗口，类型为Table，包含window_size行。
+
+##### (2) ForRollingWindowEndNode
+表格滚动窗口处理结束节点，标志滚动窗口循环体的结束。
+
+**参数：**
+无
+
+**输入：**
+- window: 当前处理的滚动窗口，类型为Table，包含window_size行。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含所有处理后的滚动窗口行。

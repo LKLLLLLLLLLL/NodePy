@@ -7,7 +7,7 @@ from server.lib.CacheManager import CacheManager
 from server.lib.FileManager import FileManager
 from server.lib.utils import safe_hash
 from server.models.data import Data, Schema, Table
-from server.models.exception import NodeParameterError
+from server.models.exception import NodeExecutionError, NodeParameterError
 from server.models.project import TopoEdge, TopoNode, WorkflowTopology
 
 from .nodes.base_node import BaseNode
@@ -537,5 +537,95 @@ class ProjectInterpreter:
             return {
                 output_port_name: Data.from_df(combined_df)
             }
+        elif control_structure_begin_type == "ForRollingWindowBeginNode":
+            input_table_data = inputs.get("table")
+            assert input_table_data is not None
+            input_node = self._node_objects[begin_node_id]
+            window_size = getattr(input_node, "window_size", None)
+            assert isinstance(window_size, int)
+            
+            # if windows size is too small, raise error
+            assert isinstance(input_table_data.payload, Table)
+            assert input_table_data.payload.df is not None
+            if window_size > len(input_table_data.payload.df):
+                raise NodeExecutionError(
+                    node_id=begin_node_id,
+                    err_msg=f"Window size {window_size} is larger than the number of rows {len(input_table_data.payload.df)} in the input table.",
+                )
+
+            output_rows: list[Data] = []
+            for index in range(0, len(input_table_data.payload.df) - window_size + 1):
+                res_cache: dict[tuple[str, str], Data] = {} # local cache for exec result in this iteration: (node_id, port) -> Data
+
+                # set the current window data to the output port of the begin node
+                window_data = Data.from_df(input_table_data.payload.df.iloc[index: index + window_size])
+                res_cache[(begin_node_id, "window")] = window_data
+
+                # a sample interpreter to execute body nodes
+                for node_id in control_info["body_exec_queue"]:
+                    node = self._node_objects[node_id]
+                    in_edges = list(self._graph.in_edges(node_id, data=True)) # type: ignore
+
+                    # 1. get input data
+                    input_data : dict[str, Data] = {}
+                    for src_id, _, edge_data in in_edges:
+                        src_port = edge_data['src_port']
+                        tar_port = edge_data['tar_port']
+                        input_data[tar_port] = res_cache[(src_id, src_port)]
+
+                    # 2. search cache in cache manager
+                    cache_data = self.cache_manager.get(
+                        node.type, 
+                        self._node_map[node_id].params, 
+                        input_data
+                    )
+
+                    output_data: dict[str, Data]
+                    if cache_data is not None:
+                        output_data, execution_time = cache_data
+                    else:
+                        # 3. execute node if cache miss
+                        start_time = time.perf_counter()
+                        output_data = node.execute(input_data)
+                        end_time = time.perf_counter()
+                        execution_time = (end_time - start_time) * 1000  # in ms
+
+                    # 4. store output data to local cache
+                    for tar_port, data in output_data.items():
+                        res_cache[(node_id, tar_port)] = data
+                    
+                    # 5. store to CacheManager
+                    if output_data is not None:
+                        self.cache_manager.set(
+                            node_type=self._node_map[node_id].type,
+                            params=self._node_map[node_id].params,
+                            inputs=input_data,
+                            outputs=output_data,
+                            running_time=execution_time,
+                        )
+                    
+                # collect output from the input of the end node
+                end_node_id = control_info["end_node_id"]
+                end_in_edges = list(self._graph.in_edges(end_node_id, data=True)) # type: ignore
+                for src_id, _, edge_data in end_in_edges:
+                    src_port = edge_data['src_port']
+                    tar_port = edge_data['tar_port']
+                    output_rows.append(res_cache[(src_id, src_port)])
+            # combine all output rows into a single table
+            for row in output_rows:
+                assert isinstance(row.payload, Table)
+            combined_df = pd.concat([row.payload.df for row in output_rows], ignore_index=True) # type: ignore
+            
+            # find the output port name of the end node
+            end_node_id = control_info["end_node_id"]
+            end_node = self._node_objects[end_node_id]
+            _, out_ports = end_node.port_def()
+            if not out_ports:
+                return {} # End node has no output
+            output_port_name = out_ports[0].name
+            return {
+                output_port_name: Data.from_df(combined_df)
+            }
+            
         else:
             raise NotImplementedError(f"Control structure type '{control_structure_begin_type}' is not implemented yet.")
