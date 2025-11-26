@@ -146,9 +146,12 @@
             cursor: pointer;
             .item {
                 @include tool-item-style;
-                padding: 1px 0px;
+                padding: 1px 5px;
                 border-radius: 6px;
                 font-size: 13px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             .item:hover {
                 background: #ddd;

@@ -166,13 +166,19 @@
         }
         .value {
             @include tool-item-style;
-            width: 100%;
+            padding: 2px 5px;
+            flex-grow: 1;
+            flex-basis: 0%;
             text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             cursor: ew-resize;
         }
         .value-input {
             @include tool-item-style;
             width: 100%;
+            padding: 2px 5px;
             input {
                 width: 100%;
                 text-align: center;

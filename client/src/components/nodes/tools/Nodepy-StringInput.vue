@@ -76,6 +76,7 @@
         font-size: $node-description-fontsize;
         input {
             @include tool-item-style;
+            padding: 2px 5px;
             width: 100%;
             text-align: center;
             outline: none;
