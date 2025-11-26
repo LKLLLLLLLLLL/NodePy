@@ -6,6 +6,7 @@ import pandas
 from server.config import DEFAULT_TIMEZONE
 from server.models.data import Data, File, Table
 from server.models.exception import (
+    NodeExecutionError,
     NodeParameterError,
 )
 from server.models.schema import (
@@ -162,3 +163,92 @@ class TableToFileNode(BaseNode):
         )
         return {"file": Data(payload=file)}
 
+
+@register_node()
+class TextFromFileNode(BaseNode):
+    """
+    A node to extract text content from a file.
+    Currently supports extracting text from txt, pdf and word files.
+    """
+
+    @override
+    def validate_parameters(self) -> None:
+        if not self.type == "TextFromFileNode":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Node type must be 'TextFromFileNode'.",
+            )
+        return
+
+    @override
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
+        return [
+            InPort(
+                name="file",
+                description="The input file to extract text from.",
+                accept=Pattern(types={Schema.Type.FILE}, file_formats={"txt", "pdf", "word"}),
+            )
+        ], [OutPort(name="text", description="The extracted text content.")]
+
+    @override
+    def infer_output_schemas(
+        self, input_schemas: Dict[str, Schema]
+    ) -> Dict[str, Schema]:
+        return {"text": Schema(type=Schema.Type.STR)}
+
+    @override
+    def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
+        file_data = input["file"]
+        assert isinstance(file_data.payload, File)
+        file_manager = self.global_config.file_manager
+        user_id = self.global_config.user_id
+        file_content = file_manager.read_sync(file_data.payload, user_id=user_id)
+        file_format = file_data.payload.format
+
+        text: str = ""
+        try:
+            if file_format == "txt":
+                text = file_content.decode("utf-8", errors="replace")
+            elif file_format == "pdf":
+                from io import BytesIO
+
+                import PyPDF2
+
+                reader = PyPDF2.PdfReader(BytesIO(file_content))
+                for page in reader.pages:
+                    extracted = page.extract_text()
+                    if extracted:
+                        text += extracted + "\n"
+                text = text.strip()
+
+            elif file_format == "word":
+                from io import BytesIO
+
+                import docx
+
+                doc = docx.Document(BytesIO(file_content))
+                text_parts = []
+                
+                # extract paragraph texts
+                for para in doc.paragraphs:
+                    if para.text.strip():
+                        text_parts.append(para.text)
+                
+                # extract table texts
+                for table in doc.tables:
+                    for row in table.rows:
+                        for cell in row.cells:
+                            if cell.text.strip():
+                                text_parts.append(cell.text)
+                
+                text = "\n".join(text_parts)
+            else:
+                raise AssertionError(f"Unsupported file format: {file_format}")
+        except Exception as e:
+            raise NodeExecutionError(
+                node_id=self.id,
+                err_msg=f"Failed to extract text from file: {e}",
+            )
+
+        return {"text": Data(payload=text)}

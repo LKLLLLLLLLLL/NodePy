@@ -56,13 +56,11 @@ async def upload_file(
         "jpg": "jpg",
         # documents
         "pdf": "pdf",
-        "doc": "word",
         "docx": "word",
         "txt": "txt",
         # sheets
         "csv": "csv",
         "xlsx": "xlsx",
-        "xls": "xlsx",
         "json": "json",
     }
     format = exts_to_format.get(file.filename.split('.')[-1])

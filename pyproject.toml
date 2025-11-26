@@ -41,6 +41,8 @@ worker = [
     "matplotlib>=3.10.7",
     "restrictedpython>=8.1",
     "wordcloud>=1.9.4",
+    "pypdf2>=3.0.1",
+    "python-docx>=1.2.0",
 ]
 
 [tool.taskipy.tasks]

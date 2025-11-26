@@ -767,6 +767,18 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - file: 输出的文件对象，类型为File。
 
+#### 6.5 TextFromFileNode
+从文件加载文本节点，可以读取上传的文本文件并将其转换为字符串类型。支持TXT, WORD, PDF格式。
+
+**参数：**
+无
+
+**输入：**
+- file: 输入的文件对象，类型为File。
+
+**输出：**
+- text: 输出的文本内容，类型为str。
+
 ### 7. 日期时间处理节点(datetimeprocess)
 #### 7.1 DatetimeComputeNode
 日期与PRIM类型运算节点，支持对Datetime类型与int或float类型的输入进行`ADD`, `SUB`两种基本运算。
