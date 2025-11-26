@@ -13,7 +13,7 @@
         const dataOut = graphStore.currentNode?.data.data_out
         if (!dataOut) {
             console.log('Result: 当前节点没有 data_out')
-            return undefined
+            return null
         }
 
         if (dataOut.plot?.data_id) {
@@ -28,19 +28,21 @@
         else if (dataOut.table?.data_id) {
             return dataOut.table.data_id
         }
-        return undefined
+        return null  // 明确返回null而不是undefined
     })
 
     watch([() => graphStore.currentNode, resultId], async ([newNode, newResultId]) => {
         try {
             
-            if (!newResultId) {
-                console.log('Result: resultId 不存在，显示节点信息');
+            // 添加对newResultId的有效性检查
+            console.log("@@@@@@@newResultId",newResultId)
+            if (!newResultId || typeof newResultId !== 'number' || isNaN(newResultId)) {
+                console.log('Result: resultId 不存在或无效，显示节点信息');
                 resultStore.currentInfo = newNode?.data?.param || {};
                 resultStore.currentResult = resultStore.default_dataview;
                 return;
             }
-            
+
             resultStore.currentInfo = resultStore.default_info;
             
             // 先设置为默认值，避免显示旧数据

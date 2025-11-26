@@ -24,30 +24,44 @@
     // 获取表格数据
     const tableData = computed(() => {
         if (!isTableView.value) {
-            return { columns: [], rows: [] }
+            return { columns: [], rows: [], indexColumn: null }
         }
 
         const table = props.value as TableView
-        const columns = Object.keys(table.cols || {})
+        const allColumns = Object.keys(table.cols || {})
+        
+        // 分离 _index 列和其他列
+        const indexColumn = allColumns.find(col => col === '_index') || null
+        const columns = allColumns.filter(col => col !== '_index')
         
         // 将列数据转换为行数据
         const rows: Record<string, any>[] = []
-        if (columns.length > 0) {
-            const firstCol = columns[0]
-            const rowCount = (table.cols[firstCol as keyof typeof table.cols] as any[])?.length || 0
+        if (columns.length > 0 || indexColumn) {
+            // 确定行数（使用第一个有效列或 _index 列）
+            const rowCountCol = indexColumn || columns[0]
+            const rowCount = (table.cols[rowCountCol as keyof typeof table.cols] as any[])?.length || 0
+            
             for (let i = 0; i < rowCount; i++) {
                 const row: Record<string, any> = {}
+                
+                // 处理普通列
                 columns.forEach(col => {
                     row[col] = (table.cols[col as keyof typeof table.cols] as any[])?.[i] ?? null
                 })
+                
+                // 处理 _index 列
+                if (indexColumn) {
+                    row[indexColumn] = (table.cols[indexColumn as keyof typeof table.cols] as any[])?.[i] ?? null
+                }
+                
                 rows.push(row)
             }
         }
 
-        return { columns, rows }
+        return { columns, rows, indexColumn }
     })
 
-    // 获取列类型
+
     const columnTypes = computed(() => {
         if (!isTableView.value) return {}
         const table = props.value as TableView
@@ -87,14 +101,19 @@
         </div>
 
         <!-- 表格显示 -->
-        <div v-else-if="tableData.rows.length > 0" class='table-wrapper'>
+        <div v-else-if="tableData.rows.length > 0 || tableData.columns.length > 0" class='table-wrapper'>
             <table class='result-table'>
                 <thead>
                     <tr>
-                        <th class='index-column'>序号</th>
+                        <th class='index-column'>
+                            <div class='column-header'>
+                                <span class="column-name">序号</span>
+                                <span v-if="tableData.indexColumn" class='column-type'>{{ tableData.indexColumn }}</span>
+                            </div>
+                        </th>
                         <th v-for="col in tableData.columns" :key="col" class='data-column'>
                             <div class='column-header'>
-                                <span class='column-name'>{{ col }}</span>
+                                <span class="column-name">{{ col }}</span>
                                 <span v-if="columnTypes[col]" class='column-type'>{{ columnTypes[col] }}</span>
                             </div>
                         </th>
@@ -102,7 +121,11 @@
                 </thead>
                 <tbody>
                     <tr v-for="(row, rowIndex) in tableData.rows" :key="rowIndex" class='data-row'>
-                        <td class='index-column'>{{ rowIndex + 1 }}</td>
+                        <td class='index-column'>
+                            <div class="index-content">
+                                <span class="index-value">{{ tableData.indexColumn ? formatCellValue(row[tableData.indexColumn]) : rowIndex + 1 }}</span>
+                            </div>
+                        </td>
                         <td v-for="col in tableData.columns" :key="col" class='data-column'>
                             {{ formatCellValue(row[col]) }}
                         </td>
@@ -143,7 +166,6 @@
     .table-empty {
         flex: 1;
         display: flex;
-        align-items: center;
         justify-content: center;
         color: #909399;
         font-size: 14px;
@@ -182,7 +204,7 @@
 
     th {
         padding: 12px 8px;
-        text-align: left;
+        text-align: center; /* 修改为居中 */
         border-bottom: 2px solid #ebeef5;
         font-weight: 600;
         color: #303133;
@@ -190,13 +212,14 @@
 
     td {
         padding: 10px 8px;
+        text-align: center; /* 修改为居中 */
         border-bottom: 1px solid #ebeef5;
         color: #606266;
     }
 
     .index-column {
-        width: 50px;
-        min-width: 50px;
+        width: 80px;
+        min-width: 80px;
         text-align: center;
         background: #fafafa;
         font-weight: 500;
@@ -205,12 +228,14 @@
     .data-column {
         word-break: break-word;
         white-space: normal;
+        text-align: center; /* 添加居中对齐 */
     }
 
     .column-header {
         display: flex;
         flex-direction: column;
         gap: 4px;
+        align-items: center; /* 添加居中对齐 */
     }
 
     .column-name {
@@ -224,7 +249,13 @@
         font-weight: normal;
     }
 
-    tr:hover td:not(.index-column) {
-        background: #f0f9ff;
+    .index-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .index-value {
+        font-weight: 500;
     }
 </style>

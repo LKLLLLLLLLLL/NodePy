@@ -165,7 +165,7 @@ async function handleNodeDoubleClick(event) {
       value && typeof value === 'object' && 'data_id' in value
     );
     
-    if (dataIdEntry) {
+    if (dataIdEntry!==undefined) {
       const [key, value] = dataIdEntry;
       graphStore.url_id = value.data_id; // waiting multi-result nodes
       resultStore.currentResult = await resultStore.getResultCacheContent(graphStore.url_id);
