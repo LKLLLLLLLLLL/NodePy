@@ -194,6 +194,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedBoolUnaryOpNode)
         break
+      case 'ColWithNumberBinOpNode':
+        const addedColWithNumberBinOpNode: Nodetypes.ColWithNumberBinOpNode = {
+          id,
+          position,
+          type: 'ColWithNumberBinOpNode',
+          data: {
+            param: {
+              op: 'ADD',
+              col: ''
+            }
+          }
+        }
+        addNodes(addedColWithNumberBinOpNode)
+        break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
           id,
