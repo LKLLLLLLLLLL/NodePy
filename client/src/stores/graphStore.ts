@@ -88,30 +88,6 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedBoolNode)
         break
-      case 'NumberBinOpNode':
-        const addedNumBinComputeNode: Nodetypes.NumberBinOpNode = {
-          id,
-          position,
-          type: 'NumberBinOpNode',
-          data: {
-            param: {
-              op: 'ADD'
-            }
-          },
-        }
-        addNodes(addedNumBinComputeNode)
-        break
-      case 'TableFromCSVNode':
-        const addedTableFromCSVNode: Nodetypes.TableFromCSVNode = {
-          id,
-          position,
-          type: 'TableFromCSVNode',
-          data: {
-            param: {}
-          }
-        }
-        addNodes(addedTableFromCSVNode)
-        break
       case 'RandomNode':
         const addedRandomNode: Nodetypes.RandomNode = {
           id,
@@ -153,6 +129,32 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedDateTimeNode)
         break
+      case 'NumberBinOpNode':
+        const addedNumBinComputeNode: Nodetypes.NumberBinOpNode = {
+          id,
+          position,
+          type: 'NumberBinOpNode',
+          data: {
+            param: {
+              op: 'ADD'
+            }
+          },
+        }
+        addNodes(addedNumBinComputeNode)
+        break
+      case 'NumberUnaryOpNode':
+        const addedNumberUnaryOpNode: Nodetypes.NumberUnaryOpNode = {
+          id,
+          position,
+          type: 'NumberUnaryOpNode',
+          data: {
+            param: {
+              op: 'NEG'
+            }
+          }
+        }
+        addNodes(addedNumberUnaryOpNode)
+        break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
           id,
@@ -165,6 +167,17 @@ export const useGraphStore = defineStore('graph', () => {
           }
         }
         addNodes(addedUploadNode)
+        break
+      case 'TableFromCSVNode':
+        const addedTableFromCSVNode: Nodetypes.TableFromCSVNode = {
+          id,
+          position,
+          type: 'TableFromCSVNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedTableFromCSVNode)
         break
       case 'PlotNode':
         const addedPlotNode: Nodetypes.PlotNode = {

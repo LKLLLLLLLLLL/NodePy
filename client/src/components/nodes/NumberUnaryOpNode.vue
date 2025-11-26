@@ -1,6 +1,6 @@
 <template>
-    <div class="NumBinComputeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="compute">数字二元运算节点</NodeTitle>
+    <div class="NumberUnaryOpNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category="compute">数字一元运算节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-x port">
@@ -9,17 +9,11 @@
                 </div>
                 <Handle id="x" type="target" :position="Position.Left" :class="[`${x_type}-handle-color`, {'node-errhandle': xHasErr.value}]"/>
             </div>
-            <div class="input-y port">
-                <div class="input-port-description">
-                    y输入端口
-                </div>
-                <Handle id="y" type="target" :position="Position.Left" :class="[`${y_type}-handle-color`, {'node-errhandle': yHasErr.value}]"/>
-            </div>
             <div class="op">
                 <div class="param-description" :class="{'node-has-paramerr': opHasErr.value}">
                     运算类型
                 </div>
-                <NodepySelectMany
+                <NodepySelectFew
                     :options="opChinese"
                     :default-selected="defaultSelected"
                     @select-change="onSelectChange"
@@ -41,22 +35,21 @@
     import {ref, computed, watch} from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
-    import type {NumberBinOpNodeData} from '../../types/nodeTypes'
-    import NodepySelectMany from './tools/Nodepy-selectMany.vue'
     import { getInputType } from './getInputType'
     import type { Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
     import ErrorMsg from './tools/ErrorMsg.vue'
     import NodeTitle from './tools/NodeTitle.vue'
     import Timer from './tools/Timer.vue'
+    import NodepySelectFew from './tools/Nodepy-selectFew.vue'
+    import type { NumberUnaryOpNodeData } from '@/types/nodeTypes'
 
 
-    const props = defineProps<NodeProps<NumberBinOpNodeData>>()
-    const op = ['ADD', 'SUB', 'MUL', 'DIV', 'POW']
-    const opChinese = ['加法', '减法', '乘法', '除法', '乘方']
-    const defaultSelected = op.indexOf(props.data.param.op)
+    const props = defineProps<NodeProps<NumberUnaryOpNodeData>>()
+    const op = ['NEG', 'ABS', 'SQRT']
+    const opChinese = ['相反数', '绝对值', '开平方']
+    const defaultSelected = [op.indexOf(props.data.param.op)]
     const x_type = computed(() => getInputType(props.id, 'x'))
-    const y_type = computed(() => getInputType(props.id, 'y'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['result']?.type || 'default')
     const resultHasErr = computed(() => handleOutputError(props.id, 'result'))
     const errMsg = ref<string[]>([])
@@ -68,14 +61,10 @@
         handleId: 'x',
         value: false
     })
-    const yHasErr = ref({
-        handleId: 'y',
-        value: false
-    })
 
 
     const onSelectChange = (e: any) => {
-        const selected_op = op[e] as 'ADD' | 'SUB' | 'MUL' | 'DIV' | 'POW'
+        const selected_op = op[e[0]] as 'NEG' | 'ABS' | 'SQRT'
         props.data.param.op = selected_op
     }
 
@@ -84,7 +73,7 @@
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
         handleParamError(props.data.error, errMsg, opHasErr)
-        handleValidationError(props.id, props.data.error, errMsg, xHasErr, yHasErr)
+        handleValidationError(props.id, props.data.error, errMsg, xHasErr)
     }, {immediate: true})
 
 </script>
@@ -92,7 +81,7 @@
 <style lang="scss" scoped>
     @use '../../common/global.scss' as *;
     @use '../../common/node.scss' as *;
-    .NumBinComputeNodeLayout {
+    .NumberUnaryOpNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;
@@ -100,14 +89,9 @@
             .input-x {
                 margin-bottom: $node-margin;
             }
-            .input-y {
-                margin-bottom: $node-margin;
-            }
             .op {
                 padding: 0 $node-padding-hor;
-            }
-            .output-result {
-                margin-top: $node-margin;
+                margin-bottom: $node-margin;
             }
         }
     }

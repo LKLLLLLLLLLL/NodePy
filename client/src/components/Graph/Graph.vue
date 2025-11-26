@@ -22,6 +22,7 @@ import RandomNode from '../nodes/RandomNode.vue'
 import RangeNode from '../nodes/RangeNode.vue'
 import DateTimeNode from '../nodes/DateTimeNode.vue'
 import NumberBinOpNode from '../nodes/NumberBinOpNode.vue'
+import NumberUnaryOpNode from '../nodes/NumberUnaryOpNode.vue'
 import UploadNode from '../nodes/UploadNode.vue'
 import PlotNode from '../nodes/PlotNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -210,6 +211,8 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.input
     case 'NumberBinOpNode':
       return nodeCategoryColor.compute
+    case 'NumberUnaryOpNode':
+      return nodeCategoryColor.compute
     case 'PlotNode':
       return nodeCategoryColor.visualize
     case 'UploadNode':
@@ -300,6 +303,10 @@ const isValidConnection = (connection: any) => {
 
         <template #node-NumberBinOpNode="NumberBinOpNodeProps">
           <NumberBinOpNode v-bind="NumberBinOpNodeProps"/>
+        </template>
+
+        <template #node-NumberUnaryOpNode="NumberUnaryOpNodeProps">
+          <NumberUnaryOpNode v-bind="NumberUnaryOpNodeProps"/>
         </template>
 
         <template #node-PlotNode="PlotNodeProps">

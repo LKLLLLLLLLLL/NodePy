@@ -134,7 +134,7 @@
         height: 100%;
         .data {
             padding-top: $node-padding-top;
-            padding-bottom: 5px;
+            padding-bottom: $node-padding-bottom;
             .input-row_count, .input-min_value, .input-max_value {
                 margin-bottom: $node-margin;
             }

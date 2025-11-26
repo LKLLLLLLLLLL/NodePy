@@ -94,7 +94,7 @@
         height: 100%;
         .data {
             padding-top: $node-padding-top;
-            padding-bottom: 5px;
+            padding-bottom: $node-padding-bottom;
             .file {
                 padding: 0 $node-padding-hor;
                 .file-upload-component {

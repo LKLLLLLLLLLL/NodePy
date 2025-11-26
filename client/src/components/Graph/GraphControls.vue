@@ -248,6 +248,7 @@
             margin-left: 4px;
             font-size: 16px;
             color: rgba(0, 0, 0, 0.75);
+            user-select: none;
         }
     }
 

@@ -143,7 +143,7 @@
         height: 100%;
         .data {
             padding-top: $node-padding-top;
-            padding-bottom: 5px;
+            padding-bottom: $node-padding-bottom;
             .input-table {
                 margin-bottom: $node-margin;
             }

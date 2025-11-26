@@ -97,6 +97,7 @@ const isActive = (path: string) => {
       height: 90%;
       margin-left: 15px;
       position: absolute;
+      user-select: none;
 
       .logo {
         height: 100%;
