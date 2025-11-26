@@ -26,6 +26,7 @@ import NumberUnaryOpNode from '../nodes/NumberUnaryOpNode.vue'
 import PrimitiveCompareNode from '../nodes/PrimitiveCompareNode.vue'
 import BoolUnaryOpNode from '../nodes/BoolUnaryOpNode.vue'
 import ColWithNumberBinOpNode from '../nodes/ColWithNumberBinOpNode.vue'
+import ColWithBoolBinOpNode from '../nodes/ColWithBoolBinOpNode.vue'
 import UploadNode from '../nodes/UploadNode.vue'
 import TableFromFileNode from '../nodes/TableFromFileNode.vue'
 import PlotNode from '../nodes/PlotNode.vue'
@@ -226,6 +227,8 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.compute
     case 'ColWithNumberBinOpNode':
       return nodeCategoryColor.compute
+    case 'ColWithBoolBinOpNode':
+      return nodeCategoryColor.compute
     case 'PlotNode':
       return nodeCategoryColor.visualize
     case 'UploadNode':
@@ -336,6 +339,10 @@ const isValidConnection = (connection: any) => {
 
         <template #node-ColWithNumberBinOpNode="ColWithNumberBinOpNodeProps">
           <ColWithNumberBinOpNode v-bind="ColWithNumberBinOpNodeProps"/>
+        </template>
+
+        <template #node-ColWithBoolBinOpNode="ColWithBoolBinOpNodeProps">
+          <ColWithBoolBinOpNode v-bind="ColWithBoolBinOpNodeProps"/>
         </template>
 
         <template #node-PlotNode="PlotNodeProps">
