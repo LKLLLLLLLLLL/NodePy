@@ -5,8 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.models.database import ProjectRecord, get_async_session
-from server.models.explore_list import ExploreList
-from server.models.project_list import ProjectListItem
+from server.models.explore_list import ExploreList, ExploreListItem
 
 """
 API router for explore-related endpoints.
@@ -31,7 +30,7 @@ async def get_explore_projects(
     project_items = []
     for record in project_records:
         project_items.append(
-            ProjectListItem(
+            ExploreListItem(
                 project_id=record.id,  # type: ignore
                 project_name=record.name,  # type: ignore
                 owner=record.owner_id,  # type: ignore

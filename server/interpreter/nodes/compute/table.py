@@ -51,7 +51,7 @@ class ColWithNumberBinOpNode(BaseNode):
                 err_param_key="col",
                 err_msg="Column name cannot be empty."
             )
-        if self.result_col is None:
+        if not self.result_col:
             self.result_col = generate_default_col_name(self.id, "result")
         if self.result_col.strip() == "":
             raise NodeParameterError(
@@ -108,7 +108,7 @@ class ColWithNumberBinOpNode(BaseNode):
             )
         # 3. build output schema
         res_col_type = None
-        if self.op in {"ADD", "SUB", "MUL"}:
+        if self.op in {"ADD", "COL_SUB_NUM", "NUM_SUB_COL", "MUL"}:
             res_col_type = col_type
         else:
             res_col_type = ColType.FLOAT
@@ -151,9 +151,9 @@ class ColWithNumberBinOpNode(BaseNode):
                 )
             df[self.result_col] = num / series
         elif self.op == "COL_POW_NUM":
-            df[self.result_col] = series ** num
+            df[self.result_col] = series.astype("Float64") ** num
         elif self.op == "NUM_POW_COL":
-            df[self.result_col] = num ** series
+            df[self.result_col] = num ** series.astype("Float64")
         else:
             raise NodeExecutionError(
                 node_id=self.id,
@@ -197,7 +197,7 @@ class ColWithBoolBinOpNode(BaseNode):
                 err_param_key="col",
                 err_msg="Column name cannot be empty."
             )
-        if self.result_col is None:
+        if not self.result_col:
             self.result_col = generate_default_col_name(self.id, "result")
         if self.result_col.strip() == "":
             raise NodeParameterError(
@@ -326,7 +326,7 @@ class NumberColUnaryOpNode(BaseNode):
                 err_param_key="col",
                 err_msg="Column name cannot be empty."
             )
-        if self.result_col is None:
+        if not self.result_col:
             self.result_col = generate_default_col_name(self.id, "result")
         if self.result_col.strip() == "":
             raise NodeParameterError(
@@ -446,7 +446,7 @@ class BoolColUnaryOpNode(BaseNode):
                 err_param_key="col",
                 err_msg="Column name cannot be empty."
             )
-        if self.result_col is None:
+        if not self.result_col:
             self.result_col = generate_default_col_name(self.id, "result")
         if self.result_col.strip() == "":
             raise NodeParameterError(
@@ -565,7 +565,7 @@ class NumberColWithColBinOpNode(BaseNode):
                 err_param_key="col2",
                 err_msg="Second column name cannot be the same as first column name."
             )
-        if self.result_col is None:
+        if not self.result_col:
             self.result_col = generate_default_col_name(self.id, "result")
         if self.result_col.strip() == "":
             raise NodeParameterError(
@@ -724,7 +724,7 @@ class BoolColWithColBinOpNode(BaseNode):
                 err_param_key="col2",
                 err_msg="Second column name cannot be the same as first column name."
             )
-        if self.result_col is None:
+        if not self.result_col:
             self.result_col = generate_default_col_name(self.id, "result")
         if self.result_col.strip() == "":
             raise NodeParameterError(
@@ -857,7 +857,7 @@ class ColCompareNode(BaseNode):
                 err_param_key="col2",
                 err_msg="Second column name cannot be the same as first column name."
             )
-        if self.result_col is None:
+        if not self.result_col:
             self.result_col = generate_default_col_name(self.id, "result")
         if self.result_col.strip() == "":
             raise NodeParameterError(
