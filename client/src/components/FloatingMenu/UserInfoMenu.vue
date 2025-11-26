@@ -11,17 +11,22 @@
         <img
           v-else
           :src="avatarUrl"
-          :alt="userInfo.username"
           class="avatar-img"
-          :title="`${userInfo.username}`"
         />
       </div>
     </template>
 
     <!-- 菜单内容：用户信息 -->
     <div class="user-info-menu">
+      <!-- 未登录提示 -->
+      <div v-if="!loginStore.isAuthenticated" class="not-logged-in">
+        <div class="not-logged-in-icon"><el-avatar :icon="Avatar" size="default" /></div>
+        <div class="not-logged-in-text">请先登录</div>
+        <el-button @click="handleLogin">立即登录</el-button>
+      </div>
+      
       <!-- 用户头部 -->
-      <div class="user-header">
+      <div v-else class="user-header">
         <el-avatar
           v-if="!avatarUrl"
           :icon="Avatar"
@@ -30,55 +35,43 @@
         <img
           v-else
           :src="avatarUrl"
-          :alt="userInfo.username"
           class="user-avatar"
         />
         <div class="user-details">
-          <div class="username">{{ userInfo.username }}</div>
-          <div class="email">{{ userInfo.email }}</div>
+          <div class="username">{{ userStore.currentUserInfo?.username || '未知用户' }}</div>
+          <div class="email">{{ userStore.currentUserInfo?.email || '暂无邮箱' }}</div>
         </div>
       </div>
 
       <!-- 用户统计 -->
-      <div class="user-stats">
-        <div class="stat-item">
-          <span class="stat-label">项目:</span>
-          <span class="stat-value">{{ userInfo.projectCount }}</span>
+      <div v-if="loginStore.isAuthenticated" class="user-stats">
+        <!-- 动态显示所有用户信息字段 -->
+        <div 
+          v-for="(value, key) in filteredUserInfo" 
+          :key="key" 
+          class="stat-item"
+        >
+          <span class="stat-label">{{ formatKey(key) }}:</span>
+          <span class="stat-value">{{ formatValue(key, value) }}</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">节点:</span>
-          <span class="stat-value">{{ userInfo.nodeCount }}</span>
+        
+        <!-- 合并显示存储空间信息 -->
+        <div v-if="userStore.currentUserInfo?.file_space_used !== undefined && userStore.currentUserInfo?.file_space_total !== undefined" class="stat-item">
+          <span class="stat-label">存储空间:</span>
+          <span class="stat-value">{{ formatStorageSpace() }}</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">存储:</span>
-          <span class="stat-value">{{ userInfo.storageUsed }}</span>
-        </div>
-      </div>
-
-      <!-- 用户等级 -->
-      <div class="user-tier">
-        <span class="tier-label">等级:</span>
-        <span class="tier-value" :class="`tier-${userInfo.tier}`">{{
-          userInfo.tier
-        }}</span>
       </div>
 
       <!-- 分割线 -->
-      <div class="divider"></div>
+      <div v-if="loginStore.isAuthenticated" class="divider"></div>
 
       <!-- 菜单选项 -->
-      <div class="menu-actions">
-        <button class="action-btn" @click="handleProfile">
-          <span class="icon">👤</span> 个人资料
-        </button>
-        <button class="action-btn" @click="handleSettings">
+      <div v-if="loginStore.isAuthenticated" class="menu-actions">
+        <button class="action-btn">
           <span class="icon">⚙️</span> 设置
         </button>
-        <button class="action-btn" @click="handleHelp">
-          <span class="icon">❓</span> 帮助
-        </button>
         <button class="action-btn logout" @click="handleLogout">
-          <span class="icon" @click="">🚪</span> 登出
+          <span class="icon">🚪</span> 登出
         </button>
         <button @click="handleEdit">点我测试编辑器弹窗</button>
       </div>
@@ -87,95 +80,160 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import FloatingMenu from './FloatingMenu.vue'
-import { useLoginStore } from '@/stores/loginStore'
-import notify from '@/components/Notification/notify'
+import { computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { Avatar } from '@element-plus/icons-vue'
+import { useLoginStore } from '@/stores/loginStore'
 import { useModalStore } from '@/stores/modalStore'
+import { useUserStore } from '@/stores/userStore'
+import notify from '@/components/Notification/notify'
+import FloatingMenu from './FloatingMenu.vue'
+import PyEditor from '../PyEditor.vue'
+import Logout from '../Logout.vue'
 
-
-// 类型定义
-interface UserInfo {
-  username: string
-  email: string
-  projectCount: number
-  nodeCount: number
-  storageUsed: string
-  tier: 'free' | 'pro' | 'enterprise'
-}
-
-// 状态
 const loginStore = useLoginStore()
+const modalStore = useModalStore()
+const userStore = useUserStore()
 
-// 示例用户信息（后续可通过 API 获取）
-const userInfo = ref<UserInfo>({
-  username: '张三',
-  email: 'zhangsan@example.com',
-  projectCount: 5,
-  nodeCount: 48,
-  storageUsed: '2.4 GB / 10 GB',
-  tier: 'pro',
+const router = useRouter()
+
+onMounted(async () => {
+  if (!loginStore.isAuthenticated) return
+  await userStore.refreshUserInfo()
+  await userStore.getUserInfo()
 })
 
-import PyEditor from '../PyEditor.vue'
-const modalStore = useModalStore()
-function handleEdit(){
+function handleLogin() {
+  router.replace({
+    name: 'login' 
+  })
+}
+
+function handleEdit() {
   modalStore.createModal({
     component: PyEditor,
     title: '编辑代码',
     isActive: true,
     isResizable: false,
     isDraggable: true,
-    position:{
-        x: 400,
-        y: 400
+    position: {
+      x: 400,
+      y: 400
     },
-    size:{
-        width: 400,
-        height: 600
+    size: {
+      width: 400,
+      height: 600
     },
     id: 'edit-modal',
   })
 }
 
+function handleLogout() {
+  modalStore.createModal({
+    component: Logout,
+    title: 'Logout',
+    isActive: true,
+    isResizable: false,
+    isDraggable: true,
+    position: {
+      x: 400,
+      y: 400
+    },
+    size: {
+      width: 400,
+      height: 600
+    },
+    id: 'logout',
+  })
+}
+
 // 头像 URL（当没有用户头像时为空）
 const avatarUrl = computed(() => {
-  // 返回空字符串表示使用 el-avatar 的默认显示
   return ''
 })
 
-// 方法
-const handleProfile = () => {
-  notify({
-    message: '跳转到个人资料页面',
-    type: 'info',
+// 过滤掉不需要显示的字段（包括存储空间字段，因为我们要合并显示它们）
+const filteredUserInfo = computed(() => {
+  const userInfo = userStore.currentUserInfo
+  if (!userInfo) return {}
+  
+  // 过滤掉已经在其他地方显示的字段和一些不需要显示的字段
+  const excludeKeys = ['username', 'email', 'id', 'file_space_used', 'file_space_total']
+  const filtered: Record<string, any> = {}
+  
+  Object.keys(userInfo).forEach(key => {
+    if (!excludeKeys.includes(key)) {
+      filtered[key] = userInfo[key]
+    }
   })
-  // router.push('/profile')
+  
+  return filtered
+})
+
+// 格式化键名显示
+const formatKey = (key: string) => {
+  const keyMap: Record<string, string> = {
+    'projects_count': '项目数量',
+    'file_space_used': '已使用存储',
+    'file_space_total': '总存储空间',
+    'created_at': '注册时间'
+  }
+  return keyMap[key] || key
 }
 
-const handleSettings = () => {
-  notify({
-    message: '跳转到设置页面',
-    type: 'info',
-  })
-  // router.push('/settings')
+// 格式化值显示
+const formatValue = (key: string, value: any) => {
+  // 格式化存储空间显示
+  if (key.includes('space')) {
+    return formatStorage(value)
+  }
+  
+  // 格式化时间显示
+  if (key === 'created_at' && typeof value === 'string') {
+    return new Date(value).toLocaleDateString()
+  }
+  
+  // 默认显示
+  return value ?? 'N/A'
 }
 
-const handleHelp = () => {
-  notify({
-    message: '打开帮助文档',
-    type: 'info',
-  })
-  // window.open('/help')
+// 格式化存储空间显示
+const formatStorage = (bytes: number | undefined) => {
+  if (bytes === undefined || bytes === null) return '0 B'
+  
+  const units = ['B', 'KB', 'MB', 'GB', 'TB']
+  let size = bytes
+  let unitIndex = 0
+  
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024
+    unitIndex++
+  }
+  
+  // 如果是整数，不显示小数点
+  if (size % 1 === 0) {
+    return `${size} ${units[unitIndex]}`
+  } else {
+    // 保留两位小数
+    return `${size.toFixed(2)} ${units[unitIndex]}`
+  }
 }
 
-const handleLogout = async () => {
-  notify({
-    message: '正在登出...',
-    type: 'info',
-  })
-  await loginStore.logout()
+// 格式化存储空间显示（合并显示已用空间/总空间和百分比）
+const formatStorageSpace = () => {
+  const userInfo = userStore.currentUserInfo
+  if (!userInfo) return 'N/A'
+  
+  const used = userInfo.file_space_used
+  const total = userInfo.file_space_total
+  
+  if (used === undefined || total === undefined) return 'N/A'
+  
+  // 计算百分比
+  const percentage = total > 0 ? Math.round((used / total) * 100) : 0
+  
+  // 格式化存储空间显示
+  return `${formatStorage(used)} / ${formatStorage(total)}`
 }
 </script>
 
@@ -207,6 +265,36 @@ const handleLogout = async () => {
 .user-info-menu {
   width: 280px;
   padding: 16px;
+
+  .not-logged-in {
+    text-align: center;
+    padding: 20px 0;
+
+    .not-logged-in-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .not-logged-in-text {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    .login-btn {
+      background-color: #409eff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+
+      &:hover {
+        background-color: #66b1ff;
+      }
+    }
+  }
 
   .user-header {
     display: flex;
@@ -242,7 +330,7 @@ const handleLogout = async () => {
 
   .user-stats {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
     margin-bottom: 16px;
     padding: 12px;
@@ -264,44 +352,7 @@ const handleLogout = async () => {
         font-size: 16px;
         font-weight: 600;
         color: #333;
-      }
-    }
-  }
-
-  .user-tier {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 16px;
-    padding: 8px 12px;
-    background-color: #f0f4ff;
-    border-radius: 6px;
-
-    .tier-label {
-      font-size: 12px;
-      color: #666;
-    }
-
-    .tier-value {
-      font-size: 14px;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 4px;
-
-      &.tier-free {
-        background-color: #e0e0e0;
-        color: #333;
-      }
-
-      &.tier-pro {
-        background-color: #4a90e2;
-        color: white;
-      }
-
-      &.tier-enterprise {
-        background-color: #f5a623;
-        color: white;
+        text-align: center;
       }
     }
   }

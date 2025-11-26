@@ -1,9 +1,11 @@
 <script lang="ts" setup>
     import { useProjectStore } from '@/stores/projectStore';
     import { useModalStore } from '@/stores/modalStore';
+    import { useUserStore } from '@/stores/userStore';
     import { onUnmounted } from 'vue';
     const projectStore = useProjectStore();
     const modalStore = useModalStore();
+    const userStore = useUserStore()
 
     async function onEnsureDelete(){
         await projectStore.deleteProject(projectStore.toBeDeleted.id);
@@ -18,6 +20,7 @@
 
     onUnmounted(()=>{
         projectStore.initializeProjects();
+        userStore.initializeUserInfo();
     })
 
 </script>

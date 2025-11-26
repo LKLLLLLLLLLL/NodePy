@@ -2,10 +2,12 @@
     import {ref} from 'vue';
     import { useProjectStore } from '@/stores/projectStore';
     import { useModalStore } from '@/stores/modalStore';
+    import { useUserStore } from '@/stores/userStore';
     import { onUnmounted } from 'vue';
 
     const projectStore = useProjectStore();
     const modalStore = useModalStore();
+    const userStore = useUserStore()
     const labelPosition = ref<string>('top')
 
     async function onConfirmUpdateProject(){
@@ -21,6 +23,7 @@
 
     onUnmounted(()=>{
         projectStore.initializeProjects();
+        userStore.initializeUserInfo();
     })
 
 </script>

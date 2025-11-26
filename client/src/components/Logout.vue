@@ -12,8 +12,8 @@
         router.push({
             name: 'home'
         })
-        modalStore.deactivateModal('log-out')
-        modalStore.destroyModal('log-out')
+        modalStore.deactivateModal('logout')
+        modalStore.destroyModal('logout')
         notify({
             message: '退出登录成功',
             type: 'success'

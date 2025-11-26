@@ -2,16 +2,19 @@
     import {ref} from 'vue';
     import { useProjectStore } from '@/stores/projectStore';
     import { useModalStore } from '@/stores/modalStore';
+    import { useUserStore } from '@/stores/userStore';
     import { onUnmounted } from 'vue';
 
     const projectStore = useProjectStore();
     const modalStore = useModalStore();
+    const userStore = useUserStore()
 
     async function onCreateProject(){
         const success = await projectStore.createProject();
         if (success) {
             // 创建成功后立即刷新项目列表
             await projectStore.initializeProjects();
+            await userStore.initializeUserInfo();
         }
         modalStore.deactivateModal('create-project');
         modalStore.destroyModal('create-project');
