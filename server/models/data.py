@@ -194,6 +194,10 @@ class Data(BaseModel):
             assert isinstance(payload_value, DataView.TableView)
             df = DataFrame.from_dict(payload_value.cols)
             col_types = {k: ColType(v) for k, v in payload_value.col_types.items()}
+            # Convert datetime columns back to datetime objects
+            for col, col_type in col_types.items():
+                if col_type == ColType.DATETIME:
+                    df[col] = df[col].apply(lambda x: datetime.fromisoformat(x) if isinstance(x, str) else x)
             payload = Table(df=df, col_types=col_types)
         elif payload_type == "File":
             assert isinstance(payload_value, File)
@@ -211,11 +215,8 @@ class Data(BaseModel):
             assert isinstance(payload_value, bool)
             payload = payload_value
         elif payload_type == "Datetime":
-            if isinstance(payload_value, str):
-                payload = datetime.fromisoformat(payload_value)
-            else:
-                assert isinstance(payload_value, datetime)
-                payload = payload_value
+            assert isinstance(payload_value, str)
+            payload = datetime.fromisoformat(payload_value)
         else:
             raise TypeError(f"Unsupported payload type for deserialization: {payload_type}")
         
