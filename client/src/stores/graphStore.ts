@@ -155,6 +155,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedNumberUnaryOpNode)
         break
+      case 'PrimitiveCompareNode':
+        const addedPrimitiveCompareNode: Nodetypes.PrimitiveCompareNode = {
+          id,
+          position,
+          type: 'PrimitiveCompareNode',
+          data: {
+            param: {
+              op: 'EQ'
+            }
+          }
+        }
+        addNodes(addedPrimitiveCompareNode)
+        break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
           id,

@@ -150,7 +150,7 @@ export interface NumberUnaryOpNode extends BaseNode<NumberUnaryOpNodeData>{
 }
 
 
-export const CmpOpList = ['LT', 'LE', 'EQ', 'NE', 'GE', 'GT'] as const
+export const CmpOpList = ['LT', 'LTE', 'EQ', 'NEQ', 'GTE', 'GT'] as const
 export interface PrimitiveCompareNodeParam {
     op : typeof CmpOpList[number]
 }
