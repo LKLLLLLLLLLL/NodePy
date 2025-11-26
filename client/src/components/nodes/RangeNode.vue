@@ -67,6 +67,7 @@
     import NodepyStringInput from './tools/Nodepy-StringInput.vue'
     import NodepySelectFew from './tools/Nodepy-selectFew.vue'
     import type { RangeNodeData } from '@/types/nodeTypes'
+    import { dataTypeColor } from '@/types/nodeTypes'
 
 
     const props = defineProps<NodeProps<RangeNodeData>>()
@@ -100,6 +101,18 @@
         value: false
     })
     const errMsg = ref<string[]>([])
+    const min_max_all_handle_color = computed(() => {
+        switch(props.data.param.col_type) {
+            case 'int':
+                return dataTypeColor.int
+            case 'float':
+                return dataTypeColor.float
+            case 'Datetime':
+                return dataTypeColor.Datetime
+            default:
+                return `conic-gradient(${dataTypeColor.int} 0 120deg, ${dataTypeColor.float} 0 240deg, ${dataTypeColor.Datetime} 0 360deg)`
+        }
+    })
 
 
     const onSelectChange = (e: any) => {
@@ -138,10 +151,6 @@
         }
     }
     .all-handle-color {
-        background: conic-gradient(
-            $int-color 0 120deg,
-            $float-color 0 240deg,
-            $datetime-color 0 360deg
-        );
+        background: v-bind(min_max_all_handle_color);
     }
 </style>

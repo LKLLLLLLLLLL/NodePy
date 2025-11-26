@@ -9,13 +9,13 @@
                 </div>
                 <Handle id="row_count" type="target" :position="Position.Left" :class="[`${row_count_type}-handle-color`, {'node-errhandle': row_countHasErr.value}]"/>
             </div>
-            <div class="input-min_value port" v-if="selected_col_type !== 'str' && selected_col_type !== 'bool'">
+            <div class="input-min_value port" v-if="data.param.col_type !== 'str' && data.param.col_type !== 'bool'">
                 <div class="input-port-description">
                     最小值
                 </div>
                 <Handle id="min_value" type="target" :position="Position.Left" :class="[`${min_value_type}-handle-color`, {'node-errhandle': min_valueHasErr.value}]"/>
             </div>
-            <div class="input-max_value port" v-if="selected_col_type !== 'str' && selected_col_type !== 'bool'">
+            <div class="input-max_value port" v-if="data.param.col_type !== 'str' && data.param.col_type !== 'bool'">
                 <div class="input-port-description">
                     最大值
                 </div>
@@ -67,6 +67,7 @@
     import NodepySelectMany from './tools/Nodepy-selectMany.vue'
     import { getInputType } from './getInputType'
     import type { RandomNodeData } from '@/types/nodeTypes'
+    import { dataTypeColor } from '@/types/nodeTypes'
 
 
     const {removeEdges} = useVueFlow('main')
@@ -74,7 +75,6 @@
     const col_type = ['int', 'float', 'str', 'bool']
     const col_typeChinese = ['整数', '浮点数', '字符串', '布尔值']
     const defaultSelected = col_type.indexOf(props.data.param.col_type)
-    const selected_col_type = computed(() => props.data.param.col_type)
     const col_name = ref(props.data.param.col_name)
     const row_count_type = computed(() => getInputType(props.id, 'row_count'))
     const min_value_type = computed(() => getInputType(props.id, 'min_value'))
@@ -102,6 +102,16 @@
         value: false
     })
     const errMsg = ref<string[]>([])
+    const min_max_all_handle_color = computed(() => {
+        switch(props.data.param.col_type) {
+            case 'int':
+                return dataTypeColor.int
+            case 'float':
+                return dataTypeColor.float
+            default:
+                return `linear-gradient(to bottom, ${dataTypeColor.int} 0 50%, ${dataTypeColor.float} 50% 100%)`
+        }
+    })
 
 
     const onSelectChange = (e: any) => {
@@ -147,10 +157,7 @@
     .all-handle-color[data-handleid="row_count"] {
         background: $int-color;
     }
-    .all-handle-color[data-handleid="min_value"] {
-        background: linear-gradient(to bottom, $int-color 0 50%, $float-color 50% 100%);
-    }
-    .all-handle-color[data-handleid="max_value"] {
-        background: linear-gradient(to bottom, $int-color 0 50%, $float-color 50% 100%);
+    .all-handle-color[data-handleid="min_value"], .all-handle-color[data-handleid="max_value"] {
+        background: v-bind(min_max_all_handle_color);
     }
 </style>
