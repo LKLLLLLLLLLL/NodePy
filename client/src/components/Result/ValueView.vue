@@ -49,6 +49,11 @@
         }
         return typeof props.value
     })
+    
+    // 检查是否为布尔值
+    const isBoolean = computed(() => {
+        return typeof props.value === 'boolean';
+    });
 </script>
 <template>
     <div class='value-view-container'>
@@ -68,7 +73,7 @@
             <div class='value-header'>
                 <span class='value-type'>{{ valueType }}</span>
             </div>
-            <div class='value-content'>
+            <div class='value-content' :class="{ 'boolean-true': isBoolean && value === true, 'boolean-false': isBoolean && value === false }">
                 {{ displayValue }}
             </div>
         </div>
@@ -136,5 +141,15 @@
         word-break: break-all;
         text-align: center;
         line-height: 1.6;
+    }
+    
+    .boolean-true {
+        color: #67c23a; // 绿色表示 True
+        font-weight: bold;
+    }
+    
+    .boolean-false {
+        color: #f56c6c; // 红色表示 False
+        font-weight: bold;
     }
 </style>

@@ -47,6 +47,7 @@
     }, { immediate: true, deep: true });
 
     async function handleChooseResult(key: string){
+        console.log("@@@@@@@currentTypeDataID[key]", resultStore.currentTypeDataID[key])
         resultStore.currentResult = await resultStore.getResultCacheContent(resultStore.currentTypeDataID[key]!)
     }
 
@@ -54,7 +55,7 @@
 <template>
     <div :style="{width: '100%',height: '100%'}">
         <div class = "result-control">
-            <el-button v-for="key in Object.keys(resultStore.currentTypeDataID)" :key="key" @click="handleChooseResult">{{ key }}</el-button>
+            <el-button v-for="key in Object.keys(resultStore.currentTypeDataID)" :key="key" @click="handleChooseResult(key)">{{ key }}</el-button>
         </div>
         <div class = "result-container">
             <div class="if-result" v-if="resultStore.currentResult !== resultStore.default_dataview">
