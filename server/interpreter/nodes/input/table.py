@@ -7,7 +7,7 @@ from pandas import DataFrame
 from pydantic import PrivateAttr
 
 from server.config import DEFAULT_TIMEZONE
-from server.models.data import Data
+from server.models.data import Data, Table
 from server.models.exception import (
     NodeExecutionError,
     NodeParameterError,
@@ -164,7 +164,12 @@ class TableNode(BaseNode):
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         df = DataFrame(self.rows, columns=self.col_names)
-        out_table = Data.from_df(df)
+        out_table = Data(
+            payload=Table(
+                df=df,
+                col_types=self.col_types
+            )
+        )
         return {"table": out_table}
 
 
@@ -178,7 +183,9 @@ class RandomNode(BaseNode):
     """
     col_name: str | None
     col_type: Literal["float", "int", "str", "bool"]
-    
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
+
     @override
     def validate_parameters(self) -> None:
         if not self.type == "RandomNode":
@@ -275,11 +282,14 @@ class RandomNode(BaseNode):
                 err_msg="row_count must be provided as input."
             )
         assert self.col_name is not None
+
+        self._col_types = {self.col_name: col_type_map[self.col_type]}
+
         return {
             "table": Schema(
                 type=Schema.Type.TABLE,
                 tab=TableSchema(
-                    col_types={self.col_name: col_type_map[self.col_type]}
+                    col_types=self._col_types
                 )
             )
         }
@@ -341,7 +351,13 @@ class RandomNode(BaseNode):
         df = DataFrame(
             data_rows, columns=[self.col_name], dtype=col_dtype_map[self.col_type]
         )
-        out_table = Data.from_df(df)
+        assert self._col_types is not None
+        out_table = Data(
+            payload=Table(
+                df=df,
+                col_types=self._col_types
+            )
+        )
         return {"table": out_table}
 
 
@@ -353,7 +369,9 @@ class RangeNode(BaseNode):
     """
     col_name: str | None
     col_type: Literal["float", "int", "Datetime"]
-    
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
+
     @override
     def validate_parameters(self) -> None:
         if not self.type == "RangeNode":
@@ -479,11 +497,12 @@ class RangeNode(BaseNode):
                         err_msg=f"step input type {step_schema.type} incompatible with col_type {self.col_type}."
                 )
         assert self.col_name is not None
+        self._col_types = {self.col_name: col_type_map[self.col_type]}
         return {
             "table": Schema(
                 type=Schema.Type.TABLE,
                 tab=TableSchema(
-                    col_types={self.col_name: col_type_map[self.col_type]}
+                    col_types=self._col_types
                 )
             )
         }
@@ -581,5 +600,11 @@ class RangeNode(BaseNode):
         df = DataFrame(
             data_rows, columns=[self.col_name], dtype=col_dtype_map[self.col_type]
         )
-        out_table = Data.from_df(df)
+        assert self._col_types is not None
+        out_table = Data(
+            payload=Table(
+                df=df,
+                col_types=self._col_types
+            )
+        )
         return {"table": out_table}

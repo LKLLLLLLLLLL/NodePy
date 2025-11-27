@@ -1,8 +1,11 @@
 from typing import Any, Dict, Literal, override
 
+from pydantic import PrivateAttr
+
 from server.models.data import Data, Table, TableSchema
 from server.models.exception import (
     NodeParameterError,
+    NodeValidationError,
 )
 from server.models.schema import (
     ColType,
@@ -21,6 +24,8 @@ class GroupNode(BaseNode):
     group_cols: list[str]
     agg_cols: list[str]
     agg_func: Literal["SUM", "MEAN", "COUNT", "MAX", "MIN", "STD"]
+
+    _col_types: Dict[str, ColType] | None = PrivateAttr(default=None)
 
     @override
     def validate_parameters(self) -> None:
@@ -56,6 +61,14 @@ class GroupNode(BaseNode):
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         table_schema = input_schemas["table"]
         assert table_schema.tab is not None
+        # check if group_cols and agg_cols exist in the input table
+        for col in self.group_cols:
+            if col not in table_schema.tab.col_types:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="table",
+                    err_msg=f"Grouping column '{col}' does not exist in the input table.",
+                )
         # only keep the grouping column and the aggregated column
         new_col_types = {}
         for col_name in self.group_cols:
@@ -84,9 +97,15 @@ class GroupNode(BaseNode):
         }
         
         grouped_df = df.groupby(self.group_cols)[self.agg_cols].agg(agg_func_map[self.agg_func]).reset_index()
-        
-        result_data = Data.from_df(grouped_df)
-        
+
+        assert self._col_types is not None
+        result_data = Data(
+            payload=Table(
+                df=grouped_df,
+                col_types=self._col_types
+            )
+        )
+
         return {
             "grouped_result_table": result_data
         }

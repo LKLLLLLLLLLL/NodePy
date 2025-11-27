@@ -3,6 +3,7 @@ from typing import Any, Dict, override
 from server.models.data import Data, Table
 from server.models.exception import (
     NodeParameterError,
+    NodeValidationError,
 )
 from server.models.schema import (
     ColType,
@@ -52,6 +53,13 @@ class SortNode(BaseNode):
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         table_schema = input_schemas["table"]
+        assert table_schema.tab is not None
+        if self.sort_col not in table_schema.tab.col_types:
+            raise NodeValidationError(
+                node_id=self.id,
+                err_input="table",
+                err_msg=f"Sort column '{self.sort_col}' not found in input table.",
+            )
         return {
             "sorted_table": table_schema
         }
@@ -64,8 +72,15 @@ class SortNode(BaseNode):
 
         sorted_df = df.sort_values(by=self.sort_col, ascending=self.ascending)
 
+        sorted_data = Data(
+            payload=Table(
+                df=sorted_df,
+                col_types=table_data.payload.col_types
+            )
+        )
+
         return {
-            "sorted_table": Data.from_df(sorted_df)
+            "sorted_table": sorted_data
         }
 
     @override

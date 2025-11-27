@@ -1,5 +1,7 @@
 from typing import override
 
+from pydantic import PrivateAttr
+
 from server.models.data import Data, Table
 from server.models.exception import NodeParameterError
 from server.models.schema import (
@@ -24,7 +26,9 @@ class BatchStripNode(BaseNode):
     strip_chars: str | None
     col: str
     result_col: str | None = None
-    
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
+
     @override
     def validate_parameters(self) -> None:
         if not self.type == "BatchStripNode":
@@ -99,7 +103,13 @@ class BatchStripNode(BaseNode):
             strip_chars = None
         df = input_table.df
         df[self.result_col] = df[self.col].astype(str).str.strip(strip_chars)
-        output_data = Data.from_df(df)
+        assert self._col_types is not None
+        output_data = Data(
+            payload=Table(
+                df=df,
+                col_types=self._col_types
+            )
+        )
         return {"output": output_data}
 
 @register_node()
@@ -110,7 +120,9 @@ class BatchConcatNode(BaseNode):
     col1: str
     col2: str
     result_col: str | None = None
-    
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
+
     @override
     def validate_parameters(self) -> None:
         if not self.type == "BatchConcatNode":
@@ -169,6 +181,8 @@ class BatchConcatNode(BaseNode):
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert self.result_col is not None
         output_schema = input_schemas["input"].append_col(self.result_col, ColType.STR)
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types
         return {"output": output_schema}
 
     @override
@@ -177,5 +191,11 @@ class BatchConcatNode(BaseNode):
         assert isinstance(input_table, Table)
         df = input_table.df
         df[self.result_col] = df[self.col1].astype(str) + df[self.col2].astype(str)
-        output_data = Data.from_df(df)
+        assert self._col_types is not None
+        output_data = Data(
+            payload=Table(
+                df=df,
+                col_types=self._col_types
+            )
+        )
         return {"output": output_data}

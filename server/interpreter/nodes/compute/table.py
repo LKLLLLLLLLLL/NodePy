@@ -1,6 +1,7 @@
 from typing import Any, Literal, override
 
 import numpy as np
+from pydantic import PrivateAttr
 
 from server.models.data import Data, Table
 from server.models.exception import (
@@ -36,6 +37,8 @@ class ColWithNumberBinOpNode(BaseNode):
     op: Literal["ADD", "COL_SUB_NUM", "NUM_SUB_COL", "MUL", "COL_DIV_NUM", "NUM_DIV_COL", "COL_POW_NUM", "NUM_POW_COL"]
     col: str # the column to operate on
     result_col: str | None = None  # if None, use default result col name
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
 
     @override
     def validate_parameters(self) -> None:
@@ -114,6 +117,9 @@ class ColWithNumberBinOpNode(BaseNode):
             res_col_type = ColType.FLOAT
         output_schema = input_schemas['table'].append_col(self.result_col, res_col_type)
 
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types
+
         return {'table': output_schema}
 
     @override
@@ -161,7 +167,8 @@ class ColWithNumberBinOpNode(BaseNode):
             )
         
         # convert back to Table
-        out_table = Data.from_df(df)
+        assert self._col_types is not None
+        out_table = Data(payload=Table(df=df, col_types=self._col_types))
         return {'table': out_table}
 
     @override
@@ -182,6 +189,8 @@ class ColWithBoolBinOpNode(BaseNode):
     op: Literal["AND", "OR", "XOR", "NUM_SUB_COL", "COL_SUB_NUM"]
     col: str # the column to operate on
     result_col: str | None = None  # if None, use default result col name
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
 
     @override
     def validate_parameters(self) -> None:
@@ -254,6 +263,8 @@ class ColWithBoolBinOpNode(BaseNode):
         
         # 3. build output schema
         output_schema = input_schemas['table'].append_col(self.result_col, ColType.BOOL)
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types
         return {"table": output_schema}
 
     @override
@@ -284,7 +295,8 @@ class ColWithBoolBinOpNode(BaseNode):
             )
         
         # convert back to Table
-        out_table = Data.from_df(df)
+        assert self._col_types is not None
+        out_table = Data(payload=Table(df=df, col_types=self._col_types))
         return {'table': out_table}
 
     @override
@@ -311,6 +323,8 @@ class NumberColUnaryOpNode(BaseNode):
     op: Literal["ABS", "NEG", "EXP", "LOG", "SQRT"]
     col: str # the column to operate on
     result_col: str | None = None  # if None, use default result col name
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
 
     @override
     def validate_parameters(self) -> None:
@@ -371,7 +385,8 @@ class NumberColUnaryOpNode(BaseNode):
             )
         # 2. build output schema
         output_schema = input_schemas['table'].append_col(self.result_col, ColType.FLOAT if self.op in {"LOG", "SQRT"} else in_tab.col_types[self.col])
-        
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types
         return {'table': output_schema}
 
     @override
@@ -410,7 +425,8 @@ class NumberColUnaryOpNode(BaseNode):
             )
         
         # convert back to Table
-        out_table = Data.from_df(df)
+        assert self._col_types is not None
+        out_table = Data(payload=Table(df=df, col_types=self._col_types))
         return {'table': out_table}
 
     @override
@@ -431,6 +447,8 @@ class BoolColUnaryOpNode(BaseNode):
     op: Literal["NOT"]
     col: str # the column to operate on
     result_col: str | None = None  # if None, use default result col name
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
 
     @override
     def validate_parameters(self) -> None:
@@ -491,6 +509,10 @@ class BoolColUnaryOpNode(BaseNode):
             )
         # 2. build output schema
         output_schema = input_schemas['table'].append_col(self.result_col, ColType.BOOL)
+
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types
+
         return {'table': output_schema}
 
     @override
@@ -511,7 +533,8 @@ class BoolColUnaryOpNode(BaseNode):
             )
         
         # convert back to Table
-        out_table = Data.from_df(df)
+        assert self._col_types is not None
+        out_table = Data(payload=Table(df=df, col_types=self._col_types))
         return {'table': out_table}
 
     @override
@@ -538,6 +561,8 @@ class NumberColWithColBinOpNode(BaseNode):
     col1: str # the first column to operate on
     col2: str # the second column to operate on
     result_col: str | None = None  # if None, use default result col name
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
 
     @override
     def validate_parameters(self) -> None:
@@ -632,7 +657,10 @@ class NumberColWithColBinOpNode(BaseNode):
         else:
             res_col_type = ColType.FLOAT
         output_schema = input_schemas['table'].append_col(self.result_col, res_col_type)
-        
+
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types
+
         return {'table': output_schema}
 
     @override
@@ -670,7 +698,8 @@ class NumberColWithColBinOpNode(BaseNode):
             )
         
         # convert back to Table
-        out_table = Data.from_df(df)
+        assert self._col_types is not None
+        out_table = Data(payload=Table(df=df, col_types=self._col_types))
         return {'table': out_table}
 
     @override
@@ -679,12 +708,16 @@ class NumberColWithColBinOpNode(BaseNode):
         hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
-            hint['col1_choices'] = []
-            hint['col2_choices'] = []
+            col1_choices = []
+            col2_choices = []
             for col_name, col_type in input_schemas["table"].tab.col_types.items():
                 if col_type in {ColType.INT, ColType.FLOAT}:
-                    hint['col1_choices'].append(col_name)
-                    hint['col2_choices'].append(col_name)
+                    col1_choices.append(col_name)
+                    col2_choices.append(col_name)
+            if col1_choices:
+                hint['col1_choices'] = col1_choices
+            if col2_choices:
+                hint['col2_choices'] = col2_choices
         return hint
 
 @register_node()
@@ -697,6 +730,8 @@ class BoolColWithColBinOpNode(BaseNode):
     col1: str # the first column to operate on
     col2: str # the second column to operate on
     result_col: str | None = None  # if None, use default result col name
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
 
     @override
     def validate_parameters(self) -> None:
@@ -775,7 +810,10 @@ class BoolColWithColBinOpNode(BaseNode):
             )
         # 2. build output schema
         output_schema = input_schemas['table'].append_col(self.result_col, ColType.BOOL)
-        
+
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types
+
         return {'table': output_schema}
 
     @override
@@ -803,7 +841,8 @@ class BoolColWithColBinOpNode(BaseNode):
             )
         
         # convert back to Table
-        out_table = Data.from_df(df)
+        assert self._col_types is not None
+        out_table = Data(payload=Table(df=df, col_types=self._col_types))
         return {'table': out_table}
 
     @override
@@ -812,12 +851,16 @@ class BoolColWithColBinOpNode(BaseNode):
         hint = {}
         if "table" in input_schemas:
             assert input_schemas["table"].tab is not None
-            hint['col1_choices'] = []
-            hint['col2_choices'] = []
+            col1_choices = []
+            col2_choices = []
             for col_name, col_type in input_schemas["table"].tab.col_types.items():
                 if col_type in {ColType.BOOL}:
-                    hint['col1_choices'].append(col_name)
-                    hint['col2_choices'].append(col_name)
+                    col1_choices.append(col_name)
+                    col2_choices.append(col_name)
+            if col1_choices:
+                hint['col1_choices'] = col1_choices
+            if col2_choices:
+                hint['col2_choices'] = col2_choices
         return hint
 
 @register_node()
@@ -830,6 +873,8 @@ class ColCompareNode(BaseNode):
     col1: str  # the first column to compare
     col2: str  # the second column to compare
     result_col: str | None = None  # if None, use default result col name
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
 
     @override
     def validate_parameters(self) -> None:
@@ -921,6 +966,9 @@ class ColCompareNode(BaseNode):
         # 3. build output schema
         output_schema = input_schemas['table'].append_col(self.result_col, ColType.BOOL)
 
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types
+
         return {'table': output_schema}
 
     @override
@@ -952,7 +1000,8 @@ class ColCompareNode(BaseNode):
             )
 
         # convert back to Table
-        out_table = Data.from_df(df)
+        assert self._col_types is not None
+        out_table = Data(payload=Table(df=df, col_types=self._col_types))
         return {'table': out_table}
 
     @override

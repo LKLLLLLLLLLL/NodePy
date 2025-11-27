@@ -29,7 +29,7 @@ class Table(BaseModel):
     col_types: dict[str, ColType] # col name -> col type (ColType)
     
     @model_validator(mode="after")
-    def verify(self) -> Self:#
+    def verify(self) -> Self:
         # 1. check if df is aligned with col_types
         # Check for missing columns
         missing_cols = [col for col in self.col_types if col not in self.df.columns]
@@ -67,18 +67,18 @@ class Table(BaseModel):
         new_col_types[new_col] = ColType.from_ptype(col.dtype)
         return Table(df=new_df, col_types=new_col_types)
     
-    @classmethod
-    def _from_df(cls, df: DataFrame) -> 'Table':
+    @staticmethod
+    def col_types_from_df(df: DataFrame) -> dict[str, ColType]:
         col_types = {}
         for col in df.columns:
             col_types[col] = ColType.from_ptype(df[col].dtype)
-        return Table(df=df, col_types=col_types)
+        return col_types
     
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "data": self.df.to_dict(orient="list"),
-            "col_types": {k: v.value for k, v in self.col_types.items()}
-        }
+    # def to_dict(self) -> dict[str, Any]:
+    #     return {
+    #         "data": self.df.to_dict(orient="list"),
+    #         "col_types": {k: v.value for k, v in self.col_types.items()}
+    #     }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> 'Table':
@@ -130,10 +130,10 @@ class Data(BaseModel):
         other_dict = value.to_view().to_dict()
         return self_dict == other_dict
 
-    @classmethod
-    def from_df(cls, df: DataFrame) -> 'Data':
-        table = Table._from_df(df)
-        return Data(payload=table)
+    # @classmethod
+    # def from_df(cls, df: DataFrame) -> 'Data':
+    #     table = Table._from_df(df)
+    #     return Data(payload=table)
 
     def to_view(self) -> "DataView":
         if isinstance(self.payload, Table):

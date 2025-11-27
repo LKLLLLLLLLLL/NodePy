@@ -3,6 +3,7 @@ from typing import Any, Callable, Literal
 
 from pydantic import ValidationError
 
+from server import DEBUG
 from server.lib.CacheManager import CacheManager
 from server.lib.FileManager import FileManager
 from server.lib.utils import safe_hash
@@ -228,6 +229,7 @@ class ProjectInterpreter:
             output_data: dict[str, Data]
             running_time: float
             
+            # special handling for control structures
             if node_id in self._control_structures:
                 end_node_id = self._control_structures[node_id]["end_node_id"]
                 # 3. execute control structure
@@ -275,10 +277,17 @@ class ProjectInterpreter:
 
                     # run node
                     start_time = time.perf_counter()
-                    input_data_hash = safe_hash(input_data)  # guide to avoid accidental mutation
+                    input_data_hash: str = ""
+
+                    if DEBUG:
+                        input_data_hash = safe_hash(input_data)  # guide to avoid accidental mutation
+
                     output_data = node.execute(input_data)
-                    if safe_hash(input_data) != input_data_hash:
-                        raise AssertionError(f"Node {node_id} in type {node.type} input data were modified during execution, which is not allowed.")
+
+                    if DEBUG:
+                        if safe_hash(input_data) != input_data_hash:
+                            raise AssertionError(f"Node {node_id} in type {node.type} input data were modified during execution, which is not allowed.")
+
                     running_time = (time.perf_counter() - start_time) * 1000  # in ms
                 else:
                     output_data, running_time = cache_data
@@ -468,7 +477,12 @@ class ProjectInterpreter:
                 res_cache: dict[tuple[str, str], Data] = {} # local cache for exec result in this iteration: (node_id, port) -> Data
 
                 # set the current row data to the output port of the begin node
-                row_data = Data.from_df(input_table_df.iloc[index: index + 1])
+                row_data = Data(
+                    payload=Table(
+                        df=input_table_df.iloc[index: index + 1],
+                        col_types=input_table_data.payload.col_types
+                    )
+                )
                 res_cache[(begin_node_id, "row")] = row_data
 
                 # a sample interpreter to execute body nodes
@@ -525,6 +539,7 @@ class ProjectInterpreter:
             for row in output_rows:
                 assert isinstance(row.payload, Table)
             combined_df = pd.concat([row.payload.df for row in output_rows], ignore_index=True) # type: ignore
+            combined_col_types = input_table_data.payload.col_types
             
             # find the output port name of the end node
             end_node_id = control_info["end_node_id"]
@@ -535,7 +550,12 @@ class ProjectInterpreter:
             output_port_name = out_ports[0].name
             
             return {
-                output_port_name: Data.from_df(combined_df)
+                output_port_name: Data(
+                    payload=Table(
+                        df=combined_df,
+                        col_types=combined_col_types
+                    )
+                )
             }
         elif control_structure_begin_type == "ForRollingWindowBeginNode":
             input_table_data = inputs.get("table")
@@ -558,7 +578,12 @@ class ProjectInterpreter:
                 res_cache: dict[tuple[str, str], Data] = {} # local cache for exec result in this iteration: (node_id, port) -> Data
 
                 # set the current window data to the output port of the begin node
-                window_data = Data.from_df(input_table_data.payload.df.iloc[index: index + window_size])
+                window_data = Data(
+                    payload=Table(
+                        df=input_table_data.payload.df.iloc[index: index + window_size],
+                        col_types=input_table_data.payload.col_types
+                    )
+                )
                 res_cache[(begin_node_id, "window")] = window_data
 
                 # a sample interpreter to execute body nodes
@@ -615,7 +640,8 @@ class ProjectInterpreter:
             for row in output_rows:
                 assert isinstance(row.payload, Table)
             combined_df = pd.concat([row.payload.df for row in output_rows], ignore_index=True) # type: ignore
-            
+            combined_col_types = input_table_data.payload.col_types
+
             # find the output port name of the end node
             end_node_id = control_info["end_node_id"]
             end_node = self._node_objects[end_node_id]
@@ -624,7 +650,12 @@ class ProjectInterpreter:
                 return {} # End node has no output
             output_port_name = out_ports[0].name
             return {
-                output_port_name: Data.from_df(combined_df)
+                output_port_name: Data(
+                    payload=Table(
+                        df=combined_df,
+                        col_types=combined_col_types
+                    )
+                )
             }
             
         else:

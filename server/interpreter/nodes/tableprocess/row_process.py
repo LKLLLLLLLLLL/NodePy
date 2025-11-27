@@ -3,6 +3,7 @@ from typing import Any, Dict, override
 from server.models.data import Data, Table
 from server.models.exception import (
     NodeParameterError,
+    NodeValidationError,
 )
 from server.models.schema import (
     ColType,
@@ -62,6 +63,13 @@ class FilterNode(BaseNode):
         self, input_schemas: Dict[str, Schema]
     ) -> Dict[str, Schema]:
         table_schema = input_schemas["table"]
+        assert table_schema.tab is not None
+        if self.cond_col not in table_schema.tab.col_types:
+            raise NodeValidationError(
+                node_id=self.id,
+                err_input="table",
+                err_msg=f"Condition column '{self.cond_col}' not found in input table schema.",
+            )
         return {"true_table": table_schema, "false_table": table_schema}
 
     @override
@@ -73,9 +81,23 @@ class FilterNode(BaseNode):
         true_df = df[df[self.cond_col].eq(True)]
         false_df = df[df[self.cond_col].eq(False)]
 
+        true_data = Data(
+            payload=Table(
+                df=true_df,
+                col_types=table_data.payload.col_types
+            )
+        )
+
+        false_data = Data(
+            payload=Table(
+                df=false_df,
+                col_types=table_data.payload.col_types
+            )
+        )
+
         return {
-            "true_table": Data.from_df(true_df),
-            "false_table": Data.from_df(false_df),
+            "true_table": true_data,
+            "false_table": false_data,
         }
 
     @override
@@ -134,6 +156,14 @@ class DropDuplicatesNode(BaseNode):
         self, input_schemas: Dict[str, Schema]
     ) -> Dict[str, Schema]:
         table_schema = input_schemas["table"]
+        assert table_schema.tab is not None
+        for col in self.subset_cols:
+            if col not in table_schema.tab.col_types:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="table",
+                    err_msg=f"Subset column '{col}' not found in input table schema.",
+                )
         return {"deduplicated_table": table_schema}
 
     @override
@@ -144,7 +174,14 @@ class DropDuplicatesNode(BaseNode):
 
         deduplicated_df = df.drop_duplicates(subset=self.subset_cols)
 
-        return {"deduplicated_table": Data.from_df(deduplicated_df)}
+        deduplicated_data = Data(
+            payload=Table(
+                df=deduplicated_df,
+                col_types=table_data.payload.col_types
+            )
+        )
+
+        return {"deduplicated_table": deduplicated_data}
 
     @override
     @classmethod
@@ -200,6 +237,14 @@ class DropNaNValueNode(BaseNode):
         self, input_schemas: Dict[str, Schema]
     ) -> Dict[str, Schema]:
         table_schema = input_schemas["table"]
+        assert table_schema.tab is not None
+        for col in self.subset_cols:
+            if col not in table_schema.tab.col_types:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="table",
+                    err_msg=f"Subset column '{col}' not found in input table schema.",
+                )
         return {"cleaned_table": table_schema}
 
     @override
@@ -210,7 +255,14 @@ class DropNaNValueNode(BaseNode):
 
         cleaned_df = df.dropna(subset=self.subset_cols)
 
-        return {"cleaned_table": Data.from_df(cleaned_df)}
+        cleaned_data = Data(
+            payload=Table(
+                df=cleaned_df,
+                col_types=table_data.payload.col_types
+            )
+        )
+
+        return {"cleaned_table": cleaned_data}
 
     @override
     @classmethod
@@ -291,7 +343,14 @@ class MergeNode(BaseNode):
 
         merged_df = pd.concat([df_1, df_2], ignore_index=True)
 
-        return {"merged_table": Data.from_df(merged_df)}
+        merged_data = Data(
+            payload=Table(
+                df=merged_df,
+                col_types=table_data_1.payload.col_types
+            )
+        )
+
+        return {"merged_table": merged_data}
 
 
 @register_node()
@@ -349,4 +408,11 @@ class SliceNode(BaseNode):
 
         sliced_df = df.iloc[self.begin:self.end:self.step]
 
-        return {"sliced_table": Data.from_df(sliced_df)}
+        slice_data = Data(
+            payload=Table(
+                df=sliced_df,
+                col_types=table_data.payload.col_types
+            )
+        )    
+
+        return {"sliced_table": slice_data}

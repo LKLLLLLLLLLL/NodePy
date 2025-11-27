@@ -351,7 +351,7 @@ table:
 无
 
 **输入：**
-- input: 输入的数据，类型为int, float, bool, Table。Datetime类型请参考DatetimePrintNode节点。
+- input: 输入的数据，类型为int, float, bool。Datetime类型请参考DatetimePrintNode节点。
 
 **输出：**
 - output: 输出的字符串，类型为str。
@@ -722,7 +722,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - sliced_table: 切片后的表格，类型为Table。
 
-#### 5.10 SelectColNode
+#### 5.11 SelectColNode
 表格列选择节点，根据指定的列名列表从表格中选择对应的列。
 
 **参数：**
@@ -738,7 +738,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **hint：**
 - selected_col_choices: 列名列表，类型为List[str]，用于在UI中为selected_cols参数提供可选值。
 
-#### 5.11 JoinNode
+#### 5.12 JoinNode
 表格连接节点，根据指定的键列将两个表格进行连接操作。
 
 **参数：**
@@ -757,7 +757,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - left_on_choices: 列名列表，类型为List[str]，用于在UI中为left_on参数提供可选值。
 - right_on_choices: 列名列表，类型为List[str]，用于在UI中为right_on参数提供可选值。
 
-#### 5.12 RenameColNode
+#### 5.13 RenameColNode
 表格列重命名节点，根据指定的列名映射关系对表格中的列进行重命名操作。
 
 **参数：**

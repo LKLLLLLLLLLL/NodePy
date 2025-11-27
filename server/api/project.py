@@ -370,7 +370,7 @@ async def sync_project(
                 response.status_code = 204  # No Content
                 await db_client.commit()
                 return None
-            
+
             celery_task = cast(CeleryTask, execute_project_task)  # to suppress type checker error
             task = celery_task.delay(  # the return message will be sent back via streamqueue
                 project_id=project.project_id,

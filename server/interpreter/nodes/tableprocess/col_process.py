@@ -1,8 +1,11 @@
 from typing import Any, Dict, Literal, override
 
+from pydantic import PrivateAttr
+
 from server.models.data import Data, Table
 from server.models.exception import NodeParameterError, NodeValidationError
 from server.models.schema import Pattern, Schema, TableSchema, check_no_illegal_cols
+from server.models.types import ColType
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
@@ -17,7 +20,10 @@ class SelectColNode(BaseNode):
     """
     
     selected_cols: list[str]
-    
+
+    _selected_col_types: Dict[str, ColType] | None = PrivateAttr(default=None)
+    _dropped_col_types: Dict[str, ColType] | None = PrivateAttr(default=None)
+
     @override
     def validate_parameters(self) -> None:
         if not self.type == "SelectColNode":
@@ -65,6 +71,9 @@ class SelectColNode(BaseNode):
             if col not in self.selected_cols
         }
 
+        self._selected_col_types = selected_col_types
+        self._dropped_col_types = dropped_col_types
+
         return {
             "selected_table": Schema(
                 type=Schema.Type.TABLE,
@@ -84,9 +93,24 @@ class SelectColNode(BaseNode):
         selected_df = df[self.selected_cols]
         dropped_df = df.drop(columns=self.selected_cols)
 
+        assert self._selected_col_types is not None
+        selected_data = Data(
+            payload=Table(
+                df=selected_df,
+                col_types=self._selected_col_types
+            )
+        )
+        assert self._dropped_col_types is not None
+        dropped_data = Data(
+            payload=Table(
+                df=dropped_df,
+                col_types=self._dropped_col_types
+            )
+        )
+
         return {
-            "selected_table": Data.from_df(selected_df),
-            "dropped_table": Data.from_df(dropped_df)
+            "selected_table": selected_data,
+            "dropped_table": dropped_data
         }
 
     @override
@@ -110,6 +134,8 @@ class JoinNode(BaseNode):
     left_on: str
     right_on: str
     how: Literal['INNER', 'LEFT', 'RIGHT', 'OUTER']
+
+    _col_types: Dict[str, ColType] | None = PrivateAttr(default=None)
 
     @override
     def validate_parameters(self) -> None:
@@ -181,6 +207,7 @@ class JoinNode(BaseNode):
                 new_col_types[f"{col}_right"] = col_type
 
         new_tab = TableSchema(col_types=new_col_types)
+        self._col_types = new_col_types
         return {
             "joined_table": Schema(type=Schema.Type.TABLE, tab=new_tab)
         }
@@ -207,9 +234,16 @@ class JoinNode(BaseNode):
             right_on=self.right_on,
             suffixes=('', '_right')
         )
+        assert self._col_types is not None
+        joined_data = Data(
+            payload=Table(
+                df=joined_df,
+                col_types=self._col_types
+            )
+        )
 
         return {
-            "joined_table": Data.from_df(joined_df)
+            "joined_table": joined_data
         }
 
     @override
@@ -239,6 +273,8 @@ class RenameColNode(BaseNode):
     """
 
     rename_map: dict[str, str]
+
+    _col_types: Dict[str, ColType] | None = PrivateAttr(default=None)
 
     @override
     def validate_parameters(self) -> None:
@@ -280,12 +316,36 @@ class RenameColNode(BaseNode):
         table_schema = input_schemas["table"]
         assert table_schema.tab is not None
 
+        # check if all keys in rename_map exist in the input table
+        for old_name in self.rename_map.keys():
+            if old_name not in table_schema.tab.col_types:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_inputs=["table"],
+                    err_msgs=[f"Column '{old_name}' to be renamed does not exist in the input table."],
+                )
+
+        # check if any name conflict after renaming
+        old_names = set(table_schema.tab.col_types.keys())
+        new_names = set(self.rename_map.values())
+        for old_name in self.rename_map.keys():
+            old_names.remove(old_name)
+        if len(old_names.intersection(new_names)) > 0:
+            raise NodeValidationError(
+                node_id=self.id,
+                err_inputs=["table"],
+                err_msgs=["Column name conflict after renaming."],
+            )
+
+        # generate new column types after renaming
         new_col_types = {}
         for col, col_type in table_schema.tab.col_types.items():
             if col in self.rename_map:
                 new_col_types[self.rename_map[col]] = col_type
             else:
                 new_col_types[col] = col_type
+
+        self._col_types = new_col_types
 
         return {
             "renamed_table": Schema(
@@ -301,8 +361,16 @@ class RenameColNode(BaseNode):
         df = table_data.payload.df
         renamed_df = df.rename(columns=self.rename_map)
 
+        assert self._col_types is not None
+        renamed_data = Data(
+            payload=Table(
+                df=renamed_df,
+                col_types=self._col_types
+            )
+        )
+
         return {
-            "renamed_table": Data.from_df(renamed_df)
+            "renamed_table": renamed_data
         }
 
     @override

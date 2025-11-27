@@ -1,5 +1,7 @@
 from typing import Any, override
 
+from pydantic import PrivateAttr
+
 from server.models.data import Data, Table
 from server.models.exception import NodeParameterError
 from server.models.schema import (
@@ -70,7 +72,9 @@ class BatchRegexMatchNode(BaseNode):
     pattern: str
     col: str
     result_col: str | None = None
-    
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
+
     @override
     def validate_parameters(self) -> None:
         if not self.type == "BatchRegexMatchNode":
@@ -130,6 +134,8 @@ class BatchRegexMatchNode(BaseNode):
                 err_msg = f"Result column name '{self.result_col}' is not valid."
             )
         output_schema = input_schema.append_col(self.result_col, ColType.BOOL)
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types
         return {
             "output": output_schema
         }
@@ -141,7 +147,13 @@ class BatchRegexMatchNode(BaseNode):
         df = input["input"].payload.df.copy()
         assert self.result_col is not None
         df[self.result_col] = df[self.col].str.fullmatch(self.pattern, na=False).astype(bool)
-        output_table = Data.from_df(df)
+        assert self._col_types is not None
+        output_table = Data(
+            payload=Table(
+                df=df,
+                col_types=self._col_types
+            )
+        )
 
         return {
             "output": output_table
@@ -169,6 +181,8 @@ class RegexExtractNode(BaseNode):
     """
 
     pattern: str
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(None)
 
     @override
     def validate_parameters(self) -> None:
@@ -220,13 +234,17 @@ class RegexExtractNode(BaseNode):
             raise NodeParameterError(
                 node_id=self.id, 
                 err_param_key="pattern", 
-                err_msg="Generated column names from regex groups are invalid.")
+                err_msg="Generated column names from regex groups are invalid."
+            )
 
         output_schema = Schema(
             type = Schema.Type.TABLE,
             tab = TableSchema(col_types = col_types)
         )
-        
+
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types
+
         return {
             "matches": output_schema
         }
@@ -250,5 +268,11 @@ class RegexExtractNode(BaseNode):
             col_names = [f"group_{i + 1}" for i in range(num_groups)]
 
         df = pd.DataFrame(matches, columns=col_names)
-        output_table = Data.from_df(df)
+        assert self._col_types is not None
+        output_table = Data(
+            payload=Table(
+                df=df,
+                col_types=self._col_types
+            )
+        )
         return {"matches": output_table}

@@ -1,7 +1,7 @@
 import math
 from typing import Literal, override
 
-from server.models.data import Data, Table
+from server.models.data import Data
 from server.models.exception import (
     NodeExecutionError,
     NodeParameterError,
@@ -38,7 +38,7 @@ class ToStringNode(BaseNode):
                 description='Input data to be converted to string type.',
                 optional=False,
                 accept=Pattern(
-                    types={Schema.Type.BOOL, Schema.Type.INT, Schema.Type.FLOAT, Schema.Type.TABLE}
+                    types={Schema.Type.BOOL, Schema.Type.INT, Schema.Type.FLOAT}
                 )
             )
         ], [
@@ -55,15 +55,11 @@ class ToStringNode(BaseNode):
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         assert 'input' in input
-        input_data = input['in'].payload
-        assert isinstance(input_data, (bool, int, float, Table))
+        input_data = input['input'].payload
+        assert isinstance(input_data, (bool, int, float))
 
         output: str
-        if isinstance(input_data, Table):
-            table_dict = input_data.to_dict()
-            output = str(table_dict)
-        else:
-            output = str(input_data)
+        output = str(input_data)
         return {'output': Data(payload=output)}
 
 @register_node()

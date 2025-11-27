@@ -14,6 +14,7 @@ from server.models.schema import (
     Pattern,
     Schema,
     TableSchema,
+    check_no_illegal_cols,
 )
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
@@ -56,6 +57,13 @@ class TableFromFileNode(BaseNode):
         file_schema = input_schemas["file"].file
         assert file_schema is not None
         assert file_schema.col_types is not None
+        for file_schema_col in file_schema.col_types.keys():
+            if not check_no_illegal_cols([file_schema_col], allow_index=True):
+                raise NodeParameterError(
+                    node_id=self.id,
+                    err_param_key="file",
+                    err_msg=f"Column name '{file_schema_col}' in the file conflicts with reserved column names.",
+                )
         return {
             "table": Schema(
                 type=Schema.Type.TABLE, tab=TableSchema(col_types=file_schema.col_types)
@@ -79,7 +87,8 @@ class TableFromFileNode(BaseNode):
             df = pandas.read_excel(StringIO(file_content.decode("utf-8")))
         else:
             raise ValueError(f"Unsupported file format: {file_format}")
-        out_table = Data.from_df(df)
+        col_types = Table.col_types_from_df(df)
+        out_table = Data(payload=Table(df=df, col_types=col_types))
 
         # add default timezone if not specified in csv file
         assert isinstance(out_table.payload, Table)
