@@ -5,7 +5,7 @@
         <div class="data">
             <div class="input-table port">
                 <div class="input-port-description">
-                    表格输入T
+                    表格输入
                 </div>
                 <Handle id="table" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': inputTableHasErr.value}]"/>
             </div>
