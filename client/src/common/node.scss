@@ -2,10 +2,10 @@
 //  data type color
 $int-color: #1c6bbf;
 $float-color: #ecbc00;
-$str-color: green;
+$str-color: #10b981;
 $table-color: pink;
-$file-color: rgb(216, 105, 91);
-$bool-color: #76ab0b;
+$file-color: #f97316;
+$bool-color: #84cc16;
 $datetime-color: #00c8ff;
 $default-type-color: gray;
 //  node element style
@@ -18,16 +18,15 @@ $node-margin: 10px; //  margin between child elements
 $node-title-fontsize: 15px;
 $node-description-fontsize: 14px;
 //  node first category color
-$input-node-color: rgb(255, 102, 255);
-$compute-node-color: #00b688;
-$control-node-color: #d87e00;
-$file-node-color: $file-color;
-$str-node-color: $str-color;
-$table-node-color: $table-color;
-$utils-node-color: rgb(183, 0, 70);
-$visualize-node-color: #7572d2;
-$datetime-node-color: $datetime-color;
-
+$input-node-color: #8b5cf6; // 紫罗兰 - 输入
+$compute-node-color: #14b8a6; // 青绿色 - 计算
+$control-node-color: #eab308; // 金黄色 - 控制
+$file-node-color: $file-color; // 橙色 - 文件
+$str-node-color: $str-color; // 翠绿色 - 字符串处理
+$table-node-color: $table-color; // 粉红色 - 表格处理
+$utils-node-color: #ef4444; // 红色 - 工具
+$visualize-node-color: #6366f1; // 靛蓝色 - 可视化
+$datetime-node-color: $datetime-color; // 青色 - 日期时间处理
 
 .nodes-style {
   border-radius: 9px;
@@ -87,6 +86,7 @@ $datetime-node-color: $datetime-color;
   display: flex;
   align-items: center;
   font-weight: bold;
+  color: white;
   svg{
     width: 18px;
     margin-right: 6px;

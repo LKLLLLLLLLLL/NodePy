@@ -1,27 +1,27 @@
-import type {Node} from '@vue-flow/core'
-import type { ProjNode, File } from '@/utils/api'
+import type { File, ProjNode } from '@/utils/api'
+import type { Node } from '@vue-flow/core'
 
 
 export const dataTypeColor = {
     int: '#1c6bbf',
     float: '#ecbc00',
-    str: 'green',
-    bool: '#76ab0b',
+    str: '#10b981',
+    bool: '#84cc16',
     Table: 'pink',
-    File: 'rgb(216, 105, 91)',
+    File: '#f97316',
     Datetime: '#00c8ff',
     default: 'gray'
 }
 
 export const nodeCategoryColor = {
-    input: 'rgb(255, 102, 255)',
-    compute: '#00b688',
-    control: '#d87e00',
+    input: '#8b5cf6',
+    compute: '#14b8a6',
+    control: '#eab308',
     file: dataTypeColor.File,
     str: dataTypeColor.str,
     table: dataTypeColor.Table,
-    utils: 'rgb(183, 0, 70)',
-    visualize: '#7572d2',
+    utils: '#ef4444',
+    visualize: '#6366f1',
     datetime: dataTypeColor.Datetime,
     default: 'gray'
 }
