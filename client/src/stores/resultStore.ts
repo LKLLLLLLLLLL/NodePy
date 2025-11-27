@@ -25,7 +25,12 @@ export const useResultStore = defineStore('result',()=>{
         value: default_content
     }
     const default_info: any = 'default_info'
+    const default_id: number = 12315
+    const default_typedataid: Record<string,number> = {
+        'default_type': default_id
+    }
 
+    const currentTypeDataID = ref<{[key:string]:number}>(default_typedataid)
     const currentResult = ref<DataView>(default_dataview)
     const currentInfo = ref<any>(default_info)
 
@@ -52,8 +57,6 @@ export const useResultStore = defineStore('result',()=>{
         createTime: number
     }
 
-    const default_id: number = 12315
-
     const resultCache = ref(new Map<Number,ResultCacheItem>());
     const cacheMaxSize: number = 30;//结果数量最大值30
     const basicDuration: number = 10*60*1000//10 minutes
@@ -74,6 +77,20 @@ export const useResultStore = defineStore('result',()=>{
             mostHit: mostHit
         }
     })
+
+    // 工具函数：将 data_out 转换为类型:data_id 字典
+    function convertDataOutToDict(dataOut: Record<string, any>): Record<string, number> {
+        const result: Record<string, number> = {};
+        
+        for (const [key, value] of Object.entries(dataOut)) {
+            // 检查值是否存在且具有 data_id 属性
+            if (value && typeof value === 'object' && 'data_id' in value) {
+                result[key] = value.data_id;
+            }
+        }
+        
+        return result;
+    }
 
     function refreshResultCache(){
         resultCache.value.clear();
@@ -212,8 +229,10 @@ export const useResultStore = defineStore('result',()=>{
     return{
         default_dataview,
         default_info,
+        default_typedataid,
         currentResult,
         currentInfo,
+        currentTypeDataID,
         modalWidth,
         modalHeight,
         marginRight,
@@ -224,6 +243,7 @@ export const useResultStore = defineStore('result',()=>{
         createResultModal, 
         refresh,
         cacheStatus,
+        convertDataOutToDict,
         refreshResultCache,
         cacheGarbageRecycle,
         hitResultCacheContent,

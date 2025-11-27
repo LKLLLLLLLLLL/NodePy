@@ -56,7 +56,7 @@ import { useRouter } from 'vue-router';
 
 </script>
 <template>
-    <div class="project-card">
+    <div class="project-card" @click="handleOpenExample">
         <!-- 缩略图区域 -->
         <div class="project-thumb">
             <div class="thumb-content">

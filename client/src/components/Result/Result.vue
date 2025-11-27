@@ -10,61 +10,51 @@
 
     const resultStore = useResultStore();
     const graphStore = useGraphStore()
-    const resultId = computed(()=>{
-        const dataOut = graphStore.currentNode?.data.data_out
-        if (!dataOut) {
-            console.log('Result: 当前节点没有 data_out')
-            return null
-        }
 
-        if (dataOut.plot?.data_id) {
-            return dataOut.plot.data_id
-        }
-        else if (dataOut.const?.data_id) {
-            return dataOut.const.data_id
-        }
-        else if (dataOut.file?.data_id) {
-            return dataOut.file.data_id
-        }
-        else if (dataOut.table?.data_id) {
-            return dataOut.table.data_id
-        }
-        return null  // 明确返回null而不是undefined
-    })
-
-    watch([() => graphStore.currentNode, resultId], async ([newNode, newResultId]) => {
+    // 监听currentTypeDataID字典变化
+    watch(() => resultStore.currentTypeDataID, async (newTypeDataID, oldTypeDataID) => {
         try {
-            
-            // 添加对newResultId的有效性检查
-            console.log("@@@@@@@newResultId",newResultId)
-            if (!newResultId || typeof newResultId !== 'number' || isNaN(newResultId)) {
-                console.log('Result: resultId 不存在或无效，显示节点信息');
-                resultStore.currentInfo = newNode?.data?.param || {};
-                resultStore.currentResult = resultStore.default_dataview;
-                return;
+            console.log("@@@@@@@newTypeDataID", newTypeDataID);
+            console.log("@@@@@@@oldTypeDataID", oldTypeDataID);
+            if(newTypeDataID === resultStore.default_typedataid){
+                resultStore.currentResult = resultStore.default_dataview
+                resultStore.currentInfo = resultStore.default_info
+                return 
             }
-
-            resultStore.currentInfo = resultStore.default_info;
-            
-            // 先设置为默认值，避免显示旧数据
-            resultStore.currentResult = resultStore.default_dataview;
-            
-            // 获取新结果
-            const result = await resultStore.getResultCacheContent(newResultId);
-            resultStore.currentResult = result;
+            // 获取字典中的第一个值作为默认结果ID
+            const keys = Object.keys(newTypeDataID);
+            if (keys.length > 0) {
+                const firstKey = keys[0]!;
+                const dataId = newTypeDataID[firstKey];
+                
+                // 检查是否是有效数字
+                if (typeof dataId === 'number' && !isNaN(dataId)) {
+                    resultStore.currentInfo = resultStore.default_info;
+                    resultStore.currentResult = resultStore.default_dataview;
+                    
+                    // 获取新结果
+                    const result = await resultStore.getResultCacheContent(dataId);
+                    resultStore.currentResult = result;
+                    console.log("@@@newResult:", resultStore.currentResult);
+                }
+            }
             
         } catch (error) {
             console.error('Result: 加载结果失败:', error);
-            resultStore.currentInfo = newNode?.data?.param || {};
+            resultStore.currentInfo = graphStore.currentNode?.data?.param || {};
             resultStore.currentResult = resultStore.default_dataview;
         }
-    }, { immediate: true });
+    }, { immediate: true, deep: true });
+
+    async function handleChooseResult(key: string){
+        resultStore.currentResult = await resultStore.getResultCacheContent(resultStore.currentTypeDataID[key]!)
+    }
 
 </script>
 <template>
     <div :style="{width: '100%',height: '100%'}">
         <div class = "result-control">
-            Control
+            <el-button v-for="key in Object.keys(resultStore.currentTypeDataID)" :key="key" @click="handleChooseResult">{{ key }}</el-button>
         </div>
         <div class = "result-container">
             <div class="if-result" v-if="resultStore.currentResult !== resultStore.default_dataview">

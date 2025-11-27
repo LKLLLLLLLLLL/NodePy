@@ -126,10 +126,19 @@ onConnect((connection) => {
   addEdges(addedEdge)
 })
 
-watch(()=>graphStore.currentNode?.data.data_out?.result?.data_id,async ()=>{
-  graphStore.url_id = graphStore.currentNode?.data.data_out?.result?.data_id!
-  resultStore.currentResult = await resultStore.getResultCacheContent(graphStore.url_id)
-})
+// 监听当前节点的数据变化
+watch(() => graphStore.currentNode?.data, (newData, oldData) => {
+  if (graphStore.currentNode && newData?.data_out !== undefined) {
+    // 当节点数据发生变化时，更新currentTypeDataID
+    const dataOut = newData.data_out;
+    const dataOutDict = resultStore.convertDataOutToDict(dataOut);
+    resultStore.currentTypeDataID = dataOutDict;
+    console.log("@@@@@currentTypeDataID updated due to node data change", resultStore.currentTypeDataID);
+  }
+  else{
+    resultStore.currentTypeDataID = resultStore.default_typedataid
+  }
+}, { deep: true });
 
   // 双击检测变量
 const lastClickTime = ref<number>(0)
@@ -179,22 +188,18 @@ async function handleNodeDoubleClick(event) {
   if(graphStore.currentNode?.data?.data_out===undefined){
     resultStore.currentInfo = graphStore.currentNode?.data.param
     resultStore.currentResult = resultStore.default_dataview
+    resultStore.currentTypeDataID = resultStore.default_typedataid
   }
   else if (graphStore.currentNode?.data?.data_out !== undefined) {
     // 获取第一个包含data_id的子对象
     const dataOut = graphStore.currentNode.data.data_out;
-    const dataIdEntry = Object.entries(dataOut).find(([key, value]) => 
-      value && typeof value === 'object' && 'data_id' in value
-    );
+    const dataOutDict = resultStore.convertDataOutToDict(dataOut)
+    resultStore.currentTypeDataID = dataOutDict
+    console.log("@@@@@currentTypeDataID",resultStore.currentTypeDataID)
     
-    if (dataIdEntry!==undefined) {
-      const [key, value] = dataIdEntry;
-      graphStore.url_id = value.data_id; // waiting multi-result nodes
-      resultStore.currentResult = await resultStore.getResultCacheContent(graphStore.url_id);
-      resultStore.currentInfo = graphStore.currentNode?.data.param;
-    }
+    // 只需要设置currentTypeDataID，Result.vue中的watcher会自动处理结果获取
+    // 不需要在这里手动调用getResultCacheContent
   }
-
 }
 
 const lastPaneClicktime = ref(0)
