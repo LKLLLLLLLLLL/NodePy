@@ -45,8 +45,9 @@ const modalStore = useModalStore()
 const graphStore = useGraphStore()
 
 const {params: {projectId}} = useRoute()
-const { onNodeClick, findNode, onConnect, onInit, onNodeDragStop, addEdges, getNodes, onPaneClick } = useVueFlow('main')
+const { onNodeClick, findNode, onConnect, onNodesInitialized, fitView, onNodeDragStop, addEdges, getNodes, onPaneClick } = useVueFlow('main')
 const shouldWatch = ref(false)
+const nodeFirstInit = ref(true)
 const listenNodePosition = ref(true)
 const intervalId = setInterval(() => {
   listenNodePosition.value = true
@@ -64,11 +65,26 @@ onMounted(async () => {
   try {
     const p = await getProjectFromServer(Number(projectId))
     initVueFlowProject(p, graphStore.project)
-    await nextTick()
+    await nextTick()  //  waiting for node initialization
+    if(nodes.value.length === 0) {
+      nodeFirstInit.value = false
+    }
     shouldWatch.value = true
   }catch(err) {
     console.error('init error:', err)
   }
+})
+
+onNodesInitialized(() => {
+  if(nodeFirstInit.value) {
+    nodeFirstInit.value = false
+    nextTick(() => {
+      fitView({
+        padding: 0.1,
+        maxZoom: 1,
+      })
+    })
+  } // fitView when first loading nodes
 })
 
 watch([
@@ -269,7 +285,6 @@ const isValidConnection = (connection: any) => {
       :connection-mode="ConnectionMode.Strict"
       :is-valid-connection="isValidConnection"
       :zoom-on-double-click="false"
-      fit-view-on-init
       id="main"
       >
 

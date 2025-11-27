@@ -94,20 +94,28 @@
         })
     })
 
-    const {zoomIn,zoomOut,fitView,vueFlowRef} = useVueFlow('main');
+    const {zoomIn,zoomOut,fitView} = useVueFlow('main');
 
     function handleZoomIn(){
         console.log("zoom-in")
-        zoomIn();
+        zoomIn({
+            duration: 200
+        });
     }
 
     function handleZoomOut(){
         console.log("zoom-out")
-        zoomOut();
+        zoomOut({
+            duration: 200
+        });
     }
 
     function handleFitView(){
-        fitView();
+        fitView({
+            padding: 0.1,
+            maxZoom: 1,
+            duration: 300
+        })
     }
 
     async function handleForcedSync(){
