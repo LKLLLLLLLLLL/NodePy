@@ -274,12 +274,12 @@ class ProjectInterpreter:
                     callbefore(node_id)
 
                     # run node
-                    input_data_hash = safe_hash(input_data)  # guide to avoid accidental mutation
                     start_time = time.perf_counter()
+                    input_data_hash = safe_hash(input_data)  # guide to avoid accidental mutation
                     output_data = node.execute(input_data)
-                    running_time = (time.perf_counter() - start_time) * 1000  # in ms
                     if safe_hash(input_data) != input_data_hash:
                         raise AssertionError(f"Node {node_id} in type {node.type} input data were modified during execution, which is not allowed.")
+                    running_time = (time.perf_counter() - start_time) * 1000  # in ms
                 else:
                     output_data, running_time = cache_data
             # 4. call callafter
