@@ -86,7 +86,11 @@ export const nodeMenuItems: MenuNode[] = [
             {
                 label: '列间布尔运算节点',
                 value: 'BoolColWithColBinOpNode'
-            }
+            },
+            {
+                label: '列间比较节点',
+                value: 'ColCompareNode'
+            },
         ]
     },
     {

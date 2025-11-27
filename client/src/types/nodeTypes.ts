@@ -270,6 +270,20 @@ export interface BoolColWithColBinOpNode extends BaseNode<BoolColWithColBinOpNod
 }
 
 
+export interface ColCompareNodeParam {
+    op: typeof CmpOpList[number],
+    col1: string,
+    col2: string,
+    result_col?: string
+}
+export type ColCompareNodeData = BaseData & {
+    param: ColCompareNodeParam
+}
+export interface ColCompareNode extends BaseNode<ColCompareNodeData>{
+    type: 'ColCompareNode'
+}
+
+
 export interface ToStringNode extends BaseNode {
     type: 'ToStringNode'
 }

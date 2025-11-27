@@ -280,6 +280,21 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedBoolColWithColBinOpNode)
         break
+      case 'ColCompareNode':
+        const addedColCompareNode: Nodetypes.ColCompareNode = {
+          id,
+          position,
+          type: 'ColCompareNode',
+          data: {
+            param: {
+              op: 'EQ',
+              col1: '',
+              col2: ''
+            }
+          }
+        }
+        addNodes(addedColCompareNode)
+        break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
           id,
