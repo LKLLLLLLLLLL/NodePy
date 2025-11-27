@@ -16,7 +16,7 @@
             </div>
             <div class="output-datetime port">
                 <div class="output-port-description">
-                    日期时间输出端口
+                    日期时间输出
                 </div>
                 <Handle id="datetime" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': datetimeHasErr}]"/>
             </div>

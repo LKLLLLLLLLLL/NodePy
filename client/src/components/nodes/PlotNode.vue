@@ -4,7 +4,7 @@
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
-                <div class="input-port-description">表格输入端口</div>
+                <div class="input-port-description">表格输入</div>
                 <Handle id="input" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': tableHasErr.value}]"/>
             </div>
             <div class="x_col">
@@ -41,7 +41,7 @@
                 <NodepyStringInput v-model="title" @update-value="onUpdateTitle" class="nodrag" placeholder="图像标题"/>
             </div>
             <div class="output-plot port">
-                <div class="output-port-description">图像输出端口</div>
+                <div class="output-port-description">图像输出</div>
                 <Handle id="plot" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': plotHasErr}]"/>
             </div>
         </div>

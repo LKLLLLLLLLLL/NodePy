@@ -5,13 +5,13 @@
         <div class="data">
             <div class="input-x port">
                 <div class="input-port-description">
-                    x输入端口
+                    x输入
                 </div>
                 <Handle id="x" type="target" :position="Position.Left" :class="[`${x_type}-handle-color`, {'node-errhandle': xHasErr.value}]"/>
             </div>
             <div class="input-y port">
                 <div class="input-port-description">
-                    y输入端口
+                    y输入
                 </div>
                 <Handle id="y" type="target" :position="Position.Left" :class="[`${y_type}-handle-color`, {'node-errhandle': yHasErr.value}]"/>
             </div>
@@ -28,7 +28,7 @@
             </div>
             <div class="output-result port">
                 <div class="output-port-description">
-                    结果输出端口
+                    结果输出
                 </div>
                 <Handle id="result" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': resultHasErr}]"/>
             </div>

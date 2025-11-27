@@ -13,7 +13,7 @@
                 </div>
             </div>
             <div class="output-file port">
-                <div class="output-port-description">文件输出端口</div>
+                <div class="output-port-description">文件输出</div>
                 <Handle id="file" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': fileOutputHasErr}]"/>
             </div>
         </div>

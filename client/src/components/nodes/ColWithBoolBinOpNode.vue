@@ -46,7 +46,7 @@
             </div>
             <div class="output-table port">
                 <div class="output-port-description">
-                    结果表格输出端口
+                    结果表格输出
                 </div>
                 <Handle id="table" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': outputTableHasErr}]"/>
             </div>

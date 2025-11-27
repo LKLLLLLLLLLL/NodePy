@@ -76,7 +76,7 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'ColWithBoolBinOpNode'
             },
             {
-                label: '列布尔一元运算节点',
+                label: '列布尔非运算节点',
                 value: 'BoolColUnaryOpNode'
             },
             {

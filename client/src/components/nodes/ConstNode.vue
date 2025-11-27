@@ -34,7 +34,7 @@
             </div>
             <div class="output-const port">
                 <div class="output-port-description">
-                    常量输出端口
+                    常量输出
                 </div>
                 <Handle id="const" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': constHasErr}]"/>
             </div>

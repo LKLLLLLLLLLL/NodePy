@@ -17,7 +17,7 @@
             </div>
             <div class="output-string port">
                 <div class="output-port-description">
-                    字符串输出端口
+                    字符串输出
                 </div>
                 <Handle id="string" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': stringHasErr}]"/>
             </div>

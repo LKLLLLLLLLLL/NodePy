@@ -15,7 +15,7 @@
             </div>
             <div class="output-const port">
                 <div class="output-port-description">
-                    布尔输出端口
+                    布尔输出
                 </div>
                 <Handle id="const" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': constHasErr}]"/>
             </div>

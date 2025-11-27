@@ -5,7 +5,7 @@
         <div class="data">
             <div class="input-file port">
                 <div class="input-port-description">
-                    文件输入端口
+                    文件输入
                 </div>
                 <Handle
                     id="file"
@@ -16,7 +16,7 @@
             </div>
             <div class="output-table port">
                 <div class="output-port-description">
-                    表格输出端口
+                    表格输出
                 </div>
                 <Handle
                     id="table"
