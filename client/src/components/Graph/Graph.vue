@@ -67,10 +67,6 @@ onMounted(async () => {
   }
 })
 
-onInit((instance) => {
-  instance.fitView()
-})
-
 watch([
   () => nodes.value.length, // @ts-ignore
   () => nodes.value.map(n => JSON.stringify(n.data.param)).join('|'),
@@ -261,6 +257,7 @@ const isValidConnection = (connection: any) => {
       :connection-mode="ConnectionMode.Strict"
       :is-valid-connection="isValidConnection"
       :zoom-on-double-click="false"
+      fit-view-on-init
       id="main"
       >
 

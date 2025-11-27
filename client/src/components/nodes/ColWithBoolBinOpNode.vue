@@ -88,11 +88,11 @@
         value: false
     })
     const colHasErr = ref({
-        handleId: 'col',
+        id: 'col',
         value: false
     })
     const result_colHasErr = ref({
-        handleId: 'result_col',
+        id: 'result_col',
         value: false
     })
     const inputTableHasErr = ref({
