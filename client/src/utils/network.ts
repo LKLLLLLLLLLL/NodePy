@@ -117,7 +117,8 @@ export const sync = async(graphStore: any) => {
     try {
         const resultStore = useResultStore()
         resultStore.cacheGarbageRecycle()
-        const p = getProject(graphStore.project)
+        const p_temp = getProject(graphStore.project)
+        const p = JSON.parse(JSON.stringify(p_temp))
         const res = await syncProject(p, graphStore)
         console.log('syncProject response:', res, res === p)
         writeBackVueFLowProject(res, graphStore.project)
@@ -134,7 +135,8 @@ export const sync = async(graphStore: any) => {
 export const syncUiState = async(graphStore: any) => {
 
     try {
-        const p = getProject(graphStore.project)
+        const p_temp = getProject(graphStore.project)
+        const p = JSON.parse(JSON.stringify(p_temp))
         const res = await syncProjectUiState(p, graphStore)
         console.log('syncProjectUiState response:', res)
     }catch(err) {
