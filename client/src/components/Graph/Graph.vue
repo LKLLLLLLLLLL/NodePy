@@ -29,6 +29,7 @@ import ColWithNumberBinOpNode from '../nodes/ColWithNumberBinOpNode.vue'
 import ColWithBoolBinOpNode from '../nodes/ColWithBoolBinOpNode.vue'
 import NumberColUnaryOpNode from '../nodes/NumberColUnaryOpNode.vue'
 import BoolColUnaryOpNode from '../nodes/BoolColUnaryOpNode.vue'
+import NumberColWithColBinOpNode from '../nodes/NumberColWithColBinOpNode.vue'
 import UploadNode from '../nodes/UploadNode.vue'
 import TableFromFileNode from '../nodes/TableFromFileNode.vue'
 import PlotNode from '../nodes/PlotNode.vue'
@@ -231,6 +232,8 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.compute
     case 'BoolColUnaryOpNode':
       return nodeCategoryColor.compute
+    case 'NumberColWithColBinOpNode':
+      return nodeCategoryColor.compute
     case 'PlotNode':
       return nodeCategoryColor.visualize
     case 'UploadNode':
@@ -354,6 +357,10 @@ const isValidConnection = (connection: any) => {
 
         <template #node-BoolColUnaryOpNode="BoolColUnaryOpNodeProps">
           <BoolColUnaryOpNode v-bind="BoolColUnaryOpNodeProps"/>
+        </template>
+
+        <template #node-NumberColWithColBinOpNode="NumberColWithColBinOpNodeProps">
+          <NumberColWithColBinOpNode v-bind="NumberColWithColBinOpNodeProps"/>
         </template>
 
         <template #node-PlotNode="PlotNodeProps">
