@@ -292,3 +292,61 @@ class MergeNode(BaseNode):
         merged_df = pd.concat([df_1, df_2], ignore_index=True)
 
         return {"merged_table": Data.from_df(merged_df)}
+
+
+@register_node()
+class SliceNode(BaseNode):
+    """
+    Slice table rows by specified indices.
+    """
+    begin: int | None = None
+    end: int | None = None
+    step: int = 1
+
+    @override
+    def validate_parameters(self) -> None:
+        if not self.type == "SliceNode":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Node type parameter mismatch.",
+            )
+        if self.step == 0:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="step",
+                err_msg="Step cannot be zero.",
+            )
+        return
+
+    @override
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
+        return [
+            InPort(
+                name="table",
+                description="Input table to be sliced.",
+                accept=Pattern(
+                    types={Schema.Type.TABLE},
+                ),
+            )
+        ], [
+            OutPort(
+                name="sliced_table",
+                description="Output table after slicing the input table.",
+            )
+        ]
+
+    @override
+    def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
+        table_schema = input_schemas["table"]
+        return {"sliced_table": table_schema}
+
+    @override
+    def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
+        table_data = input["table"]
+        assert isinstance(table_data.payload, Table)
+        df = table_data.payload.df
+
+        sliced_df = df.iloc[self.begin:self.end:self.step]
+
+        return {"sliced_table": Data.from_df(sliced_df)}

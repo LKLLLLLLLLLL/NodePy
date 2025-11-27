@@ -4,6 +4,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, PrivateAttr, model_validator
 from typing_extensions import Self
 
+from server import logger
 from server.models.data import Data
 from server.models.exception import (
     NodeExecutionError,
@@ -217,7 +218,12 @@ class BaseNode(BaseModel):
         sub_cls = _NODE_REGISTRY.get(type_name)
         if sub_cls is None:
             raise ValueError(f"Node type '{type_name}' is not registered.")
-        return sub_cls.hint(input_schemas, current_params)
+        try:
+            hint = sub_cls.hint(input_schemas, current_params)
+            return hint
+        except Exception as e:
+            logger.warning(f"Failed to get hint for node type '{type_name}': {e}")
+            return {}
 
 _NODE_REGISTRY: dict[str, type[BaseNode]] = {}
 _NODE_PAIR_REGISTRY: dict[str, bool] = {}
