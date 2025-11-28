@@ -103,6 +103,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '浮点数转换节点',
                 value: 'ToFloatNode'
             },
+            {
+                label: '布尔转换节点',
+                value: 'ToBoolNode'
+            },
         ]
     },
     {

@@ -331,6 +331,17 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedToFloatNode)
         break
+      case 'ToBoolNode':
+        const addedToBoolNode: Nodetypes.ToBoolNode = {
+          id,
+          position,
+          type: 'ToBoolNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedToBoolNode)
+        break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
           id,
