@@ -1,4 +1,4 @@
-from typing import Any, Dict, override
+from typing import Any, Dict, Literal, override
 
 from server.models.data import Data, Table
 from server.models.exception import (
@@ -275,6 +275,172 @@ class DropNaNValueNode(BaseNode):
             assert table_schema.tab is not None
             subset_col_choices = list(table_schema.tab.col_types.keys())
         return {"subset_col_choices": subset_col_choices}
+
+
+@register_node()
+class FillNaNValueNode(BaseNode):
+    """
+    Fill NaN values in specified columns with a given value.
+    """
+
+    subset_cols: list[str]
+    method: Literal["const", "ffill", "bfill"]
+    fill_value: list[int | float | str | bool] | None = None # the datetime type will be input as iso format string
+
+    @override
+    def validate_parameters(self) -> None:
+        if not self.type == "FillNaNValueNode":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Node type parameter mismatch.",
+            )
+        if len(self.subset_cols) == 0:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="subset_cols",
+                err_msg="Subset columns cannot be empty.",
+            )
+        if self.method == "const":
+            if self.fill_value is None:
+                raise NodeParameterError(
+                    node_id=self.id,
+                    err_param_key="fill_value",
+                    err_msg="Fill value must be provided when method is 'const'.",
+                )
+            if len(self.fill_value) != len(self.subset_cols):
+                raise NodeParameterError(
+                    node_id=self.id,
+                    err_param_key="fill_value",
+                    err_msg="Fill value length must match subset columns length.",
+                )
+        return
+
+    @override
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
+        return [
+            InPort(
+                name="table",
+                description="Input table to fill NaN values in.",
+                accept=Pattern(
+                    types={Schema.Type.TABLE},
+                    table_columns={col: set() for col in self.subset_cols},
+                ),
+            )
+        ], [
+            OutPort(
+                name="filled_table",
+                description="Output table with NaN values filled.",
+            )
+        ]
+
+    @override
+    def infer_output_schemas(
+        self, input_schemas: Dict[str, Schema]
+    ) -> Dict[str, Schema]:
+        from datetime import datetime
+        
+        table_schema = input_schemas["table"]
+        assert table_schema.tab is not None
+        for col in self.subset_cols:
+            if col not in table_schema.tab.col_types:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="table",
+                    err_msg=f"Subset column '{col}' not found in input table schema.",
+                )
+        # check if fill_value type matches column type
+        if self.method == "const":
+            converted_fill_values = []
+            assert self.fill_value is not None
+            for col, value in zip(self.subset_cols, self.fill_value):
+                col_type = table_schema.tab.col_types[col]
+                if col_type == ColType.INT:
+                    if not isinstance(value, int):
+                        raise NodeValidationError(
+                            node_id=self.id,
+                            err_input="table",
+                            err_msg=f"Fill value for column '{col}' must be of type int.",
+                        )
+                    converted_fill_values.append(value)
+                elif col_type == ColType.FLOAT:
+                    if not isinstance(value, (int, float)):
+                        raise NodeValidationError(
+                            node_id=self.id,
+                            err_input="table",
+                            err_msg=f"Fill value for column '{col}' must be of type float.",
+                        )
+                    converted_fill_values.append(float(value))
+                elif col_type == ColType.STR:
+                    if not isinstance(value, str):
+                        raise NodeValidationError(
+                            node_id=self.id,
+                            err_input="table",
+                            err_msg=f"Fill value for column '{col}' must be of type str.",
+                        )
+                    converted_fill_values.append(value)
+                elif col_type == ColType.BOOL:
+                    if not isinstance(value, bool):
+                        raise NodeValidationError(
+                            node_id=self.id,
+                            err_input="table",
+                            err_msg=f"Fill value for column '{col}' must be of type bool.",
+                        )
+                    converted_fill_values.append(value)
+                elif col_type == ColType.DATETIME:
+                    if not isinstance(value, str):
+                        raise NodeValidationError(
+                            node_id=self.id,
+                            err_input="table",
+                            err_msg=f"Fill value for column '{col}' must be of type str representing datetime.",
+                        )
+                    converted_fill_values.append(datetime.fromisoformat(value))
+                else:
+                    assert False, "Unsupported column type"
+            self.fill_value = converted_fill_values
+        return {"filled_table": table_schema}
+
+    @override
+    def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
+        table_data = input["table"]
+        assert isinstance(table_data.payload, Table)
+        df = table_data.payload.df.copy()
+
+        if self.method == "value":
+            # fill with constant value
+            assert self.fill_value is not None
+            filled_df = df.fillna(
+                value={col: val for col, val in zip(self.subset_cols, self.fill_value)}
+            )
+        elif self.method == "ffill":
+            # fill with forward fill
+            df[self.subset_cols] = df[self.subset_cols].ffill()
+            filled_df = df
+        elif self.method == "bfill":
+            # fill with backward fill
+            df[self.subset_cols] = df[self.subset_cols].bfill()
+            filled_df = df
+        else:
+            filled_df = df
+
+        filled_data = Data(
+            payload=Table(df=filled_df, col_types=table_data.payload.col_types)
+        )
+
+        return {"filled_table": filled_data}
+
+    @override
+    @classmethod
+    def hint(
+        cls, input_schemas: Dict[str, Schema], current_params: Dict
+    ) -> Dict[str, Any]:
+        hint = {}
+        if "table" in input_schemas:
+            table_schema = input_schemas["table"]
+            assert table_schema.tab is not None
+            subset_col_choices = list(table_schema.tab.col_types.keys())
+            hint["subset_col_choices"] = subset_col_choices
+        return hint
 
 
 @register_node()

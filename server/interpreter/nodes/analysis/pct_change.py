@@ -1,5 +1,7 @@
 from typing import Any, Dict, override
 
+from pydantic import PrivateAttr
+
 from server.models.data import Data, Table
 from server.models.exception import (
     NodeParameterError,
@@ -8,6 +10,7 @@ from server.models.schema import (
     ColType,
     Pattern,
     Schema,
+    TableSchema,
     check_no_illegal_cols,
     generate_default_col_name,
 )
@@ -16,32 +19,28 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
 @register_node()
-class MovingAverageNode(BaseNode):
+class PctChangeNode(BaseNode):
     """
-    A node to calculate the moving average of a specified column over a defined window size.
+    A node to calculate the percentage change of a specified column between each row and the previous row.
+    Export a new table with the specific column, and n-1 rows, where n is the number of rows in the input table.
     """
     col: str
     result_col: str | None = None
-    window_size: int
+
+    _result_col_type: ColType | None = PrivateAttr(default=None)
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "MovingAverageNode":
+        if not self.type == "PctChangeNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
             )
-        if self.window_size <= 0:
-            raise NodeParameterError(
-                node_id=self.id,
-                err_param_key="window_size",
-                err_msg="Window size must be a positive integer.",
-            )
         if not self.result_col:
             self.result_col = generate_default_col_name(
                 id=self.id,
-                annotation="ma",
+                annotation="pct_change",
             )
         if check_no_illegal_cols([self.result_col]) is False:
             raise NodeParameterError(
@@ -57,7 +56,7 @@ class MovingAverageNode(BaseNode):
         return [
             InPort(
                 name="table",
-                description="Input table for moving average calculation.",
+                description="Input table for percentage change calculation.",
                 accept=Pattern(
                     types={Schema.Type.TABLE},
                     table_columns=input_table_cols,
@@ -66,52 +65,55 @@ class MovingAverageNode(BaseNode):
         ], [
             OutPort(
                 name="table",
-                description="Output table with the moving average column."
+                description="Output table with the percentage change column."
             )
         ]
 
     @override
-    def infer_output_schemas(
-        self, input_schemas: Dict[str, Schema]
-    ) -> Dict[str, Schema]:
+    def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         input_schema = input_schemas["table"]
+        assert input_schema.tab is not None
+        assert self.col in input_schema.tab.col_types
+        col_type = input_schema.tab.col_types[self.col]
+        assert col_type in {ColType.FLOAT, ColType.INT}
+        self._result_col_type = ColType.FLOAT
+        output_col_types = input_schema.tab.col_types.copy()
         assert self.result_col is not None
-        return {"table": input_schema.append_col(self.result_col, ColType.FLOAT)}
+        output_col_types[self.result_col] = self._result_col_type
+        table_schema = Schema(
+            type=Schema.Type.TABLE,
+            tab=TableSchema(
+                col_types=output_col_types,
+            )
+        )
+        return {"table": table_schema}
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         input_table_data = input["table"]
         assert isinstance(input_table_data.payload, Table)
+        assert self._result_col_type is not None
+        assert self.result_col is not None
 
         df = input_table_data.payload.df.copy()
 
-        assert self.result_col is not None
+        df[self.result_col] = df[self.col].pct_change()
 
-        df[self.result_col] = df[self.col].rolling(window=self.window_size).mean()
+        new_col_types = input_table_data.payload.col_types.copy()
+        new_col_types[self.result_col] = self._result_col_type
 
-        output_data = Data(
-            payload=Table(
-                df=df,
-                col_types={
-                    **input_table_data.payload.col_types,
-                    self.result_col: ColType.FLOAT,
-                },
-            )
-        )
-
+        output_table = Table(df=df, col_types=new_col_types)
+        output_data = Data(payload=output_table)
         return {"table": output_data}
 
     @override
     @classmethod
     def hint(cls, input_schemas: Dict[str, Schema], current_params: Dict) -> Dict[str, Any]:
-        hint = {}
+        col_choices = []
         if "table" in input_schemas:
             input_schema = input_schemas["table"]
-            if input_schema.tab is not None:
-                col_choices = [
-                    col_name
-                    for col_name, col_type in input_schema.tab.col_types.items()
-                    if col_type in {ColType.FLOAT, ColType.INT}
-                ]
-                hint["col_choices"] = col_choices
-        return hint
+            assert input_schema.tab is not None
+            for col_name, col_type in input_schema.tab.col_types.items():
+                if col_type in {ColType.FLOAT, ColType.INT}:
+                    col_choices.append(col_name)
+        return {"col_choices": col_choices}

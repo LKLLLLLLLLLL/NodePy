@@ -684,7 +684,24 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **hint：**
 - subset_col_choices: 列名列表，类型为List[str]，用于在UI中为subset_cols参数提供可选值。
 
-#### 5.7 SortNode
+##### 5.7 FillNaNValueNode
+表格缺失值填充节点，根据指定的列名列表和填充值填充NaN值。
+
+**参数：**
+- subset_cols: 列名列表，类型为List[str]，指定用于填充NaN值的列名。
+- method: 填充方法，类型为str，取值为"const", "ffill", "bfill"。
+- fill_value: 填充值，只有当method类型为"const"时，需要提供。类型为list[int | float | str | bool] 或 None，根据列的数据类型而定，如果要填充的列是Datetime类型，则填充值必须为符合ISO 8601格式的字符串。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- filled_table: 填充NaN值后的表格，类型为Table。
+
+**hint：**
+- subset_col_choices: 列名列表，类型为List[str]，用于在UI中为subset_cols参数提供可选值。
+
+#### 5.8 SortNode
 表格排序节点，根据指定的列名列表对表格进行排序操作。
 
 **参数：**
@@ -700,7 +717,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **hint：**
 - sort_col_choices: 列名列表，类型为List[str]，用于在UI中为sort_cols参数提供可选值。
 
-#### 5.8 GroupNode
+#### 5.9 GroupNode
 表格分组节点，根据指定的列名列表对表格进行分组操作，并对每个分组应用聚合函数。
 
 **参数：**
@@ -718,7 +735,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - group_col_choices: 列名列表，类型为List[str]，用于在UI中为group_cols参数提供可选值。
 - agg_col_choices: 列名列表，类型为List[str]，用于在UI中为agg_col参数提供可选值。
 
-#### 5.9 MergeNode
+#### 5.10 MergeNode
 表格合并节点，将两个有着相同列的表格合并为一个表格。
 
 **参数：**
@@ -731,7 +748,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - merged_table: 合并后的表格，类型为Table。
 
-#### 5.10 SliceNode
+#### 5.11 SliceNode
 表格切片节点，根据指定的起始行和结束行对表格进行切片操作。
 
 **参数：**
@@ -745,7 +762,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - sliced_table: 切片后的表格，类型为Table。
 
-#### 5.11 SelectColNode
+#### 5.12 SelectColNode
 表格列选择节点，根据指定的列名列表从表格中选择对应的列。
 
 **参数：**
@@ -761,7 +778,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **hint：**
 - selected_col_choices: 列名列表，类型为List[str]，用于在UI中为selected_cols参数提供可选值。
 
-#### 5.12 JoinNode
+#### 5.13 JoinNode
 表格连接节点，根据指定的键列将两个表格进行连接操作。
 
 **参数：**
@@ -780,7 +797,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - left_on_choices: 列名列表，类型为List[str]，用于在UI中为left_on参数提供可选值。
 - right_on_choices: 列名列表，类型为List[str]，用于在UI中为right_on参数提供可选值。
 
-#### 5.13 RenameColNode
+#### 5.14 RenameColNode
 表格列重命名节点，根据指定的列名映射关系对表格中的列进行重命名操作。
 
 **参数：**
@@ -794,6 +811,23 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **hint：**
 - rename_col_choices: 列名列表，类型为List[str]，用于在UI中为rename_map参数提供可选值。
+
+#### 5.15 ShiftNode
+表格列数据移动节点，根据指定的列名和移动步数对表格中的列数据进行移动操作。
+
+**参数：**
+- col: 要操作的表格列名，类型为str。
+- periods: 移动步数，类型为int，正数表示向下移动，负数表示向上移动。
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含新增的结果列。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
 
 ### 6. 文件处理节点(file)
 #### 6.1 UploadNode
@@ -972,13 +1006,15 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **hint：**
 - col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
 
-#### 8.3 MovingAverageNode
-移动平均计算节点，计算输入表格中指定列的移动平均值。
+#### 8.3 RollingNode
+移动计算节点，计算输入表格中指定列的移动统计值。
 
 **参数：**
-- col: 要计算移动平均的表格列名，类型为str。
-- window_size: 窗口大小，类型为int，表示计算移动平均时
+- col: 要计算移动统计的表格列名，类型为str。
+- window_size: 窗口大小，类型为int，表示计算移动统计时的窗口大小。
+- min_periods: 最小周期数，类型为int，表示在计算移动统计时所需的最小非NA值数量，可选，默认为1。
 - result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+- method: 移动统计方法，类型为Literal["mean", "std", "sum", "min", "max"]。
 
 **输入：**
 - table: 输入的表格，类型为Table。
@@ -1003,6 +1039,39 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的重采样列
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
+#### 8.5 PctChangeNode
+百分比变化计算节点，计算输入表格中指定列的相邻行之间的的百分比变化。
+
+**参数：**
+- col: 要计算百分比变化的表格列名，类型为str。
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含新增的百分比变化列。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
+#### 8.6 CumulativeNode
+累积计算节点，计算输入表格中指定列的累积值。
+
+**参数：**
+- col: 要计算累积值的表格列名，类型为str。
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+- method: 累积计算方法，类型为 Literal["cumsum", "cumprod", "cummax", "cummin"]。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含新增的累积值列。
 
 **hint：**
 - col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
