@@ -108,11 +108,11 @@ class ToIntNode(BaseNode):
         assert isinstance(input_data, (bool, float, str))
 
         def float_to_int(val: float) -> int:
-            if self.method == 'floor':
+            if self.method == 'FLOOR':
                 return math.floor(val)
-            elif self.method == 'ceil':
+            elif self.method == 'CEIL':
                 return math.ceil(val)
-            elif self.method == 'round':
+            elif self.method == 'ROUND':
                 return round(val)
             else:
                 raise NodeExecutionError(

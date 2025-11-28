@@ -307,6 +307,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedToStringNode)
         break
+      case 'ToIntNode':
+        const addedToIntNode: Nodetypes.ToIntNode = {
+          id,
+          position,
+          type: 'ToIntNode',
+          data: {
+            param: {
+              method: 'FLOOR'
+            }
+          }
+        }
+        addNodes(addedToIntNode)
+        break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
           id,

@@ -6,7 +6,7 @@ export const dataTypeColor = {
     int: '#1c6bbf',
     float: '#ecbc00',
     str: '#10b981',
-    bool: '#84cc16',
+    bool: '#77b021',
     Table: 'pink',
     File: '#f97316',
     Datetime: '#00c8ff',

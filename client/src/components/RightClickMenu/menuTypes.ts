@@ -95,6 +95,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '字符串转换节点',
                 value: 'ToStringNode'
             },
+            {
+                label: '整数转换节点',
+                value: 'ToIntNode'
+            },
         ]
     },
     {
