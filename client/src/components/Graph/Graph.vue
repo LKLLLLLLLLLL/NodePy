@@ -50,7 +50,7 @@ const modalStore = useModalStore()
 const graphStore = useGraphStore()
 
 const {params: {projectId}} = useRoute()
-const { onNodeClick, findNode, onConnect, onNodesInitialized, fitView, onNodeDragStop, addEdges, getNodes, onPaneClick } = useVueFlow('main')
+const { onNodeClick, findNode, onConnect, onNodesInitialized, fitView, onNodeDragStop, addEdges, getNodes, onPaneClick, screenToFlowCoordinate } = useVueFlow('main')
 const shouldWatch = ref(false)
 const nodeFirstInit = ref(true)
 const listenNodePosition = ref(true)
@@ -60,10 +60,13 @@ const intervalId = setInterval(() => {
 }, 30000)
 const nodes = computed(() => graphStore.project.workflow.nodes)
 const edges = computed(() => graphStore.project.workflow.edges)
+const mousePosition = ref({x: 0, y: 0})
 
 
 onUnmounted(() => {
   clearInterval(intervalId)
+  window.removeEventListener('keydown', handleKeyDown)
+  window.removeEventListener('mousemove', handleMouseMove)
 })
 
 onMounted(async () => {
@@ -78,6 +81,8 @@ onMounted(async () => {
   }catch(err) {
     console.error('init error:', err)
   }
+  window.addEventListener('keydown', handleKeyDown)
+  window.addEventListener('mousemove', handleMouseMove)
 })
 
 onNodesInitialized(() => {
@@ -292,6 +297,25 @@ const isValidConnection = (connection: any) => {
   }
 
   return true
+}
+
+const handleKeyDown = (e: KeyboardEvent) => {
+  if(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return // ignore input and textarea
+  if((e.ctrlKey || e.metaKey) && e.key === 'c') {
+    e.preventDefault()
+    graphStore.copySelectedNodes()
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+    e.preventDefault()
+    graphStore.pasteNodes(mousePosition.value)
+  }
+}
+
+const handleMouseMove = (e: MouseEvent) => {
+  mousePosition.value = screenToFlowCoordinate({
+    x: e.clientX,
+    y: e.clientY
+  })
 }
 
 </script>

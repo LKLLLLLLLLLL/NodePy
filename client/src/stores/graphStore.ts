@@ -10,7 +10,7 @@ export const useGraphStore = defineStore('graph', () => {
   const default_url_id: number = 12306
   const url_id = ref<number>(default_url_id)
   const vueFLowInstance = useVueFlow('main')
-  const {addNodes, nodes} = vueFLowInstance
+  const {addNodes, nodes, getSelectedNodes} = vueFLowInstance
   const project = ref<vueFlowProject>({
     project_id: -1,
     project_name: "",
@@ -24,6 +24,8 @@ export const useGraphStore = defineStore('graph', () => {
   })
   const is_syncing = ref(false)
   const syncing_err_msg = ref('')
+  const copiedNodes = ref<Array<{type: string, position: {x: number, y: number}}>>([])
+  const copiedNodesBounds = ref<{minX: number, minY: number, maxX: number, maxY: number} | null>(null)
 
 
   const nextId = (type:string):string => {
@@ -387,6 +389,42 @@ export const useGraphStore = defineStore('graph', () => {
     }
   }
 
+  const copySelectedNodes = () => {
+    const selectedNodes = getSelectedNodes.value
+    if(selectedNodes.length > 0) {
+      copiedNodes.value = selectedNodes.map(n => ({
+        type: n.type,
+        position: n.position
+      }))
+      let minX = selectedNodes[0]!.position.x
+      let minY = selectedNodes[0]!.position.y
+      let maxX = selectedNodes[0]!.position.x
+      let maxY = selectedNodes[0]!.position.y
+      selectedNodes.forEach(n => {
+        minX = Math.min(minX, n.position.x)
+        minY = Math.min(minY, n.position.y)
+        maxX = Math.max(maxX, n.position.x)
+        maxY = Math.max(maxY, n.position.y)
+      })
+      copiedNodesBounds.value = { minX, minY, maxX, maxY }
+      console.log('copy nodes:', copiedNodes.value)
+    }
+  }
 
-  return {nodes, url_id, currentNode, addNode, project, is_syncing, syncing_err_msg}
+  const pasteNodes = (position: {x: number, y: number}) => {
+    if(copiedNodes.value.length > 0 && copiedNodesBounds.value) {
+      const {minX, minY} = copiedNodesBounds.value
+      copiedNodes.value.forEach((nodeInfo) => {
+        const relativeX = nodeInfo.position.x - minX
+        const relativeY = nodeInfo.position.y - minY
+        addNode(nodeInfo.type, {
+          x: position.x + relativeX,
+          y: position.y + relativeY,
+        })
+      })
+      console.log('paste nodes:', copiedNodes.value)
+    }
+  }
+
+  return {nodes, url_id, currentNode, addNode, project, is_syncing, syncing_err_msg, copySelectedNodes, pasteNodes}
 })
