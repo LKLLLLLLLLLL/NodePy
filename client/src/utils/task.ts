@@ -56,6 +56,7 @@ class TaskManager {
   private cancelCurrentTask: (() => Promise<void>) | null = null
   private timeoutId: number | null = null
   private isOpen: Promise<void> | null = null
+  private isClosed: Promise<void> | null = null
 
   monitorTask(project: Project, task_id: string): Promise<any[]> {
     return this.createCancellableTask(project, task_id)
@@ -70,28 +71,23 @@ class TaskManager {
           try {
             await this.isOpen
             this.currentWebSocket.send('')
+            reject(new TaskCancelledError('任务被新请求取消'))
+            await this.isClosed
           }catch(err) {
             console.log('WebSocket 可能已经关闭:', err)
           }
-          this.currentWebSocket = null
         }
-        if (this.timeoutId) {
-          clearTimeout(this.timeoutId)
-          this.timeoutId = null
-        }
-        this.currentTaskId = null
-        reject(new TaskCancelledError('任务被新请求取消'))
       }
 
       this.currentTaskId = task_id
       const ws = new WebSocket(`ws://localhost:8000/api/project/status/${task_id}`)
       this.currentWebSocket = ws
-
       this.timeoutId = window.setTimeout(() => {
         ws.close()
         this.cleanup()
         resolve(messages)
       }, 600000)
+
 
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data)
@@ -113,34 +109,29 @@ class TaskManager {
 
       }
 
-      ws.onclose = (event) => {
-        if (this.timeoutId) {
-          clearTimeout(this.timeoutId)
-          this.timeoutId = null
-        }
-        stopAllRunningTimers()
-        console.log(`WebSocket 关闭: code=${event.code}, reason=${event.reason}, wasClean=${event.wasClean}, taskid=${task_id}`)
-        this.cleanup()
-        resolve(messages)
-      }
-
       ws.onerror = (error) => {
-        if (this.timeoutId) {
-          clearTimeout(this.timeoutId)
-          this.timeoutId = null
-        }
         console.error('WebSocket 错误:', error)
         this.cleanup()
         reject(error)
       }
 
-
-      this.isOpen =  new Promise<void>((resolve, reject) => {
+      this.isOpen =  new Promise<void> ((res, rej) => {
         ws.onopen = () => {
+          res()
           console.log(`WebSocket 连接已建立, 任务ID: ${task_id}`)
-          resolve()
         }
       })
+
+      this.isClosed = new Promise<void> ((res, rej) => {
+        ws.onclose = (event) => {
+          this.cleanup()
+          stopAllRunningTimers()
+          resolve(messages)
+          res()
+          console.log(`WebSocket 关闭: code=${event.code}, reason=${event.reason}, wasClean=${event.wasClean}, taskid=${task_id}`)
+        }
+      })
+
 
     })
   }
