@@ -8,13 +8,13 @@ import * as Mammoth from 'mammoth'
 import * as XLSX from 'xlsx'
 
 // 导入新组件
-import ShowPDF from './ShowPDF.vue'
-import ShowIMG from './ShowIMG.vue'
-import ShowCSV from './ShowCSV.vue'
-import ShowTXT from './ShowTXT.vue'
-import ShowWord from './ShowWord.vue'
-import ShowExcel from './ShowExcel.vue'
-import ShowJSON from './ShowJSON.vue'
+import ShowPDF from './ShowFiles/ShowPDF.vue'
+import ShowIMG from './ShowFiles/ShowIMG.vue'
+import ShowCSV from './ShowFiles/ShowCSV.vue'
+import ShowTXT from './ShowFiles/ShowTXT.vue'
+import ShowWord from './ShowFiles/ShowWord.vue'
+import ShowExcel from './ShowFiles/ShowExcel.vue'
+import ShowJSON from './ShowFiles/ShowJSON.vue'
 
 // 修改 props 定义，允许 null
 const props = defineProps<{
@@ -258,54 +258,78 @@ const loadFile = async () => {
             } catch (err) {
                 error.value = `TXT 文件读取失败: ${err instanceof Error ? err.message : String(err)}`
             }
+        // 在处理 Word 文件的部分，更新 options 配置
         } else if (isWord.value) {
-            // 处理 Word 文件，增加样式保留
-            try {
+        // 处理 Word 文件，增加样式保留
+        try {
             const arrayBuffer = await blob.arrayBuffer()
             
             // 配置 Mammoth 以保留更多原始样式
             const options = {
                 styleMap: [
-                // 标题样式映射
-                "p[style-name='Title'] => h1:fresh",
-                "p[style-name='Heading 1'] => h1:fresh",
-                "p[style-name='Heading 2'] => h2:fresh",
-                "p[style-name='Heading 3'] => h3:fresh",
-                "p[style-name='Heading 4'] => h4:fresh",
-                "p[style-name='Heading 5'] => h5:fresh",
-                "p[style-name='Heading 6'] => h6:fresh",
-                
-                // 强调样式映射
-                "r[style-name='Strong'] => strong",
-                "r[style-name='Emphasis'] => em",
-                "r[style-name='Underline'] => u",
-                "r[style-name='Strikethrough'] => s",
-                
-                // 列表样式映射
-                "p[style-name='List Paragraph'] => li:fresh",
-                "p[style-name='Caption'] => figcaption:fresh",
-                
-                // 表格样式映射
-                "table => table",
-                "tr => tr",
-                "td => td",
-                "th => th"
+                    // 标题样式映射
+                    "p[style-name='Title'] => h1:fresh",
+                    "p[style-name='Heading 1'] => h1:fresh",
+                    "p[style-name='Heading 2'] => h2:fresh",
+                    "p[style-name='Heading 3'] => h3:fresh",
+                    "p[style-name='Heading 4'] => h4:fresh",
+                    "p[style-name='Heading 5'] => h5:fresh",
+                    "p[style-name='Heading 6'] => h6:fresh",
+                    
+                    // 强调样式映射
+                    "r[style-name='Strong'] => strong",
+                    "r[style-name='Emphasis'] => em",
+                    "r[style-name='Underline'] => u",
+                    "r[style-name='Strikethrough'] => s",
+                    
+                    // 列表样式映射
+                    "p[style-name='List Paragraph'] => li:fresh",
+                    "p[style-name='Caption'] => figcaption:fresh",
+                    
+                    // 表格样式映射
+                    "table => table",
+                    "tr => tr",
+                    "td => td",
+                    "th => th",
+                    
+                    // 更多样式映射
+                    "p[style-name='Normal'] => p:fresh",
+                    "r[style-name='Font Color'] => span",
+                    "r[style-name='Background Color'] => span",
+                    "p[style-name='Quote'] => blockquote:fresh",
+                    "p[style-name='Code'] => pre:fresh",
+                    
+                    // 上下标映射
+                    "r[style-name='Superscript'] => sup",
+                    "r[style-name='Subscript'] => sub",
+                    
+                    // 更多文本样式映射
+                    "r[style-name='Highlight'] => span",
+                    "r[style-name='Bold'] => strong",
+                    "r[style-name='Italic'] => em",
+                    
+                    // 增加更多样式支持
+                    "r[style-name='Double Underline'] => span.ql-double-underline",
+                    "r[style-name='Wave Underline'] => span.ql-wave-underline",
+                    "r[style-name='Dotted Underline'] => span.ql-dotted-underline",
+                    "r[style-name='Dashed Underline'] => span.ql-dashed-underline"
                 ],
                 // 保留更多的原始格式信息
                 includeDefaultStyleMap: true,
+                // 增加对图片的处理
                 convertImage: Mammoth.images.imgElement(function(image) {
-                return image.read("base64").then(function(imageBuffer) {
-                    return {
-                    src: "data:" + image.contentType + ";base64," + imageBuffer
-                    };
-                });
+                    return image.read("base64").then(function(imageBuffer) {
+                        return {
+                            src: "data:" + image.contentType + ";base64," + imageBuffer
+                        };
+                    });
                 })
             }
             
             const result = await Mammoth.convertToHtml({ arrayBuffer }, options)
             wordContent.value = result.value
             } catch (err) {
-            error.value = `Word 文件解析失败: ${err instanceof Error ? err.message : String(err)}`
+                error.value = `Word 文件解析失败: ${err instanceof Error ? err.message : String(err)}`
             }
         } else if (isXlsx.value) {
             // 处理 Excel 文件

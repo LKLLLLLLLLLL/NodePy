@@ -60,6 +60,12 @@ export const useUserStore = defineStore('user',()=>{
                         break;
                 }
             }
+            else{
+                notify({
+                    type: 'error',
+                    message: 'Unknown error occurred'
+                })
+            }
         }
     }
 

@@ -63,8 +63,7 @@
     }
 </script>
 <template>
-    <div class="nodeinfo-container" v-if="nodeInfo">
-        <!-- 节点基本信息 -->
+    <!-- <div class="nodeinfo-container" v-if="nodeInfo">
         <div class='info-section'>
             <div class='section-title'>节点信息</div>
             <div class='info-item'>
@@ -81,7 +80,6 @@
             </div>
         </div>
 
-        <!-- 数据输出信息 -->
         <div class='info-section' v-if="dataOutInfo.length > 0">
             <div class='section-title'>数据输出</div>
             <div v-for="output in dataOutInfo" :key="output.key" class='output-item'>
@@ -95,13 +93,15 @@
             </div>
         </div>
 
-        <!-- 无数据提示 -->
         <div v-else class='no-data'>
             节点尚未执行，暂无数据输出
         </div>
     </div>
     <div v-else class='nodeinfo-container no-data'>
         无节点信息
+    </div> -->
+    <div>
+        No result
     </div>
 </template>
 <style lang="scss" scoped>

@@ -246,6 +246,12 @@ export const useFileStore = defineStore('file', () => {
                         break;
                 }
             }
+            else{
+                notify({
+                    message: 'Unknown error occurred',
+                    type: 'error'
+                });
+            }
         }
     }
 
@@ -272,6 +278,12 @@ export const useFileStore = defineStore('file', () => {
                         });
                         break;
                 }
+            }
+            else{
+                notify({
+                    message: 'Unknown error occurred',
+                    type: 'error'
+                });
             }
         }
     }
@@ -318,6 +330,12 @@ export const useFileStore = defineStore('file', () => {
                         });
                         break;
                 }
+            }
+            else{
+                notify({
+                    message: 'Unknown error occurred',
+                    type: 'error'
+                });
             }
         }
     }

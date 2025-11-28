@@ -8,8 +8,11 @@ const props = defineProps<{
 const txtLinesPerPage = 50
 const txtCurrentPage = ref<number>(1)
 
+// 修改这里以保留空行
 const txtLines = computed(() => {
-  return props.data.split('\n')
+  // 使用 split('\n') 会保留空行，但我们还需要处理末尾的空行情况
+  const lines = props.data.split('\n')
+  return lines
 })
 
 const txtTotalPages = computed(() => Math.ceil(txtLines.value.length / txtLinesPerPage))
@@ -45,7 +48,8 @@ const txtGoToPage = (page: number) => {
 <template>
   <div class="txt-view">
     <div class="txt-content">
-      <pre v-for="(line, index) in txtCurrentPageContent" :key="index" class="txt-line">{{ line }}</pre>
+      <!-- 修改这里以更好地显示空行 -->
+      <pre v-for="(line, index) in txtCurrentPageContent" :key="index" class="txt-line"><span v-if="line === ''">&nbsp;</span><span v-else>{{ line }}</span></pre>
     </div>
     <!-- TXT 分页控件 -->
     <div v-if="txtTotalPages > 1" class="txt-pagination">
@@ -112,6 +116,8 @@ const txtGoToPage = (page: number) => {
   margin: 0;
   padding: 2px 0;
   font-family: inherit;
+  /* 确保空行也能正确显示 */
+  min-height: 1.2em;
 }
 
 .txt-pagination {
