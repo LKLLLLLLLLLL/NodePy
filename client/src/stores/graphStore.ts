@@ -19,7 +19,8 @@ export const useGraphStore = defineStore('graph', () => {
       nodes: [],
       edges: []
     },
-    updated_at: 0
+    updated_at: 0,
+    editable: true
   })
   const is_syncing = ref(false)
   const syncing_err_msg = ref('')

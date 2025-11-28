@@ -1,8 +1,8 @@
 <script lang="ts" setup>
     import { useUserStore } from '@/stores/userStore';
-import type { ExploreListItem } from '@/utils/api';
-import { computed } from 'vue';
-import { useRouter } from 'vue-router';
+    import type { ExploreListItem } from '@/utils/api';
+    import { computed } from 'vue';
+    import { useRouter } from 'vue-router';
 
     const props = defineProps<{
         item: ExploreListItem
@@ -45,7 +45,7 @@ import { useRouter } from 'vue-router';
     async function handleOpenExample(){
         const route = router.resolve({
             name: 'editor-example',
-            params: { exampleName: props.item.project_name }
+            params: { projectId: props.item.project_id }
         });
         window.open(route.href, '_blank');
     }

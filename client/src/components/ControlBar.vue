@@ -24,6 +24,11 @@ const showProjectName = computed(()=>{
   else return false
 })
 
+// 判断项目是否为只读模式
+const isReadOnly = computed(() => {
+  return graphStore.project.editable === false
+})
+
 // 导航项
 const navItems = [
   { name: 'Home', path: '/home', label: '首页' },
@@ -44,6 +49,7 @@ const isActive = (path: string) => {
 <template>
   <div
     class="control-bar set_background_color"
+    :class="{ 'readonly-mode': isReadOnly }"
   >
     <!-- 控制栏内容 -->
     <div class="control-content">
@@ -64,6 +70,10 @@ const isActive = (path: string) => {
 
         <div v-else class="project-name">
           <h2>{{ graphStore.project.project_name }}</h2>
+          <!-- 只读提示 -->
+          <div v-if="isReadOnly" class="readonly-indicator">
+            只读
+          </div>
         </div>
 
         <div class="user-avatar">
@@ -139,6 +149,22 @@ const isActive = (path: string) => {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .readonly-indicator {
+      display: flex;
+      background-color: #108EFE;
+      align-items: center;
+      justify-content: center;
+      height: 30px;
+      width: 40px;
+      margin-left: 10px;
+      border-radius: 4px;
       font-size: 14px;
       font-weight: 500;
     }
