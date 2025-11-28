@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-    import { ref, onMounted, computed, watch } from 'vue';
+    import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue';
     import { useRouter, useRoute } from 'vue-router';
     import { useModalStore } from '@/stores/modalStore';
     import { useProjectStore } from '@/stores/projectStore';
@@ -15,6 +15,9 @@
     const loginStore = useLoginStore();
     const router = useRouter();
     const route = useRoute();
+    
+    // 定时器引用
+    const refreshTimer = ref<number | null>(null);
 
     onMounted(()=>{
         loginStore.checkAuthStatus()
@@ -26,11 +29,26 @@
                 name: 'login'
             })
         }
+        
+        // 设置定时刷新，每3分钟刷新一次
+        refreshTimer.value = window.setInterval(() => {
+            if (loginStore.loggedIn) {
+                projectStore.initializeProjects()
+            }
+        }, 3 * 60 * 1000); // 3分钟 = 3 * 60 * 1000毫秒
+    });
+    
+    // 清理定时器，避免内存泄漏
+    onBeforeUnmount(() => {
+        if (refreshTimer.value) {
+            window.clearInterval(refreshTimer.value);
+            refreshTimer.value = null;
+        }
     });
 
     // 监听路由变化，当进入项目列表页面时刷新数据
     watch(() => route.name, (newRoute) => {
-        if (newRoute === 'project-list' && loginStore.loggedIn) {
+        if (newRoute === 'project' && loginStore.loggedIn) {
             projectStore.initializeProjects()
         }
     });

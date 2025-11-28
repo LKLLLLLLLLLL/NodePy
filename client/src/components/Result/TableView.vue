@@ -75,12 +75,17 @@
             return '-'
         }
         if (typeof value === 'boolean') {
-            return value ? '是' : '否'
+            return value ? 'True' : 'False'
         }
         if (typeof value === 'number') {
             return value.toString()
         }
         return String(value)
+    }
+    
+    // 检查是否为布尔值
+    function isBooleanValue(value: any): boolean {
+        return typeof value === 'boolean';
     }
 </script>
 <template>
@@ -128,7 +133,13 @@
                             </div>
                         </td>
                         <td v-for="col in tableData.columns" :key="col" class='data-column'>
-                            {{ formatCellValue(row[col]) }}
+                            <span 
+                                v-if="isBooleanValue(row[col])" 
+                                :class="row[col] ? 'boolean-true' : 'boolean-false'"
+                            >
+                                {{ formatCellValue(row[col]) }}
+                            </span>
+                            <span v-else>{{ formatCellValue(row[col]) }}</span>
                         </td>
                     </tr>
                 </tbody>
@@ -258,5 +269,15 @@
 
     .index-value {
         font-weight: 500;
+    }
+    
+    .boolean-true {
+        color: #67c23a; // 绿色表示 True
+        font-weight: bold;
+    }
+    
+    .boolean-false {
+        color: #f56c6c; // 红色表示 False
+        font-weight: bold;
     }
 </style>
