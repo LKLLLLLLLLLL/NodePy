@@ -50,7 +50,7 @@ class ToStringNode(BaseNode):
 
     @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
-        return {'out': Schema(type=Schema.Type.STR)}
+        return {'output': Schema(type=Schema.Type.STR)}
 
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:

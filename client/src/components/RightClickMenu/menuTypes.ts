@@ -91,6 +91,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '列间比较节点',
                 value: 'ColCompareNode'
             },
+            {
+                label: '字符串转换节点',
+                value: 'ToStringNode'
+            },
         ]
     },
     {

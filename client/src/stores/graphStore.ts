@@ -296,6 +296,17 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedColCompareNode)
         break
+      case 'ToStringNode':
+        const addedToStringNode: Nodetypes.ToStringNode = {
+          id,
+          position,
+          type: 'ToStringNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedToStringNode)
+        break
       case 'UploadNode':
         const addedUploadNode: Nodetypes.UploadNode = {
           id,

@@ -1,28 +1,28 @@
 <template>
-    <div class="TableFromFileNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="file">文件表格节点</NodeTitle>
+    <div class="ToStringNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category="compute">字符串转换节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
-            <div class="input-file port">
+            <div class="input-input port">
                 <div class="input-port-description">
-                    文件输入
+                    数据输入
                 </div>
                 <Handle
-                    id="file"
+                    id="input"
                     type="target"
                     :position="Position.Left"
-                    :class="[`${file_type}-handle-color`, {'node-errhandle': fileHaserr.value}]"
+                    :class="[`${input_type}-handle-color`, {'node-errhandle': inputHaserr.value}]"
                 />
             </div>
-            <div class="output-table port">
+            <div class="output-output port">
                 <div class="output-port-description">
-                    表格输出
+                    字符串输出
                 </div>
                 <Handle
-                    id="table"
+                    id="output"
                     type="source"
                     :position="Position.Right"
-                    :class="[`${schema_type}-handle-color`, {'node-errhandle': tableHasErr}]"
+                    :class="[`${schema_type}-handle-color`, {'node-errhandle': outputHasErr}]"
                 />
             </div>
         </div>
@@ -44,12 +44,12 @@
 
 
     const props = defineProps<NodeProps<BaseData>>()
-    const file_type = computed(() => getInputType(props.id, 'file'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['table']?.type || 'default')
-    const tableHasErr = computed(() => handleOutputError(props.id, 'table'))
+    const input_type = computed(() => getInputType(props.id, 'input'))
+    const schema_type = computed(():Type|'default' => props.data.schema_out?.['output']?.type || 'default')
+    const outputHasErr = computed(() => handleOutputError(props.id, 'output'))
     const errMsg = ref<string[]>([])
-    const fileHaserr = ref({
-        handleId: 'file',
+    const inputHaserr = ref({
+        handleId: 'input',
         value: false
     })
 
@@ -57,7 +57,7 @@
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
-        handleValidationError(props.id, props.data.error, errMsg, fileHaserr)
+        handleValidationError(props.id, props.data.error, errMsg, inputHaserr)
     }, {immediate: true})
 
 </script>
@@ -65,17 +65,21 @@
 <style lang="scss" scoped>
     @use '../../common/global.scss' as *;
     @use '../../common/node.scss' as *;
-    .TableFromFileNodeLayout {
+    .ToStringNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;
             padding-bottom: $node-padding-bottom;
-            .output-table {
-                margin-top: $node-margin;
+            .input-input {
+                margin-bottom: $node-margin;
             }
         }
     }
     .all-handle-color {
-        background: $file-color;
+        background: conic-gradient(
+            $int-color 0 120deg, 
+            $float-color 0 240deg, 
+            $bool-color 0 360deg
+        );
     }
 </style>
