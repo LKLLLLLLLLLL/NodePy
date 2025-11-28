@@ -34,6 +34,7 @@ import BoolColWithColBinOpNode from '../nodes/BoolColWithColBinOpNode.vue'
 import ColCompareNode from '../nodes/ColCompareNode.vue'
 import ToStringNode from '../nodes/ToStringNode.vue'
 import ToIntNode from '../nodes/ToIntNode.vue'
+import ToFloatNode from '../nodes/ToFloatNode.vue'
 import UploadNode from '../nodes/UploadNode.vue'
 import TableFromFileNode from '../nodes/TableFromFileNode.vue'
 import PlotNode from '../nodes/PlotNode.vue'
@@ -267,6 +268,8 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.compute
     case 'ToIntNode':
       return nodeCategoryColor.compute
+    case 'ToFloatNode':
+      return nodeCategoryColor.compute
     case 'PlotNode':
       return nodeCategoryColor.visualize
     case 'UploadNode':
@@ -409,6 +412,10 @@ const isValidConnection = (connection: any) => {
 
         <template #node-ToIntNode="ToIntNodeProps">
           <ToIntNode v-bind="ToIntNodeProps"/>
+        </template>
+
+        <template #node-ToFloatNode="ToFloatNodeProps">
+          <ToFloatNode v-bind="ToFloatNodeProps"/>
         </template>
 
         <template #node-PlotNode="PlotNodeProps">

@@ -99,6 +99,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '整数转换节点',
                 value: 'ToIntNode'
             },
+            {
+                label: '浮点数转换节点',
+                value: 'ToFloatNode'
+            },
         ]
     },
     {

@@ -69,7 +69,7 @@
         return table.col_types || {}
     })
 
-    // 格式化单元格值
+// 格式化单元格值
     function formatCellValue(value: any): string {
         if (value === null || value === undefined) {
             return '-'
@@ -78,7 +78,10 @@
             return value ? 'True' : 'False'
         }
         if (typeof value === 'number') {
-            return value.toString()
+            // 如果是小数，保留3位小数
+            return typeof value === 'number' && value % 1 !== 0 
+                ? value.toFixed(3) 
+                : value.toString()
         }
         return String(value)
     }

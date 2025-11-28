@@ -22,9 +22,9 @@
         }
         
         if (typeof props.value === 'number') {
-            // 如果是小数，保留2位小数
+            // 如果是小数，保留3位小数
             return typeof props.value === 'number' && props.value % 1 !== 0 
-                ? props.value.toFixed(2) 
+                ? props.value.toFixed(3) 
                 : String(props.value)
         }
         
