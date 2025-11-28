@@ -949,6 +949,41 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **hint：**
 - col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
 
+#### 8.3 MovingAverageNode
+移动平均计算节点，计算输入表格中指定列的移动平均值。
+
+**参数：**
+- col: 要计算移动平均的表格列名，类型为str。
+- window_size: 窗口大小，类型为int，表示计算移动平均时
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含新增的移动平均列。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
+#### 8.4 ResampleNode
+表格重采样节点，根据指定的时间频率对表格进行重采样操作。
+
+**参数：**
+- col: 要重采样的表格列名，类型为str，必须为Datetime类型。
+- frequency: 重采样频率，类型为Literal["D", "H", "T", "S"]，分别表示天、小时、分钟、秒。
+- method: 重采样方法，类型为Literal["mean", "sum", "max", "min", "count"]。
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含新增的重采样列
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
 ### 9. 控制节点(control)
 #### 9.1 CustomScriptNode
 用户自定义脚本节点，允许用户编写自定义的Python脚本来处理输入数据并生成输出数据。注意，为了安全起见，用户脚本将在受限的环境中执行，且只能使用预定义的安全库和函数。

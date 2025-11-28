@@ -46,7 +46,10 @@ class Table(BaseModel):
             for col in self.df.columns:
                 if col not in self.col_types:
                     raise TypeError(f"DataFrame has zero rows, missing column type for '{col}'")
-                self.df[col] = self.df[col].astype(self.col_types[col].to_ptype()())
+                ptype = self.col_types[col].to_ptype()
+                if callable(ptype):
+                    ptype = ptype()
+                self.df[col] = self.df[col].astype(ptype)
         # 2. check if index column exists, if not, add it
         if self.INDEX_COL not in self.df.columns:
             self.df[self.INDEX_COL] = range(len(self.df))
