@@ -31,15 +31,22 @@ class Table(BaseModel):
     @model_validator(mode="after")
     def verify(self) -> Self:
         # 1. check if df is aligned with col_types
-        # Check for missing columns
-        missing_cols = [col for col in self.col_types if col not in self.df.columns]
-        if missing_cols:
-            raise TypeError(f"DataFrame is missing columns: {missing_cols}")
-        # Check column types
-        for col, expected in self.col_types.items():
-            ser = self.df[col]
-            if not expected == ColType.from_ptype(ser.dtype):
-                raise TypeError(f"Column '{col}' expected type {expected}, got {ser.dtype}")
+        if len(self.df) != 0:
+            # Check for missing columns
+            missing_cols = [col for col in self.col_types if col not in self.df.columns]
+            if missing_cols:
+                raise TypeError(f"DataFrame is missing columns: {missing_cols}")
+            # Check column types
+            for col, expected in self.col_types.items():
+                ser = self.df[col]
+                if not expected == ColType.from_ptype(ser.dtype):
+                    raise TypeError(f"Column '{col}' expected type {expected}, got {ser.dtype}")
+        else:
+            # if the df has zero rows, it cannot infer column types, we need to specify col_types manually
+            for col in self.df.columns:
+                if col not in self.col_types:
+                    raise TypeError(f"DataFrame has zero rows, missing column type for '{col}'")
+                self.df[col] = self.df[col].astype(self.col_types[col].to_ptype()())
         # 2. check if index column exists, if not, add it
         if self.INDEX_COL not in self.df.columns:
             self.df[self.INDEX_COL] = range(len(self.df))
@@ -48,12 +55,12 @@ class Table(BaseModel):
         if check_no_illegal_cols(list(self.col_types.keys()), allow_index=True) is False:
             raise ValueError(f"Column names cannot start with reserved prefix '_' or be whitespace only: {list(self.col_types.keys())}")
         return self
-    
+
     def extract_schema(self) -> TableSchema:
         return TableSchema(
             col_types=self.col_types
         )
-    
+
     def _append_col(self, new_col: str, col: Series) -> 'Table':
         if new_col in self.col_types:
             raise ValueError(f"Cannot add column '{new_col}': already exists.")
