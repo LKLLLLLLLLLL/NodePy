@@ -19,7 +19,7 @@ async def get_project_by_id(
         return None
     editable = True
     if project_record.owner_id != user_id:  # type: ignore
-        if not project_record.show_in_examples:  # type: ignore
+        if not project_record.show_in_explore:  # type: ignore
             raise PermissionError("User does not have access to this project.")
         else:
             editable = False
