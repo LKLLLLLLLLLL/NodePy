@@ -10,7 +10,7 @@ export const useGraphStore = defineStore('graph', () => {
   const default_url_id: number = 12306
   const url_id = ref<number>(default_url_id)
   const vueFLowInstance = useVueFlow('main')
-  const {addNodes, nodes, getSelectedNodes} = vueFLowInstance
+  const {addNodes, nodes, edges, getSelectedNodes, addEdges} = vueFLowInstance
   const project = ref<vueFlowProject>({
     project_id: -1,
     project_name: "",
@@ -24,8 +24,10 @@ export const useGraphStore = defineStore('graph', () => {
   })
   const is_syncing = ref(false)
   const syncing_err_msg = ref('')
-  const copiedNodes = ref<Array<{type: string, position: {x: number, y: number}}>>([])
+  const copiedNodes = ref<Array<{type: string, position: {x: number, y: number}, param: any, id: string}>>([])
+  const copiedEdges = ref<Array<any>>([])
   const copiedNodesBounds = ref<{minX: number, minY: number, maxX: number, maxY: number} | null>(null)
+  const idMap = ref<Record<string, string>>({}) //  record old node id to new id
 
 
   const nextId = (type:string):string => {
@@ -389,12 +391,30 @@ export const useGraphStore = defineStore('graph', () => {
     }
   }
 
+  const addCopiedNode = (type: string, position: {x: number, y: number}, param: any) => {
+    const addedNode: Nodetypes.BaseNode = {
+      id: nextId(type),
+      position,
+      type,
+      data: {
+        param: param
+      }
+    }
+    addNodes(addedNode)
+    return addedNode
+  }
+
   const copySelectedNodes = () => {
     const selectedNodes = getSelectedNodes.value
     if(selectedNodes.length > 0) {
+      copiedNodes.value = []
+      copiedEdges.value = []
+      idMap.value = {}  // clear previous data
       copiedNodes.value = selectedNodes.map(n => ({
+        id: n.id,
         type: n.type,
-        position: n.position
+        position: {...n.position},
+        param: JSON.parse(JSON.stringify(n.data.param)) // deep copy
       }))
       let minX = selectedNodes[0]!.position.x
       let minY = selectedNodes[0]!.position.y
@@ -407,7 +427,11 @@ export const useGraphStore = defineStore('graph', () => {
         maxY = Math.max(maxY, n.position.y)
       })
       copiedNodesBounds.value = { minX, minY, maxX, maxY }
+      const selectedNodeIds = selectedNodes.map(n => n.id)
+      const selectedEdges = edges.value.filter(e => selectedNodeIds.includes(e.source) && selectedNodeIds.includes(e.target))
+      copiedEdges.value = selectedEdges.map(e => ({...e}))
       console.log('copy nodes:', copiedNodes.value)
+      console.log('copy edges:', copiedEdges.value)
     }
   }
 
@@ -417,12 +441,34 @@ export const useGraphStore = defineStore('graph', () => {
       copiedNodes.value.forEach((nodeInfo) => {
         const relativeX = nodeInfo.position.x - minX
         const relativeY = nodeInfo.position.y - minY
-        addNode(nodeInfo.type, {
-          x: position.x + relativeX,
-          y: position.y + relativeY,
-        })
+        const newNode = addCopiedNode(
+          nodeInfo.type,
+          {
+            x: position.x + relativeX,
+            y: position.y + relativeY,
+          },
+          nodeInfo.param
+        )
+        if(newNode) {
+          idMap.value[nodeInfo.id] = newNode.id
+        }
       })
-      console.log('paste nodes:', copiedNodes.value)
+      copiedEdges.value.forEach(e => {
+        const newSourceId = idMap.value[e.source]
+        const newTargetId = idMap.value[e.target]
+        if(newSourceId && newTargetId) {
+          const newEdge = {
+            id: Date.now().toString(),
+            source: newSourceId,
+            target: newTargetId,
+            sourceHandle: e.sourceHandle,
+            targetHandle: e.targetHandle,
+            type: 'NodePyEdge'
+          }
+          addEdges(newEdge)
+        }
+      })
+      console.log('paste nodes and their edges:', copiedNodes.value, copiedEdges.value)
     }
   }
 
