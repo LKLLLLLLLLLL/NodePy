@@ -24,7 +24,7 @@ $control-node-color: #eab308; // 金黄色 - 控制
 $file-node-color: $file-color; // 橙色 - 文件
 $str-node-color: $str-color; // 翠绿色 - 字符串处理
 $table-node-color: $table-color; // 粉红色 - 表格处理
-$utils-node-color: #ef4444; // 红色 - 工具
+$analysis-node-color: #ef4444; // 红色 - 分析
 $visualize-node-color: #6366f1; // 靛蓝色 - 可视化
 $datetime-node-color: $datetime-color; // 青色 - 日期时间处理
 
@@ -125,9 +125,9 @@ $datetime-node-color: $datetime-color; // 青色 - 日期时间处理
   background: $table-node-color;
 }
 
-.node-title-util {
+.node-title-analysis {
   @include node-title-style;
-  background: $utils-node-color;
+  background: $analysis-node-color;
 }
 
 .node-title-visualize {

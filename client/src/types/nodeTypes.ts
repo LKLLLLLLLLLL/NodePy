@@ -1,4 +1,4 @@
-import type { File, ProjNode } from '@/utils/api'
+import type { File, ProjNode, Type } from '@/utils/api'
 import type { Node } from '@vue-flow/core'
 
 
@@ -20,7 +20,7 @@ export const nodeCategoryColor = {
     file: dataTypeColor.File,
     str: dataTypeColor.str,
     table: dataTypeColor.Table,
-    utils: '#ef4444',
+    analysis: '#ef4444',
     visualize: '#6366f1',
     datetime: dataTypeColor.Datetime,
     default: 'gray'
@@ -83,11 +83,6 @@ export type TableNodeData = BaseData & {
 }
 export interface TableNode extends BaseNode<TableNodeData>{
     type: 'TableNode'
-}
-
-
-export interface TableFromFileNode extends BaseNode {
-    type: 'TableFromFileNode'
 }
 
 
@@ -337,6 +332,21 @@ export interface WordcloudNode extends BaseNode<WordcloudNodeData> {
 }
 
 
+export interface AdvancePlotNodeParam {
+    x_col: string
+    y_col: string
+    hue_col?: string
+    plot_type: "bar" | "count" | "scatter" | "strip" | "swarm" | "box" | "violin" | "hist",
+    title?: string
+}
+export type AdvancePlotNodeData = BaseData & {
+    param: AdvancePlotNodeParam
+}
+export interface AdvancePlotNode extends BaseNode<AdvancePlotNodeData>{
+    type: 'AdvancePlotNode'
+}
+
+
 /*********************  StringProcess Nodes  **************************/
 export interface StripNodeParam {
     strip_chars?: string
@@ -415,6 +425,41 @@ export interface BatchConcatNode extends BaseNode<BatchConcatNodeData> {
 }
 
 
+export interface RegexMatchNodeParam {
+    pattern: string
+}
+export type RegexMatchNodeData = BaseData & {
+    param: RegexMatchNodeParam
+}
+export interface RegexMatchNode extends BaseNode<RegexMatchNodeData> {
+    type: 'RegexMatchNode'
+}
+
+
+export interface BatchRegexMatchNodeParam {
+    pattern: string,
+    col: string,
+    result_col?: string
+}
+export type BatchRegexMatchNodeData = BaseData & {
+    param: BatchRegexMatchNodeParam
+}
+export interface BatchRegexMatchNode extends BaseNode<BatchRegexMatchNodeData> {
+    type: 'BatchRegexMatchNode'
+}
+
+
+export interface RegexExtractNodeParam {
+    pattern: string
+}
+export type RegexExtractNodeData = BaseData & {
+    param: RegexExtractNodeParam
+}
+export interface RegexExtractNode extends BaseNode<RegexExtractNodeData> {
+    type: 'RegexExtractNode'
+}
+
+
 /*********************  TableProcess Nodes  **************************/
 export interface InsertConstColNodeParam {
     col_name: string,
@@ -485,6 +530,49 @@ export interface DropNaNValueNode extends BaseNode<DropNaNValueNodeData> {
 }
 
 
+export interface FillNaNValueNodeParam {
+    subset_cols: string[]
+    method: "const" | "ffill" | "bfill"
+    fill_value?: (number | string | boolean)[]
+}
+export type FillNaNValueNodeData = BaseData & {
+    param: FillNaNValueNodeParam
+}
+export interface FillNaNValueNode extends BaseNode<FillNaNValueNodeData> {
+    type: 'FillNaNValueNode'
+}
+
+
+export interface SortNodeParam {
+    sort_cols: string[]
+    ascending: boolean[]
+}
+export type SortNodeData = BaseData & {
+    param: SortNodeParam
+}
+export interface SortNode extends BaseNode<SortNodeData> {
+    type: 'SortNode'
+}
+
+
+export interface GroupNodeParam {
+    group_cols: string[]
+    agg_cols: string[]
+    agg_func: "SUM" | "MEAN" | "COUNT" | "MAX" | "MIN" | "STD"
+}
+export type GroupNodeData = BaseData & {
+    param: GroupNodeParam
+}
+export interface GroupNode extends BaseNode<GroupNodeData> {
+    type: 'GroupNode'
+}
+
+
+export interface MergeNode extends BaseNode {
+    type: 'MergeNode'
+}
+
+
 /*********************  File Nodes  **************************/
 export interface UploadNodeParam {
     file: File
@@ -499,6 +587,28 @@ export interface UploadNode extends BaseNode<UploadNodeData>{
 
 export interface DisplayNode extends BaseNode {
     type: 'DisplayNode'
+}
+
+
+export interface TableFromFileNode extends BaseNode {
+    type: 'TableFromFileNode'
+}
+
+
+export interface TableToFileNodeParam {
+    filename?: string
+    format: "csv" | "xlsx" | "json"
+}
+export type TableToFileNodeData = BaseData & {
+    param: TableToFileNodeParam
+}
+export interface TableToFileNode extends BaseNode<TableToFileNodeData> {
+    type: 'TableToFileNode'
+}
+
+
+export interface TextFromFileNode extends BaseNode {
+    type: 'TextFromFileNode'
 }
 
 
@@ -564,6 +674,111 @@ export interface DatetimeToTimestampNode extends BaseNode<DatetimeToTimestampNod
 }
 
 
-/*********************  Utility Nodes  **************************/
+/*********************  Analysis Nodes  **************************/
+export interface StatsNodeParam {
+    col: string
+}
+export type StatsNodeData = BaseData & {
+    param: StatsNodeParam
+}
+export interface StatsNode extends BaseNode<StatsNodeData> {
+    type: 'StatsNode'
+}
+
+
+export interface DiffNodeParam {
+    col: string
+}
+export type DiffNodeData = BaseData & {
+    param: DiffNodeParam
+}
+export interface DiffNode extends BaseNode<DiffNodeData> {
+    type: 'DiffNode'
+}
+
+
+export interface RollingNodeParam {
+    col: string
+    window_size: number
+    min_periods?: number
+    result_col?: string
+    method: "mean" | "std" | "sum" | "min" | "max"
+}
+export type RollingNodeData = BaseData & {
+    param: RollingNodeParam
+}
+export interface RollingNode extends BaseNode<RollingNodeData> {
+    type: 'RollingNode'
+}
+
+
+export interface ResampleNodeParam {
+    col: string
+    frequency: "D" | "H" | "T" | "S"
+    method: "mean" | "sum" | "max" | "min" | "count"
+    result_col?: string
+}
+export type ResampleNodeData = BaseData & {
+    param: ResampleNodeParam
+}
+export interface ResampleNode extends BaseNode<ResampleNodeData> {
+    type: 'ResampleNode'
+}
+
+
+export interface PctChangeNodeParam {
+    col: string
+    result_col?: string
+}
+export type PctChangeNodeData = BaseData & {
+    param: PctChangeNodeParam
+}
+export interface PctChangeNode extends BaseNode<PctChangeNodeData> {
+    type: 'PctChangeNode'
+}
+
+
+export interface CumulativeNodeParam {
+    col: string
+    result_col?: string
+    method: "cumsum" | "cumprod" | "cummax" | "cummin"
+}
+export type CumulativeNodeData = BaseData & {
+    param: CumulativeNodeParam
+}
+export interface CumulativeNode extends BaseNode<CumulativeNodeData> {
+    type: 'CumulativeNode'
+}
 
 /*********************  Control Nodes  **************************/
+export interface CustomScriptNodeParam {
+    input_ports: Array<Record<string, Type>>
+    output_ports: Array<Record<string, Type>>
+    script: string
+}
+export type CustomScriptNodeData = BaseData & {
+    param: CustomScriptNodeParam
+}
+export interface CustomScriptNode extends BaseNode<CustomScriptNodeData> {
+    type: 'CustomScriptNode'
+}
+
+
+export interface ForEachRowBeginNode extends BaseNode {
+    type: 'ForEachRowBeginNode'
+}
+
+
+export interface ForEachRowEndNode extends BaseNode {
+    type: 'ForEachRowEndNode'
+}
+
+
+export interface ForRollingWindowBeginNode extends BaseNode {
+    type: 'ForRollingWindowBeginNode'
+}
+
+
+export interface ForRollingWindowEndNode extends BaseNode {
+    type: 'ForRollingWindowEndNode'
+}
