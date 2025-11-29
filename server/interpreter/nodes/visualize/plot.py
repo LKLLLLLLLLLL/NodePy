@@ -3,7 +3,7 @@ from typing import Any, Literal, override
 from server.config import FIGURE_DPI
 from server.models.data import Data, Table
 from server.models.exception import NodeParameterError
-from server.models.schema import ColType, FileSchema, Pattern, Schema
+from server.models.schema import ColType, FileSchema, Pattern, Schema, NO_SPECIFIED_COL
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
@@ -157,17 +157,11 @@ class AdvancePlotNode(BaseNode):
             )
         if self.y_col is not None and self.y_col.strip() == "":
             self.y_col = None
-        if self.y_col is None and self.plot_type not in {"count", "hist"}:
+        if self.plot_type not in {"count", "hist"} and self.y_col is None:
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="y_col",
                 err_msg="y_col cannot be None for the selected plot_type."
-            )
-        if self.y_col is not None and self.y_col.strip() == "":
-            raise NodeParameterError(
-                node_id=self.id,
-                err_param_key="y_col",
-                err_msg="y_col cannot be empty."
             )
         if self.hue_col is not None and self.hue_col.strip() == "":
             self.hue_col = None
@@ -213,7 +207,10 @@ class AdvancePlotNode(BaseNode):
         assert isinstance(input_table, Table)
 
         x_data = input_table.df[self.x_col]  # type: ignore
-        y_data = input_table.df[self.y_col]  # type: ignore
+        if self.y_col:
+            y_data = input_table.df[self.y_col]  # type: ignore
+        else:
+            y_data = None
         hue_data = input_table.df[self.hue_col] if self.hue_col else None  # type: ignore
 
         file_manager = self.global_config.file_manager
@@ -262,20 +259,18 @@ class AdvancePlotNode(BaseNode):
     def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
         hint = {}
         if "input" in input_schemas:
-            if isinstance(input_schemas["input"], Schema):
-                input_schema = input_schemas["input"]
-                if input_schema.type == Schema.Type.TABLE and input_schema.tab is not None:
-                    columns = list(input_schema.tab.col_types.keys())
-                    x_col_choices = []
-                    y_col_choices = []
-                    hue_col_choices = []
-                    for col, col_type in columns:
-                        if col_type in {ColType.INT, ColType.FLOAT, ColType.STR}:
-                            x_col_choices.append(col)
-                            y_col_choices.append(col)
-                            hue_col_choices.append(col)
-                    hint["x_col_choices"] = x_col_choices
-                    if current_params.get("plot_type") not in {"count", "hist"}:
-                        hint["y_col_choices"] = y_col_choices
-                    hint["hue_col_choices"] = hue_col_choices
+            input_schema = input_schemas["input"]
+            if input_schema.type == Schema.Type.TABLE and input_schema.tab is not None:
+                x_col_choices = []
+                y_col_choices = [NO_SPECIFIED_COL]
+                hue_col_choices = [NO_SPECIFIED_COL]
+                for col, col_type in input_schema.tab.col_types.items():
+                    if col_type in {ColType.INT, ColType.FLOAT, ColType.STR}:
+                        x_col_choices.append(col)
+                        y_col_choices.append(col)
+                        hue_col_choices.append(col)
+                hint["x_col_choices"] = x_col_choices
+                if current_params.get("plot_type") not in {"count", "hist"}:
+                    hint["y_col_choices"] = y_col_choices
+                hint["hue_col_choices"] = hue_col_choices
         return hint

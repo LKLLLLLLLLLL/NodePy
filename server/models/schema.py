@@ -11,6 +11,8 @@ from server.models.types import ColType
 This file defined schema passed between nodes during static analysis stage.
 """
 
+NO_SPECIFIED_COL = '_no_specified_col' # means not to specify column
+
 class TableSchema(BaseModel):
     """
     The schema of Table data.
