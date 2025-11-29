@@ -24,16 +24,18 @@ export const useGraphStore = defineStore('graph', () => {
   })
   const is_syncing = ref(false)
   const syncing_err_msg = ref('')
+  const maxNodeId = ref<Record<string, number>>({}) // record max id in history for each node type
   const copiedNodes = ref<Array<{type: string, position: {x: number, y: number}, param: any, id: string}>>([])
-  const copiedEdges = ref<Array<any>>([])
+  const copiedEdges = ref<Array<{source: string, target: string, sourceHandle?: string | null, targetHandle?: string | null, type: string}>>([])
   const copiedNodesBounds = ref<{minX: number, minY: number, maxX: number, maxY: number} | null>(null)
   const idMap = ref<Record<string, string>>({}) //  record old node id to new id
 
 
   const nextId = (type:string):string => {
-    const sameTypeNodes = nodes.value.filter(n => n.type === type)
-    const count = sameTypeNodes.length + 1
-    return `${type}_${count}`
+    const currentMax = maxNodeId.value[type] ?? 0
+    const next = currentMax + 1
+    maxNodeId.value[type] = next
+    return `${type}_${next}`
   }
 
   const addNode = (type: string, position: {x: number, y: number}) => {
@@ -406,10 +408,10 @@ export const useGraphStore = defineStore('graph', () => {
 
   const copySelectedNodes = () => {
     const selectedNodes = getSelectedNodes.value
+    copiedNodes.value = []
+    copiedEdges.value = []
+    idMap.value = {}  // clear previous data
     if(selectedNodes.length > 0 && project.value.editable) {
-      copiedNodes.value = []
-      copiedEdges.value = []
-      idMap.value = {}  // clear previous data
       copiedNodes.value = selectedNodes.map(n => ({
         id: n.id,
         type: n.type,
@@ -429,7 +431,13 @@ export const useGraphStore = defineStore('graph', () => {
       copiedNodesBounds.value = { minX, minY, maxX, maxY }
       const selectedNodeIds = selectedNodes.map(n => n.id)
       const selectedEdges = getSelectedEdges.value.filter(e => selectedNodeIds.includes(e.source) && selectedNodeIds.includes(e.target))
-      copiedEdges.value = selectedEdges.map(e => ({...e}))
+      copiedEdges.value = selectedEdges.map(e => ({
+        source: e.source,
+        target: e.target,
+        sourceHandle: e.sourceHandle,
+        targetHandle: e.targetHandle,
+        type: e.type
+      }))
       console.log('copy nodes:', copiedNodes.value)
       console.log('copy edges:', copiedEdges.value)
     }
