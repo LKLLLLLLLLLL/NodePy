@@ -10,7 +10,7 @@ export const useGraphStore = defineStore('graph', () => {
   const default_url_id: number = 12306
   const url_id = ref<number>(default_url_id)
   const vueFLowInstance = useVueFlow('main')
-  const {addNodes, nodes, edges, getSelectedNodes, addEdges} = vueFLowInstance
+  const {addNodes, nodes, getSelectedNodes, getSelectedEdges, addEdges} = vueFLowInstance
   const project = ref<vueFlowProject>({
     project_id: -1,
     project_name: "",
@@ -406,7 +406,7 @@ export const useGraphStore = defineStore('graph', () => {
 
   const copySelectedNodes = () => {
     const selectedNodes = getSelectedNodes.value
-    if(selectedNodes.length > 0) {
+    if(selectedNodes.length > 0 && project.value.editable) {
       copiedNodes.value = []
       copiedEdges.value = []
       idMap.value = {}  // clear previous data
@@ -428,7 +428,7 @@ export const useGraphStore = defineStore('graph', () => {
       })
       copiedNodesBounds.value = { minX, minY, maxX, maxY }
       const selectedNodeIds = selectedNodes.map(n => n.id)
-      const selectedEdges = edges.value.filter(e => selectedNodeIds.includes(e.source) && selectedNodeIds.includes(e.target))
+      const selectedEdges = getSelectedEdges.value.filter(e => selectedNodeIds.includes(e.source) && selectedNodeIds.includes(e.target))
       copiedEdges.value = selectedEdges.map(e => ({...e}))
       console.log('copy nodes:', copiedNodes.value)
       console.log('copy edges:', copiedEdges.value)
@@ -436,7 +436,7 @@ export const useGraphStore = defineStore('graph', () => {
   }
 
   const pasteNodes = (position: {x: number, y: number}) => {
-    if(copiedNodes.value.length > 0 && copiedNodesBounds.value) {
+    if(copiedNodes.value.length > 0 && copiedNodesBounds.value && project.value.editable) {
       const {minX, minY} = copiedNodesBounds.value
       copiedNodes.value.forEach((nodeInfo) => {
         const relativeX = nodeInfo.position.x - minX

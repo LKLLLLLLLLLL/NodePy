@@ -318,6 +318,8 @@ const handleMouseMove = (e: MouseEvent) => {
   })
 }
 
+const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'none')
+
 </script>
 
 <template>
@@ -329,6 +331,10 @@ const handleMouseMove = (e: MouseEvent) => {
       :connection-mode="ConnectionMode.Strict"
       :is-valid-connection="isValidConnection"
       :zoom-on-double-click="false"
+      :nodes-draggable="graphStore.project.editable"
+      :nodes-connectable="graphStore.project.editable"
+      :edges-updatable="graphStore.project.editable"
+      :delete-key-code="graphStore.project.editable ? ['Backspace', 'Delete'] : null"
       id="main"
       >
 
@@ -510,6 +516,12 @@ const handleMouseMove = (e: MouseEvent) => {
 .vue-flow__nodesselection-rect{
   display: none;
 } //  hide the selection-rect
+
+.vue-flow__node {
+  .nodes-style {
+    pointer-events: v-bind(editableStyle);
+  }
+}
 
 </style>
 
