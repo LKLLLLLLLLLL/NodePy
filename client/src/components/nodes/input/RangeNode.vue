@@ -55,17 +55,17 @@
 </template>
 
 <script lang="ts" setup>
-    import NodeTitle from './tools/NodeTitle.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
     import type { Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
-    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import Timer from './tools/Timer.vue'
-    import { getInputType } from './getInputType'
-    import NodepyStringInput from './tools/Nodepy-StringInput.vue'
-    import NodepySelectFew from './tools/Nodepy-selectFew.vue'
+    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import Timer from '../tools/Timer.vue'
+    import { getInputType } from '../getInputType'
+    import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
+    import NodepySelectFew from '../tools/Nodepy-selectFew.vue'
     import type { RangeNodeData } from '@/types/nodeTypes'
     import { dataTypeColor } from '@/types/nodeTypes'
 
@@ -134,8 +134,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
     .RangeNodeLayout {
         height: 100%;
         .data {

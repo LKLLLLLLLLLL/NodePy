@@ -28,13 +28,13 @@
     import { Position, Handle } from '@vue-flow/core'
     import {ref, computed, watch } from 'vue'
     import type { NodeProps } from '@vue-flow/core'
-    import type {BoolNodeData} from '../../types/nodeTypes'
+    import type {BoolNodeData} from '../../../types/nodeTypes'
     import type { Type } from '@/utils/api'
-    import NodepyBoolValue from './tools/Nodepy-boolValue.vue'
-    import { handleExecError, handleOutputError } from './handleError'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
+    import NodepyBoolValue from '../tools/Nodepy-boolValue.vue'
+    import { handleExecError, handleOutputError } from '../handleError'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
 
 
     const props = defineProps<NodeProps<BoolNodeData>>()
@@ -57,8 +57,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
     .BoolNodeLayout {
         height: 100%;
         .data {

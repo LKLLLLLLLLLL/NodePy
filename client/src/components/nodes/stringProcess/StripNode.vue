@@ -41,14 +41,14 @@
     import {ref, computed, watch} from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
-    import { getInputType } from './getInputType'
+    import { getInputType } from '../getInputType'
     import type { Type } from '@/utils/api'
-    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
+    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
     import type { StripNodeData } from '@/types/nodeTypes'
-    import NodepyStringInput from './tools/Nodepy-StringInput.vue'
+    import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
 
 
     const props = defineProps<NodeProps<StripNodeData>>()
@@ -87,8 +87,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
     .StripNodeLayout {
         height: 100%;
         .data {

@@ -29,14 +29,14 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import type { Type } from '@/utils/api'
-    import { handleParamError, handleExecError, handleOutputError } from './handleError'
+    import { handleParamError, handleExecError, handleOutputError } from '../handleError'
     import type { UploadNodeData } from '@/types/nodeTypes'
     import { useGraphStore } from '@/stores/graphStore'
     import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
-    import notify from '../Notification/notify'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
+    import notify from '../../Notification/notify'
 
 
     const mdiAddFile: string = mdiPlus
@@ -87,9 +87,9 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
-    @use './tools/tools.scss' as *;
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
+    @use '../tools/tools.scss' as *;
     .UploadNodeLayout {
         height: 100%;
         .data {

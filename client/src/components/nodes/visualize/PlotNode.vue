@@ -55,13 +55,13 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
-    import { getInputType } from './getInputType'
-    import { handleExecError, handleParamError, handleValidationError, handleOutputError } from './handleError'
-    import NodepyStringInput from './tools/Nodepy-StringInput.vue'
-    import NodepySelectMany from './tools/Nodepy-selectMany.vue'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
+    import { getInputType } from '../getInputType'
+    import { handleExecError, handleParamError, handleValidationError, handleOutputError } from '../handleError'
+    import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
+    import NodepySelectMany from '../tools/Nodepy-selectMany.vue'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
 
 
     const props = defineProps<NodeProps<PlotNodeData>>()
@@ -137,8 +137,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
     .PlotNodeLayout {
         height: 100%;
         .data {

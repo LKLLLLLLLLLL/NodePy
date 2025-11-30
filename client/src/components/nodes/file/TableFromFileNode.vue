@@ -35,12 +35,12 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
-    import type { BaseData } from '../../types/nodeTypes'
-    import { getInputType } from './getInputType'
-    import { handleExecError, handleValidationError, handleOutputError } from './handleError'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
+    import type { BaseData } from '../../../types/nodeTypes'
+    import { getInputType } from '../getInputType'
+    import { handleExecError, handleValidationError, handleOutputError } from '../handleError'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
 
 
     const props = defineProps<NodeProps<BaseData>>()
@@ -63,8 +63,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
     .TableFromFileNodeLayout {
         height: 100%;
         .data {

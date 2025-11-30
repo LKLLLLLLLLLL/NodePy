@@ -1,6 +1,6 @@
 <template>
-    <div class="NumberUnaryOpNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="compute">数字一元运算节点</NodeTitle>
+    <div class="PrimitiveCompareNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category="compute">比较节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-x port">
@@ -9,11 +9,17 @@
                 </div>
                 <Handle id="x" type="target" :position="Position.Left" :class="[`${x_type}-handle-color`, {'node-errhandle': xHasErr.value}]"/>
             </div>
+            <div class="input-y port">
+                <div class="input-port-description">
+                    y输入
+                </div>
+                <Handle id="y" type="target" :position="Position.Left" :class="[`${y_type}-handle-color`, {'node-errhandle': yHasErr.value}]"/>
+            </div>
             <div class="op">
                 <div class="param-description" :class="{'node-has-paramerr': opHasErr.value}">
                     运算类型
                 </div>
-                <NodepySelectFew
+                <NodepySelectMany
                     :options="opChinese"
                     :default-selected="defaultSelected"
                     @select-change="onSelectChange"
@@ -35,21 +41,22 @@
     import {ref, computed, watch} from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
-    import { getInputType } from './getInputType'
+    import { getInputType } from '../getInputType'
     import type { Type } from '@/utils/api'
-    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
-    import NodepySelectFew from './tools/Nodepy-selectFew.vue'
-    import type { NumberUnaryOpNodeData } from '@/types/nodeTypes'
+    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
+    import NodepySelectMany from '../tools/Nodepy-selectMany.vue'
+    import type { PrimitiveCompareNodeData } from '@/types/nodeTypes'
 
 
-    const props = defineProps<NodeProps<NumberUnaryOpNodeData>>()
-    const op = ['NEG', 'ABS', 'SQRT']
-    const opChinese = ['相反数', '绝对值', '开平方']
-    const defaultSelected = [op.indexOf(props.data.param.op)]
+    const props = defineProps<NodeProps<PrimitiveCompareNodeData>>()
+    const op = ['EQ', 'NEQ', 'LT', 'LTE', 'GT', 'GTE']
+    const opChinese = ['等于', '不等于', '小于', '小于等于', '大于', '大于等于']
+    const defaultSelected = op.indexOf(props.data.param.op)
     const x_type = computed(() => getInputType(props.id, 'x'))
+    const y_type = computed(() => getInputType(props.id, 'y'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['result']?.type || 'default')
     const resultHasErr = computed(() => handleOutputError(props.id, 'result'))
     const errMsg = ref<string[]>([])
@@ -61,10 +68,14 @@
         handleId: 'x',
         value: false
     })
+    const yHasErr = ref({
+        handleId: 'y',
+        value: false
+    })
 
 
     const onSelectChange = (e: any) => {
-        const selected_op = op[e[0]] as 'NEG' | 'ABS' | 'SQRT'
+        const selected_op = op[e] as 'EQ' | 'NEQ' | 'LT' | 'LTE' | 'GT' | 'GTE'
         props.data.param.op = selected_op
     }
 
@@ -73,20 +84,20 @@
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
         handleParamError(props.data.error, errMsg, opHasErr)
-        handleValidationError(props.id, props.data.error, errMsg, xHasErr)
+        handleValidationError(props.id, props.data.error, errMsg, xHasErr, yHasErr)
     }, {immediate: true})
 
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
-    .NumberUnaryOpNodeLayout {
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
+    .PrimitiveCompareNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;
             padding-bottom: $node-padding-bottom;
-            .input-x {
+            .input-x, .input-y {
                 margin-bottom: $node-margin;
             }
             .op {
@@ -96,6 +107,10 @@
         }
     }
     .all-handle-color {
-        background: linear-gradient(to bottom, $int-color 0 50%, $float-color 50% 100%);
+        background: conic-gradient(
+                $int-color 0 120deg, 
+                $float-color 0 240deg, 
+                $bool-color 0 360deg
+            );
     }
 </style>

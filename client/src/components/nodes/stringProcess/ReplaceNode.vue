@@ -58,13 +58,13 @@
     import {ref, computed, watch} from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
-    import { getInputType } from './getInputType'
+    import { getInputType } from '../getInputType'
     import type { Type } from '@/utils/api'
-    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
-    import NodepyStringInput from './tools/Nodepy-StringInput.vue'
+    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
+    import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
     import type { ReplaceNodeData } from '@/types/nodeTypes'
 
 
@@ -117,8 +117,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
     .ReplaceNodeLayout {
         height: 100%;
         .data {

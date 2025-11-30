@@ -1,6 +1,6 @@
 <template>
-    <div class="PrimitiveCompareNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="compute">比较节点</NodeTitle>
+    <div class="BoolBinOpNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category="compute">布尔二元运算节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-x port">
@@ -41,19 +41,19 @@
     import {ref, computed, watch} from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
-    import { getInputType } from './getInputType'
+    import { getInputType } from '../getInputType'
     import type { Type } from '@/utils/api'
-    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
-    import NodepySelectMany from './tools/Nodepy-selectMany.vue'
-    import type { PrimitiveCompareNodeData } from '@/types/nodeTypes'
+    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
+    import NodepySelectMany from '../tools/Nodepy-selectMany.vue'
+    import type {BoolBinOpNodeData} from '@/types/nodeTypes'
 
 
-    const props = defineProps<NodeProps<PrimitiveCompareNodeData>>()
-    const op = ['EQ', 'NEQ', 'LT', 'LTE', 'GT', 'GTE']
-    const opChinese = ['等于', '不等于', '小于', '小于等于', '大于', '大于等于']
+    const props = defineProps<NodeProps<BoolBinOpNodeData>>()
+    const op = ['AND', 'OR', 'XOR', 'SUB']
+    const opChinese = ['与', '或', '异或', '减']
     const defaultSelected = op.indexOf(props.data.param.op)
     const x_type = computed(() => getInputType(props.id, 'x'))
     const y_type = computed(() => getInputType(props.id, 'y'))
@@ -75,7 +75,7 @@
 
 
     const onSelectChange = (e: any) => {
-        const selected_op = op[e] as 'EQ' | 'NEQ' | 'LT' | 'LTE' | 'GT' | 'GTE'
+        const selected_op = op[e] as 'AND' | 'OR' | 'XOR' | 'SUB'
         props.data.param.op = selected_op
     }
 
@@ -90,9 +90,9 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
-    .PrimitiveCompareNodeLayout {
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
+    .BoolBinOpNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;
@@ -107,10 +107,6 @@
         }
     }
     .all-handle-color {
-        background: conic-gradient(
-                $int-color 0 120deg, 
-                $float-color 0 240deg, 
-                $bool-color 0 360deg
-            );
+        background: $bool-color;
     }
 </style>

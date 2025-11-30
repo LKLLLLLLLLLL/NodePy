@@ -1,6 +1,6 @@
 <template>
-    <div class="BoolColWithColBinOpNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="compute">列间布尔运算节点</NodeTitle>
+    <div class="ColCompareNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category="compute">列间比较节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -65,20 +65,20 @@
     import {ref, computed, watch} from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
-    import { getInputType } from './getInputType'
+    import { getInputType } from '../getInputType'
     import type { Type } from '@/utils/api'
-    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
-    import NodepySelectMany from './tools/Nodepy-selectMany.vue'
-    import NodepyStringInput from './tools/Nodepy-StringInput.vue'
-    import type { BoolColWithColBinOpNodeData } from '@/types/nodeTypes'
+    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
+    import NodepySelectMany from '../tools/Nodepy-selectMany.vue'
+    import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
+    import type { ColCompareNodeData } from '@/types/nodeTypes'
 
 
-    const props = defineProps<NodeProps<BoolColWithColBinOpNodeData>>()
-    const op = ["AND", "OR", "XOR", "SUB"]
-    const opUi = ["与", "或", "异或", "减"]
+    const props = defineProps<NodeProps<ColCompareNodeData>>()
+    const op = ["EQ", "NEQ", "LT", "LTE", "GT", "GTE"]
+    const opUi = ['等于', '不等于', '小于', '小于等于', '大于', '大于等于']
     const defaultSelectedOP = op.indexOf(props.data.param.op)
     const col1Hint = computed(() => props.data.hint?.col1_choices || [''])
     const col1 = ref(props.data.param.col1)   //  used for defaultSelectedCol1
@@ -114,7 +114,7 @@
 
 
     const onSelectChangeOP = (e: any) => {
-        const selected_op = op[e] as 'AND'|'OR'|'XOR'|'SUB'
+        const selected_op = op[e] as 'EQ'|'NEQ'|'LT'|'LTE'|'GT'|'GTE'
         props.data.param.op = selected_op
     }
     const onSelectChangeCol1 = (e: any) => {
@@ -148,9 +148,9 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
-    .BoolColWithColBinOpNodeLayout {
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
+    .ColCompareNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;

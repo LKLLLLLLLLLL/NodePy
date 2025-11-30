@@ -48,13 +48,13 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
-    import type { ConstNodeData } from '../../types/nodeTypes'
-    import { handleExecError, handleOutputError, handleParamError } from './handleError'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import NodepyNumberInput from './tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
-    import NodepySelectFew from './tools/Nodepy-selectFew.vue'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
+    import type { ConstNodeData } from '../../../types/nodeTypes'
+    import { handleExecError, handleOutputError, handleParamError } from '../handleError'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import NodepyNumberInput from '../tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
+    import NodepySelectFew from '../tools/Nodepy-selectFew.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
 
 
     const props = defineProps<NodeProps<ConstNodeData>>()
@@ -95,8 +95,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
 
     .ConstNodeLayout {
         height: 100%;

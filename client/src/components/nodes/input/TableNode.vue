@@ -13,9 +13,9 @@
     import {ref} from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
-    import type {TableNodeData} from '../../types/nodeTypes'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
+    import type {TableNodeData} from '../../../types/nodeTypes'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
 
 
     const props = defineProps<NodeProps<TableNodeData>>()
@@ -23,8 +23,8 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
     .TableNodeLayout{
         height: 100%;
         width: 100%;

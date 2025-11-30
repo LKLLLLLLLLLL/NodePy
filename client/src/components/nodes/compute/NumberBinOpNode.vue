@@ -1,6 +1,6 @@
 <template>
-    <div class="BoolBinOpNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="compute">布尔二元运算节点</NodeTitle>
+    <div class="NumBinComputeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category="compute">数字二元运算节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-x port">
@@ -41,19 +41,19 @@
     import {ref, computed, watch} from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
-    import { getInputType } from './getInputType'
+    import type {NumberBinOpNodeData} from '../../../types/nodeTypes'
+    import NodepySelectMany from '../tools/Nodepy-selectMany.vue'
+    import { getInputType } from '../getInputType'
     import type { Type } from '@/utils/api'
-    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from './handleError'
-    import ErrorMsg from './tools/ErrorMsg.vue'
-    import NodeTitle from './tools/NodeTitle.vue'
-    import Timer from './tools/Timer.vue'
-    import NodepySelectMany from './tools/Nodepy-selectMany.vue'
-    import type {BoolBinOpNodeData} from '@/types/nodeTypes'
+    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
+    import ErrorMsg from '../tools/ErrorMsg.vue'
+    import NodeTitle from '../tools/NodeTitle.vue'
+    import Timer from '../tools/Timer.vue'
 
 
-    const props = defineProps<NodeProps<BoolBinOpNodeData>>()
-    const op = ['AND', 'OR', 'XOR', 'SUB']
-    const opChinese = ['与', '或', '异或', '减']
+    const props = defineProps<NodeProps<NumberBinOpNodeData>>()
+    const op = ['ADD', 'SUB', 'MUL', 'DIV', 'POW']
+    const opChinese = ['加法', '减法', '乘法', '除法', '乘方']
     const defaultSelected = op.indexOf(props.data.param.op)
     const x_type = computed(() => getInputType(props.id, 'x'))
     const y_type = computed(() => getInputType(props.id, 'y'))
@@ -75,7 +75,7 @@
 
 
     const onSelectChange = (e: any) => {
-        const selected_op = op[e] as 'AND' | 'OR' | 'XOR' | 'SUB'
+        const selected_op = op[e] as 'ADD' | 'SUB' | 'MUL' | 'DIV' | 'POW'
         props.data.param.op = selected_op
     }
 
@@ -90,23 +90,28 @@
 </script>
 
 <style lang="scss" scoped>
-    @use '../../common/global.scss' as *;
-    @use '../../common/node.scss' as *;
-    .BoolBinOpNodeLayout {
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
+    .NumBinComputeNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;
             padding-bottom: $node-padding-bottom;
-            .input-x, .input-y {
+            .input-x {
+                margin-bottom: $node-margin;
+            }
+            .input-y {
                 margin-bottom: $node-margin;
             }
             .op {
                 padding: 0 $node-padding-hor;
-                margin-bottom: $node-margin;
+            }
+            .output-result {
+                margin-top: $node-margin;
             }
         }
     }
     .all-handle-color {
-        background: $bool-color;
+        background: linear-gradient(to bottom, $int-color 0 50%, $float-color 50% 100%);
     }
 </style>
