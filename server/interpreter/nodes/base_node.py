@@ -234,6 +234,8 @@ def register_node(pair: bool = False):
         def _wrap(cls: type[BaseNode]) -> type[BaseNode]:
             if not issubclass(cls, BaseNode):
                 raise TypeError("Can only register subclasses of BaseNode.")
+            if cls.__name__ in _NODE_REGISTRY:
+                raise ValueError(f"Node type '{cls.__name__}' is already registered.")
             _NODE_REGISTRY[cls.__name__] = cls
             _NODE_PAIR_REGISTRY[cls.__name__] = pair
             return cls

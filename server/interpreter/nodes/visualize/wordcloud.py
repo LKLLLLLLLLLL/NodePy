@@ -1,4 +1,4 @@
-from typing import override
+from typing import Any, override
 
 from server.config import FIGURE_DPI
 from server.models.data import Data, Table
@@ -121,3 +121,22 @@ class WordcloudNode(BaseNode):
             user_id=self.global_config.user_id
         )
         return {"wordcloud_image": Data(payload=file)}
+
+    @override
+    @classmethod
+    def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
+        hint = {}
+        if "input" in input_schemas:
+            input_schema = input_schemas["input"]
+            if input_schema.type == Schema.Type.TABLE:
+                word_col_choices = []
+                frequency_col_choices = []
+                assert input_schema.tab is not None
+                for col_name, col_type in input_schema.tab.col_types.items():
+                    if col_type == ColType.STR:
+                        word_col_choices.append(col_name)
+                    if col_type in {ColType.INT, ColType.FLOAT}:
+                        frequency_col_choices.append(col_name)
+                hint["word_col_choices"] = word_col_choices
+                hint["frequency_col_choices"] = frequency_col_choices
+        return hint

@@ -19,7 +19,7 @@ class ToStringNode(BaseNode):
     """
     Convert input data to string type.
     """
-    
+
     @override
     def validate_parameters(self) -> None:
         if not self.type == "ToStringNode":
