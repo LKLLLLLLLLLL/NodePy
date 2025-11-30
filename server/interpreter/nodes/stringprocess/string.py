@@ -32,6 +32,9 @@ class StripNode(BaseNode):
                 err_param_key="type",
                 err_msg = "Node type must be 'StripNode'."
             )
+        if self.strip_chars is not None and self.strip_chars.strip() == "":
+            self.strip_chars = None
+        return
 
     @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:

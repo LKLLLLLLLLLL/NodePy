@@ -426,7 +426,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 *注意：如果plot_type为{"count", "hist"}，则y_col可以为None，此时可以不显示y_col的输入框，其他时候则y_col为必填；不过这个逻辑已经通过hint实现，当y不可选时，hint中不会存在"y_col_choices"字段。*
 
 **输入：**
-- table: 输入的表格，类型为Table。
+- input: 输入的表格，类型为Table。
 
 **输出：**
 - plot: 输出的图形，类型为File，格式为PNG。
@@ -448,6 +448,10 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **输出：**
 - wordcloud_image: 输出的词云图像，类型为File，格式为PNG。
+
+**hint：**
+- word_col_choices: 列名列表，类型为List[str]，用于在UI中为word_col参数提供可选值。
+- frequency_col_choices: 列名列表，类型为List[str]，用于在UI中为frequency_col参数提供可选值。
 
 ### 4. 字符串处理节点(stringprocess)
 #### 4.1 StripNode
@@ -748,7 +752,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - merged_table: 合并后的表格，类型为Table。
 
-#### 5.11 SliceNode
+#### 5.11 TableSliceNode
 表格切片节点，根据指定的起始行和结束行对表格进行切片操作。
 
 **参数：**

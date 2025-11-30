@@ -520,7 +520,7 @@ class MergeNode(BaseNode):
 
 
 @register_node()
-class SliceNode(BaseNode):
+class TableSliceNode(BaseNode):
     """
     Slice table rows by specified indices.
     """
@@ -530,7 +530,7 @@ class SliceNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "SliceNode":
+        if not self.type == "TableSliceNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",

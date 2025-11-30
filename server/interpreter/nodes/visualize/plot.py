@@ -163,7 +163,8 @@ class AdvancePlotNode(BaseNode):
                 err_param_key="y_col",
                 err_msg="y_col cannot be None for the selected plot_type."
             )
-        if self.hue_col is not None and self.hue_col.strip() == "":
+        if ((self.hue_col is not None and self.hue_col.strip() == "")
+          or self.hue_col == NO_SPECIFIED_COL):
             self.hue_col = None
         if self.title is not None and self.title.strip() == "":
             self.title = None

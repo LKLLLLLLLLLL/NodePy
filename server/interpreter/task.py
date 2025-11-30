@@ -146,7 +146,7 @@ def execute_project_task(self, project_id: int, user_id: int):
             # 3. get UI hints from nodes
             assert graph is not None
             def hint_reporter(node_id: str, hint: dict[str, Any]) -> bool:
-                logger.debug(f"Hint reported for node {node_id}: {hint}")
+                # logger.debug(f"Hint reported for node {node_id}: {hint}")
                 check_revoke()
                 node_index = topo_graph.get_index_by_node_id(node_id)
                 assert node_index is not None
