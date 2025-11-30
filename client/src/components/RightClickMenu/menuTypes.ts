@@ -135,7 +135,12 @@ export const nodeMenuItems: MenuNode[] = [
     {
         label: '字符串处理节点',
         value: 'stringProcessing',
-        children: []
+        children: [
+            {
+                label: '首尾字符清洗节点',
+                value: 'StripNode'
+            },
+        ]
     },
     {
         label: '表格处理节点',

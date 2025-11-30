@@ -22,8 +22,9 @@
             | 'file' 
             | 'stringProcess' 
             | 'tableProcess' 
-            | 'util' 
+            | 'analysis' 
             | 'visualize'
+            | 'datetimeProcess'
     }>()
     const file_outline_path = mdiFileOutline
     const import_path = mdiImport

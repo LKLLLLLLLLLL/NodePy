@@ -40,6 +40,7 @@ import UploadNode from '../nodes/UploadNode.vue'
 import TableFromFileNode from '../nodes/TableFromFileNode.vue'
 import PlotNode from '../nodes/PlotNode.vue'
 import AdvancePlotNode from '../nodes/AdvancePlotNode.vue'
+import StripNode from '../nodes/StripNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -283,6 +284,8 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.visualize
     case 'AdvancePlotNode':
       return nodeCategoryColor.visualize
+    case 'StripNode':
+      return nodeCategoryColor.str
     case 'UploadNode':
       return nodeCategoryColor.file
     case 'TableFromFileNode':
@@ -464,6 +467,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-AdvancePlotNode="AdvancePlotNodeProps">
           <AdvancePlotNode v-bind="AdvancePlotNodeProps" />
+        </template>
+
+        <template #node-StripNode="StripNodeProps">
+          <StripNode v-bind="StripNodeProps"/>
         </template>
 
         <template #node-UploadNode="UploadNodeProps">

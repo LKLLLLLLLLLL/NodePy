@@ -410,6 +410,17 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedAdvancePlotNode)
         break
+      case 'StripNode':
+        const addedStripNode: Nodetypes.StripNode = {
+          id,
+          position,
+          type: 'StripNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedStripNode)
+        break
     
       default:
         console.log(type)
