@@ -174,13 +174,10 @@ class ReplaceNode(BaseNode):
                 err_param_key="type",
                 err_msg = "Node type must be 'ReplaceNode'."
             )
-        if self.old is not None and self.new is not None:
-            if self.old == self.new:
-                raise NodeParameterError(
-                    node_id = self.id,
-                    err_param_key="old/new",
-                    err_msg = "Old and new substrings for replacement cannot be the same."
-                )
+        if self.old is not None and self.old.strip() == "":
+            self.old = None
+        if self.new is not None and self.new.strip() == "":
+            self.new = None
 
     @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
@@ -215,11 +212,13 @@ class ReplaceNode(BaseNode):
         if self.old is None and input_schemas.get("old") is None:
             raise NodeValidationError(
                 node_id = self.id,
+                err_input="old",
                 err_msg = "Old substring for replacement must be provided."
             )
         if self.new is None and input_schemas.get("new") is None:
             raise NodeValidationError(
                 node_id = self.id,
+                err_input="new",
                 err_msg = "New substring for replacement must be provided."
             )
         return {"output": Schema(type=Schema.Type.STR)}

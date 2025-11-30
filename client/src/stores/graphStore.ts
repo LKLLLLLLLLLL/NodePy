@@ -421,6 +421,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedStripNode)
         break
+      case 'ReplaceNode':
+        const addedReplaceNode: Nodetypes.ReplaceNode = {
+          id,
+          position,
+          type: 'ReplaceNode',
+          data: {
+            param: {
+              old: '',
+              new: ''
+            }
+          }
+        }
+        addNodes(addedReplaceNode)
+        break
     
       default:
         console.log(type)

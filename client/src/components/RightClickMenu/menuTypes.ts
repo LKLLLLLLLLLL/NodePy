@@ -140,6 +140,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '首尾字符清洗节点',
                 value: 'StripNode'
             },
+            {
+                label: '字符串替换节点',
+                value: 'ReplaceNode'
+            },
         ]
     },
     {
