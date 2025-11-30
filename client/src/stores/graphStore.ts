@@ -32,7 +32,15 @@ export const useGraphStore = defineStore('graph', () => {
 
 
   const nextId = (type:string):string => {
-    const currentMax = maxNodeId.value[type] ?? 0
+    let currentMax = 0
+    nodes.value.forEach(n => {
+      if(n.type === type) {
+      const idNum = Number(n.id.split('_')[1])
+        if(idNum > currentMax) {
+          currentMax = idNum
+        }
+      }
+    })
     const next = currentMax + 1
     maxNodeId.value[type] = next
     return `${type}_${next}`
@@ -387,6 +395,21 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedPlotNode)
         break
+      case 'AdvancePlotNode':
+        const addedAdvancePlotNode: Nodetypes.AdvancePlotNode = {
+          id,
+          position,
+          type: 'AdvancePlotNode',
+          data: {
+            param: {
+              x_col: '',
+              y_col: '',
+              plot_type: 'bar'
+            }
+          }
+        }
+        addNodes(addedAdvancePlotNode)
+        break
     
       default:
         console.log(type)
@@ -455,7 +478,7 @@ export const useGraphStore = defineStore('graph', () => {
             x: position.x + relativeX,
             y: position.y + relativeY,
           },
-          nodeInfo.param
+          JSON.parse(JSON.stringify(nodeInfo.param)) // deep copy to avoid param binding
         )
         if(newNode) {
           idMap.value[nodeInfo.id] = newNode.id

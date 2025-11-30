@@ -143,8 +143,8 @@ export const nodeMenuItems: MenuNode[] = [
         children: []
     },
     {
-        label: '工具节点',
-        value: 'utility',
+        label: '分析节点',
+        value: 'analysis',
         children: []
     },
     {
@@ -154,7 +154,11 @@ export const nodeMenuItems: MenuNode[] = [
             {
                 label: '绘图节点',
                 value: 'PlotNode'
-            }
+            },
+            {
+                label: '高级绘图节点',
+                value: 'AdvancePlotNode'
+            },
         ]
     }
 ]

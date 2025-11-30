@@ -6,7 +6,7 @@
         :class="{open}"
     >
         <div class="value" :class="{close: !open}" @click.stop="toggle" :style="{height: itemHeight, width: itemWidth}">
-            <span class="selectedItem">{{ selectedItem }}</span>
+            <span class="selectedItem" :class="{'_no_specified_col' : selectedItem === '_no_specified_col'}">{{ selectedItem === '_no_specified_col' ? '不指定列名' : selectedItem }}</span>
             <span class="arrow" :class="{open}">
               <SvgIcon type="mdi" :path="down_path"  />
             </span>
@@ -18,9 +18,9 @@
                 class="item"
                 @click.stop="select(idx)"
                 :style="itemStyle"
-                :class="{selected: selectedIdx === idx && options[selectedIdx]}"
+                :class="[{selected: selectedIdx === idx && options[selectedIdx]}, {'_no_specified_col' : item === '_no_specified_col'}]"
             >   <!-- options[selectedIdx] means empty value cannot be accepted-->
-                {{ item }}
+                <span>{{ item === '_no_specified_col' ? '不指定列名' : item}}</span>
             </div>
         </div>
     </div>
@@ -28,15 +28,16 @@
 
 <script lang="ts" setup>
     import {ref, computed, watchEffect, onBeforeUnmount, watch} from 'vue'
+    import type { PropType } from 'vue'
     // @ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon'
     import { mdiMenuDown } from '@mdi/js'
 
-    const down_path = mdiMenuDown;
+    const down_path = mdiMenuDown
 
     const props = defineProps({
         options: {
-            type: Array,
+            type: Array as PropType<string[]>,
             required: true
         },
         itemWidth: {
@@ -56,7 +57,7 @@
     const root = ref<HTMLElement>()
     const itemStyle = ref({
         width: props.itemWidth,
-        height: `calc(${props.itemHeight} - 2px)`  //-4 for the gap between items
+        height: `calc(${props.itemHeight} - 2px)`  //-2 for the gap between items
     })
     const selectedIdx = ref(props.defaultSelected)
     const open = ref(false)
@@ -120,6 +121,11 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                &._no_specified_col {
+                    color: rgba(0, 0, 0, 0.2);
+                    font-style: italic;
+                    font-size: 12px;
+                }
             }
             .arrow {
                 position: absolute;
@@ -162,6 +168,14 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                &._no_specified_col {
+                    color: rgba(0, 0, 0, 0.2);
+                    font-style: italic;
+                    font-size: 11px;
+                }
             }
             .item:hover {
                 background: #ddd;
