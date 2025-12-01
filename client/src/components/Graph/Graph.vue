@@ -129,7 +129,6 @@ onNodeDragStop(async (event: NodeDragEvent) => {
 
 onConnect((connection) => {
   const addedEdge = {
-    id: Date.now().toString(),
     source: connection.source,
     sourceHandle: connection.sourceHandle,
     target: connection.target,

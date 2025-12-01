@@ -528,7 +528,6 @@ export const useGraphStore = defineStore('graph', () => {
         const newTargetId = idMap.value[e.target]
         if(newSourceId && newTargetId) {
           const newEdge = {
-            id: Date.now().toString(),
             source: newSourceId,
             target: newTargetId,
             sourceHandle: e.sourceHandle,
