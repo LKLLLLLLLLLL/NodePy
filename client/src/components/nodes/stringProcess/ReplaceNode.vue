@@ -9,39 +9,31 @@
                 </div>
                 <Handle id="input" type="target" :position="Position.Left" :class="[`${input_type}-handle-color`, {'node-errhandle': inputHasErr.value}]"/>
             </div>
-            <div class="input-old port">
-                <div class="input-port-description">
-                    旧字符串输入
-                </div>
-                <Handle id="old" type="target" :position="Position.Left" :class="[`${inputOld_type}-handle-color`, {'node-errhandle': inputOldHasErr.value}]"/>
-            </div>
-            <div class="input-new port">
-                <div class="input-port-description">
-                    新字符串输入
-                </div>
-                <Handle id="new" type="target" :position="Position.Left" :class="[`${inputNew_type}-handle-color`, {'node-errhandle': inputNewHasErr.value}]"/>
-            </div>
-            <div class="old">
+            <div class="old port">
                 <div class="param-description" :class="{'node-has-paramerr': oldHasErr.value}">
-                    旧字符串
+                    旧字符串输入
                 </div>
                 <NodepyStringInput
                     v-model="old"
                     @update-value="onUpdateOld"
+                    :disabled="oldDisabled"
                     class="nodrag"
                     placeholder="旧字符串"
                 />
+                <Handle id="old" type="target" :position="Position.Left" :class="[`${inputOld_type}-handle-color`, {'node-errhandle': inputOldHasErr.value}]"/>
             </div>
-            <div class="new">
+            <div class="new port">
                 <div class="param-description" :class="{'node-has-paramerr': newHasErr.value}">
-                    新字符串
+                    新字符串输入
                 </div>
                 <NodepyStringInput
                     v-model="New"
                     @update-value="onUpdateNew"
+                    :disabled="newDisabled"
                     class="nodrag"
                     placeholder="新字符串"
                 />
+                <Handle id="new" type="target" :position="Position.Left" :class="[`${inputNew_type}-handle-color`, {'node-errhandle': inputNewHasErr.value}]"/>
             </div>
             <div class="output-output port">
                 <div class="output-port-description">
@@ -61,6 +53,7 @@
     import { getInputType } from '../getInputType'
     import type { Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
+    import { hasInputEdge } from '../hasEdge'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
@@ -70,7 +63,9 @@
 
     const props = defineProps<NodeProps<ReplaceNodeData>>()
     const old = ref(props.data.param.old)
+    const oldDisabled = computed(() => hasInputEdge(props.id, 'old'))
     const New = ref(props.data.param.new)
+    const newDisabled = computed(() => hasInputEdge(props.id, 'new'))
     const input_type = computed(() => getInputType(props.id, 'input'))
     const inputOld_type = computed(() => getInputType(props.id, 'old'))
     const inputNew_type = computed(() => getInputType(props.id, 'new'))
@@ -124,7 +119,7 @@
         .data {
             padding-top: $node-padding-top;
             padding-bottom: $node-padding-bottom;
-            .input-input, .input-old, .input-new {
+            .input-input {
                 margin-bottom: $node-margin;
             }
             .old, .new {
