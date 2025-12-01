@@ -359,16 +359,16 @@ export interface StripNode extends BaseNode<StripNodeData> {
 }
 
 
-// export interface SliceNodeParam {
-//     start?: number
-//     end?: number
-// }
-// export type SliceNodeData = BaseData & {
-//     param: SliceNodeParam
-// }
-// export interface SliceNode extends BaseNode<SliceNodeData> {
-//     type: 'SliceNode'
-// }
+export interface SliceNodeParam {
+    start?: number
+    end?: number
+}
+export type SliceNodeData = BaseData & {
+    param: SliceNodeParam
+}
+export interface SliceNode extends BaseNode<SliceNodeData> {
+    type: 'SliceNode'
+}
 
 
 export interface ReplaceNodeParam {

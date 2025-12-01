@@ -77,8 +77,8 @@ class WordcloudNode(BaseNode):
         from wordcloud import WordCloud
         
         table_data = input["input"]
-        assert isinstance(table_data, Table)
-        table_df = Table.df
+        assert isinstance(table_data.payload, Table)
+        table_df = table_data.payload.df
         
         file_manager = self.global_config.file_manager
 

@@ -38,6 +38,7 @@ import ToFloatNode from '../nodes/compute/ToFloatNode.vue'
 import ToBoolNode from '../nodes/compute/ToBoolNode.vue'
 import PlotNode from '../nodes/visualize/PlotNode.vue'
 import AdvancePlotNode from '../nodes/visualize/AdvancePlotNode.vue'
+import WordcloudNode from '../nodes/visualize/WordcloudNode.vue'
 import StripNode from '../nodes/stringProcess/StripNode.vue'
 import ReplaceNode from '../nodes/stringProcess/ReplaceNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
@@ -236,61 +237,38 @@ const handlePaneDoubleClick = () => {
 const nodeColor = (node: BaseNode) => {
   switch (node.type) {
     case 'ConstNode':
-      return nodeCategoryColor.input
     case 'StringNode':
-      return nodeCategoryColor.input
     case 'BoolNode':
-      return nodeCategoryColor.input
     case 'TableNode':
-      return nodeCategoryColor.input
     case 'RandomNode':
-      return nodeCategoryColor.input
     case 'RangeNode':
-      return nodeCategoryColor.input
     case 'DateTimeNode':
       return nodeCategoryColor.input
     case 'NumberBinOpNode':
-      return nodeCategoryColor.compute
     case 'NumberUnaryOpNode':
-      return nodeCategoryColor.compute
     case 'PrimitiveCompareNode':
-      return nodeCategoryColor.compute
     case 'BoolBinOpNode':
-      return nodeCategoryColor.compute
     case 'BoolUnaryOpNode':
-      return nodeCategoryColor.compute
     case 'ColWithNumberBinOpNode':
-      return nodeCategoryColor.compute
     case 'ColWithBoolBinOpNode':
-      return nodeCategoryColor.compute
     case 'NumberColUnaryOpNode':
-      return nodeCategoryColor.compute
     case 'BoolColUnaryOpNode':
-      return nodeCategoryColor.compute
     case 'NumberColWithColBinOpNode':
-      return nodeCategoryColor.compute
     case 'BoolColWithColBinOpNode':
-      return nodeCategoryColor.compute
     case 'ColCompareNode':
-      return nodeCategoryColor.compute
     case 'ToStringNode':
-      return nodeCategoryColor.compute
     case 'ToIntNode':
-      return nodeCategoryColor.compute
     case 'ToFloatNode':
-      return nodeCategoryColor.compute
     case 'ToBoolNode':
       return nodeCategoryColor.compute
     case 'PlotNode':
-      return nodeCategoryColor.visualize
     case 'AdvancePlotNode':
+    case 'WordcloudNode':
       return nodeCategoryColor.visualize
     case 'StripNode':
-      return nodeCategoryColor.str
     case 'ReplaceNode':
       return nodeCategoryColor.str
     case 'UploadNode':
-      return nodeCategoryColor.file
     case 'TableFromFileNode':
       return nodeCategoryColor.file
     default:
@@ -470,6 +448,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-AdvancePlotNode="AdvancePlotNodeProps">
           <AdvancePlotNode v-bind="AdvancePlotNodeProps" />
+        </template>
+
+        <template #node-WordcloudNode="WordcloudNodeProps">
+          <WordcloudNode v-bind="WordcloudNodeProps" />
         </template>
 
         <template #node-StripNode="StripNodeProps">

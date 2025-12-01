@@ -168,6 +168,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '高级绘图节点',
                 value: 'AdvancePlotNode'
             },
+            {
+                label: '词云节点',
+                value: 'WordcloudNode'
+            },
         ]
     }
 ]

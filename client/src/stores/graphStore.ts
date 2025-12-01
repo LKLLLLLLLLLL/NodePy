@@ -410,6 +410,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedAdvancePlotNode)
         break
+      case 'WordcloudNode':
+        const addedWordcloudNode: Nodetypes.WordcloudNode = {
+          id,
+          position,
+          type: 'WordcloudNode',
+          data: {
+            param: {
+              word_col: '',
+              frequency_col: ''
+            }
+          }
+        }
+        addNodes(addedWordcloudNode)
+        break
       case 'StripNode':
         const addedStripNode: Nodetypes.StripNode = {
           id,
