@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from server import DEBUG
 from server.lib.CacheManager import CacheManager
 from server.lib.FileManager import FileManager
-from server.lib.utils import safe_hash
+from server.lib.utils import safe_hash, time_check
 from server.models.data import Data, Schema, Table
 from server.models.exception import NodeExecutionError, NodeParameterError
 from server.models.project import TopoEdge, TopoNode, WorkflowTopology
@@ -175,7 +175,9 @@ class ProjectInterpreter:
 
     def execute(self, 
                 callbefore: Callable[[str], None], 
-                callafter: Callable[[str, Literal["success", "error"], dict[str, Any] | Exception, float | None], bool]
+                callafter: Callable[[str, Literal["success", "error"], dict[str, Any] | Exception, float | None], bool],
+                periodic_time_check_seconds: float,
+                periodic_time_check_callback: Callable[[], bool]
     ) -> None:
         """ 
         Execute the graph in topological order.
@@ -236,7 +238,13 @@ class ProjectInterpreter:
                 try:
                     callbefore(node_id)
                     start_time = time.perf_counter()
-                    output_data = self._execute_control_structure(node_id, input_data)
+
+                    @time_check(periodic_time_check_seconds, periodic_time_check_callback)
+                    def _wrapped_execute(begin_node_id: str, inputs: dict[str, Data]) -> dict[str, Data]:
+                        return self._execute_control_structure(begin_node_id, inputs)
+
+                    output_data = _wrapped_execute(node_id, input_data)
+
                     running_time = (time.perf_counter() - start_time) * 1000  # in ms
                 
                 # 4. call callafter
@@ -282,7 +290,11 @@ class ProjectInterpreter:
                     if DEBUG:
                         input_data_hash = safe_hash(input_data)  # guide to avoid accidental mutation
 
-                    output_data = node.execute(input_data)
+                    @time_check(periodic_time_check_seconds, periodic_time_check_callback)
+                    def _wrapped_execute(node: BaseNode, input_data: dict[str, Data]) -> dict[str, Data]:
+                        return node.execute(input_data)
+
+                    output_data = _wrapped_execute(node, input_data)
 
                     if DEBUG:
                         if safe_hash(input_data) != input_data_hash:

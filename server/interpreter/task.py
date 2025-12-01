@@ -13,7 +13,11 @@ from server.lib.DataManager import DataManager
 from server.lib.FileManager import FileManager
 from server.lib.ProjectLock import ProjectLock
 from server.lib.StreamQueue import Status, StreamQueue
-from server.lib.utils import get_project_by_id_sync, set_project_record_sync
+from server.lib.utils import (
+    InterruptedError,
+    get_project_by_id_sync,
+    set_project_record_sync,
+)
 from server.models.data import Data
 from server.models.database import DatabaseTransaction
 from server.models.exception import (
@@ -379,6 +383,28 @@ def execute_project_task(self, project_id: int, user_id: int):
                     )
                     workflow.apply_patch(patch)
                     return True
+                except (RevokeException, InterruptedError):
+                    raise
+                except TimeoutError:
+                    has_exception = True
+                    node_index = topo_graph.get_index_by_node_id(node_id)
+                    assert node_index is not None
+                    patch = ProjWorkflowPatch(
+                        key=["nodes", node_index, "error"],
+                        value=ProjNodeError(
+                            type="execution", params=None, inputs=None, message="Execution timed out."
+                        ),
+                    )
+                    queue.push_message_sync(
+                        Status.IN_PROGRESS, 
+                        {
+                            "stage": "EXECUTION", 
+                            "status": "IN_PROGRESS", 
+                            "patch": [patch.model_dump()]
+                        }
+                    )
+                    workflow.apply_patch(patch)
+                    return True
                 except Exception as e:
                     logger.exception(f"Unexpected error during node execution: {e}")
                     has_exception = True
@@ -396,7 +422,16 @@ def execute_project_task(self, project_id: int, user_id: int):
                     )
                     workflow.apply_patch(patch)
                     return True
-            graph.execute(callbefore=exec_before_reporter, callafter=exec_after_reporter)
+            def time_check_callback() -> bool:
+                check_revoke()
+                return True
+            
+            graph.execute(
+                callbefore=exec_before_reporter, 
+                callafter=exec_after_reporter,
+                periodic_time_check_seconds=1.0,
+                periodic_time_check_callback=time_check_callback,
+            )
             
             unreached_node_indices = graph.get_unreached_nodes()
             patches = workflow.generate_del_data_patches(include=unreached_node_indices)
@@ -435,7 +470,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                     "patch": [patch.model_dump()]
                 }
             )
-        except RevokeException:
+        except (RevokeException, InterruptedError):
             logger.debug("Task revoked")
             patch = ProjWorkflowPatch(
                 key=["error_message"],
@@ -470,11 +505,13 @@ def execute_project_task(self, project_id: int, user_id: int):
         finally:
             logger.debug(f"Task {task_id} finalized")
             set_project_record_sync(db_client, project, user_id)
-            file_manager.clean_orphan_file_sync(project_id=project_id)
-            data_manager.clean_orphan_data_sync(project_id=project_id)
-            if db_client.is_active:
-                db_client.commit()  # Commit the error state to the DB
-
+            try: # cleanup procedure may be called when the execution is failed halfway
+                file_manager.clean_orphan_file_sync(project_id=project_id)
+                data_manager.clean_orphan_data_sync(project_id=project_id)
+                if db_client.is_active:
+                    db_client.commit()  # Commit the error state to the DB
+            except Exception as e:
+                logger.warning(f"Error during cleanup: {e}")
 async def revoke_project_task(task_id: str, timeout: float = 30) -> None:
     """
     Wrapper to revoke a task only it has been started.

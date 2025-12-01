@@ -22,8 +22,8 @@ class StripNode(BaseNode):
     """
     Node to strip leading and trailing whitespace or specified characters from string columns in a table.
     """
-    strip_chars: str | None
-    
+    strip_chars: str | None = None
+
     @override
     def validate_parameters(self) -> None:
         if not self.type == "StripNode":
@@ -82,8 +82,8 @@ class SliceNode(BaseNode):
     """
     Sliece the input string from start index to end index.
     """
-    start: int | None
-    end: int | None
+    start: int | None = None
+    end: int | None = None
     
     @override
     def validate_parameters(self) -> None:
@@ -166,8 +166,8 @@ class ReplaceNode(BaseNode):
     """
     Node to replace occurrences of a substring with another substring in a string.
     """
-    old: str | None
-    new: str | None
+    old: str | None = None
+    new: str | None = None
     
     @override
     def validate_parameters(self) -> None:
@@ -178,9 +178,12 @@ class ReplaceNode(BaseNode):
                 err_msg = "Node type must be 'ReplaceNode'."
             )
         if self.old is not None and self.old.strip() == "":
-            self.old = None
-        if self.new is not None and self.new.strip() == "":
-            self.new = None
+            raise NodeParameterError(
+                node_id = self.id,
+                err_param_key="old",
+                err_msg = "Old substring for replacement cannot be empty."
+            )
+        return
 
     @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:

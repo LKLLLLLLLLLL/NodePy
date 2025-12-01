@@ -1,7 +1,7 @@
 import base64
 import hashlib
 import json
-from concurrent.futures import ThreadPoolExecutor, TimeoutError
+import signal
 from typing import Any, Callable
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -88,21 +88,86 @@ def set_project_record_sync(db: Session, project: Project, user_id: int) -> None
         base64.b64decode(project.thumb) if project.thumb else None
     )
 
+class TimeoutException(Exception):
+    """Exception raised when a timeout occurs"""
+    pass
+
+
+class InterruptedError(Exception):
+    """Exception raised when execution is interrupted by callback"""
+    pass
+
+
 def timeout(seconds: float):
     """
-    A decorator to set a timeout for a function execution.
-    If the function raise error, timeout will raise the error as well.
+    A decorator to set a timeout for a function execution using SIGALRM.
+    Compatible with existing SIGTERM-based revocation mechanism.
     """
-
     def _decorator(func: Callable):
-        def _wrapper(*args, **kwargs) -> tuple[bool, Any]:
-            with ThreadPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(func, *args, **kwargs)
+        def _wrapper(*args, **kwargs) -> Any:
+            def _timeout_handler(signum, frame):
+                raise TimeoutException(
+                    f"Function execution timed out after {seconds} seconds."
+                )
+
+            # Save old SIGALRM handler (not SIGTERM, which is used for revocation)
+            old_alarm_handler = signal.signal(signal.SIGALRM, _timeout_handler)
+            signal.setitimer(signal.ITIMER_REAL, seconds)
+
+            try:
+                result = func(*args, **kwargs)
+                return result
+            finally:
+                # Cancel alarm and restore old handler
+                signal.setitimer(signal.ITIMER_REAL, 0)
+                signal.signal(signal.SIGALRM, old_alarm_handler)
+
+        return _wrapper
+    return _decorator
+
+
+def time_check(seconds: float, callback: Callable[[], bool]):
+    """
+    A decorator to periodically check a condition during function execution using SIGALRM.
+    The callback is called every 'seconds' seconds.
+    Compatible with existing SIGTERM-based revocation mechanism.
+    """
+    def _decorator(func: Callable):
+        def _wrapper(*args, **kwargs) -> Any:
+            result_container = {"result": None, "exception": None, "completed": False}
+
+            def _check_handler(signum, frame):
+                # Check if callback allows continuation
                 try:
-                    result = future.result(timeout=seconds)
-                    return True, result
-                except TimeoutError:
-                    return False, None
+                    should_continue = callback()
+                    if not should_continue:
+                        raise InterruptedError(
+                            "Execution was interrupted by the time_check callback."
+                        )
+                except Exception as e:
+                    # Store exception to re-raise later
+                    result_container["exception"] = e
+                    raise e
+
+            # Save old SIGALRM handler
+            old_alarm_handler = signal.signal(signal.SIGALRM, _check_handler)
+            # Set up periodic alarm
+            signal.setitimer(signal.ITIMER_REAL, seconds, seconds)
+
+            try:
+                result_container["result"] = func(*args, **kwargs)
+                result_container["completed"] = True
+            finally:
+                # Cancel alarm and restore old handler
+                signal.setitimer(signal.ITIMER_REAL, 0)
+                signal.signal(signal.SIGALRM, old_alarm_handler)
+
+            # Re-raise any exception from callback
+            if result_container["exception"] is not None:
+                raise result_container["exception"]
+
+            return result_container["result"]
+
         return _wrapper
     return _decorator
 
