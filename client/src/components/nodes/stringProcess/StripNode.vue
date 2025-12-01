@@ -9,22 +9,18 @@
                 </div>
                 <Handle id="input" type="target" :position="Position.Left" :class="[`${input_type}-handle-color`, {'node-errhandle': inputHasErr.value}]"/>
             </div>
-            <div class="input-strip_chars port">
-                <div class="input-port-description">
-                    清洗字符集合输入
-                </div>
-                <Handle id="strip_chars" type="target" :position="Position.Left" :class="[`${inputStrip_chars_type}-handle-color`, {'node-errhandle': inputStrip_charsHasErr.value}]"/>
-            </div>
-            <div class="strip_chars">
+            <div class="strip_chars port">
                 <div class="param-description" :class="{'node-has-paramerr': strip_charsHasErr.value}">
-                    清洗字符集合
+                    清洗字符集合输入
                 </div>
                 <NodepyStringInput
                     v-model="strip_chars"
                     @update-value="onUpdateStrip_chars"
+                    :disabled="strip_charsDisabled"
                     class="nodrag"
                     placeholder="清洗字符集合"
                 />
+                <Handle id="strip_chars" type="target" :position="Position.Left" :class="[`${inputStrip_chars_type}-handle-color`, {'node-errhandle': inputStrip_charsHasErr.value}]"/>
             </div>
             <div class="output-output port">
                 <div class="output-port-description">
@@ -44,6 +40,7 @@
     import { getInputType } from '../getInputType'
     import type { Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
+    import { hasInputEdge } from '../hasEdge'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
@@ -53,6 +50,7 @@
 
     const props = defineProps<NodeProps<StripNodeData>>()
     const strip_chars = ref(props.data.param.strip_chars || '')
+    const strip_charsDisabled = computed(() => hasInputEdge(props.id, 'strip_chars'))
     const input_type = computed(() => getInputType(props.id, 'input'))
     const inputStrip_chars_type = computed(() => getInputType(props.id, 'strip_chars'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['output']?.type || 'default')
@@ -94,7 +92,7 @@
         .data {
             padding-top: $node-padding-top;
             padding-bottom: $node-padding-bottom;
-            .input-input, .input-strip_chars {
+            .input-input {
                 margin-bottom: $node-margin;
             }
             .strip_chars {
