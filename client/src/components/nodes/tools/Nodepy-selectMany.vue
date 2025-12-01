@@ -6,7 +6,7 @@
         :class="{open}"
     >
         <div class="value" :class="{close: !open}" @click.stop="toggle" :style="{height: itemHeight, width: itemWidth}">
-            <span class="selectedItem" :class="{'_no_specified_col' : selectedItem === '_no_specified_col'}">{{ selectedItem === '_no_specified_col' ? '不指定列名' : selectedItem }}</span>
+            <span class="selectedItem" :class="{'specialColumn' : isSpecialColumn(selectedItem)}">{{columnValue(selectedItem)}}</span>
             <span class="arrow" :class="{open}">
               <SvgIcon type="mdi" :path="down_path"  />
             </span>
@@ -18,9 +18,9 @@
                 class="item"
                 @click.stop="select(idx)"
                 :style="itemStyle"
-                :class="[{selected: selectedIdx === idx && options[selectedIdx]}, {'_no_specified_col' : item === '_no_specified_col'}]"
+                :class="[{selected: selectedIdx === idx && options[selectedIdx]}, {'specialColumn' : isSpecialColumn(item)}]"
             >   <!-- options[selectedIdx] means empty value cannot be accepted-->
-                <span>{{ item === '_no_specified_col' ? '不指定列名' : item}}</span>
+                <span>{{columnValue(item)}}</span>
             </div>
         </div>
     </div>
@@ -79,6 +79,27 @@
         if (!root.value!.contains(e.target as Node)) open.value = false
     }
 
+    const isSpecialColumn = (item: string | undefined | null) => {
+        switch(item) {
+            case '_no_specified_col':
+            case '_index':
+                return true
+            default:
+                return false
+        }
+    }
+
+    const columnValue = (item: string | undefined | null) => {
+        switch(item) {
+            case '_no_specified_col':
+                return '不指定列名'
+            case '_index':
+                return '行号'
+            default:
+                return item
+        }
+    }
+
 
     watchEffect(() => open.value
         ? document.addEventListener('click', clickOutside, true)
@@ -121,7 +142,7 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                &._no_specified_col {
+                &.specialColumn {
                     color: rgba(0, 0, 0, 0.2);
                     font-style: italic;
                     font-size: 12px;
@@ -171,7 +192,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                &._no_specified_col {
+                &.specialColumn {
                     color: rgba(0, 0, 0, 0.2);
                     font-style: italic;
                     font-size: 11px;
