@@ -384,6 +384,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                     workflow.apply_patch(patch)
                     return True
                 except (RevokeException, InterruptedError):
+                    # revoke or interrupt outer, it will be handled in the outer layer
                     raise
                 except TimeoutError:
                     has_exception = True
@@ -432,7 +433,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                 periodic_time_check_seconds=1.0,
                 periodic_time_check_callback=time_check_callback,
             )
-            
+
             unreached_node_indices = graph.get_unreached_nodes()
             patches = workflow.generate_del_data_patches(include=unreached_node_indices)
             if patches:
@@ -512,6 +513,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                     db_client.commit()  # Commit the error state to the DB
             except Exception as e:
                 logger.warning(f"Error during cleanup: {e}")
+
 async def revoke_project_task(task_id: str, timeout: float = 30) -> None:
     """
     Wrapper to revoke a task only it has been started.

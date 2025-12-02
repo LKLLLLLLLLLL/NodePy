@@ -124,13 +124,6 @@ class SliceNode(BaseNode):
 
     @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
-        if self.start is not None and self.end is not None:
-            if input_schemas.get("start") is None and input_schemas.get("end") is None:
-                raise NodeValidationError(
-                    node_id = self.id,
-                    err_inputs=["start", "end"],
-                    err_msg = "Either both start and end parameters or both start and end inputs must be provided."
-                )
         return {"output": Schema(type=Schema.Type.STR)}
 
     @override
