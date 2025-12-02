@@ -82,7 +82,7 @@
     }
 
     const onUpdateValue = () => {
-        props.data.param.value = Number(value.value)
+        props.data.param.value = value.value
     }
 
 

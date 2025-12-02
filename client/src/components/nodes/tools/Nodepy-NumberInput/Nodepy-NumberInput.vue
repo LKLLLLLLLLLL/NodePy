@@ -8,8 +8,8 @@
         <div class="left-arrow" @click="onClick(-1)" :class="{disabled}">
             <SvgIcon type="mdi" :path="mdi_left_path"  />
         </div>
-        <div v-if="!isEditing" class="value" @mousedown="handleLeftMouseDown" :class="{disabled}">
-            <span>{{ (model ?? 0).toFixed(local.fixed) }}</span>
+        <div v-if="!isEditing" class="value" @mousedown="handleLeftMouseDown" :class="[{disabled}, {'empty-value' : model == null}]">
+            <span>{{ model == null ? '空' : (model ?? 0).toFixed(local.fixed) }}</span>
         </div>
         <div class="value-input" v-else :class="{disabled}">
             <input
@@ -58,7 +58,7 @@
 
 
     const onClick = (n: number) => {
-        if (model.value === undefined) return
+        if (model.value == null) return
         const newValue = model.value + n
         const min = props.min ?? Number.NEGATIVE_INFINITY
         const max = props.max ?? Number.POSITIVE_INFINITY
@@ -72,7 +72,7 @@
     }
 
     const update = (relative: number, acceleration: number = 1) => {
-      if (model.value === undefined) return
+      if (model.value == null) return
 
       const step = 1 / local.value.denominator
       const effectiveMovement = relative * acceleration
@@ -118,7 +118,7 @@
     }
 
     const startEdit = () => {
-        editText.value = (model.value ?? 0).toFixed(local.value.fixed)
+        editText.value = model.value == null ? '' : (model.value ?? 0).toFixed(local.value.fixed)
         isEditing.value = true
         nextTick(() => inputEl.value?.focus())
     }
@@ -130,7 +130,9 @@
     const commitEdit = () => {
         if(!isEditing.value) return
         const n = Number(editText.value)
-        if(Number.isFinite(n)) {
+        if(editText.value.trim() === '') {
+            model.value = undefined
+        }else if(Number.isFinite(n)) {
             const min = props.min ?? Number.NEGATIVE_INFINITY
             const max = props.max ?? Number.POSITIVE_INFINITY
             model.value = Math.min(Math.max(normalize(n, local.value.denominator), min), max)
@@ -186,6 +188,10 @@
             &.disabled {
                 color: rgba(0, 0, 0, 0.3);
                 pointer-events: none;
+            }
+            &.empty-value {
+                color: rgba(0, 0, 0, 0.2);
+                font-style: italic;
             }
         }
         .value-input {

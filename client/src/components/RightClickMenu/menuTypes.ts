@@ -141,6 +141,10 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'StripNode'
             },
             {
+                label: '字符串切片节点',
+                value: 'SliceNode'
+            },
+            {
                 label: '字符串替换节点',
                 value: 'ReplaceNode'
             },

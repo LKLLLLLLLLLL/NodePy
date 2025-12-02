@@ -435,6 +435,17 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedStripNode)
         break
+      case 'SliceNode':
+        const addedSliceNode: Nodetypes.SliceNode = {
+          id,
+          position,
+          type: 'SliceNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedSliceNode)
+        break
       case 'ReplaceNode':
         const addedReplaceNode: Nodetypes.ReplaceNode = {
           id,

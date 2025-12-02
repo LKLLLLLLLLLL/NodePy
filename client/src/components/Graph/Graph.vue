@@ -40,6 +40,7 @@ import PlotNode from '../nodes/visualize/PlotNode.vue'
 import AdvancePlotNode from '../nodes/visualize/AdvancePlotNode.vue'
 import WordcloudNode from '../nodes/visualize/WordcloudNode.vue'
 import StripNode from '../nodes/stringProcess/StripNode.vue'
+import SliceNode from '../nodes/stringProcess/SliceNode.vue'
 import ReplaceNode from '../nodes/stringProcess/ReplaceNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
@@ -265,6 +266,7 @@ const nodeColor = (node: BaseNode) => {
     case 'WordcloudNode':
       return nodeCategoryColor.visualize
     case 'StripNode':
+    case 'SliceNode':
     case 'ReplaceNode':
       return nodeCategoryColor.str
     case 'UploadNode':
@@ -455,6 +457,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-StripNode="StripNodeProps">
           <StripNode v-bind="StripNodeProps"/>
+        </template>
+
+        <template #node-SliceNode="SliceNodeProps">
+          <SliceNode v-bind="SliceNodeProps"/>
         </template>
 
         <template #node-ReplaceNode="ReplaceNodeProps">
