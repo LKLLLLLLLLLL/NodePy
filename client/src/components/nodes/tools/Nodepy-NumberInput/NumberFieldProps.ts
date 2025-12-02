@@ -7,4 +7,5 @@ export interface NumberFieldProps {
   scale?: number  // 小数位数
   width?: string
   height?: string
+  disabled?: boolean
 }

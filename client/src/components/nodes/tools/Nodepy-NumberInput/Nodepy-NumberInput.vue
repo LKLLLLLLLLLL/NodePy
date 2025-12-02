@@ -3,14 +3,15 @@
         class="NodepyNumberInputLayout nodes-innertool-border-radius"
         :style="{width: width, height: height}"
         @click.stop
+        :class="{disabled}"
     >
-        <div class="left-arrow" @click="onClick(-1)">
+        <div class="left-arrow" @click="onClick(-1)" :class="{disabled}">
             <SvgIcon type="mdi" :path="mdi_left_path"  />
         </div>
-        <div v-if="!isEditing" class="value" @mousedown="handleLeftMouseDown">
+        <div v-if="!isEditing" class="value" @mousedown="handleLeftMouseDown" :class="{disabled}">
             <span>{{ (model ?? 0).toFixed(local.fixed) }}</span>
         </div>
-        <div class="value-input" v-else>
+        <div class="value-input" v-else :class="{disabled}">
             <input
             ref="inputEl"
             v-model="editText"
@@ -20,7 +21,7 @@
             type="text"
             />
         </div>
-        <div class="right-arrow" @click="onClick(1)">
+        <div class="right-arrow" @click="onClick(1)" :class="{disabled}">
             <SvgIcon type="mdi" :path="mdi_right_path"  />
         </div>
     </div>
@@ -40,7 +41,8 @@
     const props = withDefaults(defineProps<NumberFieldProps>(), {
         denominator: 1,
         width: '100%',
-        height: 'auto'
+        height: 'auto',
+        disabled: false
     })
     const emit = defineEmits(['updateValue'])
     const model = defineModel<number>()
@@ -150,6 +152,9 @@
         align-items: center;
         overflow: hidden;
         font-size: $node-description-fontsize;
+        &.disabled {
+            cursor: not-allowed;
+        }
         .left-arrow {
             width: 20px;
             height: 100%;
@@ -160,6 +165,10 @@
             color: rgba(0,0,0,0.4);
             border-radius: 5px;
             margin-left: 2px;
+            &.disabled {
+                color: rgba(0, 0, 0, 0.3);
+                pointer-events: none;
+            }
         }
         .left-arrow:hover {
             background: #ddd;
@@ -174,6 +183,10 @@
             overflow: hidden;
             text-overflow: ellipsis;
             cursor: ew-resize;
+            &.disabled {
+                color: rgba(0, 0, 0, 0.3);
+                pointer-events: none;
+            }
         }
         .value-input {
             @include tool-item-style;
@@ -183,6 +196,10 @@
                 width: 100%;
                 text-align: center;
                 outline: none;
+            }
+            &.disabled {
+                color: rgba(0, 0, 0, 0.3);
+                pointer-events: none;
             }
         }
         .right-arrow {
@@ -194,6 +211,10 @@
             color: rgba(0,0,0,0.4);
             border-radius: 5px;
             margin-right: 2px;
+            &.disabled {
+                color: rgba(0, 0, 0, 0.3);
+                pointer-events: none;
+            }
         }
         .right-arrow:hover {
             background: #ddd;
