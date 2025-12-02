@@ -42,7 +42,8 @@
         denominator: 1,
         width: '100%',
         height: 'auto',
-        disabled: false
+        disabled: false,
+        allowEmpty: false
     })
     const emit = defineEmits(['updateValue'])
     const model = defineModel<number>()
@@ -130,7 +131,7 @@
     const commitEdit = () => {
         if(!isEditing.value) return
         const n = Number(editText.value)
-        if(editText.value.trim() === '') {
+        if(props.allowEmpty && editText.value.trim() === '') {
             model.value = undefined
         }else if(Number.isFinite(n)) {
             const min = props.min ?? Number.NEGATIVE_INFINITY

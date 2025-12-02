@@ -18,6 +18,7 @@
                     class="nodrag"
                     @update-value="onUpdateStart"
                     :disabled="startDisabled"
+                    :allow-empty="true"
                  />
                 <Handle id="start" type="target" :position="Position.Left" :class="[`${inputStart_type}-handle-color`, {'node-errhandle': inputStartHasErr.value}]"/>
             </div>
@@ -30,6 +31,7 @@
                     class="nodrag"
                     @update-value="onUpdateEnd"
                     :disabled="endDisabled"
+                    :allow-empty="true"
                  />
                 <Handle id="end" type="target" :position="Position.Left" :class="[`${inputEnd_type}-handle-color`, {'node-errhandle': inputEndHasErr.value}]"/>
             </div>

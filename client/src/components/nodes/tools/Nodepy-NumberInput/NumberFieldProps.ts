@@ -8,4 +8,5 @@ export interface NumberFieldProps {
   width?: string
   height?: string
   disabled?: boolean
+  allowEmpty?: boolean
 }
