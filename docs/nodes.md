@@ -503,7 +503,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 节点用于将字符串转换为全小写或全大写。
 
 **参数：**
-- to_case: 转换类型，类型为str，取值为"LOWER"或"UPPER"。
+- to_case: 转换类型，类型为str，取值为"lower"或"upper"。
 
 **输入：**
 - input: 输入的字符串，类型为str。

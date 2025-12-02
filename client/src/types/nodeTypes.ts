@@ -384,7 +384,7 @@ export interface ReplaceNode extends BaseNode<ReplaceNodeData> {
 
 
 export interface LowerOrUpperNodeParam {
-    to_case: string
+    to_case: 'lower'|'upper'
 }
 export type LowerOrUpperNodeData = BaseData & {
     param: LowerOrUpperNodeParam

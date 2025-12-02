@@ -460,6 +460,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedReplaceNode)
         break
+      case 'LowerOrUpperNode':
+        const addedLowerOrUpperNode: Nodetypes.LowerOrUpperNode = {
+          id,
+          position,
+          type: 'LowerOrUpperNode',
+          data: {
+            param: {
+              to_case: 'lower'
+            }
+          }
+        }
+        addNodes(addedLowerOrUpperNode)
+        break
     
       default:
         console.log(type)

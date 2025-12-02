@@ -148,6 +148,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '字符串替换节点',
                 value: 'ReplaceNode'
             },
+            {
+                label: '大小写转换节点',
+                value: 'LowerOrUpperNode'
+            },
         ]
     },
     {

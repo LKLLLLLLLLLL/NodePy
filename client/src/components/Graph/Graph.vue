@@ -42,6 +42,7 @@ import WordcloudNode from '../nodes/visualize/WordcloudNode.vue'
 import StripNode from '../nodes/stringProcess/StripNode.vue'
 import SliceNode from '../nodes/stringProcess/SliceNode.vue'
 import ReplaceNode from '../nodes/stringProcess/ReplaceNode.vue'
+import LowerOrUpperNode from '../nodes/stringProcess/LowerOrUpperNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -268,6 +269,7 @@ const nodeColor = (node: BaseNode) => {
     case 'StripNode':
     case 'SliceNode':
     case 'ReplaceNode':
+    case 'LowerOrUpperNode':
       return nodeCategoryColor.str
     case 'UploadNode':
     case 'TableFromFileNode':
@@ -465,6 +467,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-ReplaceNode="ReplaceNodeProps">
           <ReplaceNode v-bind="ReplaceNodeProps"/>
+        </template>
+
+        <template #node-LowerOrUpperNode="LowerOrUpperNodeProps">
+          <LowerOrUpperNode v-bind="LowerOrUpperNodeProps"/>
         </template>
 
         <template #node-UploadNode="UploadNodeProps">
