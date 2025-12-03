@@ -164,6 +164,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '批量字符串拼接节点',
                 value: 'BatchConcatNode'
             },
+            {
+                label: '正则表达式匹配节点',
+                value: 'RegexMatchNode'
+            },
         ]
     },
     {

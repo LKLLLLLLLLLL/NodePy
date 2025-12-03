@@ -11,7 +11,7 @@
             </div>
             <div class="col1">
                 <div class="param-description" :class="{'node-has-paramerr': col1HasErr.value}">
-                    操作列名
+                    操作列名1
                 </div>
                 <NodepySelectMany
                     :options="col1Hint"
@@ -23,7 +23,7 @@
             </div>
             <div class="col2">
                 <div class="param-description" :class="{'node-has-paramerr': col2HasErr.value}">
-                    操作列名
+                    操作列名2
                 </div>
                 <NodepySelectMany
                     :options="col2Hint"
