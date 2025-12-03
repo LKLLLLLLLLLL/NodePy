@@ -92,9 +92,10 @@ const submenuDirection = computed(() =>
 // 菜单样式
 const menuStyle = computed(() => {
   const width = 160
-  let left = menuX.value
-  if (menuX.value > window.innerWidth - width) {
-    left = menuX.value - width
+  const offsetX = 15
+  let left = menuX.value + offsetX
+  if (left + width > window.innerWidth) {
+    left = menuX.value - width - offsetX // 防止超出屏幕
   }
   let top = menuY.value
   const approxHeight = 36 * nodeMenuItems.length
