@@ -1,6 +1,6 @@
 <template>
-    <div class="BatchStripNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='stringProcess'>批量首尾字符清洗节点</NodeTitle>
+    <div class="BatchConcatNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category='stringProcess'>批量字符串拼接节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
@@ -9,30 +9,27 @@
                 </div>
                 <Handle id="input" type="target" :position="Position.Left" :class="[`${input_type}-handle-color`, {'node-errhandle': inputHasErr.value}]"/>
             </div>
-            <div class="input-strip_chars port">
-                <div class="input-port-description" :class="{'node-has-paramerr': strip_charsHasErr.value}">
-                    清洗字符集合输入
-                </div>
-                <Handle id="strip_chars" type="target" :position="Position.Left" :class="[`${inputStrip_chars_type}-handle-color`, {'node-errhandle': inputStrip_charsHasErr.value}]"/>
-            </div>
-            <div class="strip_chars">
-                <NodepyStringInput
-                    v-model="strip_chars"
-                    @update-value="onUpdateStrip_chars"
-                    :disabled="strip_charsDisabled"
-                    class="nodrag"
-                    placeholder="清洗字符集合"
-                />
-            </div>
-            <div class="col">
-                <div class="param-description" :class="{'node-has-paramerr': colHasErr.value}">
+            <div class="col1">
+                <div class="param-description" :class="{'node-has-paramerr': col1HasErr.value}">
                     操作列名
                 </div>
                 <NodepySelectMany
-                    :options="colHint"
-                    :default-selected="defaultSelectedCol"
-                    @select-change="onSelectChangeCol"
-                    @clear-select="clearSelectCol"
+                    :options="col1Hint"
+                    :default-selected="defaultSelectedCol1"
+                    @select-change="onSelectChangeCol1"
+                    @clear-select="clearSelectCol1"
+                    class="nodrag"
+                />
+            </div>
+            <div class="col2">
+                <div class="param-description" :class="{'node-has-paramerr': col2HasErr.value}">
+                    操作列名
+                </div>
+                <NodepySelectMany
+                    :options="col2Hint"
+                    :default-selected="defaultSelectedCol2"
+                    @select-change="onSelectChangeCol2"
+                    @clear-select="clearSelectCol2"
                     class="nodrag"
                 />
             </div>
@@ -60,33 +57,32 @@
     import { getInputType } from '../getInputType'
     import type { Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
-    import { hasInputEdge } from '../hasEdge'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
     import NodepySelectMany from '../tools/Nodepy-selectMany.vue'
     import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
-    import type { BatchStripNodeData } from '@/types/nodeTypes'
+    import type { BatchConcatNodeData } from '@/types/nodeTypes'
 
 
-    const props = defineProps<NodeProps<BatchStripNodeData>>()
-    const strip_chars = ref(props.data.param.strip_chars || '')
-    const strip_charsDisabled = computed(() => hasInputEdge(props.id, 'strip_chars'))
-    const colHint = computed(() => props.data.hint?.col_choices || [''])
-    const col = ref(props.data.param.col)   //  used for defaultSelectedCol
-    const defaultSelectedCol = computed(() => colHint.value.indexOf(col.value))
+    const props = defineProps<NodeProps<BatchConcatNodeData>>()
+    const col1Hint = computed(() => props.data.hint?.col1_choices || [''])
+    const col1 = ref(props.data.param.col1)   //  used for defaultSelectedCol1
+    const defaultSelectedCol1 = computed(() => col1Hint.value.indexOf(col1.value))
+    const col2Hint = computed(() => props.data.hint?.col2_choices || [''])
+    const col2 = ref(props.data.param.col2)   //  used for defaultSelectedCol2
+    const defaultSelectedCol2 = computed(() => col2Hint.value.indexOf(col2.value))
     const result_col = ref(props.data.param.result_col || '')
     const input_type = computed(() => getInputType(props.id, 'input'))
-    const inputStrip_chars_type = computed(() => getInputType(props.id, 'strip_chars'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['output']?.type || 'default')
     const outputHasErr = computed(() => handleOutputError(props.id, 'output'))
     const errMsg = ref<string[]>([])
-    const strip_charsHasErr = ref({
-        id: 'strip_chars',
+    const col1HasErr = ref({
+        id: 'col1',
         value: false
     })
-    const colHasErr = ref({
-        id: 'col',
+    const col2HasErr = ref({
+        id: 'col2',
         value: false
     })
     const result_colHasErr = ref({
@@ -97,21 +93,22 @@
         handleId: 'input',
         value: false
     })
-    const inputStrip_charsHasErr = ref({
-        handleId: 'strip_chars',
-        value: false
-    })
 
 
-    const onUpdateStrip_chars = (e?: Event) => {
-        props.data.param.strip_chars = strip_chars.value
+    const onSelectChangeCol1 = (e: any) => {
+        props.data.param.col1 = col1Hint.value[e]
     }
-    const onSelectChangeCol = (e: any) => {
-        props.data.param.col = colHint.value[e]
+    const onSelectChangeCol2 = (e: any) => {
+        props.data.param.col2 = col2Hint.value[e]
     }
-    const clearSelectCol = (resolve: any) => {
-        props.data.param.col = ''
-        col.value = props.data.param.col
+    const clearSelectCol1 = (resolve: any) => {
+        props.data.param.col1 = ''
+        col1.value = props.data.param.col1
+        resolve()
+    }
+    const clearSelectCol2 = (resolve: any) => {
+        props.data.param.col2 = ''
+        col2.value = props.data.param.col2
         resolve()
     }
     const onUpdateResult_col = () => {
@@ -122,8 +119,8 @@
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
-        handleParamError(props.data.error, errMsg, strip_charsHasErr, colHasErr, result_colHasErr)
-        handleValidationError(props.id, props.data.error, errMsg, inputHasErr, inputStrip_charsHasErr)
+        handleParamError(props.data.error, errMsg, col1HasErr, col2HasErr, result_colHasErr)
+        handleValidationError(props.id, props.data.error, errMsg, inputHasErr)
     }, {immediate: true})
 
 </script>
@@ -131,7 +128,7 @@
 <style lang="scss" scoped>
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
-    .BatchStripNodeLayout {
+    .BatchConcatNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;
@@ -139,19 +136,13 @@
             .input-input {
                 margin-bottom: $node-margin;
             }
-            .input-strip_chars {
-                margin-bottom: 2px;
-            }
-            .strip_chars, .col, .result_col {
+            .col1, .col2, .result_col {
                 padding: 0 $node-padding-hor;
                 margin-bottom: $node-margin;
             }
         }
     }
-    .all-handle-color[data-handleid="input"] {
+    .all-handle-color {
         background: $table-color;
-    }
-    .all-handle-color[data-handleid="strip_chars"] {
-        background: $str-color;
     }
 </style>

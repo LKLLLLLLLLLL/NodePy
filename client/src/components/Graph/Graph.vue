@@ -43,8 +43,9 @@ import StripNode from '../nodes/stringProcess/StripNode.vue'
 import SliceNode from '../nodes/stringProcess/SliceNode.vue'
 import ReplaceNode from '../nodes/stringProcess/ReplaceNode.vue'
 import LowerOrUpperNode from '../nodes/stringProcess/LowerOrUpperNode.vue'
-import BatchStripNode from '../nodes/stringProcess/BatchStripNode.vue'
 import ConcatNode from '../nodes/stringProcess/ConcatNode.vue'
+import BatchStripNode from '../nodes/stringProcess/BatchStripNode.vue'
+import BatchConcatNode from '../nodes/stringProcess/BatchConcatNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -274,6 +275,7 @@ const nodeColor = (node: BaseNode) => {
     case 'LowerOrUpperNode':
     case 'ConcatNode':
     case 'BatchStripNode':
+    case 'BatchConcatNode':
       return nodeCategoryColor.str
     case 'UploadNode':
     case 'TableFromFileNode':
@@ -483,6 +485,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-BatchStripNode="BatchStripNodeProps">
           <BatchStripNode v-bind="BatchStripNodeProps"/>
+        </template>
+
+        <template #node-BatchConcatNode="BatchConcatNodeProps">
+          <BatchConcatNode v-bind="BatchConcatNodeProps"/>
         </template>
 
         <template #node-UploadNode="UploadNodeProps">

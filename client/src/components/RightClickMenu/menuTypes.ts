@@ -160,6 +160,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '批量首尾字符清洗节点',
                 value: 'BatchStripNode'
             },
+            {
+                label: '批量字符串拼接节点',
+                value: 'BatchConcatNode'
+            },
         ]
     },
     {
