@@ -484,6 +484,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedConcatNode)
         break
+      case 'BatchStripNode':
+        const addedBatchStripNode: Nodetypes.BatchStripNode = {
+          id,
+          position,
+          type: 'BatchStripNode',
+          data: {
+            param: {
+              col: ''
+            }
+          }
+        }
+        addNodes(addedBatchStripNode)
+        break
     
       default:
         console.log(type)

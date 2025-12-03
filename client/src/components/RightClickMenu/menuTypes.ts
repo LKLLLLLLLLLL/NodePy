@@ -156,6 +156,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '字符串拼接节点',
                 value: 'ConcatNode'
             },
+            {
+                label: '批量首尾字符清洗节点',
+                value: 'BatchStripNode'
+            },
         ]
     },
     {
