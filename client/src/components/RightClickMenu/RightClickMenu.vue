@@ -17,7 +17,6 @@ const openSubmenuIndex = ref<number | null>(null)
 const menuItemRefs = ref<Array<HTMLElement | null>>([])
 const submenuAnchorRect = ref<DOMRect | null>(null)
 const isMenuClosing = ref(false)
-const isMenuJustOpened = ref(false) // 用于防止打开即触发子菜单
 
 const setMenuItemRef = (el: unknown, idx: number) => {
   menuItemRefs.value[idx] = (el as HTMLElement) || null
@@ -40,13 +39,8 @@ const showContextMenu = (event: MouseEvent) => {
 
   setTimeout(async () => {
     showMenu.value = true
-    isMenuJustOpened.value = true
     await nextTick()
     menuRoot.value?.focus()
-    // 200ms 后允许触发子菜单，防止打开即触发
-    setTimeout(() => {
-      isMenuJustOpened.value = false
-    }, 200)
   }, 10)
 }
 
@@ -66,8 +60,6 @@ const handleItemClick = (item: MenuNode) => {
 
 // 打开子菜单
 const openSubmenu = (index: number) => {
-  // 菜单刚打开时不响应子菜单触发
-  if (isMenuJustOpened.value) return
 
   if (nodeMenuItems[index]?.children?.length) {
     openSubmenuIndex.value = index

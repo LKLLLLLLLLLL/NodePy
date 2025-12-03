@@ -9,10 +9,13 @@
                 </div>
                 <Handle id="input" type="target" :position="Position.Left" :class="[`${input_type}-handle-color`, {'node-errhandle': inputHasErr.value}]"/>
             </div>
-            <div class="start port">
-                <div class="param-description" :class="{'node-has-paramerr': startHasErr.value}">
+            <div class="input-start port">
+                <div class="input-port-description" :class="{'node-has-paramerr': startHasErr.value}">
                     起始索引输入
                 </div>
+                <Handle id="start" type="target" :position="Position.Left" :class="[`${inputStart_type}-handle-color`, {'node-errhandle': inputStartHasErr.value}]"/>
+            </div>
+            <div class="start">
                 <NodepyNumberInput
                     v-model="start"
                     class="nodrag"
@@ -20,12 +23,14 @@
                     :disabled="startDisabled"
                     :allow-empty="true"
                  />
-                <Handle id="start" type="target" :position="Position.Left" :class="[`${inputStart_type}-handle-color`, {'node-errhandle': inputStartHasErr.value}]"/>
             </div>
-            <div class="end port">
-                <div class="param-description" :class="{'node-has-paramerr': endHasErr.value}">
+            <div class="input-end port">
+                <div class="input-port-description" :class="{'node-has-paramerr': endHasErr.value}">
                     结束索引输入
                 </div>
+                <Handle id="end" type="target" :position="Position.Left" :class="[`${inputEnd_type}-handle-color`, {'node-errhandle': inputEndHasErr.value}]"/>
+            </div>
+            <div class="end">
                 <NodepyNumberInput
                     v-model="end"
                     class="nodrag"
@@ -33,7 +38,6 @@
                     :disabled="endDisabled"
                     :allow-empty="true"
                  />
-                <Handle id="end" type="target" :position="Position.Left" :class="[`${inputEnd_type}-handle-color`, {'node-errhandle': inputEndHasErr.value}]"/>
             </div>
             <div class="output-output port">
                 <div class="output-port-description">
@@ -121,6 +125,9 @@
             padding-bottom: $node-padding-bottom;
             .input-input {
                 margin-bottom: $node-margin;
+            }
+            .input-start, .input-end {
+                margin-bottom: 2px;
             }
             .start, .end {
                 padding: 0 $node-padding-hor;

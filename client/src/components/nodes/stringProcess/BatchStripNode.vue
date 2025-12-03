@@ -9,10 +9,13 @@
                 </div>
                 <Handle id="input" type="target" :position="Position.Left" :class="[`${input_type}-handle-color`, {'node-errhandle': inputHasErr.value}]"/>
             </div>
-            <div class="strip_chars port">
-                <div class="param-description" :class="{'node-has-paramerr': strip_charsHasErr.value}">
+            <div class="input-strip_chars port">
+                <div class="input-port-description" :class="{'node-has-paramerr': strip_charsHasErr.value}">
                     清洗字符集合输入
                 </div>
+                <Handle id="strip_chars" type="target" :position="Position.Left" :class="[`${inputStrip_chars_type}-handle-color`, {'node-errhandle': inputStrip_charsHasErr.value}]"/>
+            </div>
+            <div class="strip_chars">
                 <NodepyStringInput
                     v-model="strip_chars"
                     @update-value="onUpdateStrip_chars"
@@ -20,7 +23,6 @@
                     class="nodrag"
                     placeholder="清洗字符集合"
                 />
-                <Handle id="strip_chars" type="target" :position="Position.Left" :class="[`${inputStrip_chars_type}-handle-color`, {'node-errhandle': inputStrip_charsHasErr.value}]"/>
             </div>
             <div class="col">
                 <div class="param-description" :class="{'node-has-paramerr': colHasErr.value}">
@@ -135,6 +137,9 @@
             padding-bottom: $node-padding-bottom;
             .input-input {
                 margin-bottom: $node-margin;
+            }
+            .input-strip_chars {
+                margin-bottom: 2px;
             }
             .strip_chars, .col, .result_col {
                 padding: 0 $node-padding-hor;

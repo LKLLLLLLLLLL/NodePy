@@ -9,7 +9,7 @@
                 </div>
                 <Handle id="input" type="target" :position="Position.Left" :class="[`${input_type}-handle-color`, {'node-errhandle': inputHasErr.value}]"/>
             </div>
-            <div class="to_case port">
+            <div class="to_case">
                 <div class="param-description" :class="{'node-has-paramerr': to_caseHasErr.value}">
                     转换类型
                 </div>

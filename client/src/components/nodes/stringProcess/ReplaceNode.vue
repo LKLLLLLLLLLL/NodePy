@@ -9,10 +9,13 @@
                 </div>
                 <Handle id="input" type="target" :position="Position.Left" :class="[`${input_type}-handle-color`, {'node-errhandle': inputHasErr.value}]"/>
             </div>
-            <div class="old port">
-                <div class="param-description" :class="{'node-has-paramerr': oldHasErr.value}">
+            <div class="input-old port">
+                <div class="input-port-description" :class="{'node-has-paramerr': oldHasErr.value}">
                     旧字符串输入
                 </div>
+                <Handle id="old" type="target" :position="Position.Left" :class="[`${inputOld_type}-handle-color`, {'node-errhandle': inputOldHasErr.value}]"/>
+            </div>
+            <div class="old">
                 <NodepyStringInput
                     v-model="old"
                     @update-value="onUpdateOld"
@@ -20,12 +23,14 @@
                     class="nodrag"
                     placeholder="旧字符串"
                 />
-                <Handle id="old" type="target" :position="Position.Left" :class="[`${inputOld_type}-handle-color`, {'node-errhandle': inputOldHasErr.value}]"/>
             </div>
-            <div class="new port">
-                <div class="param-description" :class="{'node-has-paramerr': newHasErr.value}">
+            <div class="input-new port">
+                <div class="input-port-description" :class="{'node-has-paramerr': newHasErr.value}">
                     新字符串输入
                 </div>
+                <Handle id="new" type="target" :position="Position.Left" :class="[`${inputNew_type}-handle-color`, {'node-errhandle': inputNewHasErr.value}]"/>
+            </div>
+            <div class="new">
                 <NodepyStringInput
                     v-model="New"
                     @update-value="onUpdateNew"
@@ -33,7 +38,6 @@
                     class="nodrag"
                     placeholder="新字符串"
                 />
-                <Handle id="new" type="target" :position="Position.Left" :class="[`${inputNew_type}-handle-color`, {'node-errhandle': inputNewHasErr.value}]"/>
             </div>
             <div class="output-output port">
                 <div class="output-port-description">
@@ -121,6 +125,9 @@
             padding-bottom: $node-padding-bottom;
             .input-input {
                 margin-bottom: $node-margin;
+            }
+            .input-old, .input-new {
+                margin-bottom: 2px;
             }
             .old, .new {
                 padding: 0 $node-padding-hor;
