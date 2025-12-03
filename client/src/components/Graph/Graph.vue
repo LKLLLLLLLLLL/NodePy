@@ -43,6 +43,7 @@ import StripNode from '../nodes/stringProcess/StripNode.vue'
 import SliceNode from '../nodes/stringProcess/SliceNode.vue'
 import ReplaceNode from '../nodes/stringProcess/ReplaceNode.vue'
 import LowerOrUpperNode from '../nodes/stringProcess/LowerOrUpperNode.vue'
+import ConcatNode from '../nodes/stringProcess/ConcatNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -270,6 +271,7 @@ const nodeColor = (node: BaseNode) => {
     case 'SliceNode':
     case 'ReplaceNode':
     case 'LowerOrUpperNode':
+    case 'ConcatNode':
       return nodeCategoryColor.str
     case 'UploadNode':
     case 'TableFromFileNode':
@@ -471,6 +473,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-LowerOrUpperNode="LowerOrUpperNodeProps">
           <LowerOrUpperNode v-bind="LowerOrUpperNodeProps"/>
+        </template>
+
+        <template #node-ConcatNode="ConcatNodeProps">
+          <ConcatNode v-bind="ConcatNodeProps"/>
         </template>
 
         <template #node-UploadNode="UploadNodeProps">

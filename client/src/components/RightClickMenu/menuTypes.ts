@@ -152,6 +152,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '大小写转换节点',
                 value: 'LowerOrUpperNode'
             },
+            {
+                label: '字符串拼接节点',
+                value: 'ConcatNode'
+            },
         ]
     },
     {

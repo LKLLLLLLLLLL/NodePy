@@ -473,6 +473,17 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedLowerOrUpperNode)
         break
+      case 'ConcatNode':
+        const addedConcatNode: Nodetypes.ConcatNode = {
+          id,
+          position,
+          type: 'ConcatNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedConcatNode)
+        break
     
       default:
         console.log(type)
