@@ -1,6 +1,6 @@
 <template>
     <div class="ConstNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="input">常量节点</NodeTitle>
+        <NodeTitle node-category="input">常数节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="value">
@@ -34,7 +34,7 @@
             </div>
             <div class="output-const port">
                 <div class="output-port-description">
-                    常量输出
+                    常数输出
                 </div>
                 <Handle id="const" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': constHasErr}]"/>
             </div>

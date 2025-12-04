@@ -1,5 +1,5 @@
 from typing import Dict, Literal, override
-
+from datetime import datetime, timedelta
 from server.models.data import Data, Table
 from server.models.exception import (
     NodeExecutionError,
@@ -114,7 +114,7 @@ class InsertRangeColNode(BaseNode):
     """
     
     col_name: str
-    col_type: Literal["int", "float", "datetime"]
+    col_type: Literal["int", "float", "Datetime"]
 
     @override
     def validate_parameters(self) -> None:
@@ -174,13 +174,14 @@ class InsertRangeColNode(BaseNode):
                 err_input="start",
                 err_msg="Input start schema type does not match specified col_type.",
             )
-        step_schema = input_schemas["step"]
-        if step_schema.type != self.col_type:
-            raise NodeValidationError(
-                node_id=self.id,
-                err_input="step",
-                err_msg="Input step schema type does not match specified col_type.",
-            )
+        if "step" in input_schemas:
+            step_schema = input_schemas["step"]
+            if step_schema.type != self.col_type:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="step",
+                    err_msg="Input step schema type does not match specified col_type.",
+                )
         input_table_schema = input_schemas["table"]
         return {
             "table": input_table_schema.append_col(self.col_name, ColType(self.col_type))
@@ -225,11 +226,11 @@ class InsertRangeColNode(BaseNode):
             for _ in range(num_rows):
                 data_rows.append(current)
                 current += step
-        elif self.col_type == "datetime":
-            assert isinstance(start, pandas.Timestamp)
+        elif self.col_type == "Datetime":
+            assert isinstance(start, datetime)
             if step is None:
-                step = pandas.Timedelta(1, "D")
-            assert isinstance(step, pandas.Timedelta)
+                step = timedelta(days=1)
+            assert isinstance(step, timedelta)
             current = start
             for _ in range(num_rows):
                 data_rows.append(current)

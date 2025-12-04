@@ -14,7 +14,7 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'BoolNode'
             },
             {
-                label: '常量节点',
+                label: '常数节点',
                 value: 'ConstNode'
             },
             {
@@ -185,6 +185,10 @@ export const nodeMenuItems: MenuNode[] = [
             {
                 label: '常量列添加节点',
                 value: 'InsertConstColNode'
+            },
+            {
+                label: '范围数据列添加节点',
+                value: 'InsertRangeColNode'
             },
         ]
     },

@@ -1,6 +1,6 @@
 <template>
-    <div class="InsertConstColNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">常量列添加节点</NodeTitle>
+    <div class="InsertRangeColNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category="tableProcess">范围数据列添加节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -9,11 +9,17 @@
                 </div>
                 <Handle id="table" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': inputTableHasErr.value}]"/>
             </div>
-            <div class="input-const_value port">
+            <div class="input-start port">
                 <div class="input-port-description">
-                    常量值
+                    起始值
                 </div>
-                <Handle id="const_value" type="target" :position="Position.Left" :class="[`${const_value_type}-handle-color`, {'node-errhandle': const_valueHasErr.value}]"/>
+                <Handle id="start" type="target" :position="Position.Left" :class="[`${start_type}-handle-color`, {'node-errhandle': startHasErr.value}]"/>
+            </div>
+            <div class="input-step port">
+                <div class="input-port-description">
+                    步长
+                </div>
+                <Handle id="step" type="target" :position="Position.Left" :class="[`${step_type}-handle-color`, {'node-errhandle': stepHasErr.value}]"/>
             </div>
             <div class="col_name">
                 <div class="param-description" :class="{'node-has-paramerr': col_nameHasErr.value}">
@@ -55,17 +61,18 @@
     import Timer from '../tools/Timer.vue'
     import NodepySelectMany from '../tools/Nodepy-selectMany.vue'
     import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
-    import type { InsertConstColNodeData } from '@/types/nodeTypes'
     import { dataTypeColor } from '@/types/nodeTypes'
+    import type { InsertRangeColNodeData } from '@/types/nodeTypes'
 
 
-    const props = defineProps<NodeProps<InsertConstColNodeData>>()
-    const col_type = ["int", "float", "bool", "str", "Datetime"]
-    const col_typeUi = ['整数', '浮点数', '布尔值', '字符串', '日期时间']
+    const props = defineProps<NodeProps<InsertRangeColNodeData>>()
+    const col_type = ["int", "float", "Datetime"]
+    const col_typeUi = ['整数', '浮点数', '日期时间']
     const defaultSelectedCol_type = col_type.indexOf(props.data.param.col_type)
     const col_name = ref(props.data.param.col_name)
     const table_type = computed(() => getInputType(props.id, 'table'))
-    const const_value_type = computed(() => getInputType(props.id, 'const_value'))
+    const start_type = computed(() => getInputType(props.id, 'start'))
+    const step_type = computed(() => getInputType(props.id, 'step'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['table']?.type || 'default')
     const outputTableHasErr = computed(() => handleOutputError(props.id, 'table'))
     const errMsg = ref<string[]>([])
@@ -81,20 +88,20 @@
         handleId: 'table',
         value: false
     })
-    const const_valueHasErr = ref({
-        handleId: 'const_value',
+    const startHasErr = ref({
+        handleId: 'start',
         value: false
     })
-    const const_valueHandleColor = computed(() => {
+    const stepHasErr = ref({
+        handleId: 'step',
+        value: false
+    })
+    const startAndStepHandleColor = computed(() => {
         switch(props.data.param.col_type) {
             case 'int':
                 return dataTypeColor.int
             case 'float':
                 return dataTypeColor.float
-            case 'bool':
-                return dataTypeColor.bool
-            case 'str':
-                return dataTypeColor.str
             case 'Datetime':
                 return dataTypeColor.Datetime
         }
@@ -105,7 +112,7 @@
         props.data.param.col_name = col_name.value
     }
     const onSelectChangeCol_type = (e: any) => {
-        const selected_col_type = col_type[e] as 'int'|'float'|'bool'|'str'|'Datetime'
+        const selected_col_type = col_type[e] as 'int'|'float'|'Datetime'
         props.data.param.col_type = selected_col_type
     }
 
@@ -114,20 +121,20 @@
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
         handleParamError(props.data.error, errMsg, col_nameHasErr, col_typeHasErr)
-        handleValidationError(props.id, props.data.error, errMsg, inputTableHasErr, const_valueHasErr)
+        handleValidationError(props.id, props.data.error, errMsg, inputTableHasErr, startHasErr, stepHasErr)
     }, {immediate: true})
-
+    
 </script>
 
 <style lang="scss" scoped>
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
-    .InsertConstColNodeLayout {
+    .InsertRangeColNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;
             padding-bottom: $node-padding-bottom;
-            .input-table, .input-const_value {
+            .input-table, .input-start, .input-step {
                 margin-bottom: $node-margin;
             }
             .col_name, .col_type {
@@ -139,7 +146,7 @@
     .all-handle-color[data-handleid="table"] {
         background: $table-color;
     }
-    .all-handle-color[data-handleid="const_value"] {
-        background: v-bind(const_valueHandleColor);
+    .all-handle-color[data-handleid="start"], .all-handle-color[data-handleid="step"] {
+        background: v-bind(startAndStepHandleColor);
     }
 </style>

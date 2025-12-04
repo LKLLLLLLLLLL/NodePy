@@ -565,6 +565,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedInsertConstColNode)
         break
+      case 'InsertRangeColNode':
+        const addedInsertRangeColNode: Nodetypes.InsertRangeColNode = {
+          id,
+          position,
+          type: 'InsertRangeColNode',
+          data: {
+            param: {
+              col_name: '',
+              col_type: 'int'
+            }
+          }
+        }
+        addNodes(addedInsertRangeColNode)
+        break
     
       default:
         console.log(type)
