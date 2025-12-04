@@ -23,7 +23,7 @@ class BatchStripNode(BaseNode):
     """
     Node to strip leading and trailing whitespace or specified characters from string columns in a table.
     """
-    strip_chars: str | None
+    strip_chars: str | None = None
     col: str
     result_col: str | None = None
 
