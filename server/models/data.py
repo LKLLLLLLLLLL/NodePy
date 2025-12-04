@@ -143,11 +143,6 @@ class Data(BaseModel):
         other_dict = value.to_view().to_dict()
         return self_dict == other_dict
 
-    # @classmethod
-    # def from_df(cls, df: DataFrame) -> 'Data':
-    #     table = Table._from_df(df)
-    #     return Data(payload=table)
-
     def to_view(self) -> "DataView":
         if isinstance(self.payload, Table):
             # Serialize Table payload

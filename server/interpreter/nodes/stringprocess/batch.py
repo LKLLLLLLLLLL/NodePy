@@ -1,4 +1,4 @@
-from typing import override
+from typing import Any, override
 
 from pydantic import PrivateAttr
 
@@ -43,6 +43,8 @@ class BatchStripNode(BaseNode):
                 err_param_key="col",
                 err_msg = "Column name for stripping cannot be empty."
             )
+        if self.result_col is not None and self.result_col.strip() == "":
+            self.result_col = None
         if self.result_col is None:
             self.result_col = generate_default_col_name(self.id, "result")
         if self.result_col.strip() == "":
@@ -87,6 +89,8 @@ class BatchStripNode(BaseNode):
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         assert self.result_col is not None
         output_schema = input_schemas["input"].append_col(self.result_col, ColType.STR)
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types
         return {"output": output_schema}
 
     @override
@@ -101,7 +105,7 @@ class BatchStripNode(BaseNode):
             strip_chars = self.strip_chars
         else:
             strip_chars = None
-        df = input_table.df
+        df = input_table.df.copy()
         df[self.result_col] = df[self.col].astype(str).str.strip(strip_chars)
         assert self._col_types is not None
         output_data = Data(
@@ -111,6 +115,20 @@ class BatchStripNode(BaseNode):
             )
         )
         return {"output": output_data}
+
+    @override
+    @classmethod
+    def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
+        hint = {}
+        if "input" in input_schemas:
+            input_schema = input_schemas["input"]
+            if input_schema.tab is not None:
+                str_cols = [
+                    col_name for col_name, col_type in input_schema.tab.col_types.items()
+                    if col_type == ColType.STR
+                ]
+                hint["col_choices"] = str_cols
+        return hint
 
 @register_node()
 class BatchConcatNode(BaseNode):
@@ -189,7 +207,7 @@ class BatchConcatNode(BaseNode):
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         input_table = input["input"].payload
         assert isinstance(input_table, Table)
-        df = input_table.df
+        df = input_table.df.copy()
         df[self.result_col] = df[self.col1].astype(str) + df[self.col2].astype(str)
         assert self._col_types is not None
         output_data = Data(
@@ -199,3 +217,18 @@ class BatchConcatNode(BaseNode):
             )
         )
         return {"output": output_data}
+
+    @override
+    @classmethod
+    def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
+        hint = {}
+        if "input" in input_schemas:
+            input_schema = input_schemas["input"]
+            if input_schema.tab is not None:
+                str_cols = [
+                    col_name for col_name, col_type in input_schema.tab.col_types.items()
+                    if col_type == ColType.STR
+                ]
+                hint["col1_choices"] = str_cols
+                hint["col2_choices"] = str_cols
+        return hint
