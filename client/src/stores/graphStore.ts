@@ -524,6 +524,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedRegexMatchNode)
         break
+      case 'BatchRegexMatchNode':
+        const addedBatchRegexMatchNode: Nodetypes.BatchRegexMatchNode = {
+          id,
+          position,
+          type: 'BatchRegexMatchNode',
+          data: {
+            param: {
+              pattern: '',
+              col: ''
+            }
+          }
+        }
+        addNodes(addedBatchRegexMatchNode)
+        break
     
       default:
         console.log(type)

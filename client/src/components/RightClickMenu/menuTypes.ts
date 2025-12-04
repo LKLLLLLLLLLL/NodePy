@@ -168,6 +168,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '正则表达式匹配节点',
                 value: 'RegexMatchNode'
             },
+            {
+                label: '批量正则表达式匹配节点',
+                value: 'BatchRegexMatchNode'
+            },
         ]
     },
     {
