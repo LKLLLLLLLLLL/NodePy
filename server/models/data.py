@@ -30,12 +30,19 @@ class Table(BaseModel):
     
     @model_validator(mode="after")
     def verify(self) -> Self:
-        # 1. check if df is aligned with col_types
+        # 1. align index column
+        if self.INDEX_COL not in self.df.columns:
+            self.df[self.INDEX_COL] = range(len(self.df))
+            self.col_types[self.INDEX_COL] = ColType.INT
+        # 2. check if df is aligned with col_types
         if len(self.df) != 0:
             # Check for missing columns
-            missing_cols = [col for col in self.col_types if col not in self.df.columns]
-            if missing_cols:
-                raise TypeError(f"DataFrame is missing columns: {missing_cols}")
+            df_missing_cols = [col for col in self.col_types if col not in self.df.columns]
+            if df_missing_cols:
+                raise TypeError(f"DataFrame is missing columns: {df_missing_cols}")
+            col_types_missing_cols = [col for col in self.df.columns if col not in self.col_types]
+            if col_types_missing_cols:
+                raise TypeError(f"Column types missing for columns: {col_types_missing_cols}")
             # Check column types
             for col, expected in self.col_types.items():
                 ser = self.df[col]
@@ -50,10 +57,6 @@ class Table(BaseModel):
                 if callable(ptype):
                     ptype = ptype()
                 self.df[col] = self.df[col].astype(ptype)
-        # 2. check if index column exists, if not, add it
-        if self.INDEX_COL not in self.df.columns:
-            self.df[self.INDEX_COL] = range(len(self.df))
-            self.col_types[self.INDEX_COL] = ColType.INT
         # 3. check if the colnames is not illegal
         if check_no_illegal_cols(list(self.col_types.keys()), allow_index=True) is False:
             raise ValueError(f"Column names cannot start with reserved prefix '_' or be whitespace only: {list(self.col_types.keys())}")

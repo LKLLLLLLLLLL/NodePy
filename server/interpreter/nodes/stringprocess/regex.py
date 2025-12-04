@@ -260,15 +260,11 @@ class RegexExtractNode(BaseNode):
 
         matches = re.findall(self.pattern, input_string)
 
-        num_groups = re.compile(self.pattern).groups
-        col_names: list[str]
-        if num_groups == 0:
-            col_names = ["match_0"]
-        else:
-            col_names = [f"group_{i + 1}" for i in range(num_groups)]
-
-        df = pd.DataFrame(matches, columns=col_names)
         assert self._col_types is not None
+        col_names = [col_name for col_name in self._col_types.keys() if col_name != Table.INDEX_COL]
+
+        assert self._col_types is not None
+        df = pd.DataFrame(matches, columns=col_names)
         output_table = Data(
             payload=Table(
                 df=df,

@@ -133,9 +133,14 @@ def execute_project_task(self, project_id: int, user_id: int):
                 )
             except Exception as e:
                 patch = ProjWorkflowPatch(
-                            key=["error_message"], 
-                            value="Validation Error: " + str(e)
-                        )
+                    key=["error_message"], 
+                    value=ProjNodeError(
+                        type="validation",
+                        params=None,
+                        inputs=None,
+                        message="Validation Error: " + str(e)
+                    )
+                )
                 queue.push_message_sync(
                     Status.FAILURE,
                     {
@@ -213,9 +218,16 @@ def execute_project_task(self, project_id: int, user_id: int):
                 except Exception as e:
                     logger.exception(f"Unexpected error during node construction: {e}")
                     has_exception = True
+                    node_index = topo_graph.get_index_by_node_id(node_id)
+                    assert node_index is not None
                     patch = ProjWorkflowPatch(
-                        key=["error_message"],
-                        value="Construction Error: " + str(e)
+                        key=["nodes", node_index, "error"],
+                        value=ProjNodeError(
+                            type="execution",
+                            params=None,
+                            inputs=None,
+                            message="Construction Error: " + str(e)
+                        )
                     )
                     queue.push_message_sync(
                         Status.IN_PROGRESS,
@@ -285,10 +297,17 @@ def execute_project_task(self, project_id: int, user_id: int):
                 except Exception as e:
                     logger.exception(f"Unexpected error during static analysis: {e}")
                     has_exception = True
+                    node_index = topo_graph.get_index_by_node_id(node_id)
+                    assert node_index is not None
                     patch = ProjWorkflowPatch(
-                                key=["error_message"],
-                                value="Static Analysis Error: " + str(e)
-                            )
+                        key=["nodes", node_index, "error"],
+                        value=ProjNodeError(
+                            type="validation",
+                            params=None,
+                            inputs=None,
+                            message="Static Analysis Error: " + str(e)
+                        )
+                    )
                     queue.push_message_sync(
                         Status.IN_PROGRESS, 
                         {
@@ -409,9 +428,16 @@ def execute_project_task(self, project_id: int, user_id: int):
                 except Exception as e:
                     logger.exception(f"Unexpected error during node execution: {e}")
                     has_exception = True
+                    node_index = topo_graph.get_index_by_node_id(node_id)
+                    assert node_index is not None
                     patch = ProjWorkflowPatch(
-                        key=["error_message"],
-                        value="Execution Error:" + str(e)
+                        key=['nodes', node_index, "error"],
+                        value=ProjNodeError(
+                            type="execution",
+                            params=None,
+                            inputs=None,
+                            message="Execution Error: " + str(e)
+                        )
                     )
                     queue.push_message_sync(
                         Status.IN_PROGRESS,
