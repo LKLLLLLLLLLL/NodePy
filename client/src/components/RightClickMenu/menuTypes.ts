@@ -181,7 +181,12 @@ export const nodeMenuItems: MenuNode[] = [
     {
         label: '表格处理节点',
         value: 'tableProcessing',
-        children: []
+        children: [
+            {
+                label: '常量列添加节点',
+                value: 'InsertConstColNode'
+            },
+        ]
     },
     {
         label: '分析节点',

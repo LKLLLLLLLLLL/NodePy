@@ -49,6 +49,7 @@ import BatchConcatNode from '../nodes/stringProcess/BatchConcatNode.vue'
 import RegexMatchNode from '../nodes/stringProcess/RegexMatchNode.vue'
 import BatchRegexMatchNode from '../nodes/stringProcess/BatchRegexMatchNode.vue'
 import RegexExtractNode from '../nodes/stringProcess/RegexExtractNode.vue'
+import InsertConstColNode from '../nodes/tableProcess/InsertConstColNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -283,6 +284,8 @@ const nodeColor = (node: BaseNode) => {
     case 'BatchRegexMatchNode':
     case 'RegexExtractNode':
       return nodeCategoryColor.str
+    case 'InsertConstColNode':
+      return nodeCategoryColor.table
     case 'UploadNode':
     case 'TableFromFileNode':
       return nodeCategoryColor.file
@@ -507,6 +510,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-RegexExtractNode="RegexExtractNodeProps">
           <RegexExtractNode v-bind="RegexExtractNodeProps"/>
+        </template>
+
+        <template #node-InsertConstColNode="InsertConstColNodeProps">
+          <InsertConstColNode v-bind="InsertConstColNodeProps"/>
         </template>
 
         <template #node-UploadNode="UploadNodeProps">

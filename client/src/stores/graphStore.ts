@@ -551,6 +551,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedRegexExtractNode)
         break
+      case 'InsertConstColNode':
+        const addedInsertConstColNode: Nodetypes.InsertConstColNode = {
+          id,
+          position,
+          type: 'InsertConstColNode',
+          data: {
+            param: {
+              col_name: '',
+              col_type: 'int'
+            }
+          }
+        }
+        addNodes(addedInsertConstColNode)
+        break
     
       default:
         console.log(type)
