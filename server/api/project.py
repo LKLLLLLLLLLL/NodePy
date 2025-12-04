@@ -67,6 +67,50 @@ async def list_projects(
         logger.exception(f"Error listing projects for user {user_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
+@router.post(
+    "/copy/{project_id}",
+    status_code=201,
+    responses={
+        201: {"description": "Project copied successfully"},
+        404: {"description": "Project not found"},
+        500: {"description": "Internal server error"},
+    },
+)
+async def copy_project(
+    project_id: int,
+    db_client: AsyncSession = Depends(get_async_session),
+    user_record: UserRecord = Depends(get_current_user),
+) -> int:
+    """
+    Copy a read only project, and create a new project under the current user.
+    Return new project id.
+    """
+    user_id = int(user_record.id)  # type: ignore
+    try:
+        # 1. get the project to copy
+        project = await get_project_by_id(db_client, project_id, user_id)
+        if project is None:
+            raise HTTPException(status_code=404, detail="Project not found")
+        # 2. create new project
+        new_project = ProjectRecord(
+            name=f"{project.project_name}_copy",
+            owner_id=user_id,
+            workflow=project.workflow.model_dump(),
+            ui_state=project.ui_state.model_dump(),
+            thumb=None
+        )
+        db_client.add(new_project)
+        await db_client.commit()
+        await db_client.refresh(new_project)
+        return new_project.id  # type: ignore
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db_client.rollback()
+        logger.exception(f"Error copying project {project_id} for user {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
 @router.get(
     "/{project_id}", 
     status_code=200,

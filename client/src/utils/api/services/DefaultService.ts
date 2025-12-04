@@ -35,6 +35,30 @@ export class DefaultService {
         });
     }
     /**
+     * Copy Project
+     * Copy a read only project, and create a new project under the current user.
+     * Return new project id.
+     * @param projectId
+     * @returns number Project copied successfully
+     * @throws ApiError
+     */
+    public static copyProjectApiProjectCopyProjectIdPost(
+        projectId: number,
+    ): CancelablePromise<number> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/project/copy/{project_id}',
+            path: {
+                'project_id': projectId,
+            },
+            errors: {
+                404: `Project not found`,
+                422: `Validation Error`,
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
      * Get Project
      * Get the full data structure of a project.
      * @param projectId
