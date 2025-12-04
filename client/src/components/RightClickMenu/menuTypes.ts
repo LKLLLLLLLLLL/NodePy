@@ -137,10 +137,6 @@ export const nodeMenuItems: MenuNode[] = [
         value: 'stringProcessing',
         children: [
             {
-                label: '首尾字符清洗节点',
-                value: 'StripNode'
-            },
-            {
                 label: '字符串切片节点',
                 value: 'SliceNode'
             },
@@ -153,12 +149,20 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'LowerOrUpperNode'
             },
             {
-                label: '字符串拼接节点',
-                value: 'ConcatNode'
+                label: '正则表达式提取节点',
+                value: 'RegexExtractNode'
+            },
+            {
+                label: '首尾字符清洗节点',
+                value: 'StripNode'
             },
             {
                 label: '批量首尾字符清洗节点',
                 value: 'BatchStripNode'
+            },
+            {
+                label: '字符串拼接节点',
+                value: 'ConcatNode'
             },
             {
                 label: '批量字符串拼接节点',
@@ -171,10 +175,6 @@ export const nodeMenuItems: MenuNode[] = [
             {
                 label: '批量正则表达式匹配节点',
                 value: 'BatchRegexMatchNode'
-            },
-            {
-                label: '正则表达式提取节点',
-                value: 'RegexExtractNode'
             },
         ]
     },

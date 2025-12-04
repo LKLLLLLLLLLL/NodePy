@@ -573,6 +573,68 @@ export interface MergeNode extends BaseNode {
 }
 
 
+export interface TableSliceNodeParam {
+    begin?: number
+    end?: number
+    step?: number
+}
+export type TableSliceNodeData = BaseData & {
+    param: TableSliceNodeParam
+}
+export interface TableSliceNode extends BaseNode<TableSliceNodeData> {
+    type: 'TableSliceNode'
+}
+
+
+export interface SelectColNodeParam {
+    selected_cols: string[]
+}
+export type SelectColNodeData = BaseData & {
+    param: SelectColNodeParam
+}
+export interface SelectColNode extends BaseNode<SelectColNodeData> {
+    type: 'SelectColNode'
+}
+
+
+export interface JoinNodeParam {
+    left_on: string
+    right_on: string
+    how: "INNER" | "LEFT" | "RIGHT" | "OUTER"
+}
+export type JoinNodeData = BaseData & {
+    param: JoinNodeParam
+}
+export interface JoinNode extends BaseNode<JoinNodeData> {
+    type: 'JoinNode'
+}
+
+
+export interface RenameColNodeParam {
+    rename_map: Record<string, string>
+}
+export type RenameColNodeData = BaseData & {
+    param: RenameColNodeParam
+}
+export interface RenameColNode extends BaseNode<RenameColNodeData> {
+    type: 'RenameColNode'
+}
+
+
+export interface ShiftNodeParam {
+    col: string
+    periods: number
+    result_col?: string
+}
+export type ShiftNodeData = BaseData & {
+    param: ShiftNodeParam
+}
+export interface ShiftNode extends BaseNode<ShiftNodeData> {
+    type: 'ShiftNode'
+}
+
+
+
 /*********************  File Nodes  **************************/
 export interface UploadNodeParam {
     file: File
