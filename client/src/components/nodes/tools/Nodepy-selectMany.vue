@@ -136,9 +136,7 @@
             justify-content: center;
             position: relative;
             .selectedItem {
-                flex: 1;
                 padding: 0 17px;
-                text-align: center;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -186,12 +184,14 @@
                 padding: 1px 5px;
                 border-radius: 6px;
                 font-size: 13px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                span {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
                 &.specialColumn {
                     color: rgba(0, 0, 0, 0.2);
                     font-style: italic;
