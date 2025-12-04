@@ -72,6 +72,7 @@ async def list_projects(
     status_code=201,
     responses={
         201: {"description": "Project copied successfully"},
+        400: {"description": "Project name already exists"},
         404: {"description": "Project not found"},
         500: {"description": "Internal server error"},
     },
@@ -91,7 +92,15 @@ async def copy_project(
         project = await get_project_by_id(db_client, project_id, user_id)
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found")
-        # 2. create new project
+        # 2. check if project name exists
+        existing_project = await db_client.execute(
+            select(ProjectRecord).where(
+                (ProjectRecord.name == f"{project.project_name}_copy") & 
+                (ProjectRecord.owner_id == user_id))
+        )
+        if existing_project.first() is not None:
+            raise HTTPException(status_code=400, detail="Project name already exists")
+        # 3. create new project
         new_project = ProjectRecord(
             name=f"{project.project_name}_copy",
             owner_id=user_id,
@@ -142,6 +151,7 @@ async def get_project(
     except Exception as e:
         logger.exception(f"Error getting project {project_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
 
 @router.post(
     "/create",

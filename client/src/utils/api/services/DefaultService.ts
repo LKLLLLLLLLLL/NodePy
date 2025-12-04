@@ -52,6 +52,7 @@ export class DefaultService {
                 'project_id': projectId,
             },
             errors: {
+                400: `Project name already exists`,
                 404: `Project not found`,
                 422: `Validation Error`,
                 500: `Internal server error`,
