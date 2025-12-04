@@ -54,6 +54,14 @@ class RegexMatchNode(BaseNode):
         ]
 
     @override
+    def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
+        return {
+            "is_match": Schema(
+                type = Schema.Type.BOOL
+            )
+        }
+
+    @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         import re
 
