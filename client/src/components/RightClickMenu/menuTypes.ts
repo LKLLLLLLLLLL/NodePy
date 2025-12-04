@@ -172,6 +172,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '批量正则表达式匹配节点',
                 value: 'BatchRegexMatchNode'
             },
+            {
+                label: '正则表达式提取节点',
+                value: 'RegexExtractNode'
+            },
         ]
     },
     {

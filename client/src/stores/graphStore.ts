@@ -538,6 +538,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedBatchRegexMatchNode)
         break
+      case 'RegexExtractNode':
+        const addedRegexExtractNode: Nodetypes.RegexExtractNode = {
+          id,
+          position,
+          type: 'RegexExtractNode',
+          data: {
+            param: {
+              pattern: ''
+            }
+          }
+        }
+        addNodes(addedRegexExtractNode)
+        break
     
       default:
         console.log(type)
