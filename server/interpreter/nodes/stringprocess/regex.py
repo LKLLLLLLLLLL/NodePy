@@ -170,7 +170,7 @@ class BatchRegexMatchNode(BaseNode):
                     col for col, col_type in input_schema.tab.col_types.items() if col_type == ColType.STR
                 ]
                 if str_cols:
-                    hint["col_choices"] = str_cols[0]
+                    hint["col_choices"] = str_cols
         return hint
 
 
