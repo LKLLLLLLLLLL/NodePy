@@ -58,13 +58,33 @@ export const useUserStore = defineStore('user',()=>{
                             message: '服务器内部错误'
                         })
                         break;
+                    default:
+                        // 检查是否是网络错误
+                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                            notify({
+                                message: '网络错误: ' + error.message,
+                                type: 'error'
+                            });
+                        } else {
+                            notify({
+                                message: '未知错误',
+                                type: 'error'
+                            });
+                        }
+                        break;
                 }
+            }
+            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                notify({
+                    message: '网络错误: ' + error.message,
+                    type: 'error'
+                });
             }
             else{
                 notify({
-                    type: 'error',
-                    message: 'Unknown error occurred'
-                })
+                    message: '未知错误',
+                    type: 'error'
+                });
             }
         }
     }

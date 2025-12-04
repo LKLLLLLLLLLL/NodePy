@@ -11,6 +11,29 @@
     const loading = ref(false)
     const error = ref<string>('')
 
+    // 格式化日期时间显示的函数 - 转化为年月日时分秒，不需要其他字符
+    const formatDateTime = (dateTimeString: string): string => {
+        try {
+            const date = new Date(dateTimeString);
+            // 检查日期是否有效
+            if (isNaN(date.getTime())) {
+                return dateTimeString; // 如果无效，返回原始字符串
+            }
+
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            
+            return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+        } catch (e) {
+            // 如果解析失败，返回原始字符串
+            return dateTimeString;
+        }
+    }
+
     // 格式化值的显示
     const displayValue = computed(() => {
         if (props.value === null || props.value === undefined) {
@@ -29,7 +52,23 @@
         }
         
         if (typeof props.value === 'string') {
+            // 检查是否为 Datetime 类型的 ISO 格式字符串
+            // ISO 8601 格式通常包含 T 和时区信息
+            if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(props.value)) {
+                return formatDateTime(props.value);
+            }
             return props.value
+        }
+
+        // 对于对象类型，检查是否为 Datetime（在传输中会是字符串）
+        // 这里处理可能的对象形式（如果有的话）
+        if (typeof props.value === 'object') {
+            // 如果是 DataView 对象且类型为 Datetime
+            // @ts-ignore - 这是为了处理可能的对象形式
+            if (props.value.type === 'Datetime' && typeof props.value.value === 'string') {
+                // @ts-ignore
+                return formatDateTime(props.value.value);
+            }
         }
         
         // 其他类型转为字符串
@@ -46,6 +85,17 @@
         }
         if (typeof props.value === 'number') {
             return Number.isInteger(props.value) ? 'int' : 'float'
+        }
+        // 检查是否为 Datetime 类型的字符串
+        if (typeof props.value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(props.value)) {
+            return 'datetime'
+        }
+        // 检查是否为 Datetime 对象
+        if (typeof props.value === 'object') {
+            // @ts-ignore
+            if (props.value.type === 'Datetime') {
+                return 'datetime'
+            }
         }
         return typeof props.value
     })

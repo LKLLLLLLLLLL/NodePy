@@ -5,6 +5,7 @@ import { useModalStore } from './modalStore';
 import { ApiError, type ProjectListItem, type ProjectSetting } from '@/utils/api';
 import notify from '@/components/Notification/notify';
 import { type ProjectList, type Project, type ProjUIState } from '@/utils/api';
+import { useGraphStore } from './graphStore';
 
 export const useProjectStore = defineStore('project', () => {
 
@@ -47,6 +48,7 @@ export const useProjectStore = defineStore('project', () => {
     // 项目ID到名称的映射
     const projectIdToNameMap = ref<Map<number, string>>(new Map());
 
+    const graphStore = useGraphStore();
     const modalStore = useModalStore();
     const authService = AuthenticatedServiceFactory.getService();
 
@@ -105,11 +107,31 @@ export const useProjectStore = defineStore('project', () => {
                             type: 'error'
                         });
                         break;
+                    default:
+                        // 检查是否是网络错误
+                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                            notify({
+                                message: '网络错误: ' + error.message,
+                                type: 'error'
+                            });
+                        } else {
+                            notify({
+                                message: '未知网络错误',
+                                type: 'error'
+                            });
+                        }
+                        break;
                 }
+            }
+            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                notify({
+                    message: '网络错误: ' + error.message,
+                    type: 'error'
+                });
             }
             else{
                 notify({
-                    message: 'Unknown error occurred',
+                    message: '未知网络错误',
                     type: 'error'
                 });
             }
@@ -160,11 +182,31 @@ export const useProjectStore = defineStore('project', () => {
                             type: 'error'
                         });
                         break;
+                    default:
+                        // 检查是否是网络错误
+                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                            notify({
+                                message: '网络错误: ' + error.message,
+                                type: 'error'
+                            });
+                        } else {
+                            notify({
+                                message: '未知网络错误',
+                                type: 'error'
+                            });
+                        }
+                        break;
                 }
+            }
+            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                notify({
+                    message: '网络错误: ' + error.message,
+                    type: 'error'
+                });
             }
             else{
                 notify({
-                    message: 'Unknown error occurred',
+                    message: '未知网络错误',
                     type: 'error'
                 });
             }
@@ -220,11 +262,31 @@ export const useProjectStore = defineStore('project', () => {
                             type: 'error'
                         });
                         break;
+                    default:
+                        // 检查是否是网络错误
+                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                            notify({
+                                message: '网络错误: ' + error.message,
+                                type: 'error'
+                            });
+                        } else {
+                            notify({
+                                message: '未知网络错误',
+                                type: 'error'
+                            });
+                        }
+                        break;
                 }
+            }
+            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                notify({
+                    message: '网络错误: ' + error.message,
+                    type: 'error'
+                });
             }
             else{
                 notify({
-                    message: 'Unknown error occurred',
+                    message: '未知网络错误',
                     type: 'error'
                 });
             }
@@ -239,7 +301,7 @@ export const useProjectStore = defineStore('project', () => {
             if(response){
                 notify({
                     message: '项目' + id + '获取成功',
-                    type: 'info'
+                    type: 'success'
                 });
             }
             currentProject.value=response;
@@ -272,11 +334,104 @@ export const useProjectStore = defineStore('project', () => {
                             type: 'error'
                         });
                         break;
+                    default:
+                        // 检查是否是网络错误
+                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                            notify({
+                                message: '网络错误: ' + error.message,
+                                type: 'error'
+                            });
+                        } else {
+                            notify({
+                                message: '未知网络错误',
+                                type: 'error'
+                            });
+                        }
+                        break;
                 }
+            }
+            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                notify({
+                    message: '网络错误: ' + error.message,
+                    type: 'error'
+                });
             }
             else{
                 notify({
-                    message: 'Unknown error occurred',
+                    message: '未知错误',
+                    type: 'error'
+                });
+            }
+            return false;
+        }
+    }
+
+    async function copyProject(id: number){
+        console.log('Copying project by ID:', id)
+        try{
+            const projectName = graphStore.project.project_name;
+            projectIdToNameMap.value.set(id,projectName);
+            const response = await authService.copyProjectApiProjectCopyProjectIdPost(id);
+            if(response){
+                notify({
+                    message: '项目' + projectName + '添加成功',
+                    type: 'success'
+                });
+            }
+            return true;
+        }
+        catch(error){
+            if(error instanceof ApiError){
+                switch(error.status){
+                    case(400):
+                        notify({
+                            message: '项目名称已存在',
+                            type: 'error'
+                        });
+                        break;
+                    case(404):
+                        notify({
+                            message: '找不到项目',
+                            type: 'error'
+                        });
+                        break;
+                    case(422):
+                        notify({
+                            message: '验证错误',
+                            type: 'error'
+                        });
+                        break;
+                    case(500):
+                        notify({
+                            message: '服务器内部错误',
+                            type: 'error'
+                        });
+                        break;
+                    default:
+                        // 检查是否是网络错误
+                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                            notify({
+                                message: '网络错误: ' + error.message,
+                                type: 'error'
+                            });
+                        } else {
+                            notify({
+                                message: '未知网络错误',
+                                type: 'error'
+                            });
+                        }
+                        break;
+                }
+            }
+            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                notify({
+                    message: '网络错误: ' + error.message,
+                    type: 'error'
+                });
+            }
+            else{
+                notify({
+                    message: '未知错误',
                     type: 'error'
                 });
             }
@@ -319,14 +474,35 @@ export const useProjectStore = defineStore('project', () => {
                             type: 'error'
                         });
                         break;
+                    default:
+                        // 检查是否是网络错误
+                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                            notify({
+                                message: '网络错误: ' + error.message,
+                                type: 'error'
+                            });
+                        } else {
+                            notify({
+                                message: '未知网络错误',
+                                type: 'error'
+                            });
+                        }
+                        break;
                 }
             }
-            else{
+            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
                 notify({
-                    message: 'Unknown error occurred',
+                    message: '网络错误: ' + error.message,
                     type: 'error'
                 });
             }
+            else{
+                notify({
+                    message: '未知错误',
+                    type: 'error'
+                });
+            }
+            return false;
         }
     }
 
@@ -389,14 +565,35 @@ export const useProjectStore = defineStore('project', () => {
                             type: 'error'
                         });
                         break;
+                    default:
+                        // 检查是否是网络错误
+                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                            notify({
+                                message: '网络错误: ' + error.message,
+                                type: 'error'
+                            });
+                        } else {
+                            notify({
+                                message: '未知网络错误',
+                                type: 'error'
+                            });
+                        }
+                        break;
                 }
             }
-            else{
+            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
                 notify({
-                    message: 'Unknown error occurred',
+                    message: '网络错误: ' + error.message,
                     type: 'error'
                 });
             }
+            else{
+                notify({
+                    message: '未知错误',
+                    type: 'error'
+                });
+            }
+            return false;
         }
     }
 
@@ -413,6 +610,7 @@ export const useProjectStore = defineStore('project', () => {
         getProject,
         createProject,
         deleteProject,
+        copyProject,
         getProjectSettings,
         updateProjectSetting,
         initializeProjects

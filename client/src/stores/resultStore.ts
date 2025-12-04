@@ -7,8 +7,10 @@ import type { File } from "@/utils/api"
 import Result from "@/components/Result/Result.vue"
 import { useVueFlow } from "@vue-flow/core"
 import { useGraphStore } from "./graphStore"
+import notify from "@/components/Notification/notify"
+import { ApiError } from "@/utils/api"
 
-export type ResultType = string | number | boolean | File | TableView | null
+export type ResultType = string | number | boolean | File | TableView | null 
 
 export const useResultStore = defineStore('result',()=>{
 
@@ -33,6 +35,7 @@ export const useResultStore = defineStore('result',()=>{
     const currentTypeDataID = ref<{[key:string]:number}>(default_typedataid)
     const currentResult = ref<DataView>(default_dataview)
     const currentInfo = ref<any>(default_info)
+    const loading = ref<boolean>(false) // 添加loading状态
 
     //result modal default 
     const marginRight = 20;
@@ -184,19 +187,80 @@ export const useResultStore = defineStore('result',()=>{
     }
 
     async function getResultCacheContent(id: number){
-        if(openCache){
-            const cacheItem = resultCache.value.get(id);
-            if(!cacheItem){
-                const content = await authService.getNodeDataApiDataDataIdGet(id);
-                addResultCacheContent(id,content);
+        loading.value = true; // 开始请求时设置loading为true
+        try {
+            if(openCache){
+                const cacheItem = resultCache.value.get(id);
+                if(!cacheItem){
+                    const content = await authService.getNodeDataApiDataDataIdGet(id);
+                    addResultCacheContent(id,content);
+                }
+                const cacheItem_after = resultCache.value.get(id) as ResultCacheItem;
+                cacheItem_after.hitCount++;
+                cacheItem_after.lastHitTime = Date.now();
+                return cacheItem_after.content;
             }
-            const cacheItem_after = resultCache.value.get(id) as ResultCacheItem;
-            cacheItem_after.hitCount++;
-            cacheItem_after.lastHitTime = Date.now();
-            return cacheItem_after.content;
-        }
-        else {
-            return await authService.getNodeDataApiDataDataIdGet(id);
+            else {
+                return await authService.getNodeDataApiDataDataIdGet(id);
+            }
+        } catch (error) {
+            // 检查是否是网络错误
+            if (error instanceof TypeError && error.message && 
+                (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                notify({
+                    message: '网络错误: ' + error.message,
+                    type: 'error'
+                });
+            } else if (error instanceof ApiError) {
+                // 处理ApiError
+                switch(error.status) {
+                    case 403:
+                        notify({
+                            message: '没有访问权限',
+                            type: 'error'
+                        });
+                        break;
+                    case 404:
+                        notify({
+                            message: '找不到数据',
+                            type: 'error'
+                        });
+                        break;
+                    case 422:
+                        notify({
+                            message: '认证错误',
+                            type: 'error'
+                        });
+                        break;
+                    case 500:
+                        notify({
+                            message: '服务器内部错误',
+                            type: 'error'
+                        });
+                        break;
+                    default:
+                        notify({
+                            message: '未知网络错误',
+                            type: 'error'
+                        });
+                        break;
+                }
+            } else if (error instanceof Error) {
+                // 其他错误
+                notify({
+                    message: '获取结果失败: ' + error.message,
+                    type: 'error'
+                });
+            } else {
+                // 未知错误
+                notify({
+                    message: '未知错误',
+                    type: 'error'
+                });
+            }
+            throw error;
+        } finally {
+            loading.value = false; // 请求完成时（无论成功还是失败）设置loading为false
         }
     }
 
@@ -233,6 +297,7 @@ export const useResultStore = defineStore('result',()=>{
         currentResult,
         currentInfo,
         currentTypeDataID,
+        loading, // 导出loading状态
         modalWidth,
         modalHeight,
         marginRight,

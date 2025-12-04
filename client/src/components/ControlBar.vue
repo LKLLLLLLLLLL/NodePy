@@ -9,6 +9,7 @@ import { RouterLink } from 'vue-router';
 import {useRoute,useRouter} from 'vue-router';
 import { useGraphStore } from "@/stores/graphStore";
 import { useModalStore } from "@/stores/modalStore";
+import { useProjectStore } from "@/stores/projectStore";
 import Logout from "./Logout.vue";
 import { useLoginStore } from "@/stores/loginStore";
 import UserInfoMenu from "./FloatingMenu/UserInfoMenu.vue";
@@ -16,6 +17,7 @@ import UserInfoMenu from "./FloatingMenu/UserInfoMenu.vue";
 const graphStore = useGraphStore()
 const modalStore = useModalStore()
 const loginStore = useLoginStore()
+const projectStore = useProjectStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -73,6 +75,11 @@ const isActive = (path: string) => {
           <!-- 只读提示 -->
           <div v-if="isReadOnly" class="readonly-indicator">
             只读
+          </div>
+          <div class="add-to-my-project">
+            <el-button v-if="isReadOnly" @click="()=>projectStore.copyProject(Number(route.params.projectId))">
+              添加到我的项目
+            </el-button>
           </div>
         </div>
 
@@ -167,6 +174,10 @@ const isActive = (path: string) => {
       border-radius: 4px;
       font-size: 14px;
       font-weight: 500;
+    }
+
+    .add-to-my-project{
+      margin-left: 10px;
     }
 
     .actions {

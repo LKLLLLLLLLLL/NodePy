@@ -244,11 +244,31 @@ export const useFileStore = defineStore('file', () => {
                             type: 'error'
                         });
                         break;
+                    default:
+                        // 检查是否是网络错误
+                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                            notify({
+                                message: '网络错误: ' + error.message,
+                                type: 'error'
+                            });
+                        } else {
+                            notify({
+                                message: '未知网络错误',
+                                type: 'error'
+                            });
+                        }
+                        break;
                 }
+            }
+            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                notify({
+                    message: '网络错误: ' + error.message,
+                    type: 'error'
+                });
             }
             else{
                 notify({
-                    message: 'Unknown error occurred',
+                    message: '未知错误',
                     type: 'error'
                 });
             }
@@ -277,11 +297,31 @@ export const useFileStore = defineStore('file', () => {
                             type: 'error'
                         });
                         break;
+                    default:
+                        // 检查是否是网络错误
+                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                            notify({
+                                message: '网络错误: ' + error.message,
+                                type: 'error'
+                            });
+                        } else {
+                            notify({
+                                message: '未知网络错误',
+                                type: 'error'
+                            });
+                        }
+                        break;
                 }
+            }
+            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                notify({
+                    message: '网络错误: ' + error.message,
+                    type: 'error'
+                });
             }
             else{
                 notify({
-                    message: 'Unknown error occurred',
+                    message: '未知错误',
                     type: 'error'
                 });
             }
@@ -329,11 +369,31 @@ export const useFileStore = defineStore('file', () => {
                             type: 'error'
                         });
                         break;
+                    default:
+                        // 检查是否是网络错误
+                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                            notify({
+                                message: '网络错误: ' + error.message,
+                                type: 'error'
+                            });
+                        } else {
+                            notify({
+                                message: '未知网络错误',
+                                type: 'error'
+                            });
+                        }
+                        break;
                 }
+            }
+            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                notify({
+                    message: '网络错误: ' + error.message,
+                    type: 'error'
+                });
             }
             else{
                 notify({
-                    message: 'Unknown error occurred',
+                    message: '未知错误',
                     type: 'error'
                 });
             }
@@ -372,10 +432,26 @@ export const useFileStore = defineStore('file', () => {
             return currentContent.value;
             
         } catch (error) {
-            notify({
-                message: '获取文件失败: ' + (error instanceof Error ? error.message : String(error)),
-                type: 'error'
-            });
+            // 检查是否是网络错误
+            if (error instanceof TypeError && error.message && 
+                (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
+                notify({
+                    message: '网络错误: ' + error.message,
+                    type: 'error'
+                });
+            } else if (error instanceof Error) {
+                // 其他错误
+                notify({
+                    message: '获取文件失败: ' + error.message,
+                    type: 'error'
+                });
+            } else {
+                // 未知错误
+                notify({
+                    message: '未知错误',
+                    type: 'error'
+                });
+            }
         }
     }
 

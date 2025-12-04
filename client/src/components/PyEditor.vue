@@ -22,6 +22,7 @@
         @keydown="handleKeydown"
         @paste="handlePaste"
         @scroll="syncScroll"
+        @beforeinput="handleBeforeInput"
         spellcheck="false"
       ></pre>
       <pre 
@@ -40,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 
 // 引入Prism.js和Python语法高亮
 import Prism from 'prismjs';
@@ -98,6 +99,14 @@ const syncScroll = () => {
   }
 };
 
+// 处理输入前的事件，用于阻止默认行为并正确处理撤销
+const handleBeforeInput = (event: InputEvent) => {
+  // 让浏览器处理撤销/重做操作
+  if (event.inputType === 'historyUndo' || event.inputType === 'historyRedo') {
+    return;
+  }
+};
+
 // 处理输入
 const handleInput = () => {
   if (editor.value) {
@@ -108,26 +117,101 @@ const handleInput = () => {
   }
 };
 
-// 获取当前光标位置的行号
-const getCurrentLineNumber = (): number => {
-  if (!editor.value) return 0;
+// 获取当前光标位置（改进版）
+const getCursorPosition = (): { lineNumber: number; columnNumber: number } => {
+  if (!editor.value) return { lineNumber: 0, columnNumber: 0 };
   
   const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return 0;
+  if (!selection || selection.rangeCount === 0) return { lineNumber: 0, columnNumber: 0 };
   
   const range = selection.getRangeAt(0);
-  const preElement = editor.value;
   
-  // 创建一个范围，从pre元素开始到光标位置
-  const rangeToCursor = document.createRange();
-  rangeToCursor.setStart(preElement, 0);
-  rangeToCursor.setEnd(range.startContainer, range.startOffset);
+  // 获取从编辑器开始到光标位置的文本
+  const preRange = document.createRange();
+  preRange.setStart(editor.value, 0);
+  preRange.setEnd(range.startContainer, range.startOffset);
   
-  // 计算这个范围内的换行符数量
-  const textToCursor = rangeToCursor.toString();
-  const lineCount = (textToCursor.match(/\n/g) || []).length;
+  const textUpToCursor = preRange.toString();
+  const lines = textUpToCursor.split('\n');
+  const lineNumber = lines.length - 1;
+  const columnNumber = lines[lines.length - 1]!.length;
   
-  return lineCount;
+  return { lineNumber, columnNumber };
+};
+
+// 设置光标位置（改进版）
+const setCursorPosition = (lineNumber: number, columnNumber: number) => {
+  if (!editor.value) return;
+  
+  const selection = window.getSelection();
+  if (!selection) return;
+  
+  // 获取所有文本节点
+  const textNodes: Text[] = [];
+  const walker = document.createTreeWalker(
+    editor.value,
+    NodeFilter.SHOW_TEXT,
+    null
+  );
+  
+  let node = walker.nextNode();
+  while (node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      textNodes.push(node as Text);
+    }
+    node = walker.nextNode();
+  }
+  
+  // 计算目标位置
+  let totalCharCount = 0;
+  
+  // 遍历所有文本节点查找目标位置
+  for (const node of textNodes) {
+    const nodeText = node.textContent || '';
+    const nodeLines = nodeText.split('\n');
+    
+    let lineCharCount = 0;
+    for (let i = 0; i < nodeLines.length; i++) {
+      const lineText = nodeLines[i];
+      const isLastLine = i === nodeLines.length - 1;
+      
+      // 计算当前行在整体中的行号
+      const currentGlobalLine = totalCharCount > 0 ? 
+        (nodeText.substring(0, lineCharCount).split('\n').length - 1) + 
+        (editor.value.textContent?.substring(0, editor.value.textContent.indexOf(nodeText)).split('\n').length || 0) :
+        (editor.value.textContent?.substring(0, editor.value.textContent.indexOf(nodeText)).split('\n').length || 0);
+      
+      // 如果找到了目标行
+      if (currentGlobalLine === lineNumber) {
+        // 计算列位置
+        const actualColumn = Math.min(columnNumber, lineText!.length);
+        
+        // 设置光标位置
+        const range = document.createRange();
+        range.setStart(node, lineCharCount + actualColumn);
+        range.collapse(true);
+        
+        selection.removeAllRanges();
+        selection.addRange(range);
+        return;
+      }
+      
+      // 更新字符计数
+      lineCharCount += lineText!.length + (isLastLine ? 0 : 1); // +1 for \n
+    }
+    
+    totalCharCount += nodeText.length;
+  }
+  
+  // 如果没找到特定位置，将光标放在开头
+  if (textNodes.length > 0) {
+    const range = document.createRange();
+    range.setStart(textNodes[0]!, 0);
+    range.collapse(true);
+    
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
 };
 
 // 获取指定行的内容
@@ -141,7 +225,7 @@ const getLineContent = (lineNumber: number): string => {
 const getLineIndent = (lineNumber: number): string => {
   const lineContent = getLineContent(lineNumber);
   const match = lineContent.match(/^(\s*)/);
- return match && match[1] !== undefined ? match[1] : '';
+  return match && match[1] !== undefined ? match[1] : '';
 };
 
 // 检查是否需要增加缩进
@@ -201,194 +285,24 @@ const shouldDecreaseIndent = (lineContent: string): boolean => {
   return false;
 };
 
-// 处理Backspace键 - 自动删除缩进
-const handleBackspace = (event: KeyboardEvent) => {
-  if (!editor.value || !editable.value) return false;
-
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return false;
-
-  const range = selection.getRangeAt(0);
-  const startOffset = range.startOffset;
-
-  // 只在行首处理
-  if (startOffset === 0) {
-    const startContainer = range.startContainer;
-    
-    if (startContainer.nodeType === Node.TEXT_NODE) {
-      const currentLineNumber = getCurrentLineNumber();
-      const currentLineContent = getLineContent(currentLineNumber);
-      const currentIndent = getLineIndent(currentLineNumber);
-
-      // 如果当前行有缩进
-      if (currentIndent.length > 0) {
-        event.preventDefault();
-
-        // 计算要删除的空格数（最多4个或整行缩进）
-        const spacesToRemove = Math.min(4, currentIndent.length);
-
-        // 删除缩进
-        const newLineContent = currentLineContent.substring(spacesToRemove);
-        const lines = code.value.split('\n');
-        lines[currentLineNumber] = newLineContent;
-        code.value = lines.join('\n');
-
-        // 更新编辑器内容
-        if (editor.value) {
-          editor.value.textContent = code.value;
-
-          // 重新设置光标位置
-          setTimeout(() => {
-            if (!editor.value) return;
-            
-            const walker = document.createTreeWalker(
-              editor.value,
-              NodeFilter.SHOW_TEXT,
-              null
-            );
-
-            let node = walker.nextNode();
-            let position = 0;
-            const targetPosition = lines.slice(0, currentLineNumber).join('\n').length + 
-                                  (currentLineNumber > 0 ? currentLineNumber : 0);
-
-            while (node) {
-              const nodeLength = node.textContent?.length || 0;
-              if (position + nodeLength >= targetPosition) {
-                const offsetInNode = targetPosition - position;
-                const newRange = document.createRange();
-                newRange.setStart(node, offsetInNode);
-                newRange.collapse(true);
-                
-                selection.removeAllRanges();
-                selection.addRange(newRange);
-                break;
-              }
-              position += nodeLength;
-              node = walker.nextNode();
-            }
-          }, 0);
-        }
-
-        handleInput();
-        syncScroll();
-        return true;
-      }
-    }
-  } 
-  // 如果光标在文本中间但前面有空格
-  else if (range.startContainer.nodeType === Node.TEXT_NODE) {
-    const textContent = range.startContainer.textContent || '';
-    
-    // 检查光标前是否有连续的空格
-    let spacesBeforeCursor = 0;
-    for (let i = startOffset - 1; i >= 0 && i >= startOffset - 4; i--) {
-      if (textContent[i] === ' ') {
-        spacesBeforeCursor++;
-      } else {
-        break;
-      }
-    }
-    
-    // 如果光标前有空格，则删除这些空格
-    if (spacesBeforeCursor > 0) {
-      event.preventDefault();
-      
-      const newRange = document.createRange();
-      newRange.setStart(range.startContainer, startOffset - spacesBeforeCursor);
-      newRange.setEnd(range.startContainer, startOffset);
-      newRange.deleteContents();
-      
-      // 更新选区
-      range.setStart(range.startContainer, startOffset - spacesBeforeCursor);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      
-      handleInput();
-      syncScroll();
-      return true;
-    }
-  }
-
-  return false;
-};
-
-// 处理键盘事件
-const handleKeydown = (event: KeyboardEvent) => {
-  if (!editor.value || !editable.value) return;
-
-  // Backspace键处理
-  if (event.key === 'Backspace') {
-    if (handleBackspace(event)) {
-      event.preventDefault();
-      return;
-    }
-  }
-
-  // Tab键处理
-  if (event.key === 'Tab') {
-    event.preventDefault();
-    
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-    
-    const range = selection.getRangeAt(0);
-    
-    if (event.shiftKey) {
-      // Shift+Tab 减少缩进
-      removeIndentation(range);
-    } else {
-      // Tab 增加缩进
-      const tabNode = document.createTextNode('    ');
-      range.insertNode(tabNode);
-      range.setStartAfter(tabNode);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
-    
-    handleInput();
-    syncScroll();
-    return;
-  }
+// 处理Tab键
+const handleTab = (event: KeyboardEvent) => {
+  event.preventDefault();
   
-  // 回车键处理 - 自动缩进
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-    
-    const range = selection.getRangeAt(0);
-    
-    // 获取当前行号
-    const currentLineNumber = getCurrentLineNumber();
-    const currentLineContent = getLineContent(currentLineNumber);
-    const currentIndent = getLineIndent(currentLineNumber);
-    
-    // 计算新行的缩进
-    let newIndent = currentIndent;
-    
-    // 检查是否需要增加缩进
-    if (shouldIncreaseIndent(currentLineContent)) {
-      newIndent += '    '; // 增加4个空格
-    }
-    
-    // 检查下一行是否需要减少缩进
-    const nextLineContent = getLineContent(currentLineNumber + 1);
-    if (nextLineContent && shouldDecreaseIndent(nextLineContent)) {
-      newIndent = newIndent.slice(0, -4); // 减少4个空格
-      if (newIndent.length < 0) newIndent = '';
-    }
-    
-    // 插入换行和缩进
-    const newLineText = '\n' + newIndent;
-    const newLineNode = document.createTextNode(newLineText);
-    range.insertNode(newLineNode);
-    
-    // 移动光标到新行
-    range.setStartAfter(newLineNode);
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+  
+  const range = selection.getRangeAt(0);
+  
+  if (event.shiftKey) {
+    // Shift+Tab 减少缩进
+    removeIndentation();
+  } else {
+    // Tab 增加缩进
+    const tabNode = document.createTextNode('    ');
+    range.deleteContents();
+    range.insertNode(tabNode);
+    range.setStartAfter(tabNode);
     range.collapse(true);
     selection.removeAllRanges();
     selection.addRange(range);
@@ -398,41 +312,112 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 };
 
-// 移除缩进
-const removeIndentation = (range: Range) => {
+// 移除缩进（改进版）
+const removeIndentation = () => {
   const selection = window.getSelection();
-  if (!selection) return;
+  if (!selection || !editor.value) return;
   
-  const startContainer = range.startContainer;
-  const startOffset = range.startOffset;
+  const range = selection.getRangeAt(0);
   
-  // 如果是文本节点，检查前面的空格
-  if (startContainer.nodeType === Node.TEXT_NODE) {
-    const textContent = startContainer.textContent || '';
-    let spacesToRemove = 0;
+  // 只有在光标位于行首时才移除缩进
+  if (range.startContainer.nodeType === Node.TEXT_NODE) {
+    const textContent = range.startContainer.textContent || '';
+    const startOffset = range.startOffset;
     
-    // 查找前面的空格
-    for (let i = startOffset - 1; i >= 0 && spacesToRemove < 4; i--) {
-      if (textContent[i] === ' ') {
-        spacesToRemove++;
-      } else {
-        break;
-      }
-    }
+    // 检查是否在行首
+    const textBeforeCursor = textContent.substring(0, startOffset);
+    const lastNewlineIndex = textBeforeCursor.lastIndexOf('\n');
+    const textFromLineStart = lastNewlineIndex >= 0 
+      ? textBeforeCursor.substring(lastNewlineIndex + 1)
+      : textBeforeCursor;
     
-    if (spacesToRemove > 0) {
-      // 删除空格
-      const newRange = document.createRange();
-      newRange.setStart(startContainer, startOffset - spacesToRemove);
-      newRange.setEnd(startContainer, startOffset);
-      newRange.deleteContents();
+    // 检查行首是否有空格
+    const leadingSpaces = textFromLineStart.match(/^\s*/)?.[0] || '';
+    if (leadingSpaces.length > 0) {
+      // 计算要删除的空格数（最多4个或到行首）
+      const spacesToRemove = Math.min(4, leadingSpaces.length);
+      
+      // 创建新的范围来删除空格
+      const deleteRange = document.createRange();
+      deleteRange.setStart(range.startContainer, startOffset - spacesToRemove);
+      deleteRange.setEnd(range.startContainer, startOffset);
+      deleteRange.deleteContents();
       
       // 更新选区
-      range.setStart(startContainer, startOffset - spacesToRemove);
+      range.setStart(range.startContainer, startOffset - spacesToRemove);
       range.collapse(true);
       selection.removeAllRanges();
       selection.addRange(range);
+      
+      handleInput();
+      syncScroll();
     }
+  }
+};
+
+// 处理回车键（改进版）
+const handleEnter = (event: KeyboardEvent) => {
+  event.preventDefault();
+  
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+  
+  const range = selection.getRangeAt(0);
+  
+  // 获取当前光标位置
+  const cursorPos = getCursorPosition();
+  const currentLineNumber = cursorPos.lineNumber;
+  const currentLineContent = getLineContent(currentLineNumber);
+  const currentIndent = getLineIndent(currentLineNumber);
+  
+  // 计算新行的缩进
+  let newIndent = currentIndent;
+  
+  // 检查是否需要增加缩进
+  if (shouldIncreaseIndent(currentLineContent)) {
+    newIndent += '    '; // 增加4个空格
+  }
+  
+  // 检查下一行是否需要减少缩进（仅在当前行不是最后一行时）
+  const lines = code.value.split('\n');
+  if (currentLineNumber < lines.length - 1) {
+    const nextLineContent = getLineContent(currentLineNumber + 1);
+    if (nextLineContent && shouldDecreaseIndent(nextLineContent)) {
+      newIndent = newIndent.slice(0, -4); // 减少4个空格
+      if (newIndent.length < 0) newIndent = '';
+    }
+  }
+  
+  // 插入换行和缩进
+  const newLineText = '\n' + newIndent;
+  const newLineNode = document.createTextNode(newLineText);
+  range.deleteContents();
+  range.insertNode(newLineNode);
+  
+  // 移动光标到新行
+  range.setStartAfter(newLineNode);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  
+  handleInput();
+  syncScroll();
+};
+
+// 处理键盘事件
+const handleKeydown = (event: KeyboardEvent) => {
+  if (!editor.value || !editable.value) return;
+
+  // Tab键处理
+  if (event.key === 'Tab') {
+    handleTab(event);
+    return;
+  }
+  
+  // 回车键处理 - 自动缩进
+  if (event.key === 'Enter') {
+    handleEnter(event);
+    return;
   }
 };
 
@@ -460,7 +445,7 @@ const handlePaste = (event: ClipboardEvent) => {
   const textNode = document.createTextNode(pastedText);
   range.insertNode(textNode);
   
-  // 设置光标位置
+  // 设置光标位置到插入文本的末尾
   range.setStartAfter(textNode);
   range.collapse(true);
   selection.removeAllRanges();
@@ -514,7 +499,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  /* 使用等宽字体族，确保英文字符对齐 */
+  font-family: 'Consolas', 'Courier New', monospace, 'Microsoft YaHei', 'SimHei';
   font-size: 14px;
   background-color: #ffffff;
   border-radius: 8px;
@@ -613,6 +599,14 @@ input:checked + .slider:before {
   font-family: inherit;
   font-size: inherit;
   line-height: 1.5;
+  /* 确保字体渲染一致，避免中英文字符宽度差异 */
+  font-variant-ligatures: none;
+  -webkit-font-variant-ligatures: none;
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* 强制使用等宽字体，确保字符对齐 */
+  font-feature-settings: "tnum";
 }
 
 .code-editor {

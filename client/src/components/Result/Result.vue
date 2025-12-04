@@ -4,6 +4,7 @@
     import FileView from './FileView.vue';
     import ValueView from './ValueView.vue';
     import NodeInfo from './NodeInfo.vue';
+    import Loading from '../Loading.vue'; // 引入Loading组件
     import { watch, ref,computed, onMounted } from 'vue';
     import { useResultStore } from '@/stores/resultStore';
     import { useGraphStore } from '@/stores/graphStore';
@@ -55,10 +56,15 @@
 <template>
     <div :style="{width: '100%',height: '100%'}">
         <div class = "result-control">
-            <el-button v-for="key in Object.keys(resultStore.currentTypeDataID)" :key="key" @click="handleChooseResult(key)">{{ key }}</el-button>
+            <el-button v-for="key in Object.keys(resultStore.currentTypeDataID)" :key="key" @click="()=>handleChooseResult(key)">{{ key }}</el-button>
         </div>
         <div class = "result-container">
-            <div class="if-result" v-if="resultStore.currentResult !== resultStore.default_dataview">
+            <!-- 显示loading状态 -->
+            <div v-if="resultStore.loading" class="loading-container">
+                <Loading :active="true" :size="50" />
+            </div>
+            <!-- 显示结果内容 -->
+            <div class="if-result" v-else-if="resultStore.currentResult !== resultStore.default_dataview">
                 <TableView v-if="resultStore.currentResult.type === 'Table'"
                             :value="resultStore.currentResult.value"
                             class = "view-content chart-view">
@@ -70,7 +76,8 @@
                 <ValueView v-else-if="resultStore.currentResult.type === 'int'
                             || resultStore.currentResult.type  === 'str'
                             || resultStore.currentResult.type  === 'bool'
-                            || resultStore.currentResult.type  === 'float'"
+                            || resultStore.currentResult.type  === 'float'
+                            || resultStore.currentResult.type  === 'Datetime'"
                             :value="resultStore.currentResult.value"
                             class = "view-content value-view">
                 </ValueView>
@@ -90,6 +97,7 @@
         padding: 20px;
         padding-top: 10px;
         border-radius: 10px;
+        position: relative; /* 添加相对定位 */
     }
     .result-control{
         height: 30px;
@@ -101,5 +109,10 @@
         width: 100%;
         height: 100%;
     }
-
+    .loading-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
 </style>

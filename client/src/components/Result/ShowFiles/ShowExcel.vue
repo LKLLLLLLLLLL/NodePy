@@ -15,7 +15,7 @@ defineProps<{
               <tr>
                 <th class="index-column">
                   <div class="column-header">
-                    <span class="column-name">序号</span>
+                    <span class="column-name">行号</span>
                   </div>
                 </th>
                 <th v-for="(header, colIndex) in sheet.data[0]" :key="colIndex" class="excel-column">
@@ -106,7 +106,7 @@ defineProps<{
 
 .column-header {
   padding: 12px 10px;
-  text-align: left;
+  text-align: center; /* 修改为居中 */
   font-weight: 500;
   color: #606266;
   background-color: #f5f7fa;
@@ -131,6 +131,7 @@ defineProps<{
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: center; /* 添加居中 */
 }
 
 .index-content {
