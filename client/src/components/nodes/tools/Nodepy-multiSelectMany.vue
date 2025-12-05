@@ -3,13 +3,24 @@
         class="NodePyMultiSelectManyLayout"
         ref="root"
         @click.stop
-        :class="{open}"
     >
-        <div class="value" :class="{close: !open}" @click.stop="toggle" :style="{height: itemHeight, width: itemWidth}">
-            <span class="description">{{ displayDescription }}</span>
-            <span class="arrow" :class="{open}">
-              <SvgIcon type="mdi" :path="down_path"  />
-            </span>
+        <div class="tags-container">
+            <div
+                v-for="(idx) in selectedIdx"
+                :key="idx"
+                class="tag"
+                :class="{'specialColumn' : isSpecialColumn(options[idx])}"
+            >
+                <span class="tag-text">{{ columnValue(options[idx]) }}</span>
+                <span class="tag-close" @click.stop="remove(idx)">
+                    <SvgIcon type="mdi" :path="close_path" size="12" />
+                </span>
+            </div>
+
+            <div class="add-btn" @click.stop="toggle" :class="{active: open}">
+                <SvgIcon type="mdi" :path="plus_path" size="16" />
+                <span v-if="selectedIdx.length === 0">添加选项</span>
+            </div>
         </div>
 
         <div v-if="open" class="options" @click.stop>
@@ -17,23 +28,24 @@
                 v-for="(item, idx) in options"
                 class="item"
                 @click.stop="select(idx)"
-                :style="itemStyle"
                 :class="[{selected: selectedIdx.includes(idx) && options[idx]}, {'specialColumn' : isSpecialColumn(item)}]"
             >   <!-- options[idx] means empty value cannot be accepted-->
-                <span>{{columnValue(item)}}</span>
+                <span class="text">{{columnValue(item)}}</span>
             </div>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-    import {ref, computed, watchEffect, onBeforeUnmount, watch} from 'vue'
     import type { PropType } from 'vue'
+import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
     // @ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon'
-    import { mdiMenuDown } from '@mdi/js'
+import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
 
     const down_path = mdiMenuDown
+    const close_path = mdiClose
+    const plus_path = mdiPlus
 
     const props = defineProps({
         options: {
@@ -62,17 +74,6 @@
     const selectedIdx = ref(props.defaultSelected)
     const open = ref(false)
     const selectedItem = computed(() => selectedIdx.value.map(idx => props.options[idx]).filter(Boolean))
-    const displayDescription = computed(() => {
-        if(open.value) {
-            return '请选择'
-        }else {
-            if(selectedItem.value.length === 0) {
-                return '请选择'
-            }else {
-                return '已选择' + selectedItem.value.length + '项'
-            }
-        }
-    })
 
 
     const select = (idx: number) => {
@@ -84,6 +85,13 @@
             selectedIdx.value.push(idx)
         }
         emit('selectChange', selectedIdx.value)
+    }
+    const remove = (idx: number) => {
+        const id = selectedIdx.value.indexOf(idx)
+        if(id !== -1) {
+            selectedIdx.value.splice(id, 1)
+            emit('selectChange', selectedIdx.value)
+        }
     }
     const toggle = () => {
         open.value = !open.value
@@ -130,88 +138,145 @@
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
     @use './tools.scss' as *;
-    .NodePyMultiSelectManyLayout.open {
-        border-radius: 6px 6px 0 0;
-    }
+    $tag-fontsize: 13px;
     .NodePyMultiSelectManyLayout {
-        @include box-tools-style;
         position: relative;
         font-size: $node-description-fontsize;
-        .value {
-            @include tool-item-style;
-            border-radius: 6px 6px 0 0;
+        width: 100%;
+        .tags-container {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            .description {
-                padding: 0 17px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .arrow {
-                position: absolute;
-                right: 1px;
+            flex-wrap: wrap;
+            gap: 4px;
+            min-height: 25px;
+            .tag {
+                @include tool-item-style;
                 display: flex;
                 align-items: center;
-                color: rgba(0,0,0,0.4);
-                svg {
-                    width: 18px;
+                border-radius: 6px;
+                padding: 2px 8px;
+                font-size: $tag-fontsize;
+                max-width: 100%;
+
+                &.specialColumn {
+                    font-style: italic;
+                    color: rgba(0, 0, 0, 0.5);
+                }
+
+                .tag-text {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    margin-right: 4px;
+                }
+
+                .tag-close {
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+                    opacity: 0.6;
+                    &:hover {
+                        opacity: 1;
+                    }
                 }
             }
-            .arrow.open {
-                transform: rotate(180deg);
-            }
-        }
-        .value.close {
-            border-radius: 6px;
-        }
-        .value:hover {
-            @include tool-item-style-hover;
-        }
-        .options {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            z-index: 10;
-            background: #eee;
-            border-radius: 0 0 6px 6px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            padding: 2px 2px;
-            cursor: pointer;
-            .item {
+
+            .add-btn {
                 @include tool-item-style;
-                padding: 1px 5px;
                 border-radius: 6px;
-                font-size: 13px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                padding: 2px 8px;
+                cursor: pointer;
+                color: #666;
+                transition: all 0.2s;
+                height: 26px;
+
+                &:hover, &.active {
+                    background-color: #ddd;
+                    color: $stress-color;
+                }
+
                 span {
+                    margin-left: 4px;
+                    font-size: $tag-fontsize;
+                }
+            }
+        }
+
+        .options {
+            position: absolute;
+            top: calc(100% + 2px);
+            left: 0;
+            right: 0;
+            z-index: 100;
+
+            background: white;
+            border-radius: 6px;
+            box-shadow: 2px 2px 20px rgba(128, 128, 128, 0.3);
+
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 6px 6px;
+            cursor: pointer;
+
+            max-height: 200px;
+            overflow-y: auto;
+
+            &::-webkit-scrollbar {
+                width: 4px;
+            }
+            &::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 2px;
+            }
+
+            .item {
+                @include tool-item-style;
+                width: auto;
+                max-width: 100%;
+                padding: 2px 8px;
+                border-radius: 6px;
+                font-size: $tag-fontsize;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                .text {
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
                 }
+
                 &.specialColumn {
-                    color: rgba(0, 0, 0, 0.2);
+                    color: rgba(0, 0, 0, 0.4);
                     font-style: italic;
-                    font-size: 11px;
                 }
             }
             .item:hover {
-                background: #ddd;
+                @include tool-item-style-hover;
+                width: auto;
+                max-width: 100%;
+                padding: 2px 8px;
+                border-radius: 6px;
+                font-size: $tag-fontsize;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                .text {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
             }
             .item.selected {
-                background: $stress-color;
+                background-color: $stress-color;
                 color: white;
+                // font-weight: 600;
             }
             .item:hover.selected {
-                background: $hover-stress-color;
-                color: white;
+                background-color: $hover-stress-color;
             }
         }
     }

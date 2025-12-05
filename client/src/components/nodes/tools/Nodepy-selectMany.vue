@@ -27,11 +27,11 @@
 </template>
 
 <script lang="ts" setup>
-    import {ref, computed, watchEffect, onBeforeUnmount, watch} from 'vue'
     import type { PropType } from 'vue'
+import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
     // @ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon'
-    import { mdiMenuDown } from '@mdi/js'
+import { mdiMenuDown } from '@mdi/js'
 
     const down_path = mdiMenuDown
 
@@ -121,16 +121,13 @@
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
     @use './tools.scss' as *;
-    .NodePySelectManyLayout.open {
-        border-radius: 6px 6px 0 0;
-    }
+
     .NodePySelectManyLayout {
-        @include box-tools-style;
         position: relative;
         font-size: $node-description-fontsize;
         .value {
             @include tool-item-style;
-            border-radius: 6px 6px 0 0;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -154,31 +151,39 @@
                 color: rgba(0,0,0,0.4);
                 svg {
                     width: 18px;
+                    transition: transform 0.2s;
                 }
             }
             .arrow.open {
                 transform: rotate(180deg);
             }
         }
-        .value.close {
-            border-radius: 6px;
-        }
         .value:hover {
             @include tool-item-style-hover;
         }
         .options {
             position: absolute;
-            top: 100%;
+            top: calc(100% + 2px);
             left: 0;
             right: 0;
-            z-index: 10;
-            background: #eee;
-            border-radius: 0 0 6px 6px;
+            z-index: 100;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 2px 2px 20px rgba(128, 128, 128, 0.3);
             display: flex;
             flex-direction: column;
             gap: 2px;
             padding: 2px 2px;
             cursor: pointer;
+            max-height: 200px;
+            overflow-y: auto;
+            &::-webkit-scrollbar {
+                width: 4px;
+            }
+            &::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 2px;
+            }
             .item {
                 @include tool-item-style;
                 padding: 1px 5px;
@@ -187,6 +192,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                background: transparent;
                 span {
                     white-space: nowrap;
                     overflow: hidden;
@@ -199,7 +205,7 @@
                 }
             }
             .item:hover {
-                background: #ddd;
+                background: #eee;
             }
             .item.selected {
                 background: $stress-color;
