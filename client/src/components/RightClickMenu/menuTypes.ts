@@ -190,6 +190,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '范围数据列添加节点',
                 value: 'InsertRangeColNode'
             },
+            {
+                label: '随机数据列添加节点',
+                value: 'InsertRandomColNode'
+            },
         ]
     },
     {

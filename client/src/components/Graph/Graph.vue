@@ -51,6 +51,7 @@ import BatchRegexMatchNode from '../nodes/stringProcess/BatchRegexMatchNode.vue'
 import RegexExtractNode from '../nodes/stringProcess/RegexExtractNode.vue'
 import InsertConstColNode from '../nodes/tableProcess/InsertConstColNode.vue'
 import InsertRangeColNode from '../nodes/tableProcess/InsertRangeColNode.vue'
+import InsertRandomColNode from '../nodes/tableProcess/InsertRandomColNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -287,6 +288,7 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.str
     case 'InsertConstColNode':
     case 'InsertRangeColNode':
+    case 'InsertRandomColNode':
       return nodeCategoryColor.table
     case 'UploadNode':
     case 'TableFromFileNode':
@@ -520,6 +522,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-InsertRangeColNode="InsertRangeColNodeProps">
           <InsertRangeColNode v-bind="InsertRangeColNodeProps"/>
+        </template>
+
+        <template #node-InsertRandomColNode="InsertRandomColNodeProps">
+          <InsertRandomColNode v-bind="InsertRandomColNodeProps"/>
         </template>
 
         <template #node-UploadNode="UploadNodeProps">

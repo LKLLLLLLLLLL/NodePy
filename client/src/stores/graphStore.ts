@@ -579,6 +579,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedInsertRangeColNode)
         break
+      case 'InsertRandomColNode':
+        const addedInsertRandomColNode: Nodetypes.InsertRandomColNode = {
+          id,
+          position,
+          type: 'InsertRandomColNode',
+          data: {
+            param: {
+              col_name: '',
+              col_type: 'int'
+            }
+          }
+        }
+        addNodes(addedInsertRandomColNode)
+        break
     
       default:
         console.log(type)
