@@ -9,3 +9,9 @@ This file set some global configurations for the NodePy.
 DEFAULT_TIMEZONE = timezone(timedelta(hours=8))  # UTC+8
 
 FIGURE_DPI = 500  # Default DPI for matplotlib figures
+
+# The default core symbols to be tracked by the FinancialDataManager
+CORE_SYMBOLS = {
+    "crypto": ["BTCUSDT", "ETHUSDT"],
+    "stock": ["AAPL", "GOOGL", "TSLA"],
+}

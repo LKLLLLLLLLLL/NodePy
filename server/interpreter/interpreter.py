@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from server import DEBUG
 from server.lib.CacheManager import CacheManager
 from server.lib.FileManager import FileManager
+from server.lib.FinancialDataManager import FinancialDataManager
 from server.lib.utils import safe_hash, time_check
 from server.models.data import Data, Schema, Table
 from server.models.exception import NodeExecutionError, NodeParameterError
@@ -27,6 +28,7 @@ class ProjectInterpreter:
                  topology: WorkflowTopology, 
                  file_manager: FileManager, 
                  cache_manager: CacheManager,
+                 financial_data_manager: FinancialDataManager,
                  user_id: int,
                 ) -> None:
         import networkx as nx
@@ -45,7 +47,12 @@ class ProjectInterpreter:
         self._stage: Literal["init", "constructed", "static_analyzed", "running", "finished"] = "init"
         # construct global config
         self.cache_manager = cache_manager # used only by NodeGraph, no need to pass to nodes
-        self._global_config = GlobalConfig(file_manager=file_manager, user_id=user_id, project_id=topology.project_id)
+        self._global_config = GlobalConfig(
+            file_manager=file_manager, 
+            financial_data_manager=financial_data_manager, 
+            user_id=user_id, 
+            project_id=topology.project_id
+        )
         # cache unreached node ids, each period will only process nodes not in this list, and may append more unreached nodes 
         self._unreached_node_ids: set[str] = set()
 

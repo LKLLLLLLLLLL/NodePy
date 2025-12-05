@@ -11,6 +11,7 @@ from server.celery import celery_app
 from server.lib.CacheManager import CacheManager
 from server.lib.DataManager import DataManager
 from server.lib.FileManager import FileManager
+from server.lib.FinancialDataManager import FinancialDataManager
 from server.lib.ProjectLock import ProjectLock
 from server.lib.StreamQueue import Status, StreamQueue
 from server.lib.utils import (
@@ -126,7 +127,14 @@ def execute_project_task(self, project_id: int, user_id: int):
             # 2. Validate data model
             try:
                 cache_manager = CacheManager()
-                graph = ProjectInterpreter(file_manager=file_manager, cache_manager=cache_manager, topology=topo_graph, user_id=user_id)
+                financial_data_manager = FinancialDataManager(db_client=db_client)
+                graph = ProjectInterpreter(
+                    file_manager=file_manager, 
+                    cache_manager=cache_manager, 
+                    financial_data_manager=financial_data_manager, 
+                    topology=topo_graph, 
+                    user_id=user_id
+                )
                 queue.push_message_sync(
                     Status.IN_PROGRESS, 
                     {"stage": "VALIDATION", "status": "SUCCESS"}

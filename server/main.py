@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from server.lib.FinancialDataManager import initialize_core_symbols
+
 # from server.lib.ApiLoggerMiddleware import ApiLoggerMiddleware
 from server.models.database import init_database
 
@@ -36,6 +38,9 @@ app.add_middleware(
 
 # init database
 init_database()
+
+# init financial data for core symbols
+initialize_core_symbols()
 
 # Include API routes
 app.include_router(router, prefix="/api")

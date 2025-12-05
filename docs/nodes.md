@@ -149,6 +149,26 @@ table:
 **输出：**
 - datetime: 输出的日期时间值，类型为Datetime。
 
+#### 1.8 KlineNode
+K线数据输入节点，可以输出指定时间范围内的金融K线数据表格。
+
+**参数：**
+- data_type: 数据类型，类型为str，取值为"stock"或"crypto"。
+- symbol: 金融标的符号，如股票号码、加密货币名称等，类型为str。
+- start_time: 起始时间，类型为str，必须符合ISO 8601格式，可选，如果不选，则有输入口提供。
+- end_time: 结束时间，类型为str，必须符合ISO 8601格式，可选，如果不选，则有输入口提供。
+- interval: 数据时间间隔，类型为str，取值为"1m", "1h", "1d"，默认为"1m"。
+
+**输入：**
+- start_time: 起始时间，类型为str，必须符合ISO 8601格式，可选，如果参数中已提供，则忽略该输入。
+- end_time: 结束时间，类型为str，必须符合ISO 8601格式，可选，如果参数中已提供，则忽略该输入。
+
+**输出：**
+- kline_data: 输出的K线数据表格，类型为Table，包含以下列：
+
+**hint：**
+- data_type_choices: 数据类型列表，类型为List[str]，用于在UI中为data_type参数提供可选值。
+
 ### 2. 计算节点(compute)
 #### 2.1 NumberBinOpNode
 二元数值运算节点，支持对两个数值类型(int或float)的输入进行`ADD`, `SUB`, `MUL`, `DIV`, `POW`五种基本运算。

@@ -123,6 +123,44 @@ class FileRecord(Base):
     # allow to file entry with same(user_id, project_id, node_id)
     # they will be clean up in periodic task 
 
+class FinancialDataRecord(Base):
+    __tablename__ = "financial_data"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    symbol = Column(String, index=True, nullable=False)  # e.g., 'BTCUSDT'
+    data_type = Column(
+        Enum("crypto", "stock", name="financial_data_type"),
+        nullable=False,
+        index=True,
+    )  # "crypto" or "stock"
+    open_time = Column(DateTime(timezone=True), index=True, nullable=False)
+    open = Column(String, nullable=False)
+    high = Column(String, nullable=False)
+    low = Column(String, nullable=False)
+    close = Column(String, nullable=False)
+    volume = Column(String, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "symbol", "data_type", "open_time", name="_symbol_data_type_time_uc"
+        ),
+    )
+
+
+class TrackedSymbolRecord(Base):
+    __tablename__ = "tracked_symbols"
+
+    symbol = Column(String, primary_key=True)  # e.g., 'NVDA' or 'DOGEUSDT'
+    data_type = Column(
+        Enum("crypto", "stock", name="financial_data_type"),
+        primary_key=True,
+    )  # "crypto" or "stock"
+    last_requested_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+    oldest_data_time = Column(DateTime(timezone=True), nullable=True)
+    is_history_complete = Column(Boolean, default=False, nullable=False)
+
 # trigers
 def file_size_trigger(conn) -> None:
     conn.execute(

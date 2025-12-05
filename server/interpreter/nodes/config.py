@@ -2,6 +2,7 @@ from pydantic import BaseModel, model_validator
 from typing_extensions import Self
 
 from server.lib.FileManager import FileManager
+from server.lib.FinancialDataManager import FinancialDataManager
 
 
 class GlobalConfig(BaseModel):
@@ -11,6 +12,7 @@ class GlobalConfig(BaseModel):
     """
     
     file_manager: FileManager      # manager for file operations
+    financial_data_manager: FinancialDataManager  # manager for financial data operations
     user_id: int                   # current user id
     project_id: int                # current project id
 
