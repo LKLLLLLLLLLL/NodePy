@@ -97,14 +97,12 @@
     const {zoomIn,zoomOut,fitView} = useVueFlow('main');
 
     function handleZoomIn(){
-        console.log("zoom-in")
         zoomIn({
             duration: 200
         });
     }
 
     function handleZoomOut(){
-        console.log("zoom-out")
         zoomOut({
             duration: 200
         });

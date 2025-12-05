@@ -73,7 +73,6 @@ class AuthenticatedServiceFactory {
    */
   static devRefresh() {
     if (isDev) {
-      console.log('🛠️ 手动刷新认证服务');
       this.refreshService();
     }
   }

@@ -89,7 +89,6 @@ export const useProjectStore = defineStore('project', () => {
     }
 
     async function initializeProjects(){
-        console.log('Getting all projects');
         try{
             const response = await authService.listProjectsApiProjectListGet();
             projectList.value = response;

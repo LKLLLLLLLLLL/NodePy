@@ -75,7 +75,6 @@ const nodeFirstInit = ref(true)
 const listenNodePosition = ref(true)
 const intervalId = setInterval(() => {
   listenNodePosition.value = true
-  console.log('监听节点位置开始...')
 }, 30000)
 const nodes = computed(() => graphStore.project.workflow.nodes)
 const edges = computed(() => graphStore.project.workflow.edges)
@@ -191,7 +190,6 @@ onNodeClick((event) => {
 async function handleNodeDoubleClick(event) {
   // 获取节点完整信息
   resultStore.cacheGarbageRecycle()
-  console.log('double click success')
   graphStore.currentNode = findNode(event.node.id)
 
   getNodes.value.forEach((n) => {

@@ -110,7 +110,6 @@ export function withAuthMethod<T extends any[], R>(
             
             if (tokenResponse.access_token) {
               setAuthToken(tokenResponse.access_token);
-              console.log('✅ Token刷新成功，重试原请求...');
               return await executeWithAuth(retryCount + 1);
             }
           } catch (refreshError) {

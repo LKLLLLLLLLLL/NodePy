@@ -29,7 +29,6 @@ export const useUserStore = defineStore('user',()=>{
     const currentUserInfo = ref<UserInfo>(default_userinfo)
 
     function refreshUserInfo(){
-        console.log('refreshed')
         currentUserInfo.value = default_userinfo;
     }
 

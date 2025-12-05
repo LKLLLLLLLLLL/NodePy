@@ -16,7 +16,6 @@
     const graphStore = useGraphStore();
 
     const lastSyncTime = computed(() => graphStore.project.updated_at);
-    // setInterval(() => {console.log('lastSyncTime:', lastSyncTime.value)}, 100);
     const proj_err_msg = computed(() => graphStore.project.workflow.error_message);
 </script>
 <template>

@@ -59,7 +59,6 @@
         input.accept = '*'
         input.onchange = async (e) => {
             const file = (e.target as HTMLInputElement).files?.[0]
-            console.log(file instanceof Blob)
             if(!file) return
 
             try {

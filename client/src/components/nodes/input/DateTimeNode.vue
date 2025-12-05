@@ -3,7 +3,17 @@
         <NodeTitle node-category="input">日期时间输入节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
-            <div class="value">
+            <div class="isNow">
+                <NodepyBoolValue
+                    v-model="isNow"
+                    width="20px"
+                    height="20px"
+                    @update-value="onUpdateIsNow"
+                >
+                当前时间
+                </NodepyBoolValue>
+            </div>
+            <div class="value" v-if="!isNow">
                 <div class="param-description" :class="{'node-has-paramerr': valueHasErr.value}">
                     日期时间(ISO 8601格式)
                 </div>
@@ -35,11 +45,13 @@
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
     import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
+    import NodepyBoolValue from '../tools/Nodepy-boolValue.vue'
     import type { DateTimeNodeData } from '@/types/nodeTypes'
 
 
     const props = defineProps<NodeProps<DateTimeNodeData>>()
     const value = ref(props.data.param.value)
+    const isNow = ref(false)
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['datetime']?.type || 'default')
     const datetimeHasErr = computed(() => handleOutputError(props.id, 'datetime'))
     const errMsg = ref<string[]>([])
@@ -53,6 +65,14 @@
         if(value.value.trim().toLowerCase() === 'now') {
             props.data.param.value = new Date().toISOString()
         }else {
+            props.data.param.value = value.value
+        }
+    }
+    const onUpdateIsNow = () => {
+        if(isNow.value) {
+            props.data.param.value = new Date().toISOString()
+        }else {
+            value.value = ""
             props.data.param.value = value.value
         }
     }
@@ -74,7 +94,7 @@
         .data {
             padding-top: $node-padding-top;
             padding-bottom: $node-padding-bottom;
-            .value {
+            .isNow, .value {
                 padding: 0 $node-padding-hor;
                 margin-bottom: $node-margin;
             }

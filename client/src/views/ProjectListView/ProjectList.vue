@@ -83,7 +83,6 @@
     }
 
     async function handleOpenExistingProject(id:number){
-        console.log('Opening existing project...')
         const route = router.resolve({
             name: 'editor-project',
             params: { projectId: id }
@@ -92,7 +91,6 @@
     }
 
     function handleCreateNewProject(){
-        console.log("Adding new project...");
         openAddProjectModal();
     }
 

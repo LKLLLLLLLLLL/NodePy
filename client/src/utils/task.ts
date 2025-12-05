@@ -37,7 +37,6 @@ export const onTimerMsg = (callback: (msg: TimerMsg) => void) => {
 const broadcastTimer = (msg: TimerMsg) => {
   if(msg.action === 'start') runningNodes.add(msg.nodeId)
   if(msg.action === 'error' || msg.action === 'stop') runningNodes.delete(msg.nodeId)
-  console.log('broadcastTimer:', msg)
   timerListeners.forEach(callback => callback(msg))
 }
 const stopAllRunningTimers = () => {
