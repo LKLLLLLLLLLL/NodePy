@@ -619,6 +619,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedDropDuplicatesNode)
         break
+      case 'DropNaNValueNode':
+        const addedDropNaNValueNode: Nodetypes.DropNaNValueNode = {
+          id,
+          position,
+          type: 'DropNaNValueNode',
+          data: {
+            param: {
+              subset_cols: []
+            }
+          }
+        }
+        addNodes(addedDropNaNValueNode)
+        break
     
       default:
         console.log(type)

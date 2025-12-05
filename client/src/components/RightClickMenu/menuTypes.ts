@@ -202,6 +202,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格去重节点',
                 value: 'DropDuplicatesNode'
             },
+            {
+                label: '表格缺失值删除节点',
+                value: 'DropNaNValueNode'
+            },
         ]
     },
     {

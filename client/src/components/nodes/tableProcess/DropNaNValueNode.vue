@@ -1,6 +1,6 @@
 <template>
-    <div class="DropDuplicatesNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">表格去重节点</NodeTitle>
+    <div class="DropNaNValueNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category="tableProcess">表格缺失值删除节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -21,11 +21,11 @@
                     class="nodrag"
                 />
             </div>
-            <div class="output-deduplicated_table port">
+            <div class="output-cleaned_table port">
                 <div class="output-port-description">
-                    去重后表格输出
+                    删除后表格输出
                 </div>
-                <Handle id="deduplicated_table" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': deduplicated_tableHasErr}]"/>
+                <Handle id="cleaned_table" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': cleaned_tableHasErr}]"/>
             </div>
         </div>
         <ErrorMsg :err-msg="errMsg"/>
@@ -43,10 +43,10 @@
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
     import NodepyMultiSelectMany from '../tools/Nodepy-multiSelectMany.vue'
-    import type { DropDuplicatesNodeData } from '@/types/nodeTypes'
+    import type { DropNaNValueNodeData } from '@/types/nodeTypes'
 
 
-    const props = defineProps<NodeProps<DropDuplicatesNodeData>>()
+    const props = defineProps<NodeProps<DropNaNValueNodeData>>()
     const subset_colsHint = computed(() => props.data.hint?.subset_col_choices || [''])
     const subset_cols = ref(props.data.param.subset_cols)   //  used for defaultSelectedSubset_cols
     const defaultSelectedSubset_cols = computed(() => {
@@ -55,8 +55,8 @@
         return selectedArray.map(item => hintArray.indexOf(item)).filter(idx => idx !== -1)
     })
     const table_type = computed(() => getInputType(props.id, 'table'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['deduplicated_table']?.type || 'default')
-    const deduplicated_tableHasErr = computed(() => handleOutputError(props.id, 'deduplicated_table'))
+    const schema_type = computed(():Type|'default' => props.data.schema_out?.['cleaned_table']?.type || 'default')
+    const cleaned_tableHasErr = computed(() => handleOutputError(props.id, 'cleaned_table'))
     const errMsg = ref<string[]>([])
     const subset_colsHasErr = ref({
         id: 'subset_cols',
@@ -90,7 +90,7 @@
 <style lang="scss" scoped>
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
-    .DropDuplicatesNodeLayout {
+    .DropNaNValueNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;
