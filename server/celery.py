@@ -43,7 +43,7 @@ celery_app.conf.beat_schedule = {
     },
     "backfill-history-every-hour": {
         "task": "server.lib.FinancialDataManager.backfill_history_task",
-        # "schedule": 3600.0,  # Every hour
+        "schedule": 3600.0,  # Every hour
         # "schedule": 120.0,  # Every 2 minutes (for testing purposes)
     },
 }
