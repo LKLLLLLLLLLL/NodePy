@@ -593,6 +593,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedInsertRandomColNode)
         break
+      case 'FilterNode':
+        const addedFilterNode: Nodetypes.FilterNode = {
+          id,
+          position,
+          type: 'FilterNode',
+          data: {
+            param: {
+              cond_col: ''
+            }
+          }
+        }
+        addNodes(addedFilterNode)
+        break
     
       default:
         console.log(type)

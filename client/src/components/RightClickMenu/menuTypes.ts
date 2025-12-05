@@ -194,6 +194,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '随机数据列添加节点',
                 value: 'InsertRandomColNode'
             },
+            {
+                label: '表格过滤节点',
+                value: 'FilterNode'
+            },
         ]
     },
     {
