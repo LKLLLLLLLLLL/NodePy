@@ -648,6 +648,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedDropNaNValueNode)
         break
+      case 'SortNode':
+        const addedSortNode: Nodetypes.SortNode = {
+          id,
+          position,
+          type: 'SortNode',
+          data: {
+            param: {
+              sort_cols: [],
+              ascending: []
+            }
+          }
+        }
+        addNodes(addedSortNode)
+        break
     
       default:
         console.log(type)

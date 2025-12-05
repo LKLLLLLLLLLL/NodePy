@@ -210,6 +210,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格缺失值删除节点',
                 value: 'DropNaNValueNode'
             },
+            {
+                label: '表格排序节点',
+                value: 'SortNode'
+            },
         ]
     },
     {

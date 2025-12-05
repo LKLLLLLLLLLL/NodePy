@@ -175,3 +175,8 @@ $datetime-node-color: $datetime-color; // 青色 - 日期时间处理
   outline: 1.5px solid red;
   outline-offset: 1px;
 }
+
+.special-table-column {
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.5);
+}
