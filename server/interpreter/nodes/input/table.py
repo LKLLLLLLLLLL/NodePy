@@ -53,13 +53,6 @@ class TableNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type must be 'TableNode'."
             )
-        if len(self.col_names) != 0:
-            if len(self.rows) == 0:
-                raise NodeParameterError(
-                    node_id=self.id,
-                    err_param_key="rows",
-                    err_msg="Rows cannot be empty. Else cannot refer types of columns."
-                )
         # check no illegal column names
         if not check_no_illegal_cols(self.col_names):
             raise NodeParameterError(

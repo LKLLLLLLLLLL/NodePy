@@ -14,9 +14,13 @@ logger.add(
     level=LEVEL,
     format="{time:YYYY-MM-DD HH:mm:ss,ms}: [{level}] <{function}> {message}",
 )
-logger.add(
-    "/nodepy/logs/server.log",
-    rotation="10 MB",
-    level=LEVEL,
-    format="{time:YYYY-MM-DD HH:mm:ss,ms}: [{level}] <{function}> {message}",
-)
+try:
+    logger.add(
+        "/nodepy/logs/server.log",
+        rotation="10 MB",
+        level=LEVEL,
+        format="{time:YYYY-MM-DD HH:mm:ss,ms}: [{level}] <{function}> {message}",
+    )
+except Exception:
+    # Could be OSError on read-only filesystem or other issues creating dirs.
+    logger.warning("Cannot write log file to /nodepy/logs/server.log; continuing without file sink.")

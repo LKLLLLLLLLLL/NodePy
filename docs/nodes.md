@@ -79,33 +79,17 @@ NodePy 的节点系统是一个完全静态类型的节点系统，类型验证�
 
 #### 1.4 TableNode
 表格输入节点，可以输出一个固定的表格值。
-注意：如果用户提供了列名但没有提供行数据，将会抛出错误，因为无法推断列的数据类型。
 
 **参数：**
 - rows: `List[Dict[str, str | int | float | bool]]`，表格的行数据，每一行是一个字典，键为列名，值为对应的单元格数据。
 - col_names: `List[str]`，表格的列名列表，需要与rows中的字典键一致。
+- col_types: `Dict[str, str] | None`，指定每一列的数据类型，键为列名，值为数据类型字符串，取值为"int", "float", "str", "bool", "Datetime"。
 
 **输入：**
 无
 
 **输出：**
 - table: 输出的表格值，类型为Table。
-
-***示例：***
-```
-TableNode(
-    rows=[
-        {"Name": "Alice", "Age": 30, "Salary": 70000.0, "IsManager": False},
-        {"Name": "Bob", "Age": 35, "Salary": 80000.0, "IsManager": True}
-    ],
-    col_names=["Name", "Age", "Salary", "IsManager"]
-)
-```
-table: 
-|   Name   | Age | Salary  | IsManager |
-|----------|-----|---------|-----------|
-| Alice    | 30  | 70000.0 | False     |
-| Bob      | 35  | 80000.0 | True      |
 
 #### 1.5 RandomNode
 随机表格生成节点，可以生成一个包含一个由随机数构成的列的表格。

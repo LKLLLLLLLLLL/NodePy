@@ -74,7 +74,7 @@ class FinancialDataManager:
         # 5. resample if needed
         if interval != "1m":
             df.set_index('Open Time', inplace=True)
-            
+
             # aggregation rules for resampling
             aggregation_rules = {
                 'Open': 'first',
@@ -83,7 +83,7 @@ class FinancialDataManager:
                 'Close': 'last',
                 'Volume': 'sum'
             }
-            
+
             df = df.resample(interval).apply(aggregation_rules) # type: ignore
 
             df.dropna(inplace=True)
