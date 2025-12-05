@@ -439,9 +439,17 @@ class FillNaNValueNode(BaseNode):
         hint = {}
         if "table" in input_schemas:
             table_schema = input_schemas["table"]
-            assert table_schema.tab is not None
-            subset_col_choices = list(table_schema.tab.col_types.keys())
-            hint["subset_col_choices"] = subset_col_choices
+            if table_schema.tab is not None:
+                subset_col_choices = list(table_schema.tab.col_types.keys())
+                hint["subset_col_choices"] = subset_col_choices
+        if "table" in input_schemas and "subset_cols" in current_params:
+            table_schema = input_schemas["table"]
+            if table_schema.tab is not None:
+                fill_value_types = []
+                for col in current_params["subset_cols"]:
+                    if col in table_schema.tab.col_types:
+                        fill_value_types.append(table_schema.tab.col_types[col].value)
+                hint["fill_value_types"] = fill_value_types
         return hint
 
 
