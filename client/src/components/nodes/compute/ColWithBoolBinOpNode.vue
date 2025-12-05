@@ -75,7 +75,7 @@
     const opUi = ['B与T', 'B或T', 'B异或T', 'B减T', 'T减B']
     const defaultSelectedOP = op.indexOf(props.data.param.op)
     const colHint = computed(() => {
-        if(props.data.hint?.col_choices.length === 0) return ['']
+        if(props.data.hint?.col_choices?.length === 0) return ['']
         return props.data.hint?.col_choices || ['']
     })
     const col = ref(props.data.param.col)   //  used for defaultSelectedCol

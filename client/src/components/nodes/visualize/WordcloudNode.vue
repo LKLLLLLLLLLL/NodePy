@@ -52,11 +52,11 @@
 
     const props = defineProps<NodeProps<WordcloudNodeData>>()
     const word_col_hint = computed(() => {
-        if(props.data.hint?.word_col_choices.length === 0) return ['']
+        if(props.data.hint?.word_col_choices?.length === 0) return ['']
         return props.data.hint?.word_col_choices || ['']
     })
     const frequency_col_hint = computed(() => {
-        if(props.data.hint?.frequency_col_choices.length === 0) return ['']
+        if(props.data.hint?.frequency_col_choices?.length === 0) return ['']
         return props.data.hint?.frequency_col_choices || ['']
     })
     const word_col = ref(props.data.param.word_col)   // used for word_col_default_selected

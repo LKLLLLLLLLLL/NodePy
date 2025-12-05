@@ -81,13 +81,13 @@
     const opUi = ["与", "或", "异或", "减"]
     const defaultSelectedOP = op.indexOf(props.data.param.op)
     const col1Hint = computed(() => {
-        if(props.data.hint?.col1_choices.length === 0) return ['']
+        if(props.data.hint?.col1_choices?.length === 0) return ['']
         return props.data.hint?.col1_choices || ['']
     })
     const col1 = ref(props.data.param.col1)   //  used for defaultSelectedCol1
     const defaultSelectedCol1 = computed(() => col1Hint.value.indexOf(col1.value))
     const col2Hint = computed(() => {
-        if(props.data.hint?.col2_choices.length === 0) return ['']
+        if(props.data.hint?.col2_choices?.length === 0) return ['']
         return props.data.hint?.col2_choices || ['']
     })
     const col2 = ref(props.data.param.col2)   //  used for defaultSelectedCol2

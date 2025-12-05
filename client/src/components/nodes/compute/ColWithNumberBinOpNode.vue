@@ -75,7 +75,7 @@
     const opUi = ["T + n", "T - n", "n - T", "T * n", "T / n", "n / T", "T ^ n", "n ^ T"]
     const defaultSelectedOP = op.indexOf(props.data.param.op)
     const colHint = computed(() => {
-        if(props.data.hint?.col_choices.length === 0) return ['']
+        if(props.data.hint?.col_choices?.length === 0) return ['']
         return props.data.hint?.col_choices || ['']
     })
     const col = ref(props.data.param.col)   //  used for defaultSelectedCol

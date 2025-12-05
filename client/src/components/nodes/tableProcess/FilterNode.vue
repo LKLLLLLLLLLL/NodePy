@@ -54,7 +54,7 @@
 
     const props = defineProps<NodeProps<FilterNodeData>>()
     const cond_colHint = computed(() => {
-        if(props.data.hint?.cond_col_choices.length === 0) return ['']
+        if(props.data.hint?.cond_col_choices?.length === 0) return ['']
         return props.data.hint?.cond_col_choices || ['']
     })
     const cond_col = ref(props.data.param.cond_col)   //  used for defaultSelectedCond_col
