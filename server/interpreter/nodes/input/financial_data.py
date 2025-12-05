@@ -3,6 +3,7 @@ from typing import Dict, override
 
 from pydantic import PrivateAttr
 
+from server.config import DEFAULT_TIMEZONE
 from server.lib.FinancialDataManager import DataType, Interval
 from server.models.data import Data
 from server.models.exception import (
@@ -52,7 +53,8 @@ class KlineNode(BaseNode):
             )
         if self.start_time is not None:
             try:
-                self._start_time_dt = datetime.fromisoformat(self.start_time)
+                # convert to datetime with default timezone
+                self._start_time_dt = datetime.fromisoformat(self.start_time).astimezone(DEFAULT_TIMEZONE)
             except Exception:
                 raise NodeParameterError(
                     node_id=self.id,
@@ -61,7 +63,7 @@ class KlineNode(BaseNode):
                 )
         if self.end_time is not None:
             try:
-                self._end_time_dt = datetime.fromisoformat(self.end_time)
+                self._end_time_dt = datetime.fromisoformat(self.end_time).astimezone(DEFAULT_TIMEZONE)
             except Exception:
                 raise NodeParameterError(
                     node_id=self.id,
@@ -101,7 +103,7 @@ class KlineNode(BaseNode):
         ]
 
     @override
-    def infer_output_schemas(self, input: Dict[str, Schema]) -> Dict[str, Schema]:
+    def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         output_col_types = {
             "Open Time": ColType.DATETIME,
             "Open": ColType.FLOAT,
@@ -112,14 +114,14 @@ class KlineNode(BaseNode):
         }
         self._col_types = output_col_types
         if self._start_time_dt is None:
-            if "start_time" not in input:
+            if "start_time" not in input_schemas:
                 raise NodeValidationError(
                     node_id=self.id,
                     err_input="start_time",
                     err_msg="start_time must be provided either as parameter or input port.",
                 )
         if self._end_time_dt is None:
-            if "end_time" not in input:
+            if "end_time" not in input_schemas:
                 raise NodeValidationError(
                     node_id=self.id,
                     err_input="end_time",

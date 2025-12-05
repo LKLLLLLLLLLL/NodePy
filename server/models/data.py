@@ -49,7 +49,11 @@ class Table(BaseModel):
                 if not expected == ColType.from_ptype(ser.dtype):
                     raise TypeError(f"Column '{col}' expected type {expected}, got {ser.dtype}")
         else:
-            # if the df has zero rows, it cannot infer column types, we need to specify col_types manually
+            # if the df has zero rows, it cannot infer column types, we need to specify col and col_types manually
+            for col in self.col_types:
+                if col not in self.df.columns:
+                    # append col to dataframe
+                    self.df[col] = Series(dtype=self.col_types[col].to_ptype())
             for col in self.df.columns:
                 if col not in self.col_types:
                     raise TypeError(f"DataFrame has zero rows, missing column type for '{col}'")
@@ -80,18 +84,12 @@ class Table(BaseModel):
         new_col_types[new_col] = ColType.from_ptype(col.dtype)
         return Table(df=new_df, col_types=new_col_types)
     
-    @staticmethod
-    def col_types_from_df(df: DataFrame) -> dict[str, ColType]:
-        col_types = {}
-        for col in df.columns:
-            col_types[col] = ColType.from_ptype(df[col].dtype)
-        return col_types
-    
-    # def to_dict(self) -> dict[str, Any]:
-    #     return {
-    #         "data": self.df.to_dict(orient="list"),
-    #         "col_types": {k: v.value for k, v in self.col_types.items()}
-    #     }
+    # @staticmethod
+    # def col_types_from_df(df: DataFrame) -> dict[str, ColType]:
+    #     col_types = {}
+    #     for col in df.columns:
+    #         col_types[col] = ColType.from_ptype(df[col].dtype)
+    #     return col_types
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> 'Table':
@@ -206,6 +204,8 @@ class Data(BaseModel):
             # Convert datetime columns back to datetime objects
             for col, col_type in col_types.items():
                 if col_type == ColType.DATETIME:
+                    if len(df) == 0:
+                        continue
                     df[col] = df[col].apply(lambda x: datetime.fromisoformat(x) if isinstance(x, str) else x)
             payload = Table(df=df, col_types=col_types)
         elif payload_type == "File":

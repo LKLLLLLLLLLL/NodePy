@@ -47,6 +47,8 @@ class FinancialDataManager:
         logger.info(
             f"Node request for {symbol} from {start_time} to {end_time} with interval {interval}."
         )
+        start_time = start_time.astimezone(timezone.utc)
+        end_time = end_time.astimezone(timezone.utc)
 
         # 1. make sure the symbol is being tracked
         self._ensure_symbol_is_tracked(symbol, data_type)
