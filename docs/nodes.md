@@ -712,7 +712,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **hint：**
 - subset_col_choices: 列名列表，类型为List[str]，用于在UI中为subset_cols参数提供可选值。
-- fill_value_types: 列名列表，类型为List[str]，用于在UI中为fill_value参数提供可选值，其中第i个值对应subset_cols中的第i个列的数据类型，类型字符串可以为"int", "float", "str", "bool", "Datetime"。
+- fill_value_types: 列名列表，类型为List[str]，用于在UI中为fill_value参数提供可选值，其中第i个值对应subset_cols_choices中的第i个列的数据类型，类型字符串可以为"int", "float", "str", "bool", "Datetime"。
 
 #### 5.8 SortNode
 表格排序节点，根据指定的列名列表对表格进行排序操作。

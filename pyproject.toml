@@ -24,6 +24,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
     "stats-code>=0.1.5",
     "taskipy>=1.13.0",
 ]
