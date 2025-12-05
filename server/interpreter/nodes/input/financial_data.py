@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Any, Dict, override
+from typing import Dict, override
 
 from pydantic import PrivateAttr
 
-from server.lib.FinancialDataManager import DATA_TYPE_SOURCE_MAP, DataType, Interval
+from server.lib.FinancialDataManager import DataType, Interval
 from server.models.data import Data
 from server.models.exception import (
     NodeExecutionError,
@@ -171,10 +171,3 @@ class KlineNode(BaseNode):
                 payload=table
             )
         }
-        
-    @override
-    @classmethod
-    def hint(cls, input_schemas: Dict[str, Schema], current_params: Dict) -> Dict[str, Any]:
-        hint = {}
-        hint["data_type_choices"] = [dt for dt in DATA_TYPE_SOURCE_MAP.keys()]
-        return hint

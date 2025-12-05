@@ -218,7 +218,8 @@ class Pattern(BaseModel):
         return self
 
     def __contains__(self, schema: Schema) -> bool:
-        assert isinstance(schema, Schema)
+        if not isinstance(schema, Schema):
+            return NotImplemented
         if schema.type not in self.types:
             return False
         if schema.type == Schema.Type.TABLE and self.table_columns is not None:
@@ -227,6 +228,8 @@ class Pattern(BaseModel):
             for col, col_types in self.table_columns.items():
                 if col not in schema.tab.col_types:
                     return False
+                if col_types == set():
+                    continue # any type is acceptable
                 if schema.tab.col_types[col] not in col_types:
                     return False
         if schema.type == Schema.Type.FILE and self.file_formats is not None:

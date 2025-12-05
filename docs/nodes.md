@@ -166,9 +166,6 @@ K线数据输入节点，可以输出指定时间范围内的金融K线数据表
 **输出：**
 - kline_data: 输出的K线数据表格，类型为Table，包含以下列：
 
-**hint：**
-- data_type_choices: 数据类型列表，类型为List[str]，用于在UI中为data_type参数提供可选值。
-
 ### 2. 计算节点(compute)
 #### 2.1 NumberBinOpNode
 二元数值运算节点，支持对两个数值类型(int或float)的输入进行`ADD`, `SUB`, `MUL`, `DIV`, `POW`五种基本运算。
