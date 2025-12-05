@@ -61,7 +61,10 @@
 
     const props = defineProps<NodeProps<BatchRegexMatchNodeData>>()
     const pattern = ref(props.data.param.pattern)
-    const colHint = computed(() => props.data.hint?.col_choices || [''])
+    const colHint = computed(() => {
+        if(props.data.hint?.col_choices.length === 0) return ['']
+        return props.data.hint?.col_choices || ['']
+    })
     const col = ref(props.data.param.col)   //  used for defaultSelectedCol
     const defaultSelectedCol = computed(() => colHint.value.indexOf(col.value))
     const result_col = ref(props.data.param.result_col || '')

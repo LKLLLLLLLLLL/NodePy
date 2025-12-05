@@ -74,7 +74,10 @@
     const op = ["AND", "OR", "XOR", "NUM_SUB_COL", "COL_SUB_NUM"]
     const opUi = ['B与T', 'B或T', 'B异或T', 'B减T', 'T减B']
     const defaultSelectedOP = op.indexOf(props.data.param.op)
-    const colHint = computed(() => props.data.hint?.col_choices || [''])
+    const colHint = computed(() => {
+        if(props.data.hint?.col_choices.length === 0) return ['']
+        return props.data.hint?.col_choices || ['']
+    })
     const col = ref(props.data.param.col)   //  used for defaultSelectedCol
     const defaultSelectedCol = computed(() => colHint.value.indexOf(col.value))
     const result_col = ref(props.data.param.result_col || '')

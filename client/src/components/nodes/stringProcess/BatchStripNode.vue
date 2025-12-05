@@ -72,7 +72,10 @@
     const props = defineProps<NodeProps<BatchStripNodeData>>()
     const strip_chars = ref(props.data.param.strip_chars || '')
     const strip_charsDisabled = computed(() => hasInputEdge(props.id, 'strip_chars'))
-    const colHint = computed(() => props.data.hint?.col_choices || [''])
+    const colHint = computed(() => {
+        if(props.data.hint?.col_choices.length === 0) return ['']
+        return props.data.hint?.col_choices || ['']
+    })
     const col = ref(props.data.param.col)   //  used for defaultSelectedCol
     const defaultSelectedCol = computed(() => colHint.value.indexOf(col.value))
     const result_col = ref(props.data.param.result_col || '')

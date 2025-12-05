@@ -47,7 +47,10 @@
 
 
     const props = defineProps<NodeProps<DropNaNValueNodeData>>()
-    const subset_colsHint = computed(() => props.data.hint?.subset_col_choices || [''])
+    const subset_colsHint = computed(() => {
+        if(props.data.hint?.subset_col_choices.length === 0) return ['']
+        return props.data.hint?.subset_col_choices || ['']
+    })
     const subset_cols = ref(props.data.param.subset_cols)   //  used for defaultSelectedSubset_cols
     const defaultSelectedSubset_cols = computed(() => {
         const hintArray = subset_colsHint.value

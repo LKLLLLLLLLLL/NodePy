@@ -65,8 +65,14 @@
 
 
     const props = defineProps<NodeProps<PlotNodeData>>()
-    const x_col_hint = computed(() => props.data.hint?.x_col_choices || [''])
-    const y_col_hint = computed(() => props.data.hint?.y_col_choices || [''])
+    const x_col_hint = computed(() => {
+        if(props.data.hint?.x_col_choices.length === 0) return ['']
+        return props.data.hint?.x_col_choices || ['']
+    })
+    const y_col_hint = computed(() => {
+        if(props.data.hint?.y_col_choices.length === 0) return ['']
+        return props.data.hint?.y_col_choices || ['']
+    })
     const x_col = ref(props.data.param.x_col)   // used for x_col_default_selected
     const y_col = ref(props.data.param.y_col)   // used for y_col_default_selected
     const x_col_default_selected = computed(() => x_col_hint.value.indexOf(x_col.value))

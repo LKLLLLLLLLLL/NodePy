@@ -74,7 +74,10 @@
     const op = ["ADD", "COL_SUB_NUM", "NUM_SUB_COL", "MUL", "COL_DIV_NUM", "NUM_DIV_COL", "COL_POW_NUM", "NUM_POW_COL"]
     const opUi = ["T + n", "T - n", "n - T", "T * n", "T / n", "n / T", "T ^ n", "n ^ T"]
     const defaultSelectedOP = op.indexOf(props.data.param.op)
-    const colHint = computed(() => props.data.hint?.col_choices || [''])
+    const colHint = computed(() => {
+        if(props.data.hint?.col_choices.length === 0) return ['']
+        return props.data.hint?.col_choices || ['']
+    })
     const col = ref(props.data.param.col)   //  used for defaultSelectedCol
     const defaultSelectedCol = computed(() => colHint.value.indexOf(col.value))
     const result_col = ref(props.data.param.result_col || '')
