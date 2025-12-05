@@ -46,11 +46,11 @@
             </div>
             <div class="symbol">
                 <div class="param-description" :class="{'node-has-paramerr': symbolHasErr.value}">
-                    金融标符号
+                    代码
                 </div>
                 <NodepyStringInput 
                 v-model="symbol"
-                placeholder="金融标符号"
+                placeholder="代码"
                 @update-value="onUpdateSymbol"
                 class="nodrag"
                 />

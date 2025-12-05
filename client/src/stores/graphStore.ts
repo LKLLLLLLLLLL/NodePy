@@ -138,7 +138,8 @@ export const useGraphStore = defineStore('graph', () => {
           type: 'DateTimeNode',
           data: {
             param: {
-              value: ''
+              value: '',
+              isNow: false
             }
           }
         }

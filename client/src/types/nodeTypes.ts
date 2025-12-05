@@ -112,6 +112,7 @@ export interface RangeNode extends BaseNode<RangeNodeData> {
 
 export interface DateTimeNodeParam {
     value: string
+    isNow: boolean
 }
 export type DateTimeNodeData = BaseData & {
     param: DateTimeNodeParam
@@ -550,7 +551,7 @@ export interface DropNaNValueNode extends BaseNode<DropNaNValueNodeData> {
 export interface FillNaNValueNodeParam {
     subset_cols: string[]
     method: "const" | "ffill" | "bfill"
-    fill_value?: (number | string | boolean)[]
+    fill_value?: number[] | string[] | boolean[]
 }
 export type FillNaNValueNodeData = BaseData & {
     param: FillNaNValueNodeParam

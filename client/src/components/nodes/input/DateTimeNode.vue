@@ -51,7 +51,7 @@
 
     const props = defineProps<NodeProps<DateTimeNodeData>>()
     const value = ref(props.data.param.value)
-    const isNow = ref(false)
+    const isNow = ref(props.data.param.isNow)
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['datetime']?.type || 'default')
     const datetimeHasErr = computed(() => handleOutputError(props.id, 'datetime'))
     const errMsg = ref<string[]>([])
@@ -69,6 +69,7 @@
         }
     }
     const onUpdateIsNow = () => {
+        props.data.param.isNow = isNow.value
         if(isNow.value) {
             props.data.param.value = new Date().toISOString()
         }else {
