@@ -20,6 +20,7 @@ import BoolNode from '../nodes/input/BoolNode.vue'
 import RandomNode from '../nodes/input/RandomNode.vue'
 import RangeNode from '../nodes/input/RangeNode.vue'
 import DateTimeNode from '../nodes/input/DateTimeNode.vue'
+import KlineNode from '../nodes/input/KlineNode.vue'
 import NumberBinOpNode from '../nodes/compute/NumberBinOpNode.vue'
 import BoolBinOpNode from '../nodes/compute/BoolBinOpNode.vue'
 import NumberUnaryOpNode from '../nodes/compute/NumberUnaryOpNode.vue'
@@ -256,6 +257,7 @@ const nodeColor = (node: BaseNode) => {
     case 'RandomNode':
     case 'RangeNode':
     case 'DateTimeNode':
+    case 'KlineNode':
       return nodeCategoryColor.input
     case 'NumberBinOpNode':
     case 'NumberUnaryOpNode':
@@ -404,6 +406,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-DateTimeNode="DateTimeNodeProps">
           <DateTimeNode v-bind="DateTimeNodeProps"/>
+        </template>
+
+        <template #node-KlineNode="KlineNodeProps">
+          <KlineNode v-bind="KlineNodeProps"/>
         </template>
 
         <template #node-NumberBinOpNode="NumberBinOpNodeProps">

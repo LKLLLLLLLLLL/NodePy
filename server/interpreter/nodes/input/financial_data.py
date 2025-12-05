@@ -101,7 +101,7 @@ class KlineNode(BaseNode):
         ]
 
     @override
-    def infer_schema(self, input: Dict[str, Schema]) -> Dict[str, Schema]:
+    def infer_output_schemas(self, input: Dict[str, Schema]) -> Dict[str, Schema]:
         output_col_types = {
             "Open Time": ColType.DATETIME,
             "Open": ColType.FLOAT,

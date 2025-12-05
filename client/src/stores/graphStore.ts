@@ -144,6 +144,21 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedDateTimeNode)
         break
+      case 'KlineNode':
+        const addedKlineNode: Nodetypes.KlineNode = {
+          id,
+          position,
+          type: 'KlineNode',
+          data: {
+            param: {
+              data_type: 'stock',
+              symbol: '',
+              interval: '1m'
+            }
+          }
+        }
+        addNodes(addedKlineNode)
+        break
       case 'NumberBinOpNode':
         const addedNumBinComputeNode: Nodetypes.NumberBinOpNode = {
           id,

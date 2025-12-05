@@ -120,6 +120,23 @@ export interface DateTimeNode extends BaseNode<DateTimeNodeData> {
     type: 'DateTimeNode'
 }
 
+
+export interface KlineNodeParam {
+    data_type: 'stock'|'crypto'
+    symbol: string
+    start_time?: string
+    end_time?: string
+    interval: '1m'|'1h'|'1d'
+}
+export type KlineNodeData = BaseData & {
+    param: KlineNodeParam
+}
+export interface KlineNode extends BaseNode<KlineNodeData> {
+    type: 'KlineNode'
+}
+
+
+
 /**************  Compute Nodes  ****************/
 export const NumBinOpList = ['ADD', 'SUB', 'MUL', 'DIV', 'POW'] as const
 export interface NumberBinOpNodeParam {

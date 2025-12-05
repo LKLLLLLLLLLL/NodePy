@@ -37,6 +37,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '日期时间输入节点',
                 value: 'DateTimeNode'
             },
+            {
+                label: 'K线数据节点',
+                value: 'KlineNode'
+            },
         ]
     },
     {
