@@ -53,6 +53,7 @@ import InsertConstColNode from '../nodes/tableProcess/InsertConstColNode.vue'
 import InsertRangeColNode from '../nodes/tableProcess/InsertRangeColNode.vue'
 import InsertRandomColNode from '../nodes/tableProcess/InsertRandomColNode.vue'
 import FilterNode from '../nodes/tableProcess/FilterNode.vue'
+import DropDuplicatesNode from '../nodes/tableProcess/DropDuplicatesNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -291,6 +292,7 @@ const nodeColor = (node: BaseNode) => {
     case 'InsertRangeColNode':
     case 'InsertRandomColNode':
     case 'FilterNode':
+    case 'DropDuplicatesNode':
       return nodeCategoryColor.table
     case 'UploadNode':
     case 'TableFromFileNode':
@@ -532,6 +534,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-FilterNode="FilterNodeProps">
           <FilterNode v-bind="FilterNodeProps"/>
+        </template>
+
+        <template #node-DropDuplicatesNode="DropDuplicatesNodeProps">
+          <DropDuplicatesNode v-bind="DropDuplicatesNodeProps"/>
         </template>
 
         <template #node-UploadNode="UploadNodeProps">

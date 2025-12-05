@@ -606,6 +606,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedFilterNode)
         break
+      case 'DropDuplicatesNode':
+        const addedDropDuplicatesNode: Nodetypes.DropDuplicatesNode = {
+          id,
+          position,
+          type: 'DropDuplicatesNode',
+          data: {
+            param: {
+              subset_cols: []
+            }
+          }
+        }
+        addNodes(addedDropDuplicatesNode)
+        break
     
       default:
         console.log(type)

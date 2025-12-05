@@ -198,6 +198,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格过滤节点',
                 value: 'FilterNode'
             },
+            {
+                label: '表格去重节点',
+                value: 'DropDuplicatesNode'
+            },
         ]
     },
     {

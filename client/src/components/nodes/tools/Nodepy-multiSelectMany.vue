@@ -1,0 +1,218 @@
+<template>
+    <div
+        class="NodePyMultiSelectManyLayout"
+        ref="root"
+        @click.stop
+        :class="{open}"
+    >
+        <div class="value" :class="{close: !open}" @click.stop="toggle" :style="{height: itemHeight, width: itemWidth}">
+            <span class="description">{{ displayDescription }}</span>
+            <span class="arrow" :class="{open}">
+              <SvgIcon type="mdi" :path="down_path"  />
+            </span>
+        </div>
+
+        <div v-if="open" class="options" @click.stop>
+            <div
+                v-for="(item, idx) in options"
+                class="item"
+                @click.stop="select(idx)"
+                :style="itemStyle"
+                :class="[{selected: selectedIdx.includes(idx) && options[idx]}, {'specialColumn' : isSpecialColumn(item)}]"
+            >   <!-- options[idx] means empty value cannot be accepted-->
+                <span>{{columnValue(item)}}</span>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script lang="ts" setup>
+    import {ref, computed, watchEffect, onBeforeUnmount, watch} from 'vue'
+    import type { PropType } from 'vue'
+    // @ts-ignore
+    import SvgIcon from '@jamescoyle/vue-icon'
+    import { mdiMenuDown } from '@mdi/js'
+
+    const down_path = mdiMenuDown
+
+    const props = defineProps({
+        options: {
+            type: Array as PropType<string[]>,
+            required: true
+        },
+        itemWidth: {
+            type: String,
+            default: '100%'
+        },
+        itemHeight: {
+            type: String,
+            default: '25px'
+        },
+        defaultSelected: {
+            type: Array as PropType<number[]>,
+            default: () => []
+        }
+    })
+    const emit = defineEmits(['selectChange', 'clearSelect'])
+    const root = ref<HTMLElement>()
+    const itemStyle = ref({
+        width: props.itemWidth,
+        height: `calc(${props.itemHeight} - 2px)`  //-2 for the gap between items
+    })
+    const selectedIdx = ref(props.defaultSelected)
+    const open = ref(false)
+    const selectedItem = computed(() => selectedIdx.value.map(idx => props.options[idx]).filter(Boolean))
+    const displayDescription = computed(() => {
+        if(open.value) {
+            return '请选择'
+        }else {
+            if(selectedItem.value.length === 0) {
+                return '请选择'
+            }else {
+                return '已选择' + selectedItem.value.length + '项'
+            }
+        }
+    })
+
+
+    const select = (idx: number) => {
+        if(!props.options[idx])return
+        const id = selectedIdx.value.indexOf(idx)
+        if(id !== -1) {
+            selectedIdx.value.splice(id, 1)
+        }else {
+            selectedIdx.value.push(idx)
+        }
+        emit('selectChange', selectedIdx.value)
+    }
+    const toggle = () => {
+        open.value = !open.value
+    }
+    const clickOutside = (e: MouseEvent) => {
+        if (!root.value!.contains(e.target as Node)) open.value = false
+    }
+    const isSpecialColumn = (item: string | undefined | null) => {
+        switch(item) {
+            case '_no_specified_col':
+            case '_index':
+                return true
+            default:
+                return false
+        }
+    }
+    const columnValue = (item: string | undefined | null) => {
+        switch(item) {
+            case '_no_specified_col':
+                return '不指定列名'
+            case '_index':
+                return '行号'
+            default:
+                return item
+        }
+    }
+
+
+    watchEffect(() => open.value
+        ? document.addEventListener('click', clickOutside, true)
+        : document.removeEventListener('click', clickOutside, true)
+    )
+    watch(() => JSON.stringify(props.options), async (newValue, oldValue) => {
+        await new Promise(resolve => {
+            emit('clearSelect', resolve)    //  if options have changed, the selection should be cleared
+        })
+        selectedIdx.value = props.defaultSelected
+    }, {immediate: false})
+    onBeforeUnmount(() => document.removeEventListener('click', clickOutside, true))
+
+</script>
+
+<style lang="scss" scoped>
+    @use '../../../common/global.scss' as *;
+    @use '../../../common/node.scss' as *;
+    @use './tools.scss' as *;
+    .NodePyMultiSelectManyLayout.open {
+        border-radius: 6px 6px 0 0;
+    }
+    .NodePyMultiSelectManyLayout {
+        @include box-tools-style;
+        position: relative;
+        font-size: $node-description-fontsize;
+        .value {
+            @include tool-item-style;
+            border-radius: 6px 6px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            .description {
+                padding: 0 17px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .arrow {
+                position: absolute;
+                right: 1px;
+                display: flex;
+                align-items: center;
+                color: rgba(0,0,0,0.4);
+                svg {
+                    width: 18px;
+                }
+            }
+            .arrow.open {
+                transform: rotate(180deg);
+            }
+        }
+        .value.close {
+            border-radius: 6px;
+        }
+        .value:hover {
+            @include tool-item-style-hover;
+        }
+        .options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            background: #eee;
+            border-radius: 0 0 6px 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 2px 2px;
+            cursor: pointer;
+            .item {
+                @include tool-item-style;
+                padding: 1px 5px;
+                border-radius: 6px;
+                font-size: 13px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                span {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                &.specialColumn {
+                    color: rgba(0, 0, 0, 0.2);
+                    font-style: italic;
+                    font-size: 11px;
+                }
+            }
+            .item:hover {
+                background: #ddd;
+            }
+            .item.selected {
+                background: $stress-color;
+                color: white;
+            }
+            .item:hover.selected {
+                background: $hover-stress-color;
+                color: white;
+            }
+        }
+    }
+</style>
