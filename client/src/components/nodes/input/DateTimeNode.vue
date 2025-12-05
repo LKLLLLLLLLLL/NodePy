@@ -50,7 +50,11 @@
 
 
     const onUpdateValue = (e: any) => {
-        props.data.param.value = value.value
+        if(value.value.trim().toLowerCase() === 'now') {
+            props.data.param.value = new Date().toISOString()
+        }else {
+            props.data.param.value = value.value
+        }
     }
 
 
