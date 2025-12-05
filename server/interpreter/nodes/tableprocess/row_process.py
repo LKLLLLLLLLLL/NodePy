@@ -171,8 +171,10 @@ class DropDuplicatesNode(BaseNode):
         table_data = input["table"]
         assert isinstance(table_data.payload, Table)
         df = table_data.payload.df
-
-        deduplicated_df = df.drop_duplicates(subset=self.subset_cols)
+        if self.subset_cols == []:
+            deduplicated_df = df.drop_duplicates()
+        else:
+            deduplicated_df = df.drop_duplicates(subset=self.subset_cols)
 
         deduplicated_data = Data(
             payload=Table(
