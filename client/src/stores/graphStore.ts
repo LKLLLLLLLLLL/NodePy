@@ -741,6 +741,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedJoinNode)
         break
+      case 'RenameColNode':
+        const addedRenameColNode: Nodetypes.RenameColNode = {
+          id,
+          position,
+          type: 'RenameColNode',
+          data: {
+            param: {
+              rename_map: {}
+            }
+          }
+        }
+        addNodes(addedRenameColNode)
+        break
     
       default:
         console.log(type)

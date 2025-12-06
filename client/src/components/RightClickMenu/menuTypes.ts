@@ -238,6 +238,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格连接节点',
                 value: 'JoinNode'
             },
+            {
+                label: '表格列重命名节点',
+                value: 'RenameColNode'
+            },
         ]
     },
     {

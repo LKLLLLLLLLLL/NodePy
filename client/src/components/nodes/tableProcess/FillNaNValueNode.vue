@@ -33,7 +33,7 @@
                     class="nodrag"
                 />
             </div>
-            <div class="fill_value" v-if="data.hint?.subset_col_choices && data.param.method === 'const'" v-for="(value, idx) in fill_value"><!-- when the hint is empty, don't show the fill_value to avoid complex errors-->
+            <div class="fill_value" v-if="data.hint?.subset_col_choices && data.param.method === 'const'" v-for="(value, idx) in fill_value" :key="`${data.param.subset_cols[idx]}_${idx}`"><!-- when the hint is empty, don't show the fill_value to avoid complex errors-->
                 <div class="param-description fill_value-description">
                     列名:
                     <span :class="{'special-table-column': isSpecialColumn(data.param.subset_cols[idx])}">
