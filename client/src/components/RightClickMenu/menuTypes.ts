@@ -34,7 +34,7 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'RangeNode'
             },
             {
-                label: '日期时间输入节点',
+                label: '时间输入节点',
                 value: 'DateTimeNode'
             },
             {

@@ -1,6 +1,6 @@
 <template>
     <div class="DateTimeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="input">日期时间输入节点</NodeTitle>
+        <NodeTitle node-category="input">时间输入节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="isNow">
@@ -15,7 +15,7 @@
             </div>
             <div class="value" v-if="!isNow">
                 <div class="param-description" :class="{'node-has-paramerr': valueHasErr.value}">
-                    日期时间(ISO 8601格式)
+                    时间(ISO 8601格式)
                 </div>
                 <NodepyStringInput
                     v-model="value"
@@ -26,7 +26,7 @@
             </div>
             <div class="output-datetime port">
                 <div class="output-port-description">
-                    日期时间输出
+                    时间输出
                 </div>
                 <Handle id="datetime" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': datetimeHasErr}]"/>
             </div>

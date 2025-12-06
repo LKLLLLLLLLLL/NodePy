@@ -76,7 +76,7 @@
                     v-model="value.value"
                     @update-value="onUpdateValue(idx)"
                     class="nodrag"
-                    placeholder="日期时间"
+                    placeholder="时间"
                     v-if="fill_value_types[subset_colsHint.indexOf(data.param.subset_cols[idx])] === 'Datetime'"
                 />
             </div>
@@ -122,7 +122,7 @@
         return selectedArray.map(item => hintArray.indexOf(item)).filter(idx => idx !== -1)
     })
     const method = ["const", "ffill", "bfill"]
-    const methodUi = ['常量', '前向填充', '后向填充']
+    const methodUi = ['常量', '前向', '后向']
     const defaultSelectedMethod = [method.indexOf(props.data.param.method)]
     const fill_value = ref<({value: number|string|boolean})[]|undefined|null|any>(props.data.param.fill_value?.map(value => ({value})) || [])
     const fill_value_types = computed(() => props.data.hint?.fill_value_types)

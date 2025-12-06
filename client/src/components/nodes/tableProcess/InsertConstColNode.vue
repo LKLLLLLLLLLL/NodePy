@@ -61,7 +61,7 @@
 
     const props = defineProps<NodeProps<InsertConstColNodeData>>()
     const col_type = ["int", "float", "bool", "str", "Datetime"]
-    const col_typeUi = ['整数', '浮点数', '布尔值', '字符串', '日期时间']
+    const col_typeUi = ['整数', '浮点数', '布尔值', '字符串', '时间']
     const defaultSelectedCol_type = col_type.indexOf(props.data.param.col_type)
     const col_name = ref(props.data.param.col_name)
     const table_type = computed(() => getInputType(props.id, 'table'))

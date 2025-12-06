@@ -72,7 +72,7 @@
 
     const props = defineProps<NodeProps<RangeNodeData>>()
     const col_type = ['int', 'float', 'Datetime']
-    const col_typeChinese = ['整数', '浮点数', '日期']
+    const col_typeChinese = ['整数', '浮点数', '时间']
     const defaultSelected = [col_type.indexOf(props.data.param.col_type)]
     const col_name = ref(props.data.param.col_name)
     const start_type = computed(() => getInputType(props.id, 'start'))

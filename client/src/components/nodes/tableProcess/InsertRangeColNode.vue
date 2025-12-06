@@ -31,7 +31,7 @@
                 <div class="param-description" :class="{'node-has-paramerr': col_typeHasErr.value}">
                     列的数据类型
                 </div>
-                <NodepySelectMany
+                <NodepySelectFew
                     :options="col_typeUi"
                     :default-selected="defaultSelectedCol_type"
                     @select-change="onSelectChangeCol_type"
@@ -59,7 +59,7 @@
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
-    import NodepySelectMany from '../tools/Nodepy-selectMany.vue'
+    import NodepySelectFew from '../tools/Nodepy-selectFew.vue'
     import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
     import { dataTypeColor } from '@/types/nodeTypes'
     import type { InsertRangeColNodeData } from '@/types/nodeTypes'
@@ -67,8 +67,8 @@
 
     const props = defineProps<NodeProps<InsertRangeColNodeData>>()
     const col_type = ["int", "float", "Datetime"]
-    const col_typeUi = ['整数', '浮点数', '日期时间']
-    const defaultSelectedCol_type = col_type.indexOf(props.data.param.col_type)
+    const col_typeUi = ['整数', '浮点数', '时间']
+    const defaultSelectedCol_type = [col_type.indexOf(props.data.param.col_type)]
     const col_name = ref(props.data.param.col_name)
     const table_type = computed(() => getInputType(props.id, 'table'))
     const start_type = computed(() => getInputType(props.id, 'start'))
@@ -112,7 +112,7 @@
         props.data.param.col_name = col_name.value
     }
     const onSelectChangeCol_type = (e: any) => {
-        const selected_col_type = col_type[e] as 'int'|'float'|'Datetime'
+        const selected_col_type = col_type[e[0]] as 'int'|'float'|'Datetime'
         props.data.param.col_type = selected_col_type
     }
 

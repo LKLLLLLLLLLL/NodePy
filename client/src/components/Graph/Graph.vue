@@ -161,7 +161,6 @@ watch(() => graphStore.currentNode?.data, (newData, oldData) => {
     const dataOut = newData.data_out;
     const dataOutDict = resultStore.convertDataOutToDict(dataOut);
     resultStore.currentTypeDataID = dataOutDict;
-    console.log("@@@@@currentTypeDataID updated due to node data change", resultStore.currentTypeDataID);
   }
   else{
     resultStore.currentTypeDataID = resultStore.default_typedataid
