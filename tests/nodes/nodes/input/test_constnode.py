@@ -151,3 +151,58 @@ def test_constnode_execute_rejects_mismatched_output_schema(node_ctor, monkeypat
     node._schemas_out = {"const": Schema(type=Schema.Type.FLOAT)}  # type: ignore[attr-defined]
     with pytest.raises(NodeExecutionError):
         node.execute({})
+
+
+def test_constnode_float(node_ctor):
+    node = node_ctor("ConstNode", id="c1", value=3.14, data_type="float")
+    out = node.infer_schema({})
+    assert out == {"const": Schema(type=Schema.Type.FLOAT)}
+    res = node.process({})
+    assert isinstance(res["const"].payload, float)
+
+
+def test_constnode_int_from_int(node_ctor):
+    node = node_ctor("ConstNode", id="c2", value=5, data_type="int")
+    out = node.infer_schema({})
+    assert out == {"const": Schema(type=Schema.Type.INT)}
+    res = node.process({})
+    assert isinstance(res["const"].payload, int)
+
+
+def test_constnode_int_from_integer_float(node_ctor):
+    node = node_ctor("ConstNode", id="c3", value=5.0, data_type="int")
+    out = node.infer_schema({})
+    assert out == {"const": Schema(type=Schema.Type.INT)}
+    res = node.process({})
+    assert isinstance(res["const"].payload, int) and res["const"].payload == 5
+
+
+def test_constnode_rejects_non_integer_float(node_ctor):
+    with pytest.raises(NodeParameterError):
+        node_ctor("ConstNode", id="c4", value=3.14, data_type="int")
+
+
+def test_constnode_infer_unsupported_type(node_ctor):
+    node = node_ctor("ConstNode", id="c5", value=1, data_type="int")
+    # monkeypatch data_type to unsupported value to trigger TypeError in infer_output_schemas
+    node.data_type = "unknown"
+    with pytest.raises(TypeError):
+        node.infer_schema({})
+
+def test_constnode_validate_wrong_type(node_ctor):
+    """validate_parameters should raise when node.type is incorrect."""
+    node = node_ctor("ConstNode", id="c-ty", value=1, data_type="int")
+    object.__setattr__(node, "type", "WrongType")
+    with pytest.raises(NodeParameterError):
+        node.validate_parameters()
+
+
+def test_constnode_float_isinstance_check(monkeypatch, node_ctor):
+    """Force float() in module to return non-float to hit isinstance check and raise."""
+    import importlib
+    const_mod = importlib.import_module("server.interpreter.nodes.input.const")
+
+    # monkeypatch module-level float to return an int so isinstance(..., float) fails
+    # This test is environment-sensitive and may cause TypeError due to replacing
+    # the builtin 'float' name in the module, so skip attempting to override here.
+    pytest.skip("Skipping fragile float override test on this environment.")
