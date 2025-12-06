@@ -608,7 +608,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 在表格中插入常量列节点。
 
 **参数：**
-- col_name: 列名，类型为str。
+- col_name: 列名，类型为str，可以为空，如果为空则生成默认列名。
 - col_type: 列的数据类型，类型为str，取值为"int", "float", "bool", "str", "Datetime"。
 
 **输入：**
@@ -622,7 +622,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 在表格中插入范围列节点。
 
 **参数：**
-- col_name: 列名，类型为str。
+- col_name: 列名，类型为str，可以为空，如果为空则生成默认列名。
 - col_type: 列的数据类型，类型为str，取值为"int", "float", "Datetime"。
 
 **输入：**
@@ -639,7 +639,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 在表格中插入随机列节点。
 
 **参数：**
-- col_name: 列名，类型为str。
+- col_name: 列名，类型为str，可以为空，如果为空则生成默认列名。
 - col_type: 列的数据类型，类型为str，取值为"int", "float"。
 
 **输入：**

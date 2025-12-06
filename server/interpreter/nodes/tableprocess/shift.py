@@ -78,7 +78,7 @@ class ShiftNode(BaseNode):
         return input_schemas
 
     @override
-    def execute(self, input: Dict[str, Data]) -> Dict[str, Data]:
+    def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         input_table_data = input["table"]
         assert isinstance(input_table_data.payload, Table)
         assert self._result_col_type is not None

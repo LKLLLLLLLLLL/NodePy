@@ -34,6 +34,12 @@ class FilterNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
             )
+        if self.cond_col.strip() == "":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="cond_col",
+                err_msg="Condition column cannot be empty.",
+            )
         return
 
     @override
@@ -105,14 +111,16 @@ class FilterNode(BaseNode):
     def hint(
         cls, input_schemas: Dict[str, Schema], current_params: Dict
     ) -> Dict[str, Any]:
-        cond_col_choices = []
+        hint = {}
         if "table" in input_schemas:
+            cond_col_choices = []
             table_schema = input_schemas["table"]
             assert table_schema.tab is not None
             for col, type in table_schema.tab.col_types.items():
                 if type == ColType.BOOL:
                     cond_col_choices.append(col)
-        return {"cond_col_choices": cond_col_choices}
+            hint["cond_col_choices"] = cond_col_choices
+        return hint
 
 
 @register_node()
@@ -523,7 +531,7 @@ class MergeNode(BaseNode):
             payload=Table(
                 df=merged_df,
                 col_types=table_data_1.payload.col_types
-            )
+            ).regenerate_index()
         )
 
         return {"merged_table": merged_data}

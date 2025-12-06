@@ -1,5 +1,6 @@
-from typing import Dict, Literal, override
 from datetime import datetime, timedelta
+from typing import Dict, Literal, override
+
 from server.models.data import Data, Table
 from server.models.exception import (
     NodeExecutionError,
@@ -11,6 +12,7 @@ from server.models.schema import (
     Pattern,
     Schema,
     check_no_illegal_cols,
+    generate_default_col_name,
 )
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
@@ -24,7 +26,7 @@ class InsertConstColNode(BaseNode):
     Insert a constant value column into the input table.
     """
     
-    col_name: str
+    col_name: str | None
     col_type: ColType
 
     @override
@@ -34,6 +36,13 @@ class InsertConstColNode(BaseNode):
                 node_id=self.id,
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
+            )
+        if self.col_name is not None and self.col_name.strip() == '':
+            self.col_name = None
+        if self.col_name is None:
+            self.col_name = generate_default_col_name(
+                id=self.id,
+                annotation="_const"
             )
         if not check_no_illegal_cols([self.col_name]):
             raise NodeParameterError(
@@ -79,6 +88,7 @@ class InsertConstColNode(BaseNode):
                 err_msg="Input const_value schema type does not match specified col_type.",
             )
         input_table_schema = input_schemas["table"]
+        assert self.col_name is not None
         return {
             "table": input_table_schema.append_col(self.col_name, self.col_type)
         }
@@ -99,6 +109,7 @@ class InsertConstColNode(BaseNode):
         const_series = pandas.Series([const_value] * num_rows)
 
         # append the new column to the table
+        assert self.col_name is not None
         new_table = input_table._append_col(self.col_name, const_series)
 
         return {
@@ -113,7 +124,7 @@ class InsertRangeColNode(BaseNode):
     The range parameters can be specified by inputs.
     """
     
-    col_name: str
+    col_name: str | None
     col_type: Literal["int", "float", "Datetime"]
 
     @override
@@ -123,6 +134,13 @@ class InsertRangeColNode(BaseNode):
                 node_id=self.id,
                 err_param_key="col_type",
                 err_msg="Node type and col_type parameter mismatch.",
+            )
+        if self.col_name is not None and self.col_name.strip() == '':
+            self.col_name = None
+        if self.col_name is None:
+            self.col_name = generate_default_col_name(
+                id=self.id,
+                annotation="_range"
             )
         if not check_no_illegal_cols([self.col_name]):
             raise NodeParameterError(
@@ -183,6 +201,7 @@ class InsertRangeColNode(BaseNode):
                     err_msg="Input step schema type does not match specified col_type.",
                 )
         input_table_schema = input_schemas["table"]
+        assert self.col_name is not None
         return {
             "table": input_table_schema.append_col(self.col_name, ColType(self.col_type))
         }
@@ -243,6 +262,7 @@ class InsertRangeColNode(BaseNode):
 
         range_series = pandas.Series(data_rows)
 
+        assert self.col_name is not None
         new_table = input_table._append_col(self.col_name, range_series)
 
         return {
@@ -256,7 +276,7 @@ class InsertRandomColNode(BaseNode):
     The random values are generated uniformly between min_value and max_value.
     """
     
-    col_name: str
+    col_name: str | None
     col_type: Literal["int", "float"]
 
     @override
@@ -266,6 +286,13 @@ class InsertRandomColNode(BaseNode):
                 node_id=self.id,
                 err_param_key="col_type",
                 err_msg="Node type and col_type parameter mismatch.",
+            )
+        if self.col_name is not None and self.col_name.strip() == '':
+            self.col_name = None
+        if self.col_name is None:
+            self.col_name = generate_default_col_name(
+                id=self.id,
+                annotation="_random"
             )
         if not check_no_illegal_cols([self.col_name]):
             raise NodeParameterError(
@@ -324,6 +351,7 @@ class InsertRandomColNode(BaseNode):
                 err_msg="Input max_value schema type does not match specified col_type.",
             )
         input_table_schema = input_schemas["table"]
+        assert self.col_name is not None
         return {
             "table": input_table_schema.append_col(self.col_name, ColType(self.col_type))
         }
@@ -364,6 +392,7 @@ class InsertRandomColNode(BaseNode):
                 err_msg="Unsupported col_type for InsertRandomColNode.",
             )
 
+        assert self.col_name is not None
         new_table = input_table._append_col(self.col_name, data_rows)
 
         return {

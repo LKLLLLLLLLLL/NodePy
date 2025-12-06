@@ -71,6 +71,11 @@ class Table(BaseModel):
             col_types=self.col_types
         )
 
+    def regenerate_index(self) -> 'Table':
+        new_df = self.df.copy()
+        new_df[self.INDEX_COL] = range(len(new_df))
+        return Table(df=new_df, col_types=self.col_types)
+
     def _append_col(self, new_col: str, col: Series) -> 'Table':
         if new_col in self.col_types:
             raise ValueError(f"Cannot add column '{new_col}': already exists.")
@@ -84,12 +89,12 @@ class Table(BaseModel):
         new_col_types[new_col] = ColType.from_ptype(col.dtype)
         return Table(df=new_df, col_types=new_col_types)
     
-    # @staticmethod
-    # def col_types_from_df(df: DataFrame) -> dict[str, ColType]:
-    #     col_types = {}
-    #     for col in df.columns:
-    #         col_types[col] = ColType.from_ptype(df[col].dtype)
-    #     return col_types
+    @staticmethod
+    def col_types_from_df(df: DataFrame) -> dict[str, ColType]:
+        col_types = {}
+        for col in df.columns:
+            col_types[col] = ColType.from_ptype(df[col].dtype)
+        return col_types
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> 'Table':

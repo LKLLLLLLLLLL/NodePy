@@ -76,7 +76,7 @@ class SortNode(BaseNode):
             payload=Table(
                 df=sorted_df,
                 col_types=table_data.payload.col_types
-            )
+            ).regenerate_index()
         )
 
         return {

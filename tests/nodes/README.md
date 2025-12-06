@@ -62,7 +62,7 @@ schema = make_schema("int")
 d = make_data(42)
 ```
 
-## 为更多节点写测试（建议流程）
+## 为更多节点写测试
 
 1. 如果某些节点依赖更复杂的外部行为，先在 `tests/nodes/conftest.py` 中为对应依赖注入更丰富的 fake 实现（例如模拟 `FileManager.read_sync` 返回特定文件内容）。
 2. 使用 `node_ctor` 构造节点：
@@ -83,10 +83,11 @@ out_schema = node.infer_schema(input_schemas)
 outputs = node.execute({"in1": Data(payload=...), ...})
 ```
 
-## 将需要真实外部服务的测试标记为 integration
-
-如果某些测试必须访问 MinIO/Redis/数据库，请：
-
-1. 在测试上添加 `@pytest.mark.integration` 标记。
-2. 在有 Docker 的环境下运行所有测试，例如先启动 `uv run task dev`，然后运行 `pytest`。
-
+## 测试要求
+- 编写测试用例的参考应为 `docs/nodes.md` 中的节点定义与说明，最好不要参考节点实现细节，如节点的定义文件。
+- 所有测试文件按照分类放到 `tests/nodes/nodes/<category>/test_<nodename>.py`，确保一个节点一个文件。
+- 每个节点都应该有对应的测试文件。
+- 每个节点的测试：
+  - 至少包含四个阶段 (Construction, Hint, Static Analysis, Execution) 的测试 (如果某个节点不支持hint阶段，可省略该阶段测试)。
+  - 每个阶段应包含2个及以上的正常情况测试和3个及以上的异常情况测试。
+- 对应节点定义文件的测试覆盖率不低于90%。
