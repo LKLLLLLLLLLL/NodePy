@@ -9,31 +9,26 @@
                 </div>
                 <Handle id="table" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': inputTableHasErr.value}]"/>
             </div>
-            <div class="sort_cols">
-                <div class="param-description" :class="{'node-has-paramerr': sort_colsHasErr.value}">
+            <div class="sort_col">
+                <div class="param-description" :class="{'node-has-paramerr': sort_colHasErr.value}">
                     排序列名
                 </div>
-                <NodepyMultiSelectMany
-                    :options="sort_colsHint"
-                    :default-selected="defaultSelectedSort_cols"
-                    @select-change="onSelectChangeSort_cols"
-                    @clear-select="clearSelectSort_cols"
+                <NodepySelectMany
+                    :options="sort_colHint"
+                    :default-selected="defaultSelectedSort_col"
+                    @select-change="onSelectChangeSort_col"
+                    @clear-select="clearSelectSort_col"
                     class="nodrag"
                 />
             </div>
-            <div class="ascending" v-for="(value, idx) in ascending">
+            <div class="ascending">
                 <NodepyBoolValue
-                    v-model="value.value"
-                    @update-value="onUpdateValue(idx)"
+                    v-model="ascending"
+                    @update-value="onUpdateAscending"
                     width="20px"
                     height="20px"
                 >
-                    <div class="ascending-item">
-                        是否升序
-                        <span :class="{'special-table-column': isSpecialColumn(data.param.sort_cols[idx])}">
-                            {{displayColumnName(data.param.sort_cols[idx])}}
-                        </span>
-                    </div>
+                    升序
                 </NodepyBoolValue>
             </div>
             <div class="output-sorted_table port">
@@ -57,30 +52,25 @@
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
-    import NodepyMultiSelectMany from '../tools/Nodepy-multiSelectMany.vue'
+    import NodepySelectMany from '../tools/Nodepy-selectMany.vue'
     import NodepyBoolValue from '../tools/Nodepy-boolValue.vue'
-    import { displayColumnName, isSpecialColumn } from '../tableColumnDisplay'
     import type { SortNodeData } from '@/types/nodeTypes'
 
 
     const props = defineProps<NodeProps<SortNodeData>>()
-    const sort_colsHint = computed(() => {
+    const sort_colHint = computed(() => {
         if(props.data.hint?.sort_col_choices?.length === 0) return ['']
         return props.data.hint?.sort_col_choices || ['']
     })
-    const sort_cols = ref(props.data.param.sort_cols)   //  used for defaultSelectedSort_cols
-    const defaultSelectedSort_cols = computed(() => {
-        const hintArray = sort_colsHint.value
-        const selectedArray = sort_cols.value
-        return selectedArray.map(item => hintArray.indexOf(item)).filter(idx => idx !== -1)
-    })
-    const ascending = ref<{value: boolean}[]>(props.data.param.ascending.map(value => ({value})))
+    const sort_col = ref(props.data.param.sort_col)   //  used for defaultSelectedSort_col
+    const defaultSelectedSort_col = computed(() => sort_colHint.value.indexOf(sort_col.value))
+    const ascending = ref(props.data.param.ascending)
     const table_type = computed(() => getInputType(props.id, 'table'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['sorted_table']?.type || 'default')
     const sorted_tableHasErr = computed(() => handleOutputError(props.id, 'sorted_table'))
     const errMsg = ref<string[]>([])
-    const sort_colsHasErr = ref({
-        id: 'sort_cols',
+    const sort_colHasErr = ref({
+        id: 'sort_col',
         value: false
     })
     const inputTableHasErr = ref({
@@ -89,27 +79,23 @@
     })
 
 
-    const onSelectChangeSort_cols = (e: any) => {
-        props.data.param.sort_cols = e.map((idx: number) => sort_colsHint.value[idx])
-        ascending.value = e.map(() => ({value: true}))
-        props.data.param.ascending = ascending.value.map(obj => obj.value)
+    const onSelectChangeSort_col = (e: any) => {
+        props.data.param.sort_col = sort_colHint.value[e]
     }
-    const clearSelectSort_cols = (resolve: any) => {
-        props.data.param.sort_cols = []
-        sort_cols.value = props.data.param.sort_cols
-        ascending.value = []
-        props.data.param.ascending = []
+    const clearSelectSort_col = (resolve: any) => {
+        props.data.param.sort_col = ''
+        sort_col.value = props.data.param.sort_col
         resolve()
     }
-    const onUpdateValue = (idx: number) => {
-        props.data.param.ascending[idx] = ascending.value[idx]!.value
+    const onUpdateAscending = () => {
+        props.data.param.ascending = ascending.value
     }
 
 
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
-        handleParamError(props.data.error, errMsg, sort_colsHasErr)
+        handleParamError(props.data.error, errMsg, sort_colHasErr)
         handleValidationError(props.id, props.data.error, errMsg, inputTableHasErr)
     }, {immediate: true})
 
@@ -126,29 +112,10 @@
             .input-table {
                 margin-bottom: $node-margin;
             }
-            .sort_cols, .ascending {
+            .sort_col, .ascending {
                 padding: 0 $node-padding-hor;
                 margin-bottom: $node-margin;
             }
-            .ascending {
-                display: flex;
-                align-items: center;
-                :deep(.NodePyBoolValueLayout) {
-                    flex: 1;
-                    min-width: 0;
-                    .label {
-                        flex: 1;
-                        min-width: 0;
-                        .ascending-item {
-                            display: block;
-                            width: 100%;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                        }
-                    }
-                }
-            }   // display '...' when the text is too long
         }
     }
     .all-handle-color {

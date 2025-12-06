@@ -214,10 +214,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格缺失值填充节点',
                 value: 'FillNaNValueNode'
             },
-            // {
-            //     label: '表格排序节点',
-            //     value: 'SortNode'
-            // },
+            {
+                label: '表格排序节点',
+                value: 'SortNode'
+            },
         ]
     },
     {
