@@ -242,6 +242,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格列重命名节点',
                 value: 'RenameColNode'
             },
+            {
+                label: '表格列移动节点',
+                value: 'ShiftNode'
+            },
         ]
     },
     {

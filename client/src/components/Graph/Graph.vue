@@ -64,6 +64,7 @@ import TableSliceNode from '../nodes/tableProcess/TableSliceNode.vue'
 import SelectColNode from '../nodes/tableProcess/SelectColNode.vue'
 import JoinNode from '../nodes/tableProcess/JoinNode.vue'
 import RenameColNode from '../nodes/tableProcess/RenameColNode.vue'
+import ShiftNode from '../nodes/tableProcess/ShiftNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -310,6 +311,7 @@ const nodeColor = (node: BaseNode) => {
     case 'SelectColNode':
     case 'JoinNode':
     case 'RenameColNode':
+    case 'ShiftNode':
       return nodeCategoryColor.table
     case 'UploadNode':
     case 'TableFromFileNode':
@@ -595,6 +597,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-RenameColNode="RenameColNodeProps">
           <RenameColNode v-bind="RenameColNodeProps"/>
+        </template>
+
+        <template #node-ShiftNode="ShiftNodeProps">
+          <ShiftNode v-bind="ShiftNodeProps"/>
         </template>
 
         <template #node-UploadNode="UploadNodeProps">

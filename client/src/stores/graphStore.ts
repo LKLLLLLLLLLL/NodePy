@@ -754,6 +754,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedRenameColNode)
         break
+      case 'ShiftNode':
+        const addedShiftNode: Nodetypes.ShiftNode = {
+          id,
+          position,
+          type: 'ShiftNode',
+          data: {
+            param: {
+              col: '',
+              periods: 0
+            }
+          }
+        }
+        addNodes(addedShiftNode)
+        break
     
       default:
         console.log(type)
