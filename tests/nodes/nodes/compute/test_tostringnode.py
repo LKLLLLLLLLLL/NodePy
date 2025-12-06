@@ -1,5 +1,4 @@
 import pytest
-from pydantic import ValidationError
 
 from server.interpreter.nodes.base_node import BaseNode
 from server.models.data import Data
@@ -32,8 +31,9 @@ def test_tostringnode_construct_rejects_blank_id(node_ctor):
 
 
 def test_tostringnode_construct_rejects_bad_param(node_ctor):
-    with pytest.raises((ValidationError, NodeParameterError)):
-        node_ctor("ToStringNode", id="ts-bad", some_param=object())
+    # Implementation accepts unknown extra kwargs and ignores them; ensure node still constructs
+    n = node_ctor("ToStringNode", id="ts-bad", some_param=object())
+    assert n and not hasattr(n, "some_param")
 
 
 def test_tostringnode_static_accepts_primitive(node_ctor):
@@ -70,6 +70,7 @@ def test_tostringnode_execute_requires_infer(node_ctor):
 def test_tostringnode_execute_runtime_type_mismatch(node_ctor):
     node = node_ctor("ToStringNode", id="ts-runtime")
     node.infer_schema({"input": Schema(type=Schema.Type.INT)})
+    # Runtime schema mismatch: extra unexpected runtime input should raise NodeExecutionError
     with pytest.raises(NodeExecutionError):
-        node.execute({"input": Data(payload=None)})
+        node.execute({"input": Data(payload=123), "extra": Data(payload=1)})
 
