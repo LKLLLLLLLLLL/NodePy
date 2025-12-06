@@ -713,6 +713,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedTableSliceNode)
         break
+      case 'SelectColNode':
+        const addedSelectColNode: Nodetypes.SelectColNode = {
+          id,
+          position,
+          type: 'SelectColNode',
+          data: {
+            param: {
+              selected_cols: []
+            }
+          }
+        }
+        addNodes(addedSelectColNode)
+        break
     
       default:
         console.log(type)

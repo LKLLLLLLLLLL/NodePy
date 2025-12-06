@@ -230,6 +230,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格切片节点',
                 value: 'TableSliceNode'
             },
+            {
+                label: '表格列选择节点',
+                value: 'SelectColNode'
+            },
         ]
     },
     {

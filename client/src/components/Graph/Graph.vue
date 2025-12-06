@@ -61,6 +61,7 @@ import SortNode from '../nodes/tableProcess/SortNode.vue'
 import GroupNode from '../nodes/tableProcess/GroupNode.vue'
 import MergeNode from '../nodes/tableProcess/MergeNode.vue'
 import TableSliceNode from '../nodes/tableProcess/TableSliceNode.vue'
+import SelectColNode from '../nodes/tableProcess/SelectColNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -304,6 +305,7 @@ const nodeColor = (node: BaseNode) => {
     case 'GroupNode':
     case 'MergeNode':
     case 'TableSliceNode':
+    case 'SelectColNode':
       return nodeCategoryColor.table
     case 'UploadNode':
     case 'TableFromFileNode':
@@ -577,6 +579,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-TableSliceNode="TableSliceNodeProps">
           <TableSliceNode v-bind="TableSliceNodeProps"/>
+        </template>
+
+        <template #node-SelectColNode="SelectColNodeProps">
+          <SelectColNode v-bind="SelectColNodeProps"/>
         </template>
 
         <template #node-UploadNode="UploadNodeProps">
