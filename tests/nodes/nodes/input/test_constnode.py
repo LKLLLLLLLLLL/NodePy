@@ -200,7 +200,7 @@ def test_constnode_validate_wrong_type(node_ctor):
 def test_constnode_float_isinstance_check(monkeypatch, node_ctor):
     """Force float() in module to return non-float to hit isinstance check and raise."""
     import importlib
-    const_mod = importlib.import_module("server.interpreter.nodes.input.const")
+    importlib.import_module("server.interpreter.nodes.input.const")
 
     # monkeypatch module-level float to return an int so isinstance(..., float) fails
     # This test is environment-sensitive and may cause TypeError due to replacing

@@ -73,3 +73,21 @@ def test_boolbinop_execute_runtime_type_error(node_ctor):
     with pytest.raises(NodeExecutionError):
         node.execute({"x": Data(payload=True), "y": Data(payload=1)})
 
+
+def test_boolbinop_unknown_op_runtime(node_ctor):
+    node = node_ctor("BoolBinOpNode", id="bb-runtime-bad", op="AND")
+    node.infer_schema({"x": Schema(type=Schema.Type.BOOL), "y": Schema(type=Schema.Type.BOOL)})
+    node.op = "UNKNOWN"
+    with pytest.raises(NodeExecutionError):
+        node.process({"x": Data(payload=True), "y": Data(payload=False)})
+
+
+def test_boolbinop_other_ops(node_ctor):
+    node = node_ctor("BoolBinOpNode", id="bb-or", op="OR")
+    node.infer_schema({"x": Schema(type=Schema.Type.BOOL), "y": Schema(type=Schema.Type.BOOL)})
+    assert node.process({"x": Data(payload=False), "y": Data(payload=True)})["result"].payload is True
+    node.op = "XOR"
+    assert node.process({"x": Data(payload=True), "y": Data(payload=False)})["result"].payload is True
+    node.op = "SUB"
+    assert node.process({"x": Data(payload=True), "y": Data(payload=False)})["result"].payload is True
+

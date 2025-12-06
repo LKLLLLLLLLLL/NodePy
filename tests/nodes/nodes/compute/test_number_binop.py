@@ -169,3 +169,25 @@ def test_numberbinop_execute_pow_returns_float(node_ctor):
     node.infer_schema({"x": Schema(type=Schema.Type.INT), "y": Schema(type=Schema.Type.INT)})
     out = node.process({"x": Data(payload=2), "y": Data(payload=3)})
     assert isinstance(out["result"].payload, float)
+
+
+def test_numberbinop_unknown_op_runtime(node_ctor):
+    node = node_ctor("NumberBinOpNode", id="nb-runtime-bad", op="ADD")
+    node.infer_schema({"x": Schema(type=Schema.Type.INT), "y": Schema(type=Schema.Type.INT)})
+    # force an unsupported op at runtime
+    node.op = "BADOP"
+    with pytest.raises(NodeExecutionError):
+        node.process({"x": Data(payload=1), "y": Data(payload=2)})
+
+
+def test_numberbinop_div_ints_returns_float_schema(node_ctor):
+    node = node_ctor("NumberBinOpNode", id="nb-div-int", op="DIV")
+    out = node.infer_schema({"x": Schema(type=Schema.Type.INT), "y": Schema(type=Schema.Type.INT)})
+    assert out == {"result": Schema(type=Schema.Type.FLOAT)}
+
+
+def test_numberbinop_execute_div(node_ctor):
+    node = node_ctor("NumberBinOpNode", id="nb-div-good", op="DIV")
+    node.infer_schema({"x": Schema(type=Schema.Type.INT), "y": Schema(type=Schema.Type.INT)})
+    out = node.process({"x": Data(payload=5), "y": Data(payload=2)})
+    assert isinstance(out["result"].payload, float)

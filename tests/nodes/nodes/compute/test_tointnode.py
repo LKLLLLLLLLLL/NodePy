@@ -89,3 +89,19 @@ def test_toint_execute_bad_runtime_type(node_ctor):
     bad_payload: Any = object()
     with pytest.raises(ValidationError):
         Data(payload=bad_payload)
+
+
+def test_toint_invalid_method_raises(node_ctor):
+    node = node_ctor("ToIntNode", id="tint-bad", method="FLOOR")
+    node.infer_schema({"input": Schema(type=Schema.Type.FLOAT)})
+    # force invalid method
+    node.method = "BAD"
+    with pytest.raises(NodeExecutionError):
+        node.process({"input": Data(payload=3.14)})
+
+
+def test_toint_string_parse_fallback_float(node_ctor):
+    node = node_ctor("ToIntNode", id="tint-str", method="FLOOR")
+    node.infer_schema({"input": Schema(type=Schema.Type.STR)})
+    out = node.process({"input": Data(payload="3.9")})
+    assert out["output"].payload == 3

@@ -42,3 +42,25 @@ def test_primitivecompare_hint_negative(node_ctor):
     with pytest.raises(AssertionError):
         hint = BaseNode.get_hint("PrimitiveCompareNode", {"x": Schema(type=Schema.Type.INT), "y": Schema(type=Schema.Type.INT)}, {})
         assert hint
+
+
+def test_primitivecompare_unknown_op_runtime(node_ctor):
+    node = node_ctor("PrimitiveCompareNode", id="pc-runtime", op="EQ")
+    node.infer_schema({"x": Schema(type=Schema.Type.INT), "y": Schema(type=Schema.Type.INT)})
+    node.op = "BAD"
+    with pytest.raises(NodeExecutionError):
+        node.process({"x": Data(payload=1), "y": Data(payload=1)})
+
+
+def test_primitivecompare_other_ops(node_ctor):
+    node = node_ctor("PrimitiveCompareNode", id="pc-ops", op="GT")
+    node.infer_schema({"x": Schema(type=Schema.Type.INT), "y": Schema(type=Schema.Type.INT)})
+    assert node.process({"x": Data(payload=2), "y": Data(payload=1)})["result"].payload is True
+    node.op = "LT"
+    assert node.process({"x": Data(payload=1), "y": Data(payload=2)})["result"].payload is True
+    node.op = "GTE"
+    assert node.process({"x": Data(payload=2), "y": Data(payload=2)})["result"].payload is True
+    node.op = "LTE"
+    assert node.process({"x": Data(payload=2), "y": Data(payload=2)})["result"].payload is True
+    node.op = "NEQ"
+    assert node.process({"x": Data(payload=2), "y": Data(payload=3)})["result"].payload is True

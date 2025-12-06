@@ -42,3 +42,11 @@ def test_numberunaryop_rejects_non_number_static(node_ctor):
     node = node_ctor("NumberUnaryOpNode", id="nu2", op="NEG")
     with pytest.raises(NodeValidationError):
         node.infer_schema({"x": Schema(type=Schema.Type.STR)})
+
+
+def test_numberunary_unknown_op_runtime(node_ctor):
+    node = node_ctor("NumberUnaryOpNode", id="nu-runtime-bad", op="NEG")
+    node.infer_schema({"x": Schema(type=Schema.Type.INT)})
+    node.op = "BAD"
+    with pytest.raises(NodeExecutionError):
+        node.process({"x": Data(payload=3)})
