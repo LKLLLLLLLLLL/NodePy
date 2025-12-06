@@ -226,6 +226,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格合并节点',
                 value: 'MergeNode'
             },
+            {
+                label: '表格切片节点',
+                value: 'TableSliceNode'
+            },
         ]
     },
     {

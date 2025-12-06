@@ -702,6 +702,17 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedMergeNode)
         break
+      case 'TableSliceNode':
+        const addedTableSliceNode: Nodetypes.TableSliceNode = {
+          id,
+          position,
+          type: 'TableSliceNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedTableSliceNode)
+        break
     
       default:
         console.log(type)
