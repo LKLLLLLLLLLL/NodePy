@@ -648,20 +648,34 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedDropNaNValueNode)
         break
-      case 'SortNode':
-        const addedSortNode: Nodetypes.SortNode = {
+      case 'FillNaNValueNode':
+        const addedFillNaNValueNode: Nodetypes.FillNaNValueNode = {
           id,
           position,
-          type: 'SortNode',
+          type: 'FillNaNValueNode',
           data: {
             param: {
-              sort_cols: [],
-              ascending: []
+              subset_cols: [],
+              method: 'const'
             }
           }
         }
-        addNodes(addedSortNode)
+        addNodes(addedFillNaNValueNode)
         break
+      // case 'SortNode':
+      //   const addedSortNode: Nodetypes.SortNode = {
+      //     id,
+      //     position,
+      //     type: 'SortNode',
+      //     data: {
+      //       param: {
+      //         sort_cols: [],
+      //         ascending: []
+      //       }
+      //     }
+      //   }
+      //   addNodes(addedSortNode)
+      //   break
     
       default:
         console.log(type)

@@ -63,6 +63,10 @@ import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
         defaultSelected: {
             type: Array as PropType<number[]>,
             default: () => []
+        },
+        clearToggle: {
+            type: Boolean,
+            default: false
         }
     })
     const emit = defineEmits(['selectChange', 'clearSelect'])
@@ -124,7 +128,7 @@ import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
         ? document.addEventListener('click', clickOutside, true)
         : document.removeEventListener('click', clickOutside, true)
     )
-    watch(() => JSON.stringify(props.options), async (newValue, oldValue) => {
+    watch([() => JSON.stringify(props.options), () => props.clearToggle], async (newValue, oldValue) => {
         await new Promise(resolve => {
             emit('clearSelect', resolve)    //  if options have changed, the selection should be cleared
         })

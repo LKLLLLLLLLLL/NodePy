@@ -551,7 +551,7 @@ export interface DropNaNValueNode extends BaseNode<DropNaNValueNodeData> {
 export interface FillNaNValueNodeParam {
     subset_cols: string[]
     method: "const" | "ffill" | "bfill"
-    fill_value?: number[] | string[] | boolean[]
+    fill_value?: (number|string|boolean)[]
 }
 export type FillNaNValueNodeData = BaseData & {
     param: FillNaNValueNodeParam
@@ -562,8 +562,8 @@ export interface FillNaNValueNode extends BaseNode<FillNaNValueNodeData> {
 
 
 export interface SortNodeParam {
-    sort_cols: string[]
-    ascending: boolean[]
+    sort_col: string
+    ascending: boolean
 }
 export type SortNodeData = BaseData & {
     param: SortNodeParam
