@@ -127,13 +127,13 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'UploadNode'
             },
             {
-                label: '文件显示节点',
-                value: 'DisplayNode'
-            },
-            {
                 label: '文件表格节点',
                 value: 'TableFromFileNode'
-            }
+            },
+            {
+                label: '表格文件节点',
+                value: 'TableToFileNode'
+            },
         ]
     },
     {

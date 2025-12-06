@@ -35,13 +35,13 @@
             </div>
             <div class="fill_value" v-if="data.hint?.subset_col_choices && data.param.method === 'const'" v-for="(value, idx) in fill_value" :key="`${data.param.subset_cols[idx]}_${idx}`"><!-- when the hint is empty, don't show the fill_value to avoid complex errors-->
                 <div class="param-description fill_value-description">
-                    列名:
+                    列
                     <span :class="{'special-table-column': isSpecialColumn(data.param.subset_cols[idx])}">
                         {{displayColumnName(data.param.subset_cols[idx])}}
                     </span>
                 </div>
                 <div class="param-description" :class="{'node-has-paramerr': fill_valueHasErr.value}">
-                    填充值:
+                    填充值
                     <NodepyBoolValue
                         v-model="value.value"
                         @update-value="onUpdateValue(idx)"
@@ -270,6 +270,7 @@
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
+                    margin-bottom: $node-margin;
                 }
             }
         }

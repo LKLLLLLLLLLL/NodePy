@@ -24,13 +24,13 @@
             </div>
             <div class="rename_value" v-if="data.hint?.rename_col_choices" v-for="(value, idx) in rename_value" :key="`${propsRename_cols[idx]}_${idx}`"><!-- when the hint is empty, don't show the rename_value to avoid complex errors-->
                 <div class="param-description rename_value-description">
-                    旧列名:
+                    旧列
                     <span :class="{'special-table-column': isSpecialColumn(propsRename_cols[idx])}">
                         {{displayColumnName(propsRename_cols[idx])}}
                     </span>
                 </div>
                 <div class="param-description" :class="{'node-has-paramerr': rename_mapHasErr.value}">
-                    新列名:
+                    新列
                 </div>
                 <NodepyStringInput
                     v-model="value.value"
@@ -160,6 +160,7 @@
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
+                    margin-bottom: $node-margin;
                 }
             }
         }

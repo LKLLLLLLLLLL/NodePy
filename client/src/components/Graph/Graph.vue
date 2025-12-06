@@ -67,6 +67,7 @@ import RenameColNode from '../nodes/tableProcess/RenameColNode.vue'
 import ShiftNode from '../nodes/tableProcess/ShiftNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
+import TableToFileNode from '../nodes/file/TableToFileNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -315,6 +316,7 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.table
     case 'UploadNode':
     case 'TableFromFileNode':
+    case 'TableToFileNode':
       return nodeCategoryColor.file
     default:
       return nodeCategoryColor.default
@@ -405,10 +407,6 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
         
         <template #node-BoolNode="BoolNodeProps">
           <BoolNode v-bind="BoolNodeProps"/>
-        </template>
-
-        <template #node-TableFromFileNode="TableFromFileNodeProps">
-          <TableFromFileNode v-bind="TableFromFileNodeProps"/>
         </template>
 
         <template #node-RandomNode="RandomNodeProps">
@@ -605,6 +603,14 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-UploadNode="UploadNodeProps">
           <UploadNode v-bind="UploadNodeProps"/>
+        </template>
+
+        <template #node-TableFromFileNode="TableFromFileNodeProps">
+          <TableFromFileNode v-bind="TableFromFileNodeProps"/>
+        </template>
+      
+        <template #node-TableToFileNode="TableToFileNodeProps">
+          <TableToFileNode v-bind="TableToFileNodeProps"/>
         </template>
 
       </VueFlow>
