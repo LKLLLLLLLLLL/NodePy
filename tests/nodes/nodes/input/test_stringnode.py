@@ -149,3 +149,10 @@ def test_stringnode_execute_rejects_mismatched_output_schema(node_ctor):
     node._schemas_out = {"string": Schema(type=Schema.Type.FLOAT)}  # type: ignore[attr-defined]
     with pytest.raises(NodeExecutionError):
         node.execute({})
+
+def test_stringnode_construct_and_process(node_ctor):
+    node = node_ctor("StringNode", id="s1", value="hello")
+    out = node.infer_schema({})
+    assert out == {"string": Schema(type=Schema.Type.STR)}
+    res = node.process({})
+    assert res["string"].payload == "hello"

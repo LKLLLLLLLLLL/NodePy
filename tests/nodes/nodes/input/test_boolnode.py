@@ -151,3 +151,15 @@ def test_boolnode_execute_rejects_mismatched_output_schema(node_ctor):
     node._schemas_out = {"const": Schema(type=Schema.Type.INT)}  # type: ignore[attr-defined]
     with pytest.raises(NodeExecutionError):
         node.execute({})
+
+def test_boolnode_construct_and_process(node_ctor):
+    node = node_ctor("BoolNode", id="bnode1", value=True)
+    out_schema = node.infer_schema({})
+    assert out_schema == {"const": Schema(type=Schema.Type.BOOL)}
+    out = node.process({})
+    assert out["const"].payload is True
+
+
+def test_boolnode_rejects_blank_id(node_ctor):
+    with pytest.raises(NodeParameterError):
+        node_ctor("BoolNode", id="   ", value=False)

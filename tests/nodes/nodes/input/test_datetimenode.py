@@ -51,3 +51,17 @@ def test_datetimenode_execute_requires_inferred_schema(node_ctor):
     node = node_ctor("DateTimeNode", id="dt-no-infer", value=now)
     with pytest.raises(NodeExecutionError):
         node.execute({})
+
+
+def test_datetimenode_valid_iso_without_tz(node_ctor):
+    node = node_ctor("DateTimeNode", id="dt1", value="2020-01-01T00:00:00")
+    out = node.infer_schema({})
+    assert out == {"datetime": Schema(type=Schema.Type.DATETIME)}
+    res = node.process({})
+    assert isinstance(res["datetime"].payload, datetime)
+    assert res["datetime"].payload.tzinfo is not None
+
+
+def test_datetimenode_invalid_iso_raises(node_ctor):
+    with pytest.raises(NodeParameterError):
+        node_ctor("DateTimeNode", id="dt-bad", value="not-a-date")

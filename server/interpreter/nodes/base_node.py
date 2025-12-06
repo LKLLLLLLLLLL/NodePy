@@ -24,7 +24,7 @@ class InPort(BaseModel):
     description: str
     optional: bool = False # default is False, means this port must be connected
     accept: Pattern
-    
+
     def accept_schema(self, schema: Schema) -> bool:
         assert isinstance(schema, Schema)
         return schema in self.accept
@@ -37,7 +37,7 @@ class BaseNode(BaseModel):
     id: str
     type: str
     global_config: GlobalConfig
-    
+
     _schemas_in: dict[str, Schema] | None = PrivateAttr(None) # cache for input schema
     _schemas_out: dict[str, Schema] | None = PrivateAttr(None) # cache for output schema
 
@@ -53,7 +53,7 @@ class BaseNode(BaseModel):
         so you should not rely on any input or params, just return hints as you can.
         """
         return {}
-    
+
     @abstractmethod
     def validate_parameters(self) -> None:
         """ 
