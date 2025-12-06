@@ -218,6 +218,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格排序节点',
                 value: 'SortNode'
             },
+            {
+                label: '表格分组节点',
+                value: 'GroupNode'
+            },
         ]
     },
     {

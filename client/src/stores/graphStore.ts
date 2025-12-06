@@ -676,6 +676,21 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedSortNode)
         break
+      case 'GroupNode':
+        const addedGroupNode: Nodetypes.GroupNode = {
+          id,
+          position,
+          type: 'GroupNode',
+          data: {
+            param: {
+              group_cols: [],
+              agg_cols: [],
+              agg_func: 'COUNT'
+            }
+          }
+        }
+        addNodes(addedGroupNode)
+        break
     
       default:
         console.log(type)

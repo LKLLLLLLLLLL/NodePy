@@ -58,6 +58,7 @@ import DropDuplicatesNode from '../nodes/tableProcess/DropDuplicatesNode.vue'
 import DropNaNValueNode from '../nodes/tableProcess/DropNaNValueNode.vue'
 import FillNaNValueNode from '../nodes/tableProcess/FillNaNValueNode.vue'
 import SortNode from '../nodes/tableProcess/SortNode.vue'
+import GroupNode from '../nodes/tableProcess/GroupNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -298,6 +299,7 @@ const nodeColor = (node: BaseNode) => {
     case 'DropNaNValueNode':
     case 'FillNaNValueNode':
     case 'SortNode':
+    case 'GroupNode':
       return nodeCategoryColor.table
     case 'UploadNode':
     case 'TableFromFileNode':
@@ -559,6 +561,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-SortNode="SortNodeProps">
           <SortNode v-bind="SortNodeProps"/>
+        </template>
+
+        <template #node-GroupNode="GroupNodeProps">
+          <GroupNode v-bind="GroupNodeProps"/>
         </template>
 
         <template #node-UploadNode="UploadNodeProps">
