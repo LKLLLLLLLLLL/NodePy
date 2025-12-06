@@ -42,7 +42,7 @@ class InsertConstColNode(BaseNode):
         if self.col_name is None:
             self.col_name = generate_default_col_name(
                 id=self.id,
-                annotation="_const"
+                annotation="const"
             )
         if not check_no_illegal_cols([self.col_name]):
             raise NodeParameterError(
@@ -140,7 +140,7 @@ class InsertRangeColNode(BaseNode):
         if self.col_name is None:
             self.col_name = generate_default_col_name(
                 id=self.id,
-                annotation="_range"
+                annotation="range"
             )
         if not check_no_illegal_cols([self.col_name]):
             raise NodeParameterError(
@@ -292,7 +292,7 @@ class InsertRandomColNode(BaseNode):
         if self.col_name is None:
             self.col_name = generate_default_col_name(
                 id=self.id,
-                annotation="_random"
+                annotation="random"
             )
         if not check_no_illegal_cols([self.col_name]):
             raise NodeParameterError(

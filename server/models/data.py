@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, ClassVar, Literal, Union, cast
 
-from pandas import DataFrame, Series
+from pandas import DataFrame, Series, isna
 from pydantic import BaseModel, model_validator
 from typing_extensions import Self
 
@@ -153,17 +153,21 @@ class Data(BaseModel):
             for col in self.payload.df.columns:
                 # Convert Timestamp objects to ISO format strings
                 if self.payload.col_types[col] == ColType.DATETIME:
-                    cols[col] = [v.isoformat() if isinstance(v, datetime) else v for v in self.payload.df[col].tolist()]
+                    cols[col] = [
+                        v.isoformat() if isinstance(v, datetime) else v
+                        for v in self.payload.df[col].tolist()
+                    ]
                 else:
-                    cols[col] = self.payload.df[col].tolist()
+                    # [保持] 显式清洗 NaN/None 值，确保 JSON 序列化安全
+                    cols[col] = [
+                        None if isna(v) else v for v in self.payload.df[col].tolist()
+                    ]
+
             table_view = DataView.TableView(
                 cols=cols,
-                col_types={k: v.value for k, v in self.payload.col_types.items()}
+                col_types={k: v.value for k, v in self.payload.col_types.items()},
             )
-            return DataView(
-                type="Table",
-                value=table_view
-            )
+            return DataView(type="Table", value=table_view)
         elif isinstance(self.payload, datetime):
             return DataView(
                 type="Datetime",
@@ -206,12 +210,24 @@ class Data(BaseModel):
             assert isinstance(payload_value, DataView.TableView)
             df = DataFrame.from_dict(payload_value.cols)
             col_types = {k: ColType(v) for k, v in payload_value.col_types.items()}
-            # Convert datetime columns back to datetime objects
+
             for col, col_type in col_types.items():
+                if len(df) == 0:
+                    continue
+
                 if col_type == ColType.DATETIME:
-                    if len(df) == 0:
-                        continue
-                    df[col] = df[col].apply(lambda x: datetime.fromisoformat(x) if isinstance(x, str) else x)
+                    # convert ISO format strings to datetime
+                    df[col] = df[col].apply(
+                        lambda x: datetime.fromisoformat(x) if isinstance(x, str) else x
+                    )
+                else:
+                    # convert null to nullable types
+                    # make None to pd.NA/NaN
+                    ptype = col_type.to_ptype()
+                    if callable(ptype):
+                        ptype = ptype()
+                    df[col] = df[col].astype(ptype)
+
             payload = Table(df=df, col_types=col_types)
         elif payload_type == "File":
             assert isinstance(payload_value, File)
@@ -241,18 +257,27 @@ class DataView(BaseModel):
     A dict-like view of data, for transmitting or json serialization.
     """
     class TableView(BaseModel):
-        cols: dict[str, list[str | bool | int | float]] # the datetime columns are serialized as ISO format strings
+        cols: dict[str, list[str | bool | int | float | None]] 
+        # the datetime columns are serialized as ISO format strings
+        # the nan values are serialized as None
         col_types: dict[str, str]  # col name -> col type
         
         def model_dump(self, **kwargs):
             """Override to handle Timestamp serialization"""
             result = super().model_dump(**kwargs)
-            # Convert Timestamp objects to ISO format strings
-            for col_name, values in result['cols'].items():
-                result['cols'][col_name] = [
-                    v.isoformat() if isinstance(v, datetime) else v 
-                    for v in values
-                ]
+            # Normalize values: datetimes -> ISO string, NaN/pandas.NA -> None
+            for col_name, values in result["cols"].items():
+                normalized = []
+                for v in values:
+                    if isinstance(v, datetime):
+                        normalized.append(v.isoformat())
+                    else:
+                        # pandas.isna covers: numpy.nan, pandas.NA, None, etc.
+                        if isna(v):
+                            normalized.append(None)
+                        else:
+                            normalized.append(v)
+                result["cols"][col_name] = normalized
             return result
 
     type: Literal["int", "float", "str", "bool", "Table", "File", "Datetime"]

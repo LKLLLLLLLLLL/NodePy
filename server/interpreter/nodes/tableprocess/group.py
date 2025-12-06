@@ -23,7 +23,7 @@ class GroupNode(BaseNode):
     """
     group_cols: list[str]
     agg_cols: list[str]
-    agg_func: Literal["SUM", "MEAN", "COUNT", "MAX", "MIN", "STD"]
+    agg_func: Literal["MEAN", "SUM", "COUNT", "MAX", "MIN", "STD"]
 
     _col_types: Dict[str, ColType] | None = PrivateAttr(default=None)
 
@@ -34,6 +34,18 @@ class GroupNode(BaseNode):
                 node_id=self.id,
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
+            )
+        if not self.group_cols:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="group_cols",
+                err_msg="At least one grouping column must be specified.",
+            )
+        if not self.agg_cols:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="agg_cols",
+                err_msg="At least one aggregation column must be specified.",
             )
         return
 
@@ -52,7 +64,7 @@ class GroupNode(BaseNode):
             )
         ], [
             OutPort(
-                name="grouped_result_table",
+                name="grouped_table",
                 description="Output table after grouping and aggregation."
             )
         ]
@@ -75,10 +87,22 @@ class GroupNode(BaseNode):
             new_col_types[col_name] = table_schema.tab.col_types[col_name]
         for col_name in self.agg_cols:
             new_col_types[col_name] = table_schema.tab.col_types[col_name]
+        # convert col types of aggregated columns
+        if self.agg_func == "COUNT":
+            for col_name in self.agg_cols:
+                new_col_types[col_name] = ColType.INT
+        elif self.agg_func in {"MEAN", "STD"}:
+            for col_name in self.agg_cols:
+                new_col_types[col_name] = ColType.FLOAT
+        elif self.agg_func in {"MAX", "MIN", "SUM"}:
+            pass # MAX, MIN, and SUM keep the original type
+        else:
+            assert False, "Unreachable"
+        self._col_types = new_col_types
         new_tab = TableSchema(col_types=new_col_types)
         result_table_schema = Schema(type=Schema.Type.TABLE, tab=new_tab)
         return {
-            "grouped_result_table": result_table_schema
+            "grouped_table": result_table_schema
         }
 
     @override
@@ -90,7 +114,7 @@ class GroupNode(BaseNode):
         agg_func_map = {
             "SUM": "sum",
             "MEAN": "mean",
-            "COUNT": "size",
+            "COUNT": "count",
             "MAX": "max",
             "MIN": "min",
             "STD": "std",
@@ -107,7 +131,7 @@ class GroupNode(BaseNode):
         )
 
         return {
-            "grouped_result_table": result_data
+            "grouped_table": result_data
         }
 
     @override

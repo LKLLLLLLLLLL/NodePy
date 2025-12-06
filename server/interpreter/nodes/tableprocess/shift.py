@@ -37,6 +37,12 @@ class ShiftNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
             )
+        if self.col.strip() == "":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col",
+                err_msg="Column name to be shifted cannot be empty.",
+            )
         if not self.result_col:
             self.result_col = generate_default_col_name(
                 id=self.id,
@@ -75,7 +81,10 @@ class ShiftNode(BaseNode):
         assert self.col in input_schema.tab.col_types
         col_type = input_schema.tab.col_types[self.col]
         self._result_col_type = col_type
-        return input_schemas
+        assert self.result_col is not None
+        return {
+            "table": input_schema.append_col(self.result_col, col_type)
+        }
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
@@ -100,9 +109,10 @@ class ShiftNode(BaseNode):
         hint = {}
         if "table" in input_schemas:
             input_schema = input_schemas["table"]
+            col_choices = []
             if input_schema.tab is not None:
                 for col_name, col_type in input_schema.tab.col_types.items():
                     if col_type in {ColType.INT, ColType.FLOAT}:
-                        hint["col"] = col_name
-                        break
+                        col_choices.append(col_name)
+            hint["col_choices"] = col_choices
         return hint

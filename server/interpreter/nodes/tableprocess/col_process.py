@@ -1,5 +1,6 @@
 from typing import Any, Dict, Literal, override
 
+from loguru import logger
 from pydantic import PrivateAttr
 
 from server.models.data import Data, Table
@@ -145,6 +146,18 @@ class JoinNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
             )
+        if self.left_on.strip() == "":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="left_on",
+                err_msg="Left join column must be specified.",
+            )
+        if self.right_on.strip() == "":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="right_on",
+                err_msg="Right join column must be specified.",
+            )
         return
 
     @override
@@ -207,7 +220,7 @@ class JoinNode(BaseNode):
                 new_col_types[f"{col}_right"] = col_type
 
         new_tab = TableSchema(col_types=new_col_types)
-        self._col_types = new_col_types
+        self._col_types = new_tab.col_types
         return {
             "joined_table": Schema(type=Schema.Type.TABLE, tab=new_tab)
         }
@@ -221,11 +234,11 @@ class JoinNode(BaseNode):
         left_df = left_table_data.payload.df.copy()
         right_df = right_table_data.payload.df.copy()
         
-        # remove _index column
-        if '_index' in left_df.columns:
-            left_df = left_df.drop(columns=['_index'])
-        if '_index' in right_df.columns:
-            right_df = right_df.drop(columns=['_index'])
+        # # remove _index column
+        # if '_index' in left_df.columns:
+        #     left_df = left_df.drop(columns=['_index'])
+        # if '_index' in right_df.columns:
+        #     right_df = right_df.drop(columns=['_index'])
 
         joined_df = left_df.merge(
             right_df,
@@ -234,6 +247,7 @@ class JoinNode(BaseNode):
             right_on=self.right_on,
             suffixes=('', '_right')
         )
+        logger.debug(f"@@@ Joined DataFrame:\n{joined_df}")
         assert self._col_types is not None
         joined_data = Data(
             payload=Table(
@@ -249,22 +263,24 @@ class JoinNode(BaseNode):
     @override
     @classmethod
     def hint(cls, input_schemas: Dict[str, Schema], current_params: Dict) -> Dict[str, Any]:
-        left_col_choices = []
-        right_col_choices = []
+        hint = {}
         if "left_table" in input_schemas:
+            left_col_choices = []
             left_schema = input_schemas["left_table"]
-            assert left_schema.tab is not None
-            for col in left_schema.tab.col_types.keys():
-                left_col_choices.append(col)
+            if left_schema.tab is not None:
+                for col in left_schema.tab.col_types.keys():
+                    left_col_choices.append(col)
+            hint["left_on_choices"] = left_col_choices
         if "right_table" in input_schemas:
+            right_col_choices = []
             right_schema = input_schemas["right_table"]
-            assert right_schema.tab is not None
-            for col in right_schema.tab.col_types.keys():
-                right_col_choices.append(col)
-        return {
-            "left_on_choices": left_col_choices,
-            "right_on_choices": right_col_choices
-        }
+            if right_schema.tab is not None:
+                for col in right_schema.tab.col_types.keys():
+                    right_col_choices.append(col)
+            hint["right_on_choices"] = right_col_choices
+        return hint
+
+
 
 @register_node()
 class RenameColNode(BaseNode):

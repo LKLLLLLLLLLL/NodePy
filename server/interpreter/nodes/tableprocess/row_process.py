@@ -416,7 +416,7 @@ class FillNaNValueNode(BaseNode):
         assert isinstance(table_data.payload, Table)
         df = table_data.payload.df.copy()
 
-        if self.method == "value":
+        if self.method == "const":
             # fill with constant value
             assert self.fill_value is not None
             filled_df = df.fillna(
