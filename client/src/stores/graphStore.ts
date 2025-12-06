@@ -691,6 +691,17 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedGroupNode)
         break
+      case 'MergeNode':
+        const addedMergeNode: Nodetypes.MergeNode = {
+          id,
+          position,
+          type: 'MergeNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedMergeNode)
+        break
     
       default:
         console.log(type)

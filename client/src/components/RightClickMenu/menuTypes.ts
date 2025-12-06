@@ -222,6 +222,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格分组节点',
                 value: 'GroupNode'
             },
+            {
+                label: '表格合并节点',
+                value: 'MergeNode'
+            },
         ]
     },
     {

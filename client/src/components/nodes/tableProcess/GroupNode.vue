@@ -96,7 +96,7 @@
     const defaultSelectedAgg_func = agg_func.indexOf(props.data.param.agg_func)
     const table_type = computed(() => getInputType(props.id, 'table'))
     const schema_type = computed(():Type|'default' => props.data.schema_out?.['grouped_table']?.type || 'default')
-     const grouped_tableHasErr = computed(() => handleOutputError(props.id, 'grouped_table'))
+    const grouped_tableHasErr = computed(() => handleOutputError(props.id, 'grouped_table'))
     const errMsg = ref<string[]>([])
     const group_colsHasErr = ref({
         id: 'group_cols',
