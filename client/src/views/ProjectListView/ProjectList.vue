@@ -66,7 +66,7 @@
         const modalHeight = 600;
         modalStore.createModal({
             id: 'create-project',
-            title: 'Create New Project',
+            title: '创建项目',
             isActive: true,
             isDraggable: true,
             isResizable: false,

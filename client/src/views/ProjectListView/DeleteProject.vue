@@ -27,13 +27,15 @@
 <template>
     <el-form class="delete-project-container">
         <el-form-item>
-            <div>R U sure to delete this project (ID:{{ projectStore.toBeDeleted.id }})which is irreversible?</div>
+            <div>确定删除此项目吗？ (项目名称:{{ projectStore.projectIdToNameMap.get(projectStore.toBeDeleted.id) }})<br></br>该操作不可逆。</div>
         </el-form-item>
         <el-form-item>
-            <el-button type="primary" @click="onEnsureDelete">Ensure</el-button>
-            <el-button type="primary" @click="onCancleDelete">Cancle</el-button>
+            <el-button type="primary" @click="onEnsureDelete">删除</el-button>
+            <el-button type="plain" @click="onCancleDelete">取消</el-button>
         </el-form-item>
     </el-form>
 </template>
 <style lang="scss" scoped>
+    .delete-project-container {
+    }
 </style>

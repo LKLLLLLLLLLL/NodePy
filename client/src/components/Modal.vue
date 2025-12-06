@@ -82,10 +82,16 @@
         const minWidth = props.modal.minSize?.width ?? 100;
         const minHeight = props.modal.minSize?.height ?? 100;
 
+        // 对于Result弹窗的特殊处理：只允许向左调整大小
+        const isResultModal = (props.modal as any).isResultModal;
+
         // 根据调整方向计算新尺寸和位置
         switch(resizeDirection.value) {
             case 'right':
-                newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width + deltaX));
+                // 如果是Result弹窗，则不允许向右调整大小
+                if (!isResultModal) {
+                    newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width + deltaX));
+                }
                 break;
             case 'left':
                 newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width - deltaX));
@@ -98,22 +104,33 @@
                 newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height + deltaY));
                 break;
             case 'top':
-                newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height - deltaY));
-                // 只有当高度实际改变时才更新位置
-                if (newHeight !== resizeStartSize.value.height) {
-                    newPosition.y = resizeStartModalPosition.value.y + (resizeStartSize.value.height - newHeight);
+                // 如果是Result弹窗，则不允许向上调整大小
+                if (!isResultModal) {
+                    newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height - deltaY));
+                    // 只有当高度实际改变时才更新位置
+                    if (newHeight !== resizeStartSize.value.height) {
+                        newPosition.y = resizeStartModalPosition.value.y + (resizeStartSize.value.height - newHeight);
+                    }
                 }
                 break;
             case 'top-right':
-                newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width + deltaX));
-                newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height - deltaY));
-                // 只有当高度实际改变时才更新位置
-                if (newHeight !== resizeStartSize.value.height) {
-                    newPosition.y = resizeStartModalPosition.value.y + (resizeStartSize.value.height - newHeight);
+                // 如果是Result弹窗，则不允许向右或向上调整大小
+                if (!isResultModal) {
+                    newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width + deltaX));
+                }
+                if (!isResultModal) {
+                    newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height - deltaY));
+                    // 只有当高度实际改变时才更新位置
+                    if (newHeight !== resizeStartSize.value.height) {
+                        newPosition.y = resizeStartModalPosition.value.y + (resizeStartSize.value.height - newHeight);
+                    }
                 }
                 break;
             case 'bottom-right':
-                newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width + deltaX));
+                // 如果是Result弹窗，则不允许向右调整大小
+                if (!isResultModal) {
+                    newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width + deltaX));
+                }
                 newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height + deltaY));
                 break;
             case 'bottom-left':
@@ -126,13 +143,17 @@
                 break;
             case 'top-left':
                 newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStartSize.value.width - deltaX));
-                newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height - deltaY));
-                // 只有当宽度和高度实际改变时才更新位置
+                // 如果是Result弹窗，则不允许向上调整大小
+                if (!isResultModal) {
+                    newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStartSize.value.height - deltaY));
+                    // 只有当高度实际改变时才更新位置
+                    if (newHeight !== resizeStartSize.value.height) {
+                        newPosition.y = resizeStartModalPosition.value.y + (resizeStartSize.value.height - newHeight);
+                    }
+                }
+                // 只有当宽度实际改变时才更新位置
                 if (newWidth !== resizeStartSize.value.width) {
                     newPosition.x = resizeStartModalPosition.value.x + (resizeStartSize.value.width - newWidth);
-                }
-                if (newHeight !== resizeStartSize.value.height) {
-                    newPosition.y = resizeStartModalPosition.value.y + (resizeStartSize.value.height - newHeight);
                 }
                 break;
         }
@@ -159,6 +180,16 @@
     };
 
     const startResize = (event: MouseEvent, direction: string) => {
+        // 对于Result弹窗的特殊处理：只允许向左调整大小
+        const isResultModal = (props.modal as any).isResultModal;
+        
+        // 如果是Result弹窗，只允许left、bottom-left、top-left方向的调整
+        if (isResultModal) {
+            if (direction !== 'left' && direction !== 'bottom-left' && direction !== 'top-left') {
+                return;
+            }
+        }
+        
         if (!props.modal.isResizable) return
         if (isDragging.value) return;
 
@@ -202,14 +233,14 @@
             maxWidth: modal.maxSize?.width ? modal.maxSize.width + 'px' : 'none',
             maxHeight: modal.maxSize?.height ? modal.maxSize.height + 'px' : 'none'
         }">
-        <!-- <div class="resize-handle resize-handle-right" @mousedown="startResize($event, 'right')"></div> -->
-        <!-- <div class="resize-handle resize-handle-bottom" @mousedown="startResize($event, 'bottom')"></div> -->
+        <div class="resize-handle resize-handle-right" @mousedown="startResize($event, 'right')"></div>
+        <div class="resize-handle resize-handle-bottom" @mousedown="startResize($event, 'bottom')"></div>
         <div class="resize-handle resize-handle-left" @mousedown="startResize($event, 'left')"></div>
-        <!-- <div class="resize-handle resize-handle-top" @mousedown="startResize($event, 'top')"></div> -->
-        <!-- <div class="resize-handle resize-handle-top-right" @mousedown="startResize($event, 'top-right')"></div>
+        <div class="resize-handle resize-handle-top" @mousedown="startResize($event, 'top')"></div>
+        <div class="resize-handle resize-handle-top-right" @mousedown="startResize($event, 'top-right')"></div>
         <div class="resize-handle resize-handle-bottom-right" @mousedown="startResize($event, 'bottom-right')"></div>
         <div class="resize-handle resize-handle-bottom-left" @mousedown="startResize($event, 'bottom-left')"></div>
-        <div class="resize-handle resize-handle-top-left" @mousedown="startResize($event, 'top-left')"></div> -->
+        <div class="resize-handle resize-handle-top-left" @mousedown="startResize($event, 'top-left')"></div>
         <div class = "modal-head" @mousedown="startDrag" >
             <div class = "modal-title-id-container">
                 <div class="modal-title-container">
@@ -222,8 +253,7 @@
             <div class = "modal-control">
                 <el-button
                     @click = "closeModal"
-                    :style="{height: '100%',width: 'max(60px, 10%)',borderRadius: '16px'}"
-
+                    :style="{height: '100%',width: 'max(60px, 10%)',borderRadius: '12px',border: 'none'}"
                     :icon="Close"
                 >
                 </el-button>
@@ -251,24 +281,28 @@
         display: flex;
         flex-direction: column;
         border-radius: 15px;
+        box-sizing: border-box; /* 添加盒模型计算 */
     }
     .modal-head{
         display: flex;
         min-height: 35px;
-        height: 10%;
         width: 100%;
+        cursor: move; /* 头部显示移动光标 */
     }
     .modal-body, .modal-content{
         height: calc(100% - max(30px, 5%) - max(20px, 5%));
+        margin-top: 10px;
+        margin-left: 20px;
+        margin-right: 20px;
         display: flex;
         flex-direction: column;
-        overflow: auto;// 内容超出时显示滚动条
+        overflow: hidden; /* 改为hidden，让内部组件控制滚动 */
     }
     .modal-footer{
         width: 100%;
-        min-height: 20px;
-        height: 5%;
+        min-height: 35px;
         margin-left: 20px;
+        margin-right: 20px;
         display: flex;
         align-items: center;
     }
@@ -293,11 +327,20 @@
         align-items: center;
         flex: 1;
     }
-    /* 调整大小手柄样式 */
+    /* 调整大小手柄样式 - 隐藏可见元素，仅保留鼠标样式 */
     .resize-handle {
         position: absolute;
         z-index: 10;
         background: transparent;
+    }
+
+    /* 移除所有可见的背景色和边框 */
+    .resize-handle-top-right, .resize-handle-bottom-right,
+    .resize-handle-bottom-left, .resize-handle-top-left {
+        width: 12px;
+        height: 12px;
+        background: transparent;
+        border: none;
     }
 
     .resize-handle-right, .resize-handle-left {
@@ -305,6 +348,7 @@
         height: 100%;
         top: 0;
         cursor: ew-resize;
+        background: transparent;
     }
 
     .resize-handle-right {
@@ -320,6 +364,7 @@
         height: 6px;
         left: 0;
         cursor: ns-resize;
+        background: transparent;
     }
 
     .resize-handle-top {
@@ -328,14 +373,6 @@
 
     .resize-handle-bottom {
         bottom: -3px;
-    }
-
-    .resize-handle-top-right, .resize-handle-bottom-right,
-    .resize-handle-bottom-left, .resize-handle-top-left {
-        width: 12px;
-        height: 12px;
-        background: #585858;
-        border: 1px solid #fff;
     }
 
     .resize-handle-top-right {

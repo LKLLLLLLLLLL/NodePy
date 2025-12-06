@@ -55,11 +55,11 @@ function onCardClick() {
 
 async function handleClickDelete(){
     projectStore.toBeDeleted.id = props.id
-    const modalWidth = 300;
+    const modalWidth = 450;
     const modalHeight = 200;
     modalStore.createModal({
         id: 'delete-modal',
-        title: "Delete a project",
+        title: "删除项目",
         isActive: true,
         isDraggable: true,
         isResizable: false,
@@ -82,7 +82,7 @@ async function handleClickUpdate(){
     const modalHeight = 400;
     modalStore.createModal({
         id: 'update-modal',
-        title: "Update a project",
+        title: "更新项目",
         isActive: true,
         isDraggable: true,
         isResizable: false,

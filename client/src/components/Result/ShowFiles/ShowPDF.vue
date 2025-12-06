@@ -8,6 +8,7 @@ const props = defineProps<{
 
 const currentPage = ref<number>(1)
 const pageCount = ref<number>(0)
+const inputPage = ref<number>(1) // 用于存储输入框的值
 
 const handlePdfLoad = (pdf: any) => {
   pageCount.value = pdf.numPages
@@ -15,6 +16,8 @@ const handlePdfLoad = (pdf: any) => {
   if (currentPage.value > pageCount.value) {
     currentPage.value = 1
   }
+  // 同步输入框的值
+  inputPage.value = currentPage.value
 }
 
 const handlePdfError = (error: any) => {
@@ -25,6 +28,7 @@ const handlePdfError = (error: any) => {
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
+    inputPage.value = currentPage.value
   }
 }
 
@@ -32,6 +36,7 @@ const prevPage = () => {
 const nextPage = () => {
   if (currentPage.value < pageCount.value) {
     currentPage.value++
+    inputPage.value = currentPage.value
   }
 }
 
@@ -41,17 +46,33 @@ const goToPage = (page: number) => {
     currentPage.value = page
   }
 }
+
+// 更新输入框的值，但不立即跳转
+const updateInputPage = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const page = parseInt(target.value) || 1
+  inputPage.value = Math.max(1, Math.min(page, pageCount.value))
+}
+
+// 点击跳转按钮时才真正跳转
+const handleGoButtonClick = () => {
+  goToPage(inputPage.value)
+}
 </script>
 
 <template>
   <div class="pdf-view">
-    <VuePdfEmbed
-      :source="src"
-      :page="currentPage"
-      @loaded="handlePdfLoad"
-      @error="handlePdfError"
-      class="pdf-embed"
-    />
+    <div class="pdf-content">
+      <div class="pdf-center">
+        <VuePdfEmbed
+          :source="src"
+          :page="currentPage"
+          @loaded="handlePdfLoad"
+          @error="handlePdfError"
+          class="pdf-embed"
+        />
+      </div>
+    </div>
     <!-- PDF 分页控件 -->
     <div v-if="pageCount > 1" class="pdf-pagination">
       <button 
@@ -74,15 +95,15 @@ const goToPage = (page: number) => {
       <div class="page-input-container">
         <input 
           type="number" 
-          v-model.number="currentPage" 
+          :value="inputPage" 
           min="1" 
           :max="pageCount"
           class="page-input"
-          @change="goToPage(currentPage)"
+          @input="updateInputPage"
         />
         <button 
           class="go-btn" 
-          @click="goToPage(currentPage)"
+          @click="handleGoButtonClick"
         >
           跳转
         </button>
@@ -94,18 +115,39 @@ const goToPage = (page: number) => {
 <style scoped>
 .pdf-view {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   background: white;
   border: 1px solid #e4e7ed;
-  border-radius: 4px;
+  border-radius: 10px;
   padding: 12px;
-  margin: 12px;
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+.pdf-content {
+  flex: 1;
+  overflow: auto;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.pdf-center {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
 .pdf-embed {
+  display: flex;
   flex: 1;
+  width: 100%;
+  height: 100%;
 }
 
 .pdf-pagination {
@@ -115,6 +157,12 @@ const goToPage = (page: number) => {
   gap: 12px;
   padding: 12px 0;
   flex-wrap: wrap;
+  bottom: 0;
+  background: white;
+  border-top: 1px solid #e4e7ed;
+  margin: 0 -12px -12px -12px;
+  padding: 12px;
+  z-index: 10;
 }
 
 .pagination-btn {

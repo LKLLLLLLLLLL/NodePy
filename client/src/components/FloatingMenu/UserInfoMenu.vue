@@ -97,6 +97,11 @@ const userStore = useUserStore()
 
 const router = useRouter()
 
+const editWidth = 400;
+const editHeight = 600;
+const logoutWidth = 300;
+const logoutHeight = 200;
+
 onMounted(async () => {
   if (!loginStore.isAuthenticated) return
   await userStore.refreshUserInfo()
@@ -114,15 +119,15 @@ function handleEdit() {
     component: PyEditor,
     title: '编辑代码',
     isActive: true,
-    isResizable: false,
+    isResizable: true,
     isDraggable: true,
     position: {
-      x: 400,
-      y: 400
+      x: window.innerWidth / 2 - editWidth / 2,
+      y: window.innerHeight / 2 - editHeight / 2
     },
     size: {
-      width: 400,
-      height: 600
+      width: editWidth,
+      height: editHeight
     },
     id: 'edit-modal',
   })
@@ -131,17 +136,17 @@ function handleEdit() {
 function handleLogout() {
   modalStore.createModal({
     component: Logout,
-    title: 'Logout',
+    title: '退出登录',
     isActive: true,
     isResizable: false,
     isDraggable: true,
     position: {
-      x: 400,
-      y: 400
+      x: window.innerWidth / 2 - logoutWidth / 2,
+      y: window.innerHeight / 2 - logoutHeight / 2
     },
     size: {
-      width: 400,
-      height: 600
+      width: logoutWidth,
+      height: logoutHeight
     },
     id: 'logout',
   })

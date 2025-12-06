@@ -13,6 +13,11 @@
         file: FileItem;
     }>()
 
+    const previewWidth = 600;
+    const previewHeight = 800;
+    const uploadWidth = 400;
+    const uploadHeight = 600;
+
     // 格式化文件大小的函数
     const formatFileSize = (bytes: number): string => {
         if (bytes < 1024) {
@@ -45,17 +50,17 @@
     async function handleUpload(){
         modalStore.createModal({
             id: 'upload-file',
-            title: 'upload-file',
+            title: '上传文件',
             isActive: true,
             isResizable: false,
             isDraggable: true,
             position:{
-                x: 200,
-                y: 200
+                x: window.innerWidth / 2 - uploadWidth / 2,
+                y: window.innerHeight / 2 - uploadHeight / 2
             },
             size:{
-                width: 400,
-                height: 600
+                width: uploadWidth,
+                height: uploadHeight
             },
             component: FileUpload
         })
@@ -65,17 +70,21 @@
         fileStore.changeCurrentFile(file);
         modalStore.createModal({
             id: 'file-preview',
-            title: 'flie-preview',
+            title: '文件预览',
             isActive: true,
-            isResizable: false,
+            isResizable: true,
             isDraggable: true,
             position:{
-                x: 400,
-                y: 400
+                x: window.innerWidth / 2 - previewWidth / 2,
+                y: window.innerHeight / 2 - previewHeight / 2
             },
             size:{
-                width: 400,
-                height: 600
+                width: previewWidth,
+                height: previewHeight
+            },
+            minSize:{
+                width: previewWidth,
+                height: previewHeight
             },
             component: FilePreview
         })

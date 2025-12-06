@@ -96,9 +96,8 @@ const txtGoToPage = (page: number) => {
   overflow: auto;
   background: white;
   border: 1px solid #e4e7ed;
-  border-radius: 4px;
+  border-radius: 10px;
   padding: 12px;
-  margin: 12px;
   display: flex;
   flex-direction: column;
 }

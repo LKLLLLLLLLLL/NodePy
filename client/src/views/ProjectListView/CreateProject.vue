@@ -20,23 +20,41 @@
         modalStore.destroyModal('create-project');
     }
 
+    function onCancel(){
+        modalStore.deactivateModal('create-project');
+        modalStore.destroyModal('create-project');
+    }
+
     onUnmounted(()=>{
         projectStore.initializeProjects();
     })
 
 </script>
 <template>
-    <el-form class="create-project-container" @submit.prevent="onCreateProject">
-        <el-form-item label="Project Name">
-            <el-input placeholder="Enter project name" v-model="projectStore.currentProjectName" @keyup.enter="onCreateProject"></el-input>
-        </el-form-item>
-        <!-- <el-form-item label="Description">
-            <el-switch></el-switch>
-        </el-form-item> -->
-        <el-form-item>
-            <el-button type="primary" @click="onCreateProject">Create Project</el-button>
-        </el-form-item>
-    </el-form>
+     <div class="create-project-container">
+        <el-form @submit.prevent="onCreateProject">
+            <el-form-item label="项目名称">
+                <el-input placeholder="请输入项目名称" v-model="projectStore.currentProjectName" @keyup.enter="onCreateProject"></el-input>
+            </el-form-item>
+            <!-- <el-form-item label="描述">
+                <el-switch></el-switch>
+            </el-form-item> -->
+            <el-form-item>
+                <div class="form-buttons">
+                    <el-button type="primary" @click="onCreateProject">创建</el-button>
+                    <el-button @click="onCancel">取消</el-button>
+                </div>
+            </el-form-item>
+        </el-form>
+    </div>
 </template>
 <style lang="scss" scoped>
+    .create-project-container {
+    }
+    
+    .form-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
 </style>

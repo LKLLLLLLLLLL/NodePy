@@ -5,18 +5,32 @@
     import ValueView from './ValueView.vue';
     import NodeInfo from './NodeInfo.vue';
     import Loading from '../Loading.vue'; // 引入Loading组件
-    import { watch, ref,computed, onMounted } from 'vue';
+    import { watch, ref,computed, onMounted, onUnmounted } from 'vue';
     import { useResultStore } from '@/stores/resultStore';
     import { useGraphStore } from '@/stores/graphStore';
 
     const resultStore = useResultStore();
-    const graphStore = useGraphStore()
+    const graphStore = useGraphStore();
+
+    // 监听窗口大小变化
+    const handleWindowResize = () => {
+        // 触发resultStore中的窗口大小变化处理
+        resultStore['handleWindowResize']?.();
+    };
+
+    // 组件挂载时添加事件监听器
+    onMounted(() => {
+        window.addEventListener('resize', handleWindowResize);
+    });
+
+    // 组件卸载时移除事件监听器
+    onUnmounted(() => {
+        window.removeEventListener('resize', handleWindowResize);
+    });
 
     // 监听currentTypeDataID字典变化
     watch(() => resultStore.currentTypeDataID, async (newTypeDataID, oldTypeDataID) => {
         try {
-            console.log("@@@@@@@newTypeDataID", newTypeDataID);
-            console.log("@@@@@@@oldTypeDataID", oldTypeDataID);
             if(newTypeDataID === resultStore.default_typedataid){
                 resultStore.currentResult = resultStore.default_dataview
                 resultStore.currentInfo = resultStore.default_info
@@ -36,7 +50,6 @@
                     // 获取新结果
                     const result = await resultStore.getResultCacheContent(dataId);
                     resultStore.currentResult = result;
-                    console.log("@@@newResult:", resultStore.currentResult);
                 }
             }
             
@@ -48,15 +61,14 @@
     }, { immediate: true, deep: true });
 
     async function handleChooseResult(key: string){
-        console.log("@@@@@@@currentTypeDataID[key]", resultStore.currentTypeDataID[key])
         resultStore.currentResult = await resultStore.getResultCacheContent(resultStore.currentTypeDataID[key]!)
     }
 
 </script>
 <template>
-    <div :style="{width: '100%',height: '100%'}">
+    <div class="result-total-container">
         <div class = "result-control">
-            <el-button v-for="key in Object.keys(resultStore.currentTypeDataID)" :key="key" @click="()=>handleChooseResult(key)">{{ key }}</el-button>
+            <el-button v-for="key in Object.keys(resultStore.currentTypeDataID)" :key="key" @click="()=>handleChooseResult(key)" type="primary">{{ key[0]!.toUpperCase()+ key.slice(1) }}</el-button>
         </div>
         <div class = "result-container">
             <!-- 显示loading状态 -->
@@ -90,25 +102,45 @@
     </div>
 </template>
 <style lang = "scss" scoped>
-    .result-container{
-        width: 100%;
-        height: calc(100% - 30px);
-        color: grey;
-        padding: 20px;
-        padding-top: 10px;
-        border-radius: 10px;
-        position: relative; /* 添加相对定位 */
-    }
-    .result-control{
-        height: 30px;
+    .result-total-container{
         display: flex;
-        margin-left: 20px;
-        gap: 5px;
-    }
-    .view-content{
+        flex-direction: column;
         width: 100%;
         height: 100%;
     }
+
+    .result-container{
+        display: flex;
+        width: 100%;
+        height: calc(100% - 30px);
+        color: grey;
+        padding: 0;
+        border-radius: 10px;
+        position: relative; /* 添加相对定位 */
+        overflow: hidden; /* 添加这行 */
+    }
+
+    .result-control{
+        height: 30px;
+        display: flex;
+        gap: 5px;
+    }
+
+    .if-result{
+        flex: 1;
+        margin-top: 10px;
+        margin-left: 0;
+        border-radius: 10px;
+        overflow: hidden;
+        background: transparent; /* 添加这行 */
+    }
+
+    .view-content{
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+    }
+    
     .loading-container {
         display: flex;
         justify-content: center;

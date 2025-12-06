@@ -154,6 +154,7 @@ const csvTable = computed(() => {
   width: 100%;
   overflow: hidden;
   background: #fafafa;
+  border-radius: 10px;
 }
 
 .csv-table-wrapper {

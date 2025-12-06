@@ -101,7 +101,7 @@
         无节点信息
     </div> -->
     <div>
-        No result
+        暂无结果
     </div>
 </template>
 <style lang="scss" scoped>

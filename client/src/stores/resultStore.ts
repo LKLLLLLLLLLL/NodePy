@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import {ref,computed} from 'vue'
+import {ref,computed, watch} from 'vue'
 import { useModalStore } from "./modalStore"
 import AuthenticatedServiceFactory from "@/utils/AuthenticatedServiceFactory"
 import { DataView, type TableView } from "@/utils/api"
@@ -269,6 +269,28 @@ export const useResultStore = defineStore('result',()=>{
         currentResult.value = default_dataview;
     }
 
+    // 监听窗口大小变化，实时更新modalHeight
+    const handleWindowResize = () => {
+        modalHeight.value = window.innerHeight - marginTop - marginBottom;
+        // 更新现有的result modal的位置和大小
+        const resultModal = modalStore.modals.find(modal => modal.id === 'result');
+        if (resultModal) {
+            modalStore.updateModalPosition('result', {
+                x: getXPosition(),
+                y: getYPosition()
+            });
+            modalStore.updateModalSize('result', {
+                width: resultModal.size?.width || 500,
+                height: modalHeight.value
+            });
+        }
+    };
+
+    // 添加窗口大小变化监听器
+    if (typeof window !== 'undefined') {
+        window.addEventListener('resize', handleWindowResize);
+    }
+
     function createResultModal(){
         // 每次创建时都重新计算位置
         modalStore.createModal({
@@ -277,6 +299,8 @@ export const useResultStore = defineStore('result',()=>{
             isActive: false,
             isDraggable: false,
             isResizable: true,
+            // 为Result弹窗添加特殊属性标识
+            isResultModal: true,
             position:{
                 x: getXPosition(),
                 y: getYPosition()
@@ -284,6 +308,11 @@ export const useResultStore = defineStore('result',()=>{
             size: {
                 width: modalWidth.value,
                 height: modalHeight.value
+            },
+            // 设置最小尺寸
+            minSize: {
+                width: 300,
+                height: 200
             },
             component: Result
         });

@@ -33,8 +33,8 @@
     const email_username = ref<string>(default_email_username)
 
     const accountLabel = computed(()=>{
-        if(loginType.value=='email')return 'Email';
-        else return 'UserName'
+        if(loginType.value=='email')return '邮箱';
+        else return '用户名'
     })
 
     function loginByGoogle(){
@@ -45,16 +45,94 @@
         // GitHub登录逻辑
     }
 
-    function restrictPassword(){
-
+    // 密码限制函数
+    function restrictPassword(): boolean {
+        const pwd = password.value;
+        // 检查密码长度（至少8位）
+        if (pwd.length < 8) {
+            return false;
+        }
+        // 检查是否包含数字
+        if (!/\d/.test(pwd)) {
+            return false;
+        }
+        // 检查是否包含字母
+        if (!/[a-zA-Z]/.test(pwd)) {
+            return false;
+        }
+        // 检查是否包含特殊字符
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) {
+            return false;
+        }
+        return true;
     }
 
-    function restrictUsername(){
-
+    // 用户名限制函数
+    function restrictUsername(): boolean {
+        const usr = username.value;
+        // 检查用户名长度（3-20个字符）
+        if (usr.length < 3 || usr.length > 20) {
+            return false;
+        }
+        // 检查是否只包含字母、数字、下划线
+        if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(usr)) {
+            return false;
+        }
+        // 不能以数字开头
+        if (/^\d/.test(usr)) {
+            return false;
+        }
+        return true;
     }
 
-    function testAllInfo(){
+    // 测试所有信息是否符合规定
+    function testAllInfo(): boolean {
+        // 检查用户名
+        if (!restrictUsername()) {
+            if (username.value.length < 3 || username.value.length > 20) {
+                notify({ message: '用户名长度应在3-20个字符之间', type: 'error' });
+            } else if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(username.value)) {
+                notify({ message: '用户名只能包含字母、数字、下划线和中文', type: 'error' });
+            } else if (/^\d/.test(username.value)) {
+                notify({ message: '用户名不能以数字开头', type: 'error' });
+            } else {
+                notify({ message: '用户名不符合要求', type: 'error' });
+            }
+            return false;
+        }
 
+        // 检查密码
+        if (!restrictPassword()) {
+            if (password.value.length < 8) {
+                notify({ message: '密码长度至少8位', type: 'error' });
+            } else if (!/\d/.test(password.value)) {
+                notify({ message: '密码必须包含数字', type: 'error' });
+            } else if (!/[a-zA-Z]/.test(password.value)) {
+                notify({ message: '密码必须包含字母', type: 'error' });
+            } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) {
+                notify({ message: '密码必须包含特殊字符', type: 'error' });
+            } else {
+                notify({ message: '密码不符合要求', type: 'error' });
+            }
+            return false;
+        }
+
+        // 检查确认密码
+        if (password.value !== confirm_password.value) {
+            notify({ message: '两次输入的密码不一致', type: 'error' });
+            return false;
+        }
+
+        // 检查邮箱（如果是邮箱登录或注册）
+        if ((state.value === 'login' && loginType.value === 'email') || state.value === 'register') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value)) {
+                notify({ message: '请输入有效的邮箱地址', type: 'error' });
+                return false;
+            }
+        }
+
+        return true;
     }
 
     function comparePassword(){
@@ -63,8 +141,6 @@
         }
         else return false
     }
-
-
 
     async function handleLogin(){
         try {
@@ -85,28 +161,26 @@
     }
 
     async function handleRegister(){
-        if(comparePassword()){
-            try {
-                // 使用新的注册函数
-                await loginStore.signup({
-                    username: username.value,
-                    email: email.value,
-                    password: password.value
-                });
-                notify({ message: '注册成功，已自动登录', type: 'success' });
-                pageStore.jumpToPage();
-            } catch (error: any) {
-                if (error.status === 400) {
-                    notify({ message: '用户名或邮箱已被注册', type: 'error' });
-                } else {
-                    notify({ message: '注册失败，请重试', type: 'error' });
-                }
-            }
+        // 先验证所有信息
+        if (!testAllInfo()) {
+            return;
         }
-        else{
-            password.value = default_password
-            confirm_password.value = default_password
-            notify({ message: '密码不一致，请重试', type: 'error' })
+        
+        try {
+            // 使用新的注册函数
+            await loginStore.signup({
+                username: username.value,
+                email: email.value,
+                password: password.value
+            });
+            notify({ message: '注册成功，已自动登录', type: 'success' });
+            pageStore.jumpToPage();
+        } catch (error: any) {
+            if (error.status === 400) {
+                notify({ message: '用户名或邮箱已被注册', type: 'error' });
+            } else {
+                notify({ message: '注册失败，请重试', type: 'error' });
+            }
         }
     }
 
@@ -135,37 +209,42 @@
     <div class="login-background">
         <div class="login-container" v-if="state=='login'">
             <div class="login-head">
-                <h2>Sign In to NodePy</h2>
+                <div class="icon-container">
+                    <img src="../../public/logo-trans.png" alt="logo">
+                </div>
+                <div class="title-container">
+                    <h2 class="nodepy-title">登录<span class="brand-highlight">NodePy</span></h2>
+                </div>
             </div>
             <div class="login-form">
                 <el-form>
                     <el-form-item class="login-type-selector">
                         <el-radio-group v-model="loginType">
-                            <el-radio-button value="email">Email</el-radio-button>
-                            <el-radio-button value="username">Username</el-radio-button>
+                            <el-radio-button value="email">邮箱</el-radio-button>
+                            <el-radio-button value="username">用户名</el-radio-button>
                         </el-radio-group>
                     </el-form-item>
                 </el-form>
                 <el-form
                     :label-width="label_width"
-                    label-position="right">
+                    :label-position="label_position">
                     <el-form-item class="login-account" :label="accountLabel">
                         <el-input
-                            placeholder="Please enter your email"
+                            placeholder="请输入邮箱"
                             v-if="loginType=='email'"
                             v-model="email"
                         >
                         </el-input>
                         <el-input
-                            placeholder="Please enter your username"
+                            placeholder="请输入用户名"
                             v-else
                             v-model="username">
                         </el-input>
                     </el-form-item>
 
-                    <el-form-item class="login-password" label="Password">
+                    <el-form-item class="login-password" label="密码">
                         <el-input
-                            placeholder="Please enter your password"
+                            placeholder="请输入密码"
                             v-model="password"
                             type="password"
                             show-password
@@ -173,12 +252,15 @@
                         </el-input>
                     </el-form-item>
                 </el-form>
-                <el-form>
-                    <el-form-item class="login-control">
-                        <el-button type="primary" @click="handleSubmit">Submit</el-button>
-                        <el-button @click="handleReset">Reset</el-button>
-                    </el-form-item>
-                </el-form>
+                <div class="login-bottom-controler">
+                    <div class="login-control">
+                        <el-button type="primary" @click="handleSubmit" class="confirm-button login">登录</el-button>
+                        <!-- <el-button @click="handleReset">重置</el-button> -->
+                    </div>
+                    <div class="switcher">
+                        <el-button type="text" @click="handleSwitch">注册</el-button>
+                    </div>
+                </div>
 
                     <!-- 第三方登录按钮 -->
                     <!-- <div class="third-party-login">
@@ -203,40 +285,40 @@
                             </el-button>
                         </div>
                     </div> -->
-                <el-form>
-                    <el-form-item class="switcher">
-                        <el-button type="text" @click="handleSwitch">Register</el-button>
-                    </el-form-item>
-                </el-form>
             </div>
         </div>
         <div class="register-container" v-else>
-            <div class="login-head">
-                <h2>Register for NodePy</h2>
+            <div class="register-head">
+                <div class="icon-container">
+                    <img src="../../public/logo-trans.png" alt="logo">
+                </div>
+                <div class="title-container">
+                    <h2 class="nodepy-title">注册<span class="brand-highlight">NodePy</span>账号</h2>
+                </div>
             </div>
             <div class="register-form">
                 <el-form
                     :label-width="label_width"
                     :label-position="label_position">
-                    <el-form-item class="register-email" label="Email">
+                    <el-form-item class="register-email" label="邮箱">
                         <el-input
-                            placeholder="Please enter your email"
+                            placeholder="请输入邮箱"
                             v-model="email"
                         >
                         </el-input>
                     </el-form-item>
 
-                    <el-form-item class="register-username" label="UserName">
+                    <el-form-item class="register-username" label="用户名">
                         <el-input
-                            placeholder="Please enter your username"
+                            placeholder="请输入用户名"
                             v-model="username"
                         >
                         </el-input>
                     </el-form-item>
 
-                    <el-form-item class="register-password" label="Password">
+                    <el-form-item class="register-password" label="密码">
                         <el-input
-                            placeholder="Please enter your password"
+                            placeholder="请输入密码（至少8位，包含数字、字母和特殊字符）"
                             v-model="password"
                             type="password"
                             show-password
@@ -244,9 +326,9 @@
                         </el-input>
                     </el-form-item>
 
-                    <el-form-item class="register-password-confirm" label="Confirm">
+                    <el-form-item class="register-password-confirm" label="确认密码">
                         <el-input
-                            placeholder="Please confirm your password"
+                            placeholder="请再次输入密码"
                             v-model="confirm_password"
                             type="password"
                             show-password
@@ -254,16 +336,16 @@
                         </el-input>
                     </el-form-item>
                 </el-form>
-                <el-form>
-                    <el-form-item class="register-control">
-                        <el-button type="primary" @click="handleSubmit">Create Account</el-button>
-                        <el-button @click="handleReset">Reset</el-button>
-                    </el-form-item>
+                <div class="register-bottom-controler">
+                    <div class="register-control">
+                        <el-button type="primary" @click="handleSubmit" class="confirm-button register">创建</el-button>
+                        <!-- <el-button @click="handleReset">重置</el-button> -->
+                    </div>
 
-                    <el-form-item class="switcher">
-                        <el-button type="text" @click="handleSwitch">Return</el-button>
-                    </el-form-item>
-                </el-form>
+                    <div class="switcher">
+                        <el-button type="text" @click="handleSwitch">返回</el-button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -281,15 +363,80 @@
     .login-container, .register-container {
         display: flex;
         flex-direction: column;
-        height: 500px;
-        width: 500px;
+        height: 550px;
+        width: 450px;
         background-color: $mix-background-color;
         padding: 20px;
         @include controller-style
     }
+    
     .login-head,.register-head{
-        text-align: center;
-        height: 50px;
+        display: flex;
+        flex-direction: column;
+        height: 85px;
+    }
+
+    .icon-container{
+        width: 130px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        img{
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    .title-container{
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nodepy-title {
+        font-family: 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin: 0;
+        color: #333;
+        text-shadow: 0 1px 2px rgba(16, 142, 254, 0.1);
+    }
+    
+    .brand-highlight {
+        font-weight: 700;
+        color: $stress-color; /* 使用项目主色 #108efe */
+        position: relative;
+        display: inline-block;
+    }
+
+    .register-form,.login-form{
+        margin-top: 10px;
+    }
+
+    .login-bottom-controler,.register-bottom-controler{
+        margin-top: 28px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .login-control,.register-control{
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .switcher{
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .confirm-button{
+        width: 100%;
     }
 
     /* 第三方登录样式 */
