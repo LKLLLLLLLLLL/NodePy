@@ -234,6 +234,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格列选择节点',
                 value: 'SelectColNode'
             },
+            {
+                label: '表格连接节点',
+                value: 'JoinNode'
+            },
         ]
     },
     {

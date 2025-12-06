@@ -726,6 +726,21 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedSelectColNode)
         break
+      case 'JoinNode':
+        const addedJoinNode: Nodetypes.JoinNode = {
+          id,
+          position,
+          type: 'JoinNode',
+          data: {
+            param: {
+              left_on: '',
+              right_on: '',
+              how: 'INNER'
+            }
+          }
+        }
+        addNodes(addedJoinNode)
+        break
     
       default:
         console.log(type)
