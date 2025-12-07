@@ -7,7 +7,7 @@ $table-color: pink;
 $file-color: #f97316;
 $bool-color: #77b021;
 $datetime-color: #00c8ff;
-$model-color: #ffff29;
+$model-color: #9f03c2;
 $default-type-color: gray;
 //  node element style
 $node-width: 210px;
@@ -144,6 +144,11 @@ $machine-node-color: $model-color;
 .node-title-datetimeProcess {
   @include node-title-style;
   background: $datetime-node-color;
+}
+
+.node-title-machineLearning {
+  @include node-title-style;
+  background: $machine-node-color;
 }
 
 .port {

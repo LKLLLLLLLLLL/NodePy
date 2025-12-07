@@ -329,5 +329,15 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'WordcloudNode'
             },
         ]
-    }
+    },
+    {
+        label: '机器学习节点',
+        value: 'machineLearning',
+        children: [
+            {
+                label: '线性回归节点',
+                value: 'LinearRegressionNode'
+            },
+        ]
+    },
 ]

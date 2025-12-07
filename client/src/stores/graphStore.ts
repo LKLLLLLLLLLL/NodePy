@@ -955,6 +955,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedCumulativeNode)
         break
+      case 'LinearRegressionNode':
+        const addedLinearRegressionNode: Nodetypes.LinearRegressionNode = {
+          id,
+          position,
+          type: 'LinearRegressionNode',
+          data: {
+            param: {
+              feature_cols: [],
+              target_col: ''
+            }
+          }
+        }
+        addNodes(addedLinearRegressionNode)
+        break
     
       default:
         console.log(type)

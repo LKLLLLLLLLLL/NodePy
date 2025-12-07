@@ -10,7 +10,7 @@ export const dataTypeColor = {
     Table: 'pink',
     File: '#f97316',
     Datetime: '#00c8ff',
-    Model: '#ffff29',
+    Model: '#9f03c2',
     default: 'gray'
 }
 

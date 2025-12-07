@@ -81,6 +81,7 @@ import RollingNode from '../nodes/analysis/RollingNode.vue'
 import ResampleNode from '../nodes/analysis/ResampleNode.vue'
 import PctChangeNode from '../nodes/analysis/PctChangeNode.vue'
 import CumulativeNode from '../nodes/analysis/CumulativeNode.vue'
+import LinearRegressionNode from '../nodes/machineLearning/LinearRegressionNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -346,6 +347,8 @@ const nodeColor = (node: BaseNode) => {
     case 'PctChangeNode':
     case 'CumulativeNode':
       return nodeCategoryColor.analysis
+    case 'LinearRegressionNode':
+      return nodeCategoryColor.machine
     default:
       return nodeCategoryColor.default
   }
@@ -693,6 +696,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-CumulativeNode="CumulativeNodeProps">
           <CumulativeNode v-bind="CumulativeNodeProps"/>
+        </template>
+
+        <template #node-LinearRegressionNode="LinearRegressionNodeProps">
+          <LinearRegressionNode v-bind="LinearRegressionNodeProps"/>
         </template>
 
       </VueFlow>
