@@ -198,6 +198,35 @@ class Schema(BaseModel):
             result["value"] = self.file.to_dict()
         return result
 
+    @classmethod
+    def from_coltype(cls, col_type: ColType) -> "Schema":
+        if col_type == ColType.BOOL:
+            return Schema(type=Schema.Type.BOOL)
+        elif col_type == ColType.INT:
+            return Schema(type=Schema.Type.INT)
+        elif col_type == ColType.FLOAT:
+            return Schema(type=Schema.Type.FLOAT)
+        elif col_type == ColType.STR:
+            return Schema(type=Schema.Type.STR)
+        elif col_type == ColType.DATETIME:
+            return Schema(type=Schema.Type.DATETIME)
+        else:
+            raise ValueError(f"Cannot convert ColType {col_type} to Schema.")
+
+    def to_coltype(self) -> ColType:
+        if self.type == Schema.Type.BOOL:
+            return ColType.BOOL
+        elif self.type == Schema.Type.INT:
+            return ColType.INT
+        elif self.type == Schema.Type.FLOAT:
+            return ColType.FLOAT
+        elif self.type == Schema.Type.STR:
+            return ColType.STR
+        elif self.type == Schema.Type.DATETIME:
+            return ColType.DATETIME
+        else:
+            raise ValueError(f"Cannot convert Schema {self} to ColType.")
+
 
 class Pattern(BaseModel):
     """
