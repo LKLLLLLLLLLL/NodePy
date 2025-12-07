@@ -593,6 +593,21 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedRegexExtractNode)
         break
+      case 'TokenizeNode':
+        const addedTokenizeNode: Nodetypes.TokenizeNode = {
+          id,
+          position,
+          type: 'TokenizeNode',
+          data: {
+            param: {
+              language: 'ENGLISH',
+              delimiter: null,
+              result_col: null
+            }
+          }
+        }
+        addNodes(addedTokenizeNode)
+        break
       case 'InsertConstColNode':
         const addedInsertConstColNode: Nodetypes.InsertConstColNode = {
           id,

@@ -161,6 +161,10 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'RegexExtractNode'
             },
             {
+                label: '分词节点',
+                value: 'TokenizeNode'
+            },
+            {
                 label: '首尾字符清洗节点',
                 value: 'StripNode'
             },

@@ -64,9 +64,8 @@
     const commitEdit = () => {
         if(isEditing.value) {
             isEditing.value = false
-            if(props.allowNull && editText.value.trim() === '') {
+            if(props.allowNull && editText.value === '') {
                 model.value = null
-                editText.value = ''
             }else {
                 model.value = editText.value
             }

@@ -83,6 +83,7 @@ import PctChangeNode from '../nodes/analysis/PctChangeNode.vue'
 import CumulativeNode from '../nodes/analysis/CumulativeNode.vue'
 import LinearRegressionNode from '../nodes/machineLearning/LinearRegressionNode.vue'
 import PredictNode from '../nodes/machineLearning/PredictNode.vue'
+import TokenizeNode from '../nodes/stringProcess/TokenizeNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -312,6 +313,7 @@ const nodeColor = (node: BaseNode) => {
     case 'RegexMatchNode':
     case 'BatchRegexMatchNode':
     case 'RegexExtractNode':
+    case 'TokenizeNode':
       return nodeCategoryColor.str
     case 'InsertConstColNode':
     case 'InsertRangeColNode':
@@ -574,6 +576,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-RegexExtractNode="RegexExtractNodeProps">
           <RegexExtractNode v-bind="RegexExtractNodeProps"/>
+        </template>
+
+        <template #node-TokenizeNode="TokenizeNodeProps">
+          <TokenizeNode v-bind="TokenizeNodeProps"/>
         </template>
 
         <template #node-InsertConstColNode="InsertConstColNodeProps">

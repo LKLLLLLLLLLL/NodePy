@@ -480,6 +480,19 @@ export interface RegexExtractNode extends BaseNode<RegexExtractNodeData> {
 }
 
 
+export interface TokenizeNodeParam {
+    language: "ENGLISH"|"CHINESE"
+    delimiter: string | null
+    result_col: string | null
+}
+export type TokenizeNodeData = BaseData & {
+    param: TokenizeNodeParam
+}
+export interface TokenizeNode extends BaseNode<TokenizeNodeData> {
+    type: 'TokenizeNode'
+}
+
+
 /*********************  TableProcess Nodes  **************************/
 export interface InsertConstColNodeParam {
     col_name: string,
