@@ -1,3 +1,5 @@
+import base64
+import io
 from datetime import datetime
 from math import isinf, isnan
 from typing import Any, ClassVar, Literal, Union, cast
@@ -132,15 +134,22 @@ class Model(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         # serialize the sklearn model using joblib
-        model_bytes = joblib.dump(self.model, None)
+        buf = io.BytesIO()
+        joblib.dump(self.model, buf)
+        buf.seek(0)
+        model_bytes = buf.read()
+        model_b64 = base64.b64encode(model_bytes).decode("ascii")
         return {
-            "model": model_bytes,
+            "model": model_b64,
             "metadata": self.metadata.model_dump(),
         }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> 'Model':
-        model = joblib.load(data["model"])
+        model_b64 = data["model"]
+        model_bytes = base64.b64decode(model_b64)
+        buf = io.BytesIO(model_bytes)
+        model = joblib.load(buf)
         metadata = ModelSchema.model_validate(data["metadata"])
         return Model(model=model, metadata=metadata)
 
@@ -234,9 +243,13 @@ class Data(BaseModel):
             )
         elif isinstance(self.payload, Model):
             # Serialize Model payload
-            model_bytes = joblib.dump(self.payload.model, None)
+            buf = io.BytesIO()
+            joblib.dump(self.payload.model, buf)
+            buf.seek(0)
+            model_bytes = buf.read()
+            model_b64 = base64.b64encode(model_bytes).decode("ascii")
             model_dict = {
-                "model": model_bytes,
+                "model": model_b64,
                 "metadata": self.payload.metadata.model_dump(),
             }
             return DataView(
@@ -313,7 +326,10 @@ class Data(BaseModel):
             payload = Table(df=df, col_types=col_types)
         elif payload_type == "Model":
             assert isinstance(payload_value, dict)
-            model = joblib.load(payload_value["model"])
+            model_b64 = payload_value["model"]
+            model_bytes = base64.b64decode(model_b64)
+            buf = io.BytesIO(model_bytes)
+            model = joblib.load(buf)
             metadata = ModelSchema.model_validate(payload_value["metadata"])
             payload = Model(model=model, metadata=metadata)
         elif payload_type == "File":

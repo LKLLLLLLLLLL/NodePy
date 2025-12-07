@@ -74,7 +74,7 @@ class TokenizeNode(BaseNode):
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         import jieba
-        
+
         text_value = input["text"].payload
         assert isinstance(text_value, str)
 
