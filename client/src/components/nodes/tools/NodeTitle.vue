@@ -7,14 +7,15 @@
         <svg-icon type="mdi" :path="alphabetical_variant_path" v-else-if="nodeCategory === 'stringProcess'"></svg-icon>
         <svg-icon type="mdi" :path="table_path" v-else-if="nodeCategory === 'tableProcess'"></svg-icon>
         <svg-icon type="mdi" :path="timer_outline_path" v-else-if="nodeCategory === 'datetimeProcess'"></svg-icon>
+        <svg-icon type="mdi" :path="ruler_square_path" v-else-if="nodeCategory === 'analysis'"></svg-icon>
         <slot/>
     </div>
 </template>
 
 <script lang="ts" setup>
     //@ts-ignore
-    import SvgIcon from '@jamescoyle/vue-icon'
-    import { mdiAlphabeticalVariant, mdiChartScatterPlot, mdiFileOutline, mdiImport, mdiMathCompass, mdiTable, mdiTimerOutline } from '@mdi/js'
+    import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiAlphabeticalVariant, mdiChartScatterPlot, mdiFileOutline, mdiImport, mdiMathCompass, mdiRulerSquare, mdiTable, mdiTimerOutline } from '@mdi/js';
 
 
     const props = defineProps<{
@@ -36,6 +37,7 @@
     const alphabetical_variant_path = mdiAlphabeticalVariant
     const table_path = mdiTable
     const timer_outline_path = mdiTimerOutline
+    const ruler_square_path = mdiRulerSquare
 
 </script>
 
