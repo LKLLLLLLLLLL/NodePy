@@ -603,6 +603,20 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - matches: 提取结果，类型为Table。
 
+#### 4.11 TokenizeNode
+节点用于将输入的字符串进行分词操作，输出分词结果列表。
+
+**参数：**
+- language: 语言类型，类型为str，取值为"ENGLISH", "CHINESE"。
+- delimiter: 分词分隔符，类型为str，默认为空格" "，仅在language为"ENGLISH"时有效。
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+
+**输入：**
+- text: 输入的字符串，类型为str。
+
+**输出：**
+- tokens: 分词结果，类型为只有一列的Table，每一行是一个分词结果。
+
 ### 5. 表格处理节点(tableprocess)
 #### 5.1 InsertConstColNode
 在表格中插入常量列节点。

@@ -1,9 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
-import httpx
 import pandas as pd
-import yfinance as yf
 from loguru import logger
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import insert
@@ -195,6 +193,7 @@ class FinancialDataManager:
                 return df
 
             elif source == "yfinance":
+                import yfinance as yf
                 # yfinance uses start/end date string
                 stock = yf.Ticker(symbol)
                 # yfinance's minute-level data is limited to the last 60 days
@@ -294,6 +293,7 @@ class FinancialDataManager:
 
     @staticmethod
     def _fetch_binance_api(symbol: str, interval: str, **kwargs):
+        import httpx
         url = "https://api.binance.com/api/v3/klines"
         params = {
             "symbol": symbol,
