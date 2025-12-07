@@ -195,3 +195,37 @@ def node_ctor(global_config):
         return BaseNode.create_from_type(global_config, type_name, **data)
 
     return _ctor
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _default_fake_wordcloud():
+    """Ensure a safe Fake WordCloud is available during tests to avoid
+    system font / image generation dependencies. Tests that need to assert
+    specific WordCloud behaviour can still monkeypatch `wordcloud.WordCloud`.
+    """
+    try:
+        import wordcloud as _wc_mod
+    except Exception:
+        _wc_mod = types.ModuleType("wordcloud")
+        sys.modules["wordcloud"] = _wc_mod
+
+    class FakeWordCloud:
+        def __init__(self, *args, **kwargs):
+            self._freqs = None
+        def generate_from_frequencies(self, freqs):
+            # store frequencies for optional inspection
+            try:
+                self._freqs = dict(freqs)
+            except Exception:
+                self._freqs = None
+            return None
+        def __array__(self):
+            # return a minimal image-like array; prefer numpy if available
+            try:
+                import numpy as _np
+                return (_np.ones((8, 8, 3), dtype=_np.uint8) * 255)
+            except Exception:
+                return [[255]]
+
+    _wc_mod.WordCloud = FakeWordCloud # type: ignore[attr-defined]
+    return FakeWordCloud
