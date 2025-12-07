@@ -10,6 +10,7 @@
             :class="{selected: selectedIdx.includes(index)}"
             @click.stop="onClick(index)"
             v-for="(item, index) in options"
+            :key="item"
         >
             {{ item }}
         </div>
@@ -20,7 +21,7 @@
     import { ref, type PropType } from 'vue'
     const props = defineProps({
         options: {
-            type: Array,
+            type: Array as PropType<string[]>,
             required: true
         },
         width: {

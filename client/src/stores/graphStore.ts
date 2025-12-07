@@ -409,6 +409,17 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedTableToFileNode)
         break
+      case 'TextFromFileNode':
+        const addedTextFromFileNode: Nodetypes.TextFromFileNode = {
+          id,
+          position,
+          type: 'TextFromFileNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedTextFromFileNode)
+        break
       case 'PlotNode':
         const addedPlotNode: Nodetypes.PlotNode = {
           id,

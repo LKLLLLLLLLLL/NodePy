@@ -22,23 +22,25 @@
                     class="nodrag"
                 />
             </div>
-            <div class="rename_value" v-if="data.hint?.rename_col_choices" v-for="(value, idx) in rename_value" :key="`${propsRename_cols[idx]}_${idx}`"><!-- when the hint is empty, don't show the rename_value to avoid complex errors-->
-                <div class="param-description rename_value-description">
-                    旧列
-                    <span :class="{'special-table-column': isSpecialColumn(propsRename_cols[idx])}">
-                        {{displayColumnName(propsRename_cols[idx])}}
-                    </span>
+            <template v-if="data.hint?.rename_col_choices"> <!-- when the hint is empty, don't show the rename_value to avoid complex errors-->
+                <div class="rename_value" v-for="(value, idx) in rename_value" :key="propsRename_cols[idx]">    <!--use the column name as the key-->
+                    <div class="param-description rename_value-description">
+                        旧列
+                        <span :class="{'special-table-column': isSpecialColumn(propsRename_cols[idx])}">
+                            {{displayColumnName(propsRename_cols[idx])}}
+                        </span>
+                    </div>
+                    <div class="param-description" :class="{'node-has-paramerr': rename_mapHasErr.value}">
+                        新列
+                    </div>
+                    <NodepyStringInput
+                        v-model="value.value"
+                        @update-value="onUpdateValue(idx)"
+                        class="nodrag"
+                        placeholder="新列"
+                    />
                 </div>
-                <div class="param-description" :class="{'node-has-paramerr': rename_mapHasErr.value}">
-                    新列
-                </div>
-                <NodepyStringInput
-                    v-model="value.value"
-                    @update-value="onUpdateValue(idx)"
-                    class="nodrag"
-                    placeholder="常量字符串"
-                />
-            </div>
+            </template>
             <div class="output-renamed_table port">
                 <div class="output-port-description">
                     表格输出

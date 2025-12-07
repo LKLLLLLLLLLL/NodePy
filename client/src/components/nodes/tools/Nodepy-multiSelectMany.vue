@@ -26,6 +26,7 @@
         <div v-if="open" class="options" @click.stop>
             <div
                 v-for="(item, idx) in options"
+                :key="item"
                 class="item"
                 @click.stop="select(idx)"
                 :class="[{selected: selectedIdx.includes(idx) && options[idx]}, {'specialColumn' : isSpecialColumn(item)}]"

@@ -68,6 +68,7 @@ import ShiftNode from '../nodes/tableProcess/ShiftNode.vue'
 import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
 import TableToFileNode from '../nodes/file/TableToFileNode.vue'
+import TextFromFileNode from '../nodes/file/TextFromFileNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -317,6 +318,7 @@ const nodeColor = (node: BaseNode) => {
     case 'UploadNode':
     case 'TableFromFileNode':
     case 'TableToFileNode':
+    case 'TextFromFileNode':
       return nodeCategoryColor.file
     default:
       return nodeCategoryColor.default
@@ -611,6 +613,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
       
         <template #node-TableToFileNode="TableToFileNodeProps">
           <TableToFileNode v-bind="TableToFileNodeProps"/>
+        </template>
+
+        <template #node-TextFromFileNode="TextFromFileNodeProps">
+          <TextFromFileNode v-bind="TextFromFileNodeProps"/>
         </template>
 
       </VueFlow>

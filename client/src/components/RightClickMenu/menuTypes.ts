@@ -134,6 +134,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '表格文件节点',
                 value: 'TableToFileNode'
             },
+            {
+                label: '文件文本节点',
+                value: 'TextFromFileNode'
+            },
         ]
     },
     {

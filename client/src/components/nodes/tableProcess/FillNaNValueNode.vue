@@ -33,53 +33,55 @@
                     class="nodrag"
                 />
             </div>
-            <div class="fill_value" v-if="data.hint?.subset_col_choices && data.param.method === 'const'" v-for="(value, idx) in fill_value" :key="`${data.param.subset_cols[idx]}_${idx}`"><!-- when the hint is empty, don't show the fill_value to avoid complex errors-->
-                <div class="param-description fill_value-description">
-                    列
-                    <span :class="{'special-table-column': isSpecialColumn(data.param.subset_cols[idx])}">
-                        {{displayColumnName(data.param.subset_cols[idx])}}
-                    </span>
-                </div>
-                <div class="param-description" :class="{'node-has-paramerr': fill_valueHasErr.value}">
-                    填充值
-                    <NodepyBoolValue
+            <template v-if="data.hint?.subset_col_choices && data.param.method === 'const'">    <!-- when the hint is empty, don't show the fill_value to avoid complex errors-->
+                <div class="fill_value" v-for="(value, idx) in fill_value" :key="data.param.subset_cols[idx]">  <!--use the column name as the key-->
+                    <div class="param-description fill_value-description">
+                        列
+                        <span :class="{'special-table-column': isSpecialColumn(data.param.subset_cols[idx])}">
+                            {{displayColumnName(data.param.subset_cols[idx])}}
+                        </span>
+                    </div>
+                    <div class="param-description" :class="{'node-has-paramerr': fill_valueHasErr.value}">
+                        填充值
+                        <NodepyBoolValue
+                            v-model="value.value"
+                            @update-value="onUpdateValue(idx)"
+                            width="20px"
+                            height="20px"
+                            v-if="fill_value_types[subset_colsHint.indexOf(data.param.subset_cols[idx])] === 'bool'"
+                        >
+                            布尔
+                        </NodepyBoolValue>
+                    </div>
+                    <NodepyNumberInput
+                        v-if="fill_value_types[subset_colsHint.indexOf(data.param.subset_cols[idx])] === 'int'"
+                        v-model="value.value"
+                        class="nodrag"
+                        @update-value="onUpdateValue(idx)"
+                    />
+                    <NodepyNumberInput
+                        v-if="fill_value_types[subset_colsHint.indexOf(data.param.subset_cols[idx])] === 'float'"
+                        v-model="value.value"
+                        class="nodrag"
+                        @update-value="onUpdateValue(idx)"
+                        :denominator="1000"
+                    />
+                    <NodepyStringInput
                         v-model="value.value"
                         @update-value="onUpdateValue(idx)"
-                        width="20px"
-                        height="20px"
-                        v-if="fill_value_types[subset_colsHint.indexOf(data.param.subset_cols[idx])] === 'bool'"
-                    >
-                        布尔
-                    </NodepyBoolValue>
+                        class="nodrag"
+                        placeholder="常量字符串"
+                        v-if="fill_value_types[subset_colsHint.indexOf(data.param.subset_cols[idx])] === 'str'"
+                    />
+                    <NodepyStringInput
+                        v-model="value.value"
+                        @update-value="onUpdateValue(idx)"
+                        class="nodrag"
+                        placeholder="时间"
+                        v-if="fill_value_types[subset_colsHint.indexOf(data.param.subset_cols[idx])] === 'Datetime'"
+                    />
                 </div>
-                <NodepyNumberInput
-                    v-if="fill_value_types[subset_colsHint.indexOf(data.param.subset_cols[idx])] === 'int'"
-                    v-model="value.value"
-                    class="nodrag"
-                    @update-value="onUpdateValue(idx)"
-                 />
-                <NodepyNumberInput
-                    v-if="fill_value_types[subset_colsHint.indexOf(data.param.subset_cols[idx])] === 'float'"
-                    v-model="value.value"
-                    class="nodrag"
-                    @update-value="onUpdateValue(idx)"
-                    :denominator="1000"
-                />
-                <NodepyStringInput
-                    v-model="value.value"
-                    @update-value="onUpdateValue(idx)"
-                    class="nodrag"
-                    placeholder="常量字符串"
-                    v-if="fill_value_types[subset_colsHint.indexOf(data.param.subset_cols[idx])] === 'str'"
-                />
-                <NodepyStringInput
-                    v-model="value.value"
-                    @update-value="onUpdateValue(idx)"
-                    class="nodrag"
-                    placeholder="时间"
-                    v-if="fill_value_types[subset_colsHint.indexOf(data.param.subset_cols[idx])] === 'Datetime'"
-                />
-            </div>
+            </template>
             <div class="output-filled_table port">
                 <div class="output-port-description">
                     表格输出
