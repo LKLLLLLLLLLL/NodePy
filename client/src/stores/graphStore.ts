@@ -869,6 +869,47 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedDatetimeToTimestampNode)
         break
+      case 'StatsNode':
+        const addedStatsNode: Nodetypes.StatsNode = {
+          id,
+          position,
+          type: 'StatsNode',
+          data: {
+            param: {
+              col: ''
+            }
+          }
+        }
+        addNodes(addedStatsNode)
+        break
+      case 'DiffNode':
+        const addedDiffNode: Nodetypes.DiffNode = {
+          id,
+          position,
+          type: 'DiffNode',
+          data: {
+            param: {
+              col: ''
+            }
+          }
+        }
+        addNodes(addedDiffNode)
+        break
+      case 'RollingNode':
+        const addedRollingNode: Nodetypes.RollingNode = {
+          id,
+          position,
+          type: 'RollingNode',
+          data: {
+            param: {
+              col: '',
+              window_size: 1,
+              method: 'mean'
+            }
+          }
+        }
+        addNodes(addedRollingNode)
+        break
     
       default:
         console.log(type)

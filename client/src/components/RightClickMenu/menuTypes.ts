@@ -285,7 +285,20 @@ export const nodeMenuItems: MenuNode[] = [
     {
         label: '分析节点',
         value: 'analysis',
-        children: []
+        children: [
+            {
+                label: '统计节点',
+                value: 'StatsNode'
+            },
+            {
+                label: '差分节点',
+                value: 'DiffNode'
+            },
+            {
+                label: '移动计算节点',
+                value: 'RollingNode'
+            },
+        ]
     },
     {
         label: '可视化节点',

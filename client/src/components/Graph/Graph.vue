@@ -75,6 +75,9 @@ import ToDatetimeNode from '../nodes/datetimeProcess/ToDatetimeNode.vue'
 import StrToDatetimeNode from '../nodes/datetimeProcess/StrToDatetimeNode.vue'
 import DatetimePrintNode from '../nodes/datetimeProcess/DatetimePrintNode.vue'
 import DatetimeToTimestampNode from '../nodes/datetimeProcess/DatetimeToTimestampNode.vue'
+import StatsNode from '../nodes/analysis/StatsNode.vue'
+import DiffNode from '../nodes/analysis/DiffNode.vue'
+import RollingNode from '../nodes/analysis/RollingNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -333,6 +336,10 @@ const nodeColor = (node: BaseNode) => {
     case 'DatetimePrintNode':
     case 'DatetimeToTimestampNode':
       return nodeCategoryColor.datetime
+    case 'StatsNode':
+    case 'DiffNode':
+    case 'RollingNode':
+      return nodeCategoryColor.analysis
     default:
       return nodeCategoryColor.default
   }
@@ -350,11 +357,11 @@ const isValidConnection = (connection: any) => {
 
 const handleKeyDown = (e: KeyboardEvent) => {
   if(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return // ignore input and textarea
-  if((e.ctrlKey || e.metaKey) && e.key === 'c') {
+  if((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
     e.preventDefault()
     graphStore.copySelectedNodes()
   }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
     e.preventDefault()
     graphStore.pasteNodes(mousePosition.value)
   }
@@ -656,6 +663,18 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-DatetimeToTimestampNode="DatetimeToTimestampNodeProps">
           <DatetimeToTimestampNode v-bind="DatetimeToTimestampNodeProps"/>
+        </template>
+
+        <template #node-StatsNode="StatsNodeProps">
+          <StatsNode v-bind="StatsNodeProps"/>
+        </template>
+
+        <template #node-DiffNode="DiffNodeProps">
+          <DiffNode v-bind="DiffNodeProps"/>
+        </template>
+
+        <template #node-RollingNode="RollingNodeProps">
+          <RollingNode v-bind="RollingNodeProps"/>
         </template>
 
       </VueFlow>
