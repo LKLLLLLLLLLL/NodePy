@@ -338,6 +338,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '线性回归节点',
                 value: 'LinearRegressionNode'
             },
+            {
+                label: '预测节点',
+                value: 'PredictNode'
+            },
         ]
     },
 ]

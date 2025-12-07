@@ -969,6 +969,17 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedLinearRegressionNode)
         break
+      case 'PredictNode':
+        const addedPredictNode: Nodetypes.PredictNode = {
+          id,
+          position,
+          type: 'PredictNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedPredictNode)
+        break
     
       default:
         console.log(type)
