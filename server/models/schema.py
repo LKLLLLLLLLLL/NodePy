@@ -118,6 +118,22 @@ class FileSchema(BaseModel):
             return FileSchema(format=file.format)
 
 
+class ModelSchema(BaseModel):
+    """
+    The schema of Model data, including model type and other metadata.
+    """
+    class Type(str, Enum):
+        REGRESSION = "Regression"
+        CLASSIFICATION = "Classification"
+    
+    model_type: Type
+    input_cols: dict[str, ColType]
+    output_cols: dict[str, ColType]
+
+    def __hash__(self) -> int:
+        return hash((self.model_type, frozenset(self.input_cols.items()), frozenset(self.output_cols.items())))
+
+
 class Schema(BaseModel):
     class Type(str, Enum):
         TABLE = "Table"
@@ -127,10 +143,12 @@ class Schema(BaseModel):
         FLOAT = "float"
         FILE = "File"
         DATETIME = "Datetime"
+        MODEL = "Model"
 
     type: Type
     tab: Optional[TableSchema] = None  # not None if type is TABLE
     file: Optional[FileSchema] = None  # not None if type is FILE
+    model: Optional[ModelSchema] = None  # not None if type is MODEL
 
     @model_validator(mode="after")
     def verify(self) -> Self:
@@ -142,6 +160,10 @@ class Schema(BaseModel):
             raise ValueError("FileSchema must be provided when type is FILE.")
         if self.type != self.Type.FILE and self.file is not None:
             raise ValueError("FileSchema must be None when type is not FILE.")
+        if self.type == self.Type.MODEL and self.model is None:
+            raise ValueError("ModelSchema must be provided when type is MODEL.")
+        if self.type != self.Type.MODEL and self.model is not None:
+            raise ValueError("ModelSchema must be None when type is not MODEL.")
         return self
 
     def __hash__(self) -> int:
@@ -151,6 +173,9 @@ class Schema(BaseModel):
         elif self.type == self.Type.FILE:
             assert self.file is not None
             return hash((self.type, self.file))
+        elif self.type == self.Type.MODEL:
+            assert self.model is not None
+            return hash((self.type, self.model))
         else:
             return hash(self.type)
 
@@ -177,6 +202,9 @@ class Schema(BaseModel):
             elif self.type == self.Type.FILE:
                 assert self.file is not None and other.file is not None
                 return self.file == other.file
+            elif self.type == self.Type.MODEL:
+                assert self.model is not None and other.model is not None
+                return self.model == other.model    
             return True
         else:
             return NotImplemented
@@ -196,6 +224,9 @@ class Schema(BaseModel):
         elif self.type == self.Type.FILE:
             assert self.file is not None
             result["value"] = self.file.to_dict()
+        elif self.type == self.Type.MODEL:
+            assert self.model is not None
+            result["value"] = self.model.model_dump()
         return result
 
     @classmethod
@@ -237,6 +268,7 @@ class Pattern(BaseModel):
     types: set[Schema.Type]
     table_columns: dict[str, set[ColType]] | None = None  # only for TABLE type
     file_formats: set[FILE_FORMATS_TYPE] | None = None  # only for FILE type
+    model: set[ModelSchema] | None = None  # only for MODEL type
 
     @model_validator(mode="after")
     def verify(self) -> Self:
@@ -244,6 +276,8 @@ class Pattern(BaseModel):
             raise ValueError("table_columns can only be set if TABLE is in types.")
         if Schema.Type.FILE not in self.types and self.file_formats is not None:
             raise ValueError("file_format can only be set if FILE is in types.")
+        if Schema.Type.MODEL not in self.types and self.model is not None:
+            raise ValueError("model can only be set if MODEL is in types.")
         return self
 
     def __contains__(self, schema: Schema) -> bool:
@@ -265,5 +299,10 @@ class Pattern(BaseModel):
             if schema.file is None:
                 return False
             if schema.file.format not in self.file_formats:
+                return False
+        if schema.type == Schema.Type.MODEL and self.model is not None:
+            if schema.model is None:
+                return False
+            if schema.model not in self.model:
                 return False
         return True

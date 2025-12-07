@@ -1,12 +1,20 @@
 from datetime import datetime
 from typing import Any, ClassVar, Literal, Union, cast
 
+import joblib
 from pandas import DataFrame, Series, isna
 from pydantic import BaseModel, model_validator
+from sklearn.base import BaseEstimator
 from typing_extensions import Self
 
 from server.models.file import File
-from server.models.schema import FileSchema, Schema, TableSchema, check_no_illegal_cols
+from server.models.schema import (
+    FileSchema,
+    ModelSchema,
+    Schema,
+    TableSchema,
+    check_no_illegal_cols,
+)
 from server.models.types import ColType
 
 """
@@ -103,8 +111,40 @@ class Table(BaseModel):
         return Table(df=df, col_types=col_types)
 
 
+class Model(BaseModel):
+    """
+    The Model data.
+    Wrapping the sklearn BaseEstimator.
+    """
+    # allow arbitrary types like sklearn BaseEstimator
+    model_config = {"arbitrary_types_allowed": True}
+
+    model: BaseEstimator
+    metadata: ModelSchema
+
+    def extract_schema(self) -> Schema:
+        return Schema(
+            type=Schema.Type.MODEL,
+            model=self.metadata
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        # serialize the sklearn model using joblib
+        model_bytes = joblib.dump(self.model, None)
+        return {
+            "model": model_bytes,
+            "metadata": self.metadata.model_dump(),
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> 'Model':
+        model = joblib.load(data["model"])
+        metadata = ModelSchema.model_validate(data["metadata"])
+        return Model(model=model, metadata=metadata)
+
+
 class Data(BaseModel):
-    payload: Union[Table, str, int, bool, float, File, datetime]
+    payload: Union[Table, str, int, bool, float, File, datetime, Model]
 
     def extract_schema(self) -> Schema:
         if isinstance(self.payload, Table):
@@ -124,6 +164,8 @@ class Data(BaseModel):
             return Schema(type=Schema.Type.FILE, file=FileSchema.from_file(self.payload))
         elif isinstance(self.payload, datetime):
             return Schema(type=Schema.Type.DATETIME)
+        elif isinstance(self.payload, Model):
+            return self.payload.extract_schema()
         else:
             raise TypeError(f"Unsupported data payload type: {type(self.payload)}")
 
@@ -133,15 +175,15 @@ class Data(BaseModel):
         new_table = self.payload._append_col(new_col, ser)
         return Data(payload=new_table)
     
-    def print(self) -> str:
-        if isinstance(self.payload, Table):
-            return str(self.payload.df)
-        else:
-            return str(self.payload)
+    # def print(self) -> str:
+    #     if isinstance(self.payload, Table):
+    #         return str(self.payload.df)
+    #     else:
+    #         return str(self.payload)
 
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, Data):
-            raise NotImplementedError(f"Cannot compare Data with {type(value)}")
+            return NotImplemented
         self_dict = self.to_view().to_dict()
         other_dict = value.to_view().to_dict()
         return self_dict == other_dict
@@ -158,7 +200,7 @@ class Data(BaseModel):
                         for v in self.payload.df[col].tolist()
                     ]
                 else:
-                    # [保持] 显式清洗 NaN/None 值，确保 JSON 序列化安全
+                    # cleam NaN/pandas.NA to None
                     cols[col] = [
                         None if isna(v) else v for v in self.payload.df[col].tolist()
                     ]
@@ -172,6 +214,17 @@ class Data(BaseModel):
             return DataView(
                 type="Datetime",
                 value=self.payload.isoformat(),
+            )
+        elif isinstance(self.payload, Model):
+            # Serialize Model payload
+            model_bytes = joblib.dump(self.payload.model, None)
+            model_dict = {
+                "model": model_bytes,
+                "metadata": self.payload.metadata.model_dump(),
+            }
+            return DataView(
+                type="Model",
+                value=model_dict,
             )
         else:
             # Map Python types to allowed Literal values
@@ -229,6 +282,11 @@ class Data(BaseModel):
                     df[col] = df[col].astype(ptype)
 
             payload = Table(df=df, col_types=col_types)
+        elif payload_type == "Model":
+            assert isinstance(payload_value, dict)
+            model = joblib.load(payload_value["model"])
+            metadata = ModelSchema.model_validate(payload_value["metadata"])
+            payload = Model(model=model, metadata=metadata)
         elif payload_type == "File":
             assert isinstance(payload_value, File)
             payload = payload_value
@@ -280,8 +338,8 @@ class DataView(BaseModel):
                 result["cols"][col_name] = normalized
             return result
 
-    type: Literal["int", "float", "str", "bool", "Table", "File", "Datetime"]
-    value: Union[TableView, str, int, bool, float, File] # datetime is serialized as str
+    type: Literal["int", "float", "str", "bool", "Table", "File", "Datetime", "Model"]
+    value: Union[TableView, str, int, bool, float, File, dict[str, Any]] # datetime is serialized as str
 
     model_config = {"arbitrary_types_allowed": True}
 

@@ -23,7 +23,7 @@ class ResampleNode(BaseNode):
     """
 
     col: str
-    frequency: Literal["D", "H", "T", "S"]  # Days, Hours, Minutes, Seconds
+    frequency: Literal["D", "H", "M", "S"]  # Days, Hours, Minutes, Seconds
     method: Literal["mean", "sum", "max", "min", "count"]
     result_col: str | None = None
 
