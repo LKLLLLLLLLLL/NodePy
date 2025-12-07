@@ -3,7 +3,7 @@ from typing import Any, Literal, override
 from server.config import FIGURE_DPI
 from server.models.data import Data, Table
 from server.models.exception import NodeParameterError
-from server.models.schema import ColType, FileSchema, Pattern, Schema, NO_SPECIFIED_COL
+from server.models.schema import NO_SPECIFIED_COL, ColType, FileSchema, Pattern, Schema
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
@@ -52,7 +52,7 @@ class PlotNode(BaseNode):
                 accept=Pattern(
                     types = {Schema.Type.TABLE},
                     table_columns = {
-                        self.x_col: {ColType.INT, ColType.FLOAT, ColType.STR},
+                        self.x_col: {ColType.INT, ColType.FLOAT, ColType.STR, ColType.DATETIME},
                         self.y_col: {ColType.INT, ColType.FLOAT}
                     }
                 )

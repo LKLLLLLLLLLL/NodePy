@@ -205,7 +205,7 @@ class DatetimeToTimestampNode(BaseNode):
         datetime_value = input["datetime"].payload
         assert isinstance(datetime_value, datetime)
 
-        epoch = datetime(1970, 1, 1)
+        epoch = datetime(1970, 1, 1).replace(tzinfo=DEFAULT_TIMEZONE)
         delta = datetime_value - epoch
 
         if self.unit == "DAYS":
