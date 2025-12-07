@@ -78,6 +78,9 @@ import DatetimeToTimestampNode from '../nodes/datetimeProcess/DatetimeToTimestam
 import StatsNode from '../nodes/analysis/StatsNode.vue'
 import DiffNode from '../nodes/analysis/DiffNode.vue'
 import RollingNode from '../nodes/analysis/RollingNode.vue'
+import ResampleNode from '../nodes/analysis/ResampleNode.vue'
+import PctChangeNode from '../nodes/analysis/PctChangeNode.vue'
+import CumulativeNode from '../nodes/analysis/CumulativeNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -339,6 +342,9 @@ const nodeColor = (node: BaseNode) => {
     case 'StatsNode':
     case 'DiffNode':
     case 'RollingNode':
+    case 'ResampleNode':
+    case 'PctChangeNode':
+    case 'CumulativeNode':
       return nodeCategoryColor.analysis
     default:
       return nodeCategoryColor.default
@@ -675,6 +681,18 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-RollingNode="RollingNodeProps">
           <RollingNode v-bind="RollingNodeProps"/>
+        </template>
+
+        <template #node-ResampleNode="ResampleNodeProps">
+          <ResampleNode v-bind="ResampleNodeProps"/>
+        </template>
+
+        <template #node-PctChangeNode="PctChangeNodeProps">
+          <PctChangeNode v-bind="PctChangeNodeProps"/>
+        </template>
+
+        <template #node-CumulativeNode="CumulativeNodeProps">
+          <CumulativeNode v-bind="CumulativeNodeProps"/>
         </template>
 
       </VueFlow>

@@ -910,6 +910,48 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedRollingNode)
         break
+      case 'ResampleNode':
+        const addedResampleNode: Nodetypes.ResampleNode = {
+          id,
+          position,
+          type: 'ResampleNode',
+          data: {
+            param: {
+              col: '',
+              frequency: 'D',
+              method: 'mean'
+            }
+          }
+        }
+        addNodes(addedResampleNode)
+        break
+      case 'PctChangeNode':
+        const addedPctChangeNode: Nodetypes.PctChangeNode = {
+          id,
+          position,
+          type: 'PctChangeNode',
+          data: {
+            param: {
+              col: ''
+            }
+          }
+        }
+        addNodes(addedPctChangeNode)
+        break
+      case 'CumulativeNode':
+        const addedCumulativeNode: Nodetypes.CumulativeNode = {
+          id,
+          position,
+          type: 'CumulativeNode',
+          data: {
+            param: {
+              col: '',
+              method: 'cumsum'
+            }
+          }
+        }
+        addNodes(addedCumulativeNode)
+        break
     
       default:
         console.log(type)

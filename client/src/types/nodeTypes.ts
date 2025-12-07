@@ -794,7 +794,7 @@ export interface RollingNode extends BaseNode<RollingNodeData> {
 
 export interface ResampleNodeParam {
     col: string
-    frequency: "D" | "H" | "T" | "S"
+    frequency: "D" | "H" | "M" | "S"
     method: "mean" | "sum" | "max" | "min" | "count"
     result_col?: string
 }

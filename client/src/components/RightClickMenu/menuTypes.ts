@@ -298,6 +298,18 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '移动计算节点',
                 value: 'RollingNode'
             },
+            {
+                label: '重采样节点',
+                value: 'ResampleNode'
+            },
+            {
+                label: '百分比变化计算节点',
+                value: 'PctChangeNode'
+            },
+            {
+                label: '累计计算节点',
+                value: 'CumulativeNode'
+            },
         ]
     },
     {
