@@ -37,7 +37,7 @@ class TokenizeNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
             )
-        if self.result_col is not None and not self.result_col.strip() == "":
+        if self.result_col is not None and self.result_col.strip() == "":
             self.result_col = None
         if self.result_col is None:
             self.result_col = generate_default_col_name(
