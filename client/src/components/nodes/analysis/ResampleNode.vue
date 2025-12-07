@@ -82,7 +82,7 @@
     })
     const col = ref(props.data.param.col)   //  used for defaultSelectedCol
     const defaultSelectedCol = computed(() => colHint.value.indexOf(col.value))
-    const frequency = ["D", "H", "M", "S"]
+    const frequency = ["D", "H", "T", "S"]
     const frequencyChinese = ['天', '小时', '分钟', '秒']
     const defaultSelectedFrequency = frequency.indexOf(props.data.param.frequency)
     const method = ["mean", "sum", "max", "min", "count"]
@@ -124,7 +124,7 @@
         resolve()
     }
     const onSelectChangeFrequency = (e: any) => {
-        const selected_frequency = frequency[e] as 'D' | 'H' | 'M' | 'S'
+        const selected_frequency = frequency[e] as 'D' | 'H' | 'T' | 'S'
         props.data.param.frequency = selected_frequency
     }
     const onSelectChangeMethod = (e: any) => {

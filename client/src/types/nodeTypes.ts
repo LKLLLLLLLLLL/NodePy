@@ -10,6 +10,7 @@ export const dataTypeColor = {
     Table: 'pink',
     File: '#f97316',
     Datetime: '#00c8ff',
+    Model: '#ffff29',
     default: 'gray'
 }
 
@@ -23,6 +24,7 @@ export const nodeCategoryColor = {
     analysis: '#ef4444',
     visualize: '#6366f1',
     datetime: dataTypeColor.Datetime,
+    machine: dataTypeColor.Model,
     default: 'gray'
 }
 
@@ -780,7 +782,7 @@ export interface DiffNode extends BaseNode<DiffNodeData> {
 export interface RollingNodeParam {
     col: string
     window_size: number
-    min_periods?: number
+    min_periods: number
     result_col?: string
     method: "mean" | "std" | "sum" | "min" | "max"
 }
@@ -794,7 +796,7 @@ export interface RollingNode extends BaseNode<RollingNodeData> {
 
 export interface ResampleNodeParam {
     col: string
-    frequency: "D" | "H" | "M" | "S"
+    frequency: "D" | "H" | "T" | "S"
     method: "mean" | "sum" | "max" | "min" | "count"
     result_col?: string
 }
@@ -861,4 +863,21 @@ export interface ForRollingWindowBeginNode extends BaseNode {
 
 export interface ForRollingWindowEndNode extends BaseNode {
     type: 'ForRollingWindowEndNode'
+}
+
+/*********************  MachineLearning Nodes  **************************/
+export interface LinearRegressionNodeParam {
+    feature_cols: string[]
+    target_col: string
+}
+export type LinearRegressionNodeData = BaseData & {
+    param: LinearRegressionNodeParam
+}
+export interface LinearRegressionNode extends BaseNode<LinearRegressionNodeData> {
+    type: 'LinearRegressionNode'
+}
+
+
+export interface PredictNode extends BaseNode {
+    type: 'PredictNode'
 }

@@ -7,6 +7,7 @@ $table-color: pink;
 $file-color: #f97316;
 $bool-color: #77b021;
 $datetime-color: #00c8ff;
+$model-color: #ffff29;
 $default-type-color: gray;
 //  node element style
 $node-width: 210px;
@@ -27,6 +28,7 @@ $table-node-color: $table-color; // 粉红色 - 表格处理
 $analysis-node-color: #ef4444; // 红色 - 分析
 $visualize-node-color: #6366f1; // 靛蓝色 - 可视化
 $datetime-node-color: $datetime-color; // 青色 - 日期时间处理
+$machine-node-color: $model-color;
 
 .nodes-style {
   border-radius: 9px;
@@ -71,6 +73,10 @@ $datetime-node-color: $datetime-color; // 青色 - 日期时间处理
 
 .Datetime-handle-color {
   background: $datetime-color;
+}
+
+.Model-handle-color {
+  background: $model-color;
 }
 
 .default-handle-color {

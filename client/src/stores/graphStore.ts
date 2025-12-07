@@ -904,6 +904,7 @@ export const useGraphStore = defineStore('graph', () => {
             param: {
               col: '',
               window_size: 1,
+              min_periods: 1,
               method: 'mean'
             }
           }
