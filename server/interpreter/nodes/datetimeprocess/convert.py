@@ -127,7 +127,7 @@ class DatetimePrintNode(BaseNode):
     A node to print datetime value to string output.
     User can specify the print pattern in standard datetime format.
     """
-    pattern: str
+    format: str
 
     @override
     def validate_parameters(self) -> None:
@@ -149,19 +149,19 @@ class DatetimePrintNode(BaseNode):
                 accept=Pattern(types={Schema.Type.DATETIME})
             ),
         ], [
-            OutPort(name="string", description="The resulting string after formatting the datetime value"),
+            OutPort(name="output", description="The resulting string after formatting the datetime value"),
         ]
 
     @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
-        return {"string": Schema(type=Schema.Type.STR)}
+        return {"output": Schema(type=Schema.Type.STR)}
 
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         datetime_value = input["datetime"].payload
         assert isinstance(datetime_value, datetime)
-        formatted_string = datetime_value.strftime(self.pattern)
-        return {"string": Data(payload=formatted_string)}
+        formatted_string = datetime_value.strftime(self.format)
+        return {"output": Data(payload=formatted_string)}
 
 @register_node()
 class DatetimeToTimestampNode(BaseNode):
