@@ -46,7 +46,7 @@ class DatetimeComputeNode(BaseNode):
                 name="value", 
                 description="The float value to compute with datetime",
                 optional=False,
-                accept=Pattern(types={Schema.Type.FLOAT})
+                accept=Pattern(types={Schema.Type.FLOAT, Schema.Type.INT})
             ),
         ], [
             OutPort(name="result", description="The resulting datetime value after computation"),
@@ -105,11 +105,11 @@ class DatetimeDiffNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "DatetimeDifferenceNode":
+        if not self.type == "DatetimeDiffNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
-                err_msg="Node type must be 'DatetimeDifferenceNode'."
+                err_msg="Node type must be 'DatetimeDiffNode'."
             )
         return
 
