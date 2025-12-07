@@ -9,9 +9,9 @@
                 v-for="(idx) in selectedIdx"
                 :key="idx"
                 class="tag"
-                :class="{'specialColumn' : isSpecialColumn(options[idx])}"
+                :class="{'specialColumn' : isSpecialColumn(localOptions[idx])}"
             >
-                <span class="tag-text">{{ columnValue(options[idx]) }}</span>
+                <span class="tag-text">{{ columnValue(localOptions[idx]) }}</span>
                 <span class="tag-close" @click.stop="remove(idx)">
                     <SvgIcon type="mdi" :path="close_path" size="12" />
                 </span>
@@ -25,12 +25,12 @@
 
         <div v-if="open" class="options" @click.stop>
             <div
-                v-for="(item, idx) in options"
+                v-for="(item, idx) in localOptions"
                 :key="item"
                 class="item"
                 @click.stop="select(idx)"
-                :class="[{selected: selectedIdx.includes(idx) && options[idx]}, {'specialColumn' : isSpecialColumn(item)}]"
-            >   <!-- options[idx] means empty value cannot be accepted-->
+                :class="[{selected: selectedIdx.includes(idx) && localOptions[idx]}, {'specialColumn' : isSpecialColumn(item)}]"
+            >   <!-- localOptions[idx] means empty value cannot be accepted-->
                 <span class="text">{{columnValue(item)}}</span>
             </div>
         </div>
@@ -71,6 +71,7 @@ import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
         }
     })
     const emit = defineEmits(['selectChange', 'clearSelect'])
+    const localOptions = ref(props.options)
     const root = ref<HTMLElement>()
     const itemStyle = ref({
         width: props.itemWidth,
@@ -78,11 +79,14 @@ import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
     })
     const selectedIdx = ref(props.defaultSelected)
     const open = ref(false)
-    const selectedItem = computed(() => selectedIdx.value.map(idx => props.options[idx]).filter(Boolean))
+    const selectedItem = computed(() => selectedIdx.value.map(idx => localOptions.value[idx]).filter(Boolean))
 
 
     const select = (idx: number) => {
-        if(!props.options[idx])return
+        if(JSON.stringify(props.options) === JSON.stringify([''])) {
+            return
+        }   // if props.options is empty, which means the hint is empty, just return and display the local cache
+        if(!localOptions.value[idx])return
         const id = selectedIdx.value.indexOf(idx)
         if(id !== -1) {
             selectedIdx.value.splice(id, 1)
@@ -92,6 +96,9 @@ import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
         emit('selectChange', selectedIdx.value)
     }
     const remove = (idx: number) => {
+        if(JSON.stringify(props.options) === JSON.stringify([''])) {
+            return
+        }   // if props.options is empty, which means the hint is empty, just return and display the local cache
         const id = selectedIdx.value.indexOf(idx)
         if(id !== -1) {
             selectedIdx.value.splice(id, 1)
@@ -130,9 +137,13 @@ import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
         : document.removeEventListener('click', clickOutside, true)
     )
     watch([() => JSON.stringify(props.options), () => props.clearToggle], async (newValue, oldValue) => {
+        if(JSON.stringify(props.options) === JSON.stringify(['']) || (JSON.stringify(props.options) === JSON.stringify(localOptions.value))) {
+            return
+        } // if props.options is empty, which means the hint is empty, save the local cache and do not clear
         await new Promise(resolve => {
             emit('clearSelect', resolve)    //  if options have changed, the selection should be cleared
         })
+        localOptions.value = props.options
         selectedIdx.value = props.defaultSelected
     }, {immediate: false})
     onBeforeUnmount(() => document.removeEventListener('click', clickOutside, true))

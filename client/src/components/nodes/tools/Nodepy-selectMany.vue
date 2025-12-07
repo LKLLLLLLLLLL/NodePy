@@ -14,13 +14,13 @@
 
         <div v-if="open" class="options" @click.stop>
             <div
-                v-for="(item, idx) in options"
+                v-for="(item, idx) in localOptions"
                 :key="item"
                 class="item"
                 @click.stop="select(idx)"
                 :style="itemStyle"
-                :class="[{selected: selectedIdx === idx && options[selectedIdx]}, {'specialColumn' : isSpecialColumn(item)}]"
-            >   <!-- options[selectedIdx] means empty value cannot be accepted-->
+                :class="[{selected: selectedIdx === idx && localOptions[selectedIdx]}, {'specialColumn' : isSpecialColumn(item)}]"
+            >   <!-- localOptions[selectedIdx] means empty value cannot be accepted-->
                 <span>{{columnValue(item)}}</span>
             </div>
         </div>
@@ -55,6 +55,7 @@ import { mdiMenuDown } from '@mdi/js'
         }
     })
     const emit = defineEmits(['selectChange', 'clearSelect'])
+    const localOptions = ref(props.options)
     const root = ref<HTMLElement>()
     const itemStyle = ref({
         width: props.itemWidth,
@@ -62,12 +63,15 @@ import { mdiMenuDown } from '@mdi/js'
     })
     const selectedIdx = ref(props.defaultSelected)
     const open = ref(false)
-    const selectedItem = computed(() => selectedIdx.value >= 0 ? props.options[selectedIdx.value] : '')
+    const selectedItem = computed(() => selectedIdx.value >= 0 ? localOptions.value[selectedIdx.value] : '')
 
 
     const select = (idx: number) => {
         open.value = false
-        if(!props.options[idx])return
+        if(JSON.stringify(props.options) === JSON.stringify([''])) {
+            return
+        }   // if props.options is empty, which means the hint is empty, just return and display the local cache
+        if(!localOptions.value[idx])return
         selectedIdx.value = idx
         emit('selectChange', idx)
     }
@@ -108,9 +112,13 @@ import { mdiMenuDown } from '@mdi/js'
     )
 
     watch(() => JSON.stringify(props.options), async (newValue, oldValue) => {
+        if(JSON.stringify(props.options) === JSON.stringify(['']) || (JSON.stringify(props.options) === JSON.stringify(localOptions.value))) {
+            return
+        } // if props.options is empty, which means the hint is empty, save the local cache and do not clear
         await new Promise(resolve => {
             emit('clearSelect', resolve)    //  if options have changed, the selection should be cleared
         })
+        localOptions.value = props.options
         selectedIdx.value = props.defaultSelected
     }, {immediate: false})
 
