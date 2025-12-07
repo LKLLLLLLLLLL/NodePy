@@ -3,7 +3,9 @@
     import { useModalStore } from '../stores/modalStore';
     import { useResultStore } from '../stores/resultStore';
     import { ref, computed } from 'vue';
-    import {Close} from '@element-plus/icons-vue';
+    //@ts-ignore
+    import SvgIcon from '@jamescoyle/vue-icon';
+    import { mdiCloseThick, mdiClose, mdiDownload } from '@mdi/js';
 
     const props = defineProps<{
         modal: ModalInstance
@@ -274,21 +276,13 @@
         <div class="resize-handle resize-handle-bottom-left" @mousedown="startResize($event, 'bottom-left')"></div>
         <div class="resize-handle resize-handle-top-left" @mousedown="startResize($event, 'top-left')"></div>
         <div class = "modal-head" @mousedown="startDrag" >
-            <div class = "modal-title-id-container">
-                <div class="modal-title-container">
-                    <div><b>{{ modal.title }}</b></div>
-                </div>
-                <!-- <div class="modal-id-container">
-                    <div>ID: {{ modal.id }}</div>
-                </div> -->
+            <div class = "modal-title-container">
+                <div class="modal-title">{{ modal.title }}</div>
             </div>
             <div class = "modal-control">
-                <el-button
-                    @click = "closeModal"
-                    :style="{height: '100%',width: 'max(60px, 10%)',borderRadius: '12px',border: 'none'}"
-                    :icon="Close"
-                >
-                </el-button>
+                <button class="button close" @click="closeModal">
+                    <svg-icon type="mdi" :path="mdiClose" :size="22"></svg-icon>
+                </button>
             </div>
         </div>
         <div class = "modal-body">
@@ -302,15 +296,11 @@
             </div>
         </div>
         <div class = "modal-footer">
-            <el-button 
-                v-if="showDownloadButton" 
-                @click="downloadResult"
-                type="primary"
-                size="small"
-                style="margin-right: auto;"
-            >
-                下载结果
-            </el-button>
+            <div class="download-result-container">
+                <button class="button download" @click="downloadResult">
+                    <svg-icon type="mdi" :path="mdiDownload" :size="22"></svg-icon>
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -322,16 +312,21 @@
         flex-direction: column;
         border-radius: 15px;
         box-sizing: border-box; /* 添加盒模型计算 */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 添加阴影效果 */
     }
     .modal-head{
         display: flex;
-        min-height: 35px;
+        min-height: 40px;
         width: 100%;
         cursor: move; /* 头部显示移动光标 */
+        align-items: center;
+        padding-left: 4px;
+        padding-right: 10px;
+        padding-top: 8px;
     }
     .modal-body, .modal-content{
-        height: calc(100% - max(30px, 5%) - max(20px, 5%));
-        margin-top: 10px;
+        height: calc(100% - 40px - 40px); /* 调整高度计算 */
+        margin-top: 0px;
         margin-left: 20px;
         margin-right: 20px;
         display: flex;
@@ -340,33 +335,65 @@
     }
     .modal-footer{
         width: 100%;
-        min-height: 35px;
+        min-height: 40px;
         margin-left: 20px;
         margin-right: 20px;
         display: flex;
         align-items: center;
     }
+
+    .download-result-container{
+        display: flex;
+        justify-content: flex-end;
+        padding-right: 40px;
+        flex: 1;
+    }
+
     .modal-control{
         height: 100%;
         display: flex;
         margin-left: auto;
-    }
-    .modal-title-id-container{
-        height: 100%;
-        margin-left: 20px;
-        display: flex;
-        flex-direction: column;
-    }
-    .modal-title-container{
-        margin-top: 8px;
-        font-size: calc(max(35px, 10%)*0.75);
-        flex: 2;
-    }
-    .modal-id-container{
-        font-size: calc(max(35px, 10%)*0.5*0.40);
         align-items: center;
-        flex: 1;
     }
+
+    .modal-title-container{
+        flex: 1;
+        display: flex;
+        align-items: center;
+        padding-left: 15px;
+    }
+
+    .modal-title{
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    /* 与右键菜单样式一致的关闭按钮样式 */
+    .button {
+        padding: 3px 3px;
+        margin: 0;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 8px;
+        transition: background-color 0.15s ease;
+        border: none;
+        background: transparent;
+        color: inherit;
+        width: auto;
+        height: auto;
+    }
+
+    .button.close{
+        margin-right: 10px;
+    }
+    
+    .button:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+    
     /* 调整大小手柄样式 - 隐藏可见元素，仅保留鼠标样式 */
     .resize-handle {
         position: absolute;

@@ -148,6 +148,10 @@
             return value ? 'True' : 'False'
         }
         if (typeof value === 'number') {
+            // 检查是否为无穷大
+            if (!isFinite(value)) {
+                return value > 0 ? 'INFINITY' : '-INFINITY';
+            }
             // 如果是小数，保留3位小数
             return typeof value === 'number' && value % 1 !== 0 
                 ? value.toFixed(3) 

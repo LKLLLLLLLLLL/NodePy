@@ -16,7 +16,36 @@
     const activeTab = ref('');
 
     // 计算标签页数据
-    const tabKeys = computed(() => Object.keys(resultStore.currentTypeDataID));
+    const tabKeys = computed(() => {
+        // 如果是默认的无结果状态，返回空数组以显示"无结果"提示
+        if (resultStore.currentTypeDataID === resultStore.default_typedataid) {
+            return [];
+        }
+        return Object.keys(resultStore.currentTypeDataID);
+    });
+
+    // 计算是否处于无结果状态
+    const isNoResult = computed(() => {
+        return resultStore.currentTypeDataID === resultStore.default_typedataid || 
+               resultStore.currentResult === resultStore.default_dataview;
+    });
+
+    // 计算当前结果类型的中文标签
+    const currentResultTypeLabel = computed(() => {
+        if (!resultStore.currentResult || !resultStore.currentResult.type) return '';
+        
+        const typeLabels: Record<string, string> = {
+            'Table': '表格',
+            'File': '文件',
+            'int': '整数',
+            'str': '字符串',
+            'bool': '布尔值',
+            'float': '浮点数',
+            'Datetime': '日期时间'
+        };
+        
+        return typeLabels[resultStore.currentResult.type] || resultStore.currentResult.type;
+    });
 
     // 监听窗口大小变化
     const handleWindowResize = () => {
@@ -80,8 +109,12 @@
 </script>
 <template>
     <div class="result-total-container">
+        <!-- 标签控制栏 -->
+        <div v-if="isNoResult" class="result-control no-result-control">
+            无结果
+        </div>
         <el-tabs 
-            v-if="tabKeys.length > 0" 
+            v-else-if="tabKeys.length > 0" 
             v-model="activeTab" 
             @tab-click="(tab) => handleChooseResult(tab.props.name)" 
             class="result-control"
@@ -93,6 +126,10 @@
                 :name="key">
             </el-tab-pane>
         </el-tabs>
+        <!-- 结果类型显示区域 -->
+        <div class="result-type-container" v-if="currentResultTypeLabel && !isNoResult">
+            当前结果类型: {{ currentResultTypeLabel }}
+        </div>
         <div class = "result-container">
             <!-- 显示loading状态 -->
             <div v-if="resultStore.loading" class="loading-container">
@@ -119,6 +156,12 @@
                     </ValueView>
                 </div>
             </div>
+            <!-- 无结果提示 -->
+            <div class="no-result-prompt" v-else>
+                <div class="prompt-content">
+                    <p>当前节点无结果，请检查节点输入或双击其他节点</p>
+                </div>
+            </div>
             <div class="if-info" v-if="resultStore.currentInfo!=resultStore.default_info">
                 <NodeInfo :data="resultStore.currentInfo">
                 </NodeInfo>
@@ -137,7 +180,7 @@
     .result-container{
         display: flex;
         width: 100%;
-        height: calc(100% - 40px); /* 调整高度以适应标签页 */
+        height: calc(100% - 70px); /* 调整高度以适应标签页和类型显示 */
         color: grey;
         padding: 0;
         border-radius: 10px;
@@ -152,14 +195,14 @@
         }
         
         :deep(.el-tabs__nav-wrap)::after {
-            height: 1px;
+            height: 2px;
         }
         
         :deep(.el-tabs__item) {
-            height: 40px;
-            line-height: 40px;
+            height: 30px;
             font-weight: 500;
             color: #666;
+            padding: 0 10px;//与下面active-bar中的一致
             transition: all 0.3s ease;
         }
         
@@ -175,7 +218,30 @@
         :deep(.el-tabs__active-bar) {
             background-color: #409eff;
             transition: all 0.3s ease;
+            padding: 0 10px;//与上面item中的一致
         }
+    }
+
+    // 无结果时的标签栏样式
+    .no-result-control {
+        height: 40px;
+        line-height: 40px;
+        padding: 0 15px;
+        font-size: 14px;
+        color: #999;
+        background-color: #f5f7fa;
+        border-bottom: 1px solid #e4e7ed;
+        font-weight: 500;
+    }
+
+    .result-type-container {
+        height: 30px;
+        line-height: 30px;
+        padding: 0 15px;
+        font-size: 14px;
+        color: #666;
+        background-color: #f5f7fa;
+        border-bottom: 1px solid #e4e7ed;
     }
 
     .if-result{
@@ -210,5 +276,26 @@
         left: 0;
         background: rgba(255, 255, 255, 0.8);
         z-index: 10;
+    }
+
+    // 无结果提示样式
+    .no-result-prompt {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        background-color: #fafafa;
+        border-radius: 10px;
+    }
+
+    .prompt-content {
+        text-align: center;
+        color: #999;
+        
+        p {
+            font-size: 16px;
+            margin: 0;
+        }
     }
 </style>

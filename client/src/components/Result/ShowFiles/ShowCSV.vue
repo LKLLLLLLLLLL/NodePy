@@ -39,6 +39,12 @@ const formatCellValue = (value: string): string => {
     return '-'
   }
   
+  // 尝试将字符串转换为数字并检查是否为无穷大
+  const numValue = Number(value);
+  if (!isNaN(numValue) && !isFinite(numValue)) {
+    return numValue > 0 ? 'INFINITY' : '-INFINITY';
+  }
+  
   // 尝试格式化日期时间
   return formatDateTime(value)
 }

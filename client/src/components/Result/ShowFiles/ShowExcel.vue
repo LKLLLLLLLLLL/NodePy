@@ -1,4 +1,22 @@
 <script lang="ts" setup>
+// 格式化单元格值
+const formatCellValue = (cell: any): string => {
+  if (cell === null || cell === undefined) {
+    return '-';
+  }
+  
+  // 检查是否为数字并是否为无穷大
+  if (typeof cell === 'number') {
+    if (!isFinite(cell)) {
+      return cell > 0 ? 'INFINITY' : '-INFINITY';
+    }
+    return String(cell);
+  }
+  
+  // 其他情况直接转为字符串
+  return String(cell);
+};
+
 defineProps<{
   sheets: Array<{ name: string; data: any[] }>
 }>()
@@ -34,7 +52,7 @@ defineProps<{
                 </td>
                 <td v-for="(cell, colIndex) in row" :key="colIndex" class="excel-column">
                   <div class="cell-content">
-                    {{ cell || '-' }}
+                    {{ formatCellValue(cell) }}
                   </div>
                 </td>
               </tr>

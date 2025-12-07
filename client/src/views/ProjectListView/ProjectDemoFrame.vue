@@ -61,7 +61,7 @@ async function handleClickDelete(){
         id: 'delete-modal',
         title: "删除项目",
         isActive: true,
-        isDraggable: true,
+        isDraggable: false,
         isResizable: false,
         position: {
                 x: (window.innerWidth - modalWidth) / 2,
@@ -84,7 +84,7 @@ async function handleClickUpdate(){
         id: 'update-modal',
         title: "更新项目",
         isActive: true,
-        isDraggable: true,
+        isDraggable: false,
         isResizable: false,
         position: {
                 x: (window.innerWidth - modalWidth) / 2,

@@ -64,6 +64,10 @@
         }
         
         if (typeof props.value === 'number') {
+            // 检查是否为无穷大
+            if (!isFinite(props.value)) {
+                return props.value > 0 ? 'INFINITY' : '-INFINITY';
+            }
             // 如果是小数，保留3位小数
             return typeof props.value === 'number' && props.value % 1 !== 0 
                 ? props.value.toFixed(3) 
@@ -102,6 +106,10 @@
             return 'bool'
         }
         if (typeof props.value === 'number') {
+            // 检查是否为无穷大
+            if (!isFinite(props.value)) {
+                return 'infinity';
+            }
             return Number.isInteger(props.value) ? 'int' : 'float'
         }
         // 检查是否为 Datetime 类型的字符串
