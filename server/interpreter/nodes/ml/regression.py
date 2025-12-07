@@ -1,4 +1,4 @@
-from typing import Dict, override
+from typing import Any, Dict, override
 
 from pydantic import PrivateAttr
 from sklearn.linear_model import LinearRegression
@@ -116,3 +116,20 @@ class LinearRegressionNode(BaseNode):
             "model": Data(payload=model_data),
         }
 
+    @override
+    @classmethod
+    def hint(cls, input_schemas: Dict[str, Schema], current_params: Dict) -> Dict[str, Any]:
+        hint = {}
+        if "table" in input_schemas:
+            table_schema = input_schemas["table"]
+            feature_col_choices = []
+            target_col_choices = []
+            if table_schema.tab is not None:
+                for col_name, col_type in table_schema.tab.col_types.items():
+                    if col_type in {ColType.FLOAT, ColType.INT, ColType.BOOL}:
+                        feature_col_choices.append(col_name)
+                    if col_type in {ColType.FLOAT, ColType.INT}:
+                        target_col_choices.append(col_name)
+            hint["feature_col_choices"] = feature_col_choices
+            hint["target_col_choices"] = target_col_choices
+        return hint

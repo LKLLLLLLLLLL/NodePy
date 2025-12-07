@@ -1264,6 +1264,10 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - model: 训练好的线性回归模型，类型为Model。
 
+**hint：**
+- feature_col_choices: 列名列表，类型为List[str]，用于在UI中为feature_cols参数提供可选值。
+- target_col_choices: 列名列表，类型为List[str]，用于在UI中为target_col参数提供可选值。
+
 #### 10.2 PredictNode
 通用预测节点，使用训练好的模型对输入的表格数据进行预测，并输出包含预测结果的表格。
 
