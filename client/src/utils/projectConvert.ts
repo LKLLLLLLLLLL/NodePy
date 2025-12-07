@@ -111,3 +111,14 @@ export const writeBackVueFLowProject = (p: Project, vp: vueFlowProject) => {
     }
     vp.workflow.error_message = p.workflow.error_message
 }
+
+
+export const writeBackRunningTime = (p: Project, vp: vueFlowProject) => {
+    if(vp.workflow.nodes.length !== p.workflow.nodes.length) {
+        console.log('vp length:', vp.workflow.nodes.length, 'p length:', p.workflow.nodes.length, 'p is out of date')
+        return
+    }
+    for(let i = 0; i < p.workflow.nodes.length; i++) {  //@ts-ignore
+        vp.workflow.nodes[i].data.runningtime = p.workflow.nodes[i]?.runningtime
+    }
+}
