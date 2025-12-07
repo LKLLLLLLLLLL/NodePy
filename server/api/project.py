@@ -106,7 +106,9 @@ async def copy_project(
             owner_id=user_id,
             workflow=project.workflow.model_dump(),
             ui_state=project.ui_state.model_dump(),
-            thumb=None
+            thumb = (  # type: ignore
+                base64.b64decode(project.thumb) if project.thumb else None
+            )
         )
         db_client.add(new_project)
         await db_client.commit()

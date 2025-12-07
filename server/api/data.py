@@ -19,7 +19,7 @@ router = APIRouter()
     status_code=200,
     responses={
         200: {"description": "Data retrieved successfully", "model": DataView},
-        404: {"description": "Data not found"},
+        404: {"description": "Project or Data not found"},
         403: {"description": "User has no access to this data"},
         500: {"description": "Internal server error"},
     },
@@ -41,13 +41,18 @@ async def get_node_data(
             raise HTTPException(status_code=404, detail="Data not found")
         # 2. check user access right here
         db_project = await db_client.get(ProjectRecord, data_record.project_id)
-        if db_project is None or db_project.owner_id != user_id:  # type: ignore
-            raise HTTPException(
-                status_code=403, detail="User has no access to this data"
-            )
+        if db_project is None:
+            raise HTTPException(status_code=404, detail="Project not found")
+        if db_project.owner_id != user_id:  # type: ignore
+            if db_project.show_in_explore is False:
+                raise HTTPException(
+                    status_code=403, detail="User has no access to this data"
+                )
         # 3. get data view and return
         data = await data_manager.read_async(data_ref = DataRef(data_id=data_id))
         return data.to_view()
+    except HTTPException:
+        raise
     except Exception as e:
         logger.exception(f"Error retrieving node data {data_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
