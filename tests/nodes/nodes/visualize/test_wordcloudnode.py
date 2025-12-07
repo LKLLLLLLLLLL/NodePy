@@ -131,7 +131,7 @@ def test_wordcloudnode_infer_and_execute_errors(node_ctor, monkeypatch):
         node.infer_schema({"input": schema, "extra": schema})
 
     # execute: before infer
-    from tests.nodes.utils import table_from_dict, make_data
+    from tests.nodes.utils import make_data, table_from_dict
     tbl = table_from_dict({"word": ["a"], "freq": [1]})
     with pytest.raises(Exception):
         node.execute({"input": tbl})
@@ -152,7 +152,6 @@ def test_wordcloudnode_infer_and_execute_errors(node_ctor, monkeypatch):
             return (_np.ones((4,4,3), dtype=_np.uint8) * 255)
 
     # monkeypatch the installed wordcloud class used inside the node implementation
-    import wordcloud as _wc
     monkeypatch.setattr("wordcloud.WordCloud", ExplodingWordCloud)
     node2 = node_ctor("WordcloudNode", id="w_explode", word_col="word", frequency_col="freq")
     node2.infer_schema({"input": schema})

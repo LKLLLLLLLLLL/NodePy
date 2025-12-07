@@ -110,14 +110,14 @@ class FileSchema(BaseModel):
     
     @classmethod
     def from_file(cls, file: "File") -> "FileSchema":
-        if file.format == "csv":
+        if file.format in {"csv", "json", "xlsx"}:
             col_types = file.col_types
             assert col_types is not None
-            return FileSchema(format="csv", col_types=col_types)
+            return FileSchema(format=file.format, col_types=col_types)
         else:
             return FileSchema(format=file.format)
 
-    
+
 class Schema(BaseModel):
     class Type(str, Enum):
         TABLE = "Table"

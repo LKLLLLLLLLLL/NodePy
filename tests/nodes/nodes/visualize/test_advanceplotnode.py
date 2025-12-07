@@ -90,6 +90,7 @@ def test_advanceplotnode_construction_normals_and_errors(node_ctor):
 
 def test_advanceplotnode_hint_error_paths():
     import pytest
+
     from server.interpreter.nodes.base_node import BaseNode
     # unknown node type
     with pytest.raises(ValueError):
@@ -99,7 +100,7 @@ def test_advanceplotnode_hint_error_paths():
     from server.interpreter.nodes.visualize import plot as viz_mod
     orig = viz_mod.AdvancePlotNode.hint
     try:
-        viz_mod.AdvancePlotNode.hint = classmethod(lambda cls, a, b: (_ for _ in ()).throw(RuntimeError("boom")))
+        viz_mod.AdvancePlotNode.hint = classmethod(lambda cls, a, b: (_ for _ in ()).throw(RuntimeError("boom"))) # type: ignore
         res = viz_mod.AdvancePlotNode.get_hint("AdvancePlotNode", {}, {})
         assert res == {}
     finally:
@@ -131,7 +132,6 @@ def test_advanceplotnode_infer_and_execute_error_cases(node_ctor):
         node.infer_schema({"input": bad})
 
     # infer: extra input port should raise ValueError
-    from server.models.schema import Schema
     with pytest.raises(ValueError):
         node.infer_schema({"input": schema, "extra": schema})
 

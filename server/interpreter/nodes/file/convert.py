@@ -160,14 +160,14 @@ class TableToFileNode(BaseNode):
         elif self.format == "xlsx":
             df.to_excel(buffer, index=False)
         elif self.format == "json":
-            df.to_json(buffer, orient="records", lines=True)
+            df.to_json(buffer, orient="records", index=False)
         else:
             raise AssertionError(f"Unsupported file format: {self.format}")
         file = file_manager.write_sync(
             self.filename, 
             buffer, self.format,
-            user_id=self.global_config.user_id, 
-            node_id=self.id, 
+            user_id=self.global_config.user_id,
+            node_id=self.id,
             project_id=self.global_config.project_id
         )
         return {"file": Data(payload=file)}
