@@ -124,9 +124,15 @@ class PlotNode(BaseNode):
         if "input" in input_schemas:
             input_schema = input_schemas["input"]
             if input_schema.type == Schema.Type.TABLE and input_schema.tab is not None:
-                columns = list(input_schema.tab.col_types.keys())
-                hint["x_col_choices"] = columns
-                hint["y_col_choices"] = columns
+                for col, col_type in input_schema.tab.col_types.items():
+                    if col_type in {ColType.INT, ColType.FLOAT, ColType.STR, ColType.DATETIME}:
+                        if "x_col_choices" not in hint:
+                            hint["x_col_choices"] = []
+                        hint["x_col_choices"].append(col)
+                    if col_type in {ColType.INT, ColType.FLOAT}:
+                        if "y_col_choices" not in hint:
+                            hint["y_col_choices"] = []
+                        hint["y_col_choices"].append(col)
         return hint
 
 
@@ -180,9 +186,9 @@ class AdvancePlotNode(BaseNode):
                 accept=Pattern(
                     types = {Schema.Type.TABLE},
                     table_columns = {
-                        self.x_col: {ColType.INT, ColType.FLOAT, ColType.STR},
-                        **({self.y_col: {ColType.INT, ColType.FLOAT, ColType.STR}} if self.y_col else {}),
-                        **({self.hue_col: {ColType.INT, ColType.FLOAT, ColType.STR}} if self.hue_col else {})
+                        self.x_col: {ColType.INT, ColType.FLOAT, ColType.STR, ColType.DATETIME},
+                        **({self.y_col: {ColType.INT, ColType.FLOAT}} if self.y_col else {}),
+                        **({self.hue_col: {ColType.INT, ColType.FLOAT, ColType.STR, ColType.DATETIME}} if self.hue_col else {})
                     }
                 )
             ),
@@ -266,9 +272,10 @@ class AdvancePlotNode(BaseNode):
                 y_col_choices = [NO_SPECIFIED_COL]
                 hue_col_choices = [NO_SPECIFIED_COL]
                 for col, col_type in input_schema.tab.col_types.items():
-                    if col_type in {ColType.INT, ColType.FLOAT, ColType.STR}:
-                        x_col_choices.append(col)
+                    if col_type in {ColType.INT, ColType.FLOAT}:
                         y_col_choices.append(col)
+                    if col_type in {ColType.INT, ColType.FLOAT, ColType.STR, ColType.DATETIME}:
+                        x_col_choices.append(col)
                         hue_col_choices.append(col)
                 hint["x_col_choices"] = x_col_choices
                 if current_params.get("plot_type") not in {"count", "hist"}:
