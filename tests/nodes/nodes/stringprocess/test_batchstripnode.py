@@ -142,3 +142,9 @@ def test_batchstripnode_resultcol_whitespace_and_illegal(node_ctor):
     # illegal result_col (starts with underscore) should raise NodeParameterError
     with pytest.raises(NodeParameterError):
         node_ctor("BatchStripNode", id="bs_illegal", col="name", result_col="_bad")
+
+
+def test_batchstripnode_resultcol_cannot_match_col(node_ctor):
+    # new behavior: result_col equal to input col should raise NodeParameterError
+    with pytest.raises(NodeParameterError):
+        node_ctor("BatchStripNode", id="bs_same", col="name", result_col="name")

@@ -59,6 +59,12 @@ class BatchStripNode(BaseNode):
                 err_param_key="result_col",
                 err_msg = f"Result column name '{self.result_col}' contains illegal characters."
             )
+        if self.col == self.result_col:
+            raise NodeParameterError(
+                node_id = self.id,
+                err_param_key="result_col",
+                err_msg = "Result column name cannot be the same as the input column name."
+            )
         return
 
     @override
