@@ -265,8 +265,20 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'DatetimeDiffNode'
             },
             {
-                label: '时间转换节点',
+                label: '数值时间转换节点',
                 value: 'ToDatetimeNode'
+            },
+            {
+                label: '字符串时间转换节点',
+                value: 'StrToDatetimeNode'
+            },
+            {
+                label: '时间格式化节点',
+                value: 'DatetimePrintNode'
+            },
+            {
+                label: '时间戳转换节点',
+                value: 'DatetimeToTimestampNode'
             },
         ]
     },

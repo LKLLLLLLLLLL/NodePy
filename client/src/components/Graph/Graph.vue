@@ -72,6 +72,9 @@ import TextFromFileNode from '../nodes/file/TextFromFileNode.vue'
 import DatetimeComputeNode from '../nodes/datetimeProcess/DatetimeComputeNode.vue'
 import DatetimeDiffNode from '../nodes/datetimeProcess/DatetimeDiffNode.vue'
 import ToDatetimeNode from '../nodes/datetimeProcess/ToDatetimeNode.vue'
+import StrToDatetimeNode from '../nodes/datetimeProcess/StrToDatetimeNode.vue'
+import DatetimePrintNode from '../nodes/datetimeProcess/DatetimePrintNode.vue'
+import DatetimeToTimestampNode from '../nodes/datetimeProcess/DatetimeToTimestampNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -326,6 +329,9 @@ const nodeColor = (node: BaseNode) => {
     case 'DatetimeComputeNode':
     case 'DatetimeDiffNode':
     case 'ToDatetimeNode':
+    case 'StrToDatetimeNode':
+    case 'DatetimePrintNode':
+    case 'DatetimeToTimestampNode':
       return nodeCategoryColor.datetime
     default:
       return nodeCategoryColor.default
@@ -638,6 +644,18 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-ToDatetimeNode="ToDatetimeNodeProps">
           <ToDatetimeNode v-bind="ToDatetimeNodeProps"/>
+        </template>
+
+        <template #node-StrToDatetimeNode="StrToDatetimeNodeProps">
+          <StrToDatetimeNode v-bind="StrToDatetimeNodeProps"/>
+        </template>
+
+        <template #node-DatetimePrintNode="DatetimePrintNodeProps">
+          <DatetimePrintNode v-bind="DatetimePrintNodeProps"/>
+        </template>
+
+        <template #node-DatetimeToTimestampNode="DatetimeToTimestampNodeProps">
+          <DatetimeToTimestampNode v-bind="DatetimeToTimestampNodeProps"/>
         </template>
 
       </VueFlow>

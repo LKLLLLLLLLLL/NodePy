@@ -832,6 +832,43 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedToDatetimeNode)
         break
+      case 'StrToDatetimeNode':
+        const addedStrToDatetimeNode: Nodetypes.StrToDatetimeNode = {
+          id,
+          position,
+          type: 'StrToDatetimeNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedStrToDatetimeNode)
+        break
+      case 'DatetimePrintNode':
+        const addedDatetimePrintNode: Nodetypes.DatetimePrintNode = {
+          id,
+          position,
+          type: 'DatetimePrintNode',
+          data: {
+            param: {
+              format: ''
+            }
+          }
+        }
+        addNodes(addedDatetimePrintNode)
+        break
+      case 'DatetimeToTimestampNode':
+        const addedDatetimeToTimestampNode: Nodetypes.DatetimeToTimestampNode = {
+          id,
+          position,
+          type: 'DatetimeToTimestampNode',
+          data: {
+            param: {
+              unit: 'SECONDS'
+            }
+          }
+        }
+        addNodes(addedDatetimeToTimestampNode)
+        break
     
       default:
         console.log(type)

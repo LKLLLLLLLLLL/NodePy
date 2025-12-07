@@ -1,20 +1,20 @@
 <template>
     <div :class="`node-title-${nodeCategory}`">
-        <svg-icon type="mdi" :path="import_path" v-if="nodeCategory == 'input'"></svg-icon>
-        <svg-icon type="mdi" :path="math_compass_path" v-if="nodeCategory == 'compute'"></svg-icon>
-        <svg-icon type="mdi" :path="file_outline_path" v-if="nodeCategory == 'file'"></svg-icon>
-        <svg-icon type="mdi" :path="chart_scatter_plot_path" v-if="nodeCategory == 'visualize'"></svg-icon>
-        <svg-icon type="mdi" :path="alphabetical_variant_path" v-if="nodeCategory == 'stringProcess'"></svg-icon>
-        <svg-icon type="mdi" :path="table_path" v-if="nodeCategory == 'tableProcess'"></svg-icon>
-        <svg-icon type="mdi" :path="timer_outline_path" v-if="nodeCategory == 'datetimeProcess'"></svg-icon>
+        <svg-icon type="mdi" :path="import_path" v-if="nodeCategory === 'input'"></svg-icon>
+        <svg-icon type="mdi" :path="math_compass_path" v-else-if="nodeCategory === 'compute'"></svg-icon>
+        <svg-icon type="mdi" :path="file_outline_path" v-else-if="nodeCategory === 'file'"></svg-icon>
+        <svg-icon type="mdi" :path="chart_scatter_plot_path" v-else-if="nodeCategory === 'visualize'"></svg-icon>
+        <svg-icon type="mdi" :path="alphabetical_variant_path" v-else-if="nodeCategory === 'stringProcess'"></svg-icon>
+        <svg-icon type="mdi" :path="table_path" v-else-if="nodeCategory === 'tableProcess'"></svg-icon>
+        <svg-icon type="mdi" :path="timer_outline_path" v-else-if="nodeCategory === 'datetimeProcess'"></svg-icon>
         <slot/>
     </div>
 </template>
 
 <script lang="ts" setup>
     //@ts-ignore
-    import SvgIcon from '@jamescoyle/vue-icon';
-    import { mdiAlphabeticalVariant, mdiChartScatterPlot, mdiFileOutline, mdiImport, mdiMathCompass, mdiTable, mdiTimerOutline } from '@mdi/js';
+    import SvgIcon from '@jamescoyle/vue-icon'
+    import { mdiAlphabeticalVariant, mdiChartScatterPlot, mdiFileOutline, mdiImport, mdiMathCompass, mdiTable, mdiTimerOutline } from '@mdi/js'
 
 
     const props = defineProps<{
