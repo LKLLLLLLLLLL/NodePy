@@ -59,8 +59,11 @@
 
 
     const onClick = (n: number) => {
-        if (model.value == null) return
-        const newValue = model.value + n
+        let oldValue = model.value
+        if(oldValue == null) {
+            oldValue = 0
+        }
+        const newValue = oldValue + n
         const min = props.min ?? Number.NEGATIVE_INFINITY
         const max = props.max ?? Number.POSITIVE_INFINITY
         model.value = Math.min(Math.max(newValue, min), max)
@@ -73,20 +76,23 @@
     }
 
     const update = (relative: number, acceleration: number = 1) => {
-      if (model.value == null) return
+        let oldValue = model.value
+        if(oldValue == null) {
+            oldValue = 0
+        }
 
-      const step = 1 / local.value.denominator
-      const effectiveMovement = relative * acceleration
-      const newValue = normalize(model.value + (effectiveMovement * step), local.value.denominator)
-      const min = props.min ?? Number.NEGATIVE_INFINITY
-      const max = props.max ?? Number.POSITIVE_INFINITY
-      model.value = Math.min(Math.max(newValue, min), max)
+        const step = 1 / local.value.denominator
+        const effectiveMovement = relative * acceleration
+        const newValue = normalize(oldValue + (effectiveMovement * step), local.value.denominator)
+        const min = props.min ?? Number.NEGATIVE_INFINITY
+        const max = props.max ?? Number.POSITIVE_INFINITY
+        model.value = Math.min(Math.max(newValue, min), max)
     }
 
     const { requestLock } = usePointerLock({
-      onMove: (relative, acceleration) => update(relative.x, acceleration),
-      onDragEnd: () => {emit('updateValue')},
-      denominator: props.denominator
+        onMove: (relative, acceleration) => update(relative.x, acceleration),
+        onDragEnd: () => {emit('updateValue')},
+        denominator: props.denominator
     })
 
     const handleLeftMouseDown = (e: MouseEvent) => {

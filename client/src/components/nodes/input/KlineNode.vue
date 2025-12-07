@@ -14,6 +14,7 @@
                     v-model="start_time"
                     @update-value="onUpdateStart_time"
                     :disabled="start_timeDisabled"
+                    :allow-null="true"
                     class="nodrag"
                     placeholder="开始时间"
                 />
@@ -29,6 +30,7 @@
                     v-model="end_time"
                     @update-value="onUpdateEnd_time"
                     :disabled="end_timeDisabled"
+                    :allow-null="true"
                     class="nodrag"
                     placeholder="结束时间"
                 />
@@ -94,9 +96,9 @@
 
 
     const props = defineProps<NodeProps<KlineNodeData>>()
-    const start_time = ref(props.data.param.start_time || '')
+    const start_time = ref(props.data.param.start_time)
     const start_timeDisabled = computed(() => hasInputEdge(props.id, 'start_time'))
-    const end_time = ref(props.data.param.end_time || '')
+    const end_time = ref(props.data.param.end_time)
     const end_timeDisabled = computed(() => hasInputEdge(props.id, 'end_time'))
     const data_type = ["stock", "crypto"]
     const data_typeChinese = ['股票', '加密货币']

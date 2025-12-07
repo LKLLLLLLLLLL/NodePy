@@ -154,6 +154,8 @@ export const useGraphStore = defineStore('graph', () => {
             param: {
               data_type: 'stock',
               symbol: '',
+              start_time: null,
+              end_time: null,
               interval: '1m'
             }
           }

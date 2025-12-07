@@ -9,10 +9,10 @@
 </template>
 
 <script lang="ts" setup>
-    import { onTimerMsg } from '@/utils/task'; //@ts-ignore
-import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiCached, mdiCheck, mdiClose, mdiUpdate } from '@mdi/js'; // waiting
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+    import { onTimerMsg } from '@/utils/task' //@ts-ignore
+    import SvgIcon from '@jamescoyle/vue-icon'
+    import { mdiCached, mdiCheck, mdiClose, mdiUpdate } from '@mdi/js' // waiting
+    import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 
     const props = defineProps<{
         nodeId: string,
@@ -75,6 +75,11 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
         off()
         stopCount()
     })
+    watch(() => props.defaultTime, (newValue, oldValue) => {
+        if(newValue == null) {
+            timerStatus.value = 'waiting'
+        }
+    }, {immediate: false})
 
 </script>
 

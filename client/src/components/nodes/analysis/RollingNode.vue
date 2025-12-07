@@ -1,6 +1,6 @@
 <template>
     <div class="RollingNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="analysis">移动计算节点</NodeTitle>
+        <NodeTitle node-category="analysis">滑动窗口节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -35,7 +35,6 @@
                     class="nodrag"
                     @update-value="onUpdateMin_periods"
                     :disabled="min_periodsDisabled"
-                    :allow-empty="true"
                  />
             </div>
             <div class="col">

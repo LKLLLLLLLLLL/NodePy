@@ -295,7 +295,7 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'DiffNode'
             },
             {
-                label: '移动计算节点',
+                label: '滑动窗口节点',
                 value: 'RollingNode'
             },
             {

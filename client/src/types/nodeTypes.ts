@@ -127,8 +127,8 @@ export interface DateTimeNode extends BaseNode<DateTimeNodeData> {
 export interface KlineNodeParam {
     data_type: 'stock'|'crypto'
     symbol: string
-    start_time?: string
-    end_time?: string
+    start_time: string | null
+    end_time: string | null
     interval: '1m'|'1h'|'1d'
 }
 export type KlineNodeData = BaseData & {

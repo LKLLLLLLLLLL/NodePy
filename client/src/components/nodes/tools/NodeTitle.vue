@@ -14,8 +14,8 @@
 
 <script lang="ts" setup>
     //@ts-ignore
-    import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiAlphabeticalVariant, mdiChartScatterPlot, mdiFileOutline, mdiImport, mdiMathCompass, mdiRulerSquare, mdiTable, mdiTimerOutline } from '@mdi/js';
+    import SvgIcon from '@jamescoyle/vue-icon'
+    import { mdiAlphabeticalVariant, mdiChartScatterPlot, mdiFileOutline, mdiImport, mdiMathCompass, mdiRulerSquare, mdiTable, mdiTimerOutline } from '@mdi/js'
 
 
     const props = defineProps<{
@@ -29,6 +29,7 @@ import { mdiAlphabeticalVariant, mdiChartScatterPlot, mdiFileOutline, mdiImport,
             | 'analysis'
             | 'visualize'
             | 'datetimeProcess'
+            | 'machineLearning'
     }>()
     const file_outline_path = mdiFileOutline
     const import_path = mdiImport

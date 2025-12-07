@@ -21,7 +21,7 @@
 
 <script lang="ts" setup>
     import { ref, computed } from 'vue'
-    const model = defineModel<string>()
+    const model = defineModel<string | null>()
     const emit = defineEmits(['updateValue'])
     const props = defineProps({
         disabled: {
@@ -39,9 +39,13 @@
         placeholder: {
             type: String,
             default: '请输入...'
+        },
+        allowNull: {
+            type: Boolean,
+            default: false
         }
     })
-    const editText = ref(model.value)
+    const editText = ref(model.value || '')
     const disabled = computed(() => props.disabled)
     const isEditing = ref(false)
     const inputEl = ref<HTMLInputElement>()
@@ -53,14 +57,19 @@
 
     const cancelEdit = () => {
         isEditing.value = false
-        editText.value = model.value
+        editText.value = model.value || ''
         inputEl.value?.blur()
     }
 
     const commitEdit = () => {
         if(isEditing.value) {
             isEditing.value = false
-            model.value = editText.value
+            if(props.allowNull && editText.value.trim() === '') {
+                model.value = null
+                editText.value = ''
+            }else {
+                model.value = editText.value
+            }
             inputEl.value?.blur()
             emit('updateValue')
         }
