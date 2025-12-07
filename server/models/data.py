@@ -1,5 +1,5 @@
 from datetime import datetime
-from math import isfinite
+from math import isinf, isnan
 from typing import Any, ClassVar, Literal, Union, cast
 
 import joblib
@@ -208,13 +208,16 @@ class Data(BaseModel):
                         if isna(v):
                             normalized.append(None)
                             continue
-                        # convert +/-Infinity to None
+                        # convert +/-Infinity and NaN to string markers so JSON can carry them
                         try:
-                            if not isfinite(v):
-                                normalized.append(None)
+                            if isinf(v):
+                                normalized.append("Infinity" if v > 0 else "-Infinity")
+                                continue
+                            if isnan(v):
+                                normalized.append("NaN")
                                 continue
                         except TypeError:
-                            # not a number type
+                            # non-numeric types will raise TypeError for isinf/isnan, ignore
                             pass
                         normalized.append(v)
                     cols[col] = normalized
@@ -293,7 +296,19 @@ class Data(BaseModel):
                     ptype = col_type.to_ptype()
                     if callable(ptype):
                         ptype = ptype()
-                    df[col] = df[col].astype(ptype)
+                    # If float column, convert special string markers back to float values
+                    if col_type == ColType.FLOAT:
+                        def _convert_special(x):
+                            if isinstance(x, str):
+                                if x == "Infinity":
+                                    return float("inf")
+                                if x == "-Infinity":
+                                    return float("-inf")
+                                if x == "NaN":
+                                    return float("nan")
+                            return x
+                        df[col] = df[col].apply(_convert_special)
+                    df[col] = df[col].astype(ptype) # type: ignore
 
             payload = Table(df=df, col_types=col_types)
         elif payload_type == "Model":
