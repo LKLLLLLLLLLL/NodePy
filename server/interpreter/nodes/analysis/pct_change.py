@@ -37,6 +37,12 @@ class PctChangeNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
             )
+        if self.col.strip() == '':
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col",
+                err_msg="Column name must be a non-empty string.",
+            )
         if not self.result_col:
             self.result_col = generate_default_col_name(
                 id=self.id,
@@ -109,11 +115,13 @@ class PctChangeNode(BaseNode):
     @override
     @classmethod
     def hint(cls, input_schemas: Dict[str, Schema], current_params: Dict) -> Dict[str, Any]:
-        col_choices = []
+        hint = {}
         if "table" in input_schemas:
+            col_choices = []
             input_schema = input_schemas["table"]
             assert input_schema.tab is not None
             for col_name, col_type in input_schema.tab.col_types.items():
                 if col_type in {ColType.FLOAT, ColType.INT}:
                     col_choices.append(col_name)
-        return {"col_choices": col_choices}
+            hint["col_choices"] = col_choices
+        return hint

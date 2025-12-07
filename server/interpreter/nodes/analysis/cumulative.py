@@ -35,6 +35,12 @@ class CumulativeNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
             )
+        if self.col.strip() == '':
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col",
+                err_msg="Column name must be a non-empty string.",
+            )
         if not self.result_col:
             self.result_col = generate_default_col_name(self.id, self.method)
         if not check_no_illegal_cols([self.result_col]):
@@ -97,10 +103,12 @@ class CumulativeNode(BaseNode):
     def hint(cls, input_schemas: Dict[str, Schema], current_params: Dict) -> Dict[str, Any]:
         hint = {}
         if "table" in input_schemas:
+            col_choices = []
             input_schema = input_schemas["table"]
             if input_schema.tab is not None:
                 for col_name, col_type in input_schema.tab.col_types.items():
                     if col_type in {ColType.INT, ColType.FLOAT}:
-                        hint["col"] = col_name
+                        col_choices.append(col_name)
                         break
+            hint["col_choices"] = col_choices
         return hint

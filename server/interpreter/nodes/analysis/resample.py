@@ -23,7 +23,7 @@ class ResampleNode(BaseNode):
     """
 
     col: str
-    frequency: Literal["D", "H", "M", "S"]  # Days, Hours, Minutes, Seconds
+    frequency: Literal["D", "H", "T", "S"]  # Days, Hours, Minutes, Seconds
     method: Literal["mean", "sum", "max", "min", "count"]
     result_col: str | None = None
 
@@ -36,6 +36,12 @@ class ResampleNode(BaseNode):
                 node_id=self.id,
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
+            )
+        if self.col.strip() == '':
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col",
+                err_msg="Column name must be a non-empty string.",
             )
         if not self.result_col:
             self.result_col = generate_default_col_name(
@@ -93,13 +99,14 @@ class ResampleNode(BaseNode):
             if ctype == ColType.INT and self.method in {"mean"}:
                 output_col_types[col] = ColType.FLOAT  # mean of int is float
 
-        self._col_types = output_col_types
+        output_table_schema = TableSchema(
+            col_types=output_col_types
+        )
         output_schema = Schema(
             type=Schema.Type.TABLE,
-            tab=TableSchema(
-                col_types=output_col_types
-            )
+            tab=output_table_schema,
         )
+        self._col_types = output_table_schema.col_types
 
         return { "table": output_schema }
 
@@ -130,14 +137,14 @@ class ResampleNode(BaseNode):
                 err_msg=f"Unsupported resampling method: {self.method}",
             )
 
-        agg_df = agg_df.reset_index().rename(columns={self.col: self.result_col})
+        agg_df = agg_df.reset_index().rename(columns={self.col: self.result_col}).drop(columns=[Table.INDEX_COL])
 
         assert self._col_types is not None
         output_data = Data(
             payload=Table(
                 df=agg_df,
                 col_types=self._col_types,
-            )
+            ).regenerate_index()
         )
 
         return {"table": output_data}

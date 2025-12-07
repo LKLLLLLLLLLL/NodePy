@@ -28,6 +28,12 @@ class StatsNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
             )
+        if self.col.strip() == '':
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col",
+                err_msg="Column name must be a non-empty string.",
+            )
         return
 
     @override
@@ -121,17 +127,26 @@ class StatsNode(BaseNode):
         table_data = input["table"]
         assert isinstance(table_data.payload, Table)
         df = table_data.payload.df
+        table_schema = table_data.payload.extract_schema()
+        col_type = table_schema.col_types[self.col]
 
         # Use .item() to extract the scalar value from numpy types
-        mean = df[self.col].mean()
-        std = df[self.col].std()
-        count = df[self.col].count()
-        sum_ = df[self.col].sum().item()
-        min_ = df[self.col].min().item()
-        max_ = df[self.col].max().item()
-        quantile_25 = df[self.col].quantile(0.25)
-        quantile_50 = df[self.col].quantile(0.50)
-        quantile_75 = df[self.col].quantile(0.75)
+        mean = float(df[self.col].mean())
+        std = float(df[self.col].std())
+        count = int(df[self.col].count())
+        quantile_25 = float(df[self.col].quantile(0.25))
+        quantile_50 = float(df[self.col].quantile(0.50))
+        quantile_75 = float(df[self.col].quantile(0.75))
+        if col_type == ColType.INT:
+            sum_ = int(df[self.col].sum().item())
+            min_ = int(df[self.col].min().item())
+            max_ = int(df[self.col].max().item())
+        elif col_type == ColType.FLOAT:
+            sum_ = float(df[self.col].sum().item())
+            min_ = float(df[self.col].min().item())
+            max_ = float(df[self.col].max().item())
+        else:
+            assert False, "Unreachable code: column type should have been validated."
 
         return {
             "mean": Data(payload=mean),
@@ -148,13 +163,13 @@ class StatsNode(BaseNode):
     @override
     @classmethod
     def hint(cls, input_schemas: Dict[str, Schema], current_params: Dict) -> Dict[str, Any]:
-        col_choices = []
+        hint = {}
         if "table" in input_schemas:
             table_schema = input_schemas["table"]
+            col_choices = []
             assert table_schema.tab is not None
             for col in table_schema.tab.col_types.keys():
                 if table_schema.tab.col_types[col] in {ColType.INT, ColType.FLOAT}:
                     col_choices.append(col)
-        return {
-            "col_choices": col_choices,
-        }
+            hint["col_choices"] = col_choices
+        return hint

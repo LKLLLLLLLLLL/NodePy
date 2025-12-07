@@ -28,6 +28,8 @@ class TableSchema(BaseModel):
             self.col_types[self.INDEX_COL] = (
                 ColType.INT
             )  # add index col, imitate Table behavior
+        if self.col_types[self.INDEX_COL] != ColType.INT:
+            self.col_types[self.INDEX_COL] = ColType.INT
         # 2. verify if col_types keys are unique
         if len(self.col_types) != len(set(self.col_types.keys())):
             raise ValueError("Column names in col_types must be unique.")

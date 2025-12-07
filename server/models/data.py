@@ -1,4 +1,5 @@
 from datetime import datetime
+from math import isfinite
 from typing import Any, ClassVar, Literal, Union, cast
 
 import joblib
@@ -82,6 +83,7 @@ class Table(BaseModel):
     def regenerate_index(self) -> 'Table':
         new_df = self.df.copy()
         new_df[self.INDEX_COL] = range(len(new_df))
+        self.col_types[self.INDEX_COL] = ColType.INT
         return Table(df=new_df, col_types=self.col_types)
 
     def _append_col(self, new_col: str, col: Series) -> 'Table':
@@ -200,10 +202,22 @@ class Data(BaseModel):
                         for v in self.payload.df[col].tolist()
                     ]
                 else:
-                    # cleam NaN/pandas.NA to None
-                    cols[col] = [
-                        None if isna(v) else v for v in self.payload.df[col].tolist()
-                    ]
+                    normalized = []
+                    for v in self.payload.df[col].tolist():
+                        # convert nan/NA to None
+                        if isna(v):
+                            normalized.append(None)
+                            continue
+                        # convert +/-Infinity to None
+                        try:
+                            if not isfinite(v):
+                                normalized.append(None)
+                                continue
+                        except TypeError:
+                            # not a number type
+                            pass
+                        normalized.append(v)
+                    cols[col] = normalized
 
             table_view = DataView.TableView(
                 cols=cols,
@@ -342,6 +356,13 @@ class DataView(BaseModel):
     value: Union[TableView, str, int, bool, float, File, dict[str, Any]] # datetime is serialized as str
 
     model_config = {"arbitrary_types_allowed": True}
+    
+    @model_validator(mode="after")
+    def convert(self) -> Self:
+        if self.type == "File":
+            if not isinstance(self.value, File):
+                self.value = File.model_validate(self.value)
+        return self
 
     def to_dict(self) -> dict[str, Any]:
         return super().model_dump()

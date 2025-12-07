@@ -74,13 +74,13 @@ class DiffNode(BaseNode):
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         input_table = input["table"]
-        assert isinstance(input_table, Table)
+        assert isinstance(input_table.payload, Table)
         assert self._new_col_name is not None
-        df = input_table.df.copy()
+        df = input_table.payload.df.copy()
         df[self._new_col_name] = df[self.col].diff()
         df = df.iloc[1:].reset_index(drop=True)  # remove the first row with NaN diff
-        new_col_types = input_table.col_types.copy()
-        new_col_types[self._new_col_name] = input_table.col_types[self.col]
+        new_col_types = input_table.payload.col_types.copy()
+        new_col_types[self._new_col_name] = input_table.payload.col_types[self.col]
         output_table = Table(df=df, col_types=new_col_types)
         output_data = Data(payload=output_table)
         return {
