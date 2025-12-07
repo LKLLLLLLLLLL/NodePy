@@ -48,6 +48,100 @@ $mix-background-color: rgba($computed-r, $computed-g, $computed-b, $target-a);
   font-size: 14px;
 }
 
+// 全局el-button样式定制
+.el-button {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  
+  // 主要按钮样式（蓝色主题）
+  &.el-button--primary {
+    background-color: $stress-color;
+    border-color: $stress-color;
+    
+    &:hover, &:focus {
+      background-color: $hover-stress-color;
+      border-color: $hover-stress-color;
+      box-shadow: 0 4px 12px rgba($stress-color, 0.2);
+    }
+    
+    &:active {
+      background-color: color.scale($stress-color, $lightness: -15%);
+      border-color: color.scale($stress-color, $lightness: -15%);
+    }
+    
+    &:disabled {
+      background-color: color.scale($stress-color, $lightness: 30%);
+      border-color: color.scale($stress-color, $lightness: 30%);
+      box-shadow: none;
+    }
+  }
+  
+  // 默认按钮样式（白色主题）
+  &:not(.el-button--primary) {
+    background-color: white;
+    border-color: #dcdfe6;
+    color: #606266;
+    
+    &:hover, &:focus {
+      background-color: #f5f7fa;
+      border-color: $stress-color;
+      color: $stress-color;
+    }
+    
+    &:active {
+      background-color: #f0f2f5;
+      border-color: color.scale($stress-color, $lightness: -10%);
+      color: color.scale($stress-color, $lightness: -10%);
+    }
+    
+    &:disabled {
+      background-color: #f5f7fa;
+      border-color: #e4e7ed;
+      color: #c0c4cc;
+    }
+  }
+  
+  // 文字按钮样式
+  &.el-button--text {
+    color: $stress-color;
+    border: none;
+    background: transparent;
+    padding: 0;
+    
+    &:hover, &:focus {
+      color: $hover-stress-color;
+      background: transparent;
+    }
+    
+    &:active {
+      color: color.scale($stress-color, $lightness: -15%);
+    }
+    
+    &:disabled {
+      color: #c0c4cc;
+    }
+  }
+  
+  // 小型按钮
+  &.el-button--small {
+    font-size: 12px;
+    padding: 7px 15px;
+  }
+  
+  // 中等按钮
+  &.el-button--medium {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+  
+  // 大型按钮
+  &.el-button--large {
+    font-size: 16px;
+    padding: 12px 24px;
+  }
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   -webkit-font-smoothing: antialiased; // 让字体在 macOS 上更清晰

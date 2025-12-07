@@ -213,7 +213,10 @@
                     <img src="../../public/logo-trans.png" alt="logo">
                 </div>
                 <div class="title-container">
-                    <h2 class="nodepy-title">登录<span class="brand-highlight">NodePy</span></h2>
+                    <h2 class="nodepy-title">
+                        登录
+                        <!-- <span class="brand-highlight">NodePy</span> -->
+                    </h2>
                 </div>
             </div>
             <div class="login-form">
@@ -293,7 +296,10 @@
                     <img src="../../public/logo-trans.png" alt="logo">
                 </div>
                 <div class="title-container">
-                    <h2 class="nodepy-title">注册<span class="brand-highlight">NodePy</span>账号</h2>
+                    <h2 class="nodepy-title">
+                        注册
+                        <!-- <span class="brand-highlight">NodePy</span> -->
+                    </h2>
                 </div>
             </div>
             <div class="register-form">
@@ -359,36 +365,51 @@
         flex: 1;
         justify-content: center;
         align-items: center;
+        background-color: $background-color; /* 使用global.scss中的背景色 */
+        min-height: 100vh;
+        padding: 20px;
     }
     .login-container, .register-container {
+        @include controller-style; /* 使用controller-style混合宏 */
         display: flex;
         flex-direction: column;
-        height: 550px;
         width: 450px;
-        background-color: $mix-background-color;
-        padding: 20px;
-        @include controller-style
+        background-color: $stress-background-color;
+        padding: 30px;
+        position: relative;
+        overflow: hidden;
     }
     
-    .login-head,.register-head{
+    .login-container {
+        height: 500px; // 登录界面高度
+    }
+    
+    .register-container {
+        height: 600px; // 注册界面高度
+    }
+    
+    .login-head, .register-head {
         display: flex;
         flex-direction: column;
         height: 85px;
+        position: relative;
+        z-index: 1;
     }
 
-    .icon-container{
+    .icon-container {
         width: 130px;
         height: 45px;
         display: flex;
         align-items: center;
         justify-content: center;
-        img{
+        margin: 0 auto 10px;
+        img {
             width: 100%;
             height: 100%;
         }
     }
 
-    .title-container{
+    .title-container {
         height: 40px;
         display: flex;
         align-items: center;
@@ -401,7 +422,8 @@
         letter-spacing: 1px;
         margin: 0;
         color: #333;
-        text-shadow: 0 1px 2px rgba(16, 142, 254, 0.1);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 修改为中性阴影，避免蓝光 */
+        font-size: 24px;
     }
     
     .brand-highlight {
@@ -411,32 +433,43 @@
         display: inline-block;
     }
 
-    .register-form,.login-form{
-        margin-top: 10px;
+    .register-form, .login-form {
+        margin-top: 20px;
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
     }
 
-    .login-bottom-controler,.register-bottom-controler{
+    .login-bottom-controler, .register-bottom-controler {
         margin-top: 28px;
         width: 100%;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 15px;
+        position: relative;
+        z-index: 1;
     }
 
-    .login-control,.register-control{
+    .login-control, .register-control {
         width: 100%;
         display: flex;
         justify-content: flex-end;
     }
 
-    .switcher{
+    .switcher {
         width: 100%;
         display: flex;
         justify-content: flex-end;
     }
 
-    .confirm-button{
+    .confirm-button {
         width: 100%;
+        height: 45px;
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: 1px;
     }
 
     /* 第三方登录样式 */
@@ -446,15 +479,76 @@
         flex-direction: column;
     }
 
-    .divider{
+    .divider {
         width: 100%;
         text-align: center;
         height: 30px;
+        position: relative;
+        color: #999;
+        
+        &::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #ddd, transparent);
+        }
+        
+        span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+        }
     }
 
-    .oauth-buttons{
+    .oauth-buttons {
         display: flex;
         justify-content: center;
         align-items: center;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .oauth-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 使用中性阴影，避免蓝光 */
+        
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* 使用中性阴影，避免蓝光 */
+            border-color: #ddd;
+        }
+        
+        .oauth-icon {
+            width: 20px;
+            height: 20px;
+        }
+    }
+    
+    // 响应式设计
+    @media (max-width: 500px) {
+        .login-container, .register-container {
+            width: 95%;
+            padding: 20px;
+        }
+        
+        .login-container {
+            height: 450px;
+        }
+        
+        .register-container {
+            height: 550px;
+        }
     }
 </style>

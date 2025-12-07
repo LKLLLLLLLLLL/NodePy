@@ -6,6 +6,7 @@ import { DataView, type TableView } from "@/utils/api"
 import type { File } from "@/utils/api"
 import Result from "@/components/Result/Result.vue"
 import { useVueFlow } from "@vue-flow/core"
+import { useFileStore } from "./fileStore"
 import { useGraphStore } from "./graphStore"
 import notify from "@/components/Notification/notify"
 import { ApiError } from "@/utils/api"
@@ -16,6 +17,7 @@ export const useResultStore = defineStore('result',()=>{
 
     const modalStore = useModalStore();
     const graphStore = useGraphStore();
+    const fileStore = useFileStore();
     const {nodes} = useVueFlow('main')
     const authService = AuthenticatedServiceFactory.getService();
 
@@ -318,6 +320,243 @@ export const useResultStore = defineStore('result',()=>{
         });
     }
 
+    // 在 resultStore.ts 中更新 downloadResult 函数
+
+    /**
+     * 下载结果内容
+     * @param dataId 数据ID
+     * @param filename 可选的文件名，如果不提供则自动生成
+     */
+    async function downloadResult(dataId?: number, filename?: string) {
+        try {
+            notify({
+                message: '开始下载结果',
+                type: 'info'
+            })
+            const dataIdToUse = dataId || default_id;
+            const result = await getResultCacheContent(dataIdToUse);
+            
+            if (!result) {
+                notify({
+                    message: '无法获取结果内容',
+                    type: 'error'
+                });
+                return;
+            }
+            
+            let blob: Blob;
+            let downloadFilename = filename || `result_${dataIdToUse}`;
+            
+            // 根据结果类型处理不同的下载内容
+            switch (result.type) {
+                case DataView.type.INT:
+                case DataView.type.FLOAT:
+                case DataView.type.STR:
+                case DataView.type.BOOL:
+                    // 基本类型转换为字符串
+                    const basicValue = String(result.value);
+                    blob = new Blob([basicValue], { type: 'text/plain' });
+                    // 根据类型添加扩展名
+                    const extMap = {
+                        [DataView.type.INT]: 'txt',
+                        [DataView.type.FLOAT]: 'txt',
+                        [DataView.type.STR]: 'txt',
+                        [DataView.type.BOOL]: 'txt',
+                        [DataView.type.DATETIME]: 'txt',
+                    };
+                    const ext = extMap[result.type] || 'txt';
+                    downloadFilename = filename || `result_${dataIdToUse}.${ext}`;
+                    break;
+                    
+                case DataView.type.TABLE:
+                    // 处理表格数据
+                    if (result.value && typeof result.value === 'object') {
+                        // 转换为CSV格式
+                        const csvContent = convertTableToCSV(result.value);
+                        blob = new Blob([csvContent], { type: 'text/csv' });
+                        downloadFilename = filename || `result_${dataIdToUse}.csv`;
+                    } else {
+                        // 如果不是对象，直接转为字符串
+                        const content = String(result.value);
+                        blob = new Blob([content], { type: 'text/plain' });
+                        downloadFilename = filename || `result_${dataIdToUse}.txt`;
+                    }
+                    break;
+                    
+                case DataView.type.FILE:
+                    // 处理文件类型
+                    if (result.value && typeof result.value === 'object') {
+                        // 假设result.value是File对象
+                        const fileValue = result.value as any;
+                        
+                        // 如果有key属性，使用fileStore下载
+                        if ('key' in fileValue && fileValue.key) {
+                            const fileStore = useFileStore();
+                            await fileStore.downloadFile(fileValue.key, fileValue.filename);
+                            return; // fileStore会处理下载，这里直接返回
+                        }
+                        // 如果有content属性，直接创建Blob
+                        else if ('content' in fileValue && fileValue.content) {
+                            // 根据content类型创建Blob
+                            if (fileValue.content instanceof ArrayBuffer) {
+                                blob = new Blob([fileValue.content], { 
+                                    type: fileValue.contentType || 'application/octet-stream' 
+                                });
+                            } else if (typeof fileValue.content === 'string') {
+                                blob = new Blob([fileValue.content], { 
+                                    type: fileValue.contentType || 'text/plain' 
+                                });
+                            } else {
+                                // 其他类型转为JSON
+                                const jsonStr = JSON.stringify(fileValue.content, null, 2);
+                                blob = new Blob([jsonStr], { type: 'application/json' });
+                            }
+                            
+                            // 确定文件名
+                            if ('filename' in fileValue && fileValue.filename) {
+                                downloadFilename = fileValue.filename;
+                            } else {
+                                downloadFilename = filename || `file_${dataIdToUse}`;
+                            }
+                        } else {
+                            notify({
+                                message: '文件信息不完整',
+                                type: 'error'
+                            });
+                            return;
+                        }
+                    } else {
+                        notify({
+                            message: '文件数据格式错误',
+                            type: 'error'
+                        });
+                        return;
+                    }
+                    break;
+                    
+                case DataView.type.DATETIME:
+                    // 处理日期时间类型
+                    const dateValue = String(result.value);
+                    blob = new Blob([dateValue], { type: 'text/plain' });
+                    downloadFilename = filename || `result_${dataIdToUse}.txt`;
+                    break;
+                    
+                default:
+                    // 默认处理：转换为JSON格式
+                    const content = typeof result.value === 'string' 
+                        ? result.value 
+                        : JSON.stringify(result.value, null, 2);
+                    blob = new Blob([content], { type: 'application/json' });
+                    downloadFilename = filename || `result_${dataIdToUse}.json`;
+                    break;
+            }
+            
+            // 创建下载链接
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = downloadFilename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            notify({
+                message: '结果下载成功',
+                type: 'success'
+            });
+            
+        } catch (error) {
+            console.error('下载结果失败:', error);
+            notify({
+                message: `下载失败: ${error instanceof Error ? error.message : '未知错误'}`,
+                type: 'error'
+            });
+        }
+    }
+
+    /**
+     * 将表格数据转换为CSV格式
+     * @param tableData 表格数据，可能是TableView或其他对象
+     */
+    function convertTableToCSV(tableData: any): string {
+        if (!tableData || typeof tableData !== 'object') {
+            return '';
+        }
+        
+        try {
+            // 处理TableView类型（根据API定义）
+            if (tableData.columns && tableData.rows) {
+                const headers = tableData.columns.map((col: any) => {
+                    const header = col.name || col.title || '';
+                    // CSV转义：如果包含逗号、双引号或换行符，用双引号包裹
+                    if (header.includes(',') || header.includes('"') || header.includes('\n')) {
+                        return `"${header.replace(/"/g, '""')}"`;
+                    }
+                    return header;
+                }).join(',');
+                
+                const rows = tableData.rows.map((row: any[]) => {
+                    return row.map((cell: any) => {
+                        const cellStr = cell !== null && cell !== undefined ? String(cell) : '';
+                        // CSV转义
+                        if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                            return `"${cellStr.replace(/"/g, '""')}"`;
+                        }
+                        return cellStr;
+                    }).join(',');
+                }).join('\n');
+                
+                return `${headers}\n${rows}`;
+            }
+            
+            // 处理二维数组
+            if (Array.isArray(tableData) && tableData.length > 0 && Array.isArray(tableData[0])) {
+                const rows = tableData.map(row => {
+                    return row.map((cell: any) => {
+                        const cellStr = cell !== null && cell !== undefined ? String(cell) : '';
+                        // CSV转义
+                        if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                            return `"${cellStr.replace(/"/g, '""')}"`;
+                        }
+                        return cellStr;
+                    }).join(',');
+                }).join('\n');
+                
+                return rows;
+            }
+            
+            // 处理对象数组
+            if (Array.isArray(tableData) && tableData.length > 0 && typeof tableData[0] === 'object') {
+                // 获取所有可能的键作为表头
+                const headers = [...new Set(tableData.flatMap(Object.keys))];
+                const headerRow = headers.map(header => {
+                    if (header.includes(',') || header.includes('"') || header.includes('\n')) {
+                        return `"${header.replace(/"/g, '""')}"`;
+                    }
+                    return header;
+                }).join(',');
+                
+                const rows = tableData.map(item => {
+                    return headers.map(header => {
+                        const value = item[header] !== undefined ? String(item[header]) : '';
+                        if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                            return `"${value.replace(/"/g, '""')}"`;
+                        }
+                        return value;
+                    }).join(',');
+                }).join('\n');
+                
+                return `${headerRow}\n${rows}`;
+            }
+            
+            // 其他情况返回JSON字符串
+            return JSON.stringify(tableData, null, 2);
+        } catch (error) {
+            console.error('转换CSV失败:', error);
+            return JSON.stringify(tableData, null, 2);
+        }
+    }
 
     return{
         default_dataview,
@@ -345,6 +584,8 @@ export const useResultStore = defineStore('result',()=>{
         updateResultCacheContent,
         replaceLeastFrequentlyUsed,
         removeResultCacheContent,
-        getResultCacheContent
+        getResultCacheContent,
+        downloadResult,
+        convertTableToCSV,
     }
 })

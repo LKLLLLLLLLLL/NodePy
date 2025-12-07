@@ -5,12 +5,18 @@
     import ValueView from './ValueView.vue';
     import NodeInfo from './NodeInfo.vue';
     import Loading from '../Loading.vue'; // 引入Loading组件
-    import { watch, ref,computed, onMounted, onUnmounted } from 'vue';
+    import { watch, ref, computed, onMounted, onUnmounted } from 'vue';
     import { useResultStore } from '@/stores/resultStore';
     import { useGraphStore } from '@/stores/graphStore';
 
     const resultStore = useResultStore();
     const graphStore = useGraphStore();
+
+    // 当前激活的标签页
+    const activeTab = ref('');
+
+    // 计算标签页数据
+    const tabKeys = computed(() => Object.keys(resultStore.currentTypeDataID));
 
     // 监听窗口大小变化
     const handleWindowResize = () => {
@@ -34,6 +40,7 @@
             if(newTypeDataID === resultStore.default_typedataid){
                 resultStore.currentResult = resultStore.default_dataview
                 resultStore.currentInfo = resultStore.default_info
+                activeTab.value = ''; // 重置激活的标签页
                 return 
             }
             // 获取字典中的第一个值作为默认结果ID
@@ -50,6 +57,10 @@
                     // 获取新结果
                     const result = await resultStore.getResultCacheContent(dataId);
                     resultStore.currentResult = result;
+                    
+                    // 设置默认选中的标签页为第一个
+                    activeTab.value = firstKey;
+                    handleChooseResult(firstKey);
                 }
             }
             
@@ -57,19 +68,31 @@
             console.error('Result: 加载结果失败:', error);
             resultStore.currentInfo = graphStore.currentNode?.data?.param || {};
             resultStore.currentResult = resultStore.default_dataview;
+            activeTab.value = ''; // 出错时重置激活的标签页
         }
     }, { immediate: true, deep: true });
 
     async function handleChooseResult(key: string){
+        activeTab.value = key;
         resultStore.currentResult = await resultStore.getResultCacheContent(resultStore.currentTypeDataID[key]!)
     }
 
 </script>
 <template>
     <div class="result-total-container">
-        <div class = "result-control">
-            <el-button v-for="key in Object.keys(resultStore.currentTypeDataID)" :key="key" @click="()=>handleChooseResult(key)" type="primary">{{ key[0]!.toUpperCase()+ key.slice(1) }}</el-button>
-        </div>
+        <el-tabs 
+            v-if="tabKeys.length > 0" 
+            v-model="activeTab" 
+            @tab-click="(tab) => handleChooseResult(tab.props.name)" 
+            class="result-control"
+        >
+            <el-tab-pane 
+                v-for="key in tabKeys" 
+                :key="key" 
+                :label="key[0]!.toUpperCase() + key.slice(1)" 
+                :name="key">
+            </el-tab-pane>
+        </el-tabs>
         <div class = "result-container">
             <!-- 显示loading状态 -->
             <div v-if="resultStore.loading" class="loading-container">
@@ -77,22 +100,24 @@
             </div>
             <!-- 显示结果内容 -->
             <div class="if-result" v-else-if="resultStore.currentResult !== resultStore.default_dataview">
-                <TableView v-if="resultStore.currentResult.type === 'Table'"
-                            :value="resultStore.currentResult.value"
-                            class = "view-content chart-view">
-                </TableView>
-                <FileView  v-else-if="resultStore.currentResult.type === 'File'"
-                            :value="resultStore.currentResult.value"
-                            class = "view-content file-view">
-                </FileView>
-                <ValueView v-else-if="resultStore.currentResult.type === 'int'
-                            || resultStore.currentResult.type  === 'str'
-                            || resultStore.currentResult.type  === 'bool'
-                            || resultStore.currentResult.type  === 'float'
-                            || resultStore.currentResult.type  === 'Datetime'"
-                            :value="resultStore.currentResult.value"
-                            class = "view-content value-view">
-                </ValueView>
+                <div class="view-content-wrapper">
+                    <TableView v-if="resultStore.currentResult.type === 'Table'"
+                                :value="resultStore.currentResult.value"
+                                class = "view-content chart-view">
+                    </TableView>
+                    <FileView  v-else-if="resultStore.currentResult.type === 'File'"
+                                :value="resultStore.currentResult.value"
+                                class = "view-content file-view">
+                    </FileView>
+                    <ValueView v-else-if="resultStore.currentResult.type === 'int'
+                                || resultStore.currentResult.type  === 'str'
+                                || resultStore.currentResult.type  === 'bool'
+                                || resultStore.currentResult.type  === 'float'
+                                || resultStore.currentResult.type  === 'Datetime'"
+                                :value="resultStore.currentResult.value"
+                                class = "view-content value-view">
+                    </ValueView>
+                </div>
             </div>
             <div class="if-info" v-if="resultStore.currentInfo!=resultStore.default_info">
                 <NodeInfo :data="resultStore.currentInfo">
@@ -112,18 +137,45 @@
     .result-container{
         display: flex;
         width: 100%;
-        height: calc(100% - 30px);
+        height: calc(100% - 40px); /* 调整高度以适应标签页 */
         color: grey;
         padding: 0;
         border-radius: 10px;
-        position: relative; /* 添加相对定位 */
-        overflow: hidden; /* 添加这行 */
+        position: relative;
+        overflow: hidden;
     }
 
-    .result-control{
-        height: 30px;
-        display: flex;
-        gap: 5px;
+    .result-control {
+        height: 40px; /* 增加高度以适应标签页 */
+        :deep(.el-tabs__header) {
+            margin: 0;
+        }
+        
+        :deep(.el-tabs__nav-wrap)::after {
+            height: 1px;
+        }
+        
+        :deep(.el-tabs__item) {
+            height: 40px;
+            line-height: 40px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        
+        :deep(.el-tabs__item:hover) {
+            color: #409eff;
+        }
+        
+        :deep(.el-tabs__item.is-active) {
+            color: #409eff;
+            font-weight: 600;
+        }
+        
+        :deep(.el-tabs__active-bar) {
+            background-color: #409eff;
+            transition: all 0.3s ease;
+        }
     }
 
     .if-result{
@@ -132,12 +184,18 @@
         margin-left: 0;
         border-radius: 10px;
         overflow: hidden;
-        background: transparent; /* 添加这行 */
+        background: transparent;
+    }
+
+    .view-content-wrapper {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
     }
 
     .view-content{
         width: 100%;
-        height: 100%;
+        min-height: 100%;
         border-radius: 10px;
     }
     
@@ -146,5 +204,11 @@
         justify-content: center;
         align-items: center;
         height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: rgba(255, 255, 255, 0.8);
+        z-index: 10;
     }
 </style>

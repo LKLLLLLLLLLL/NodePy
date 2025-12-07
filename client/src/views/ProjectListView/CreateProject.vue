@@ -32,26 +32,40 @@
 </script>
 <template>
      <div class="create-project-container">
-        <el-form @submit.prevent="onCreateProject">
+        <el-form label-position="top" @submit.prevent="onCreateProject">
             <el-form-item label="项目名称">
                 <el-input placeholder="请输入项目名称" v-model="projectStore.currentProjectName" @keyup.enter="onCreateProject"></el-input>
             </el-form-item>
             <!-- <el-form-item label="描述">
                 <el-switch></el-switch>
             </el-form-item> -->
-            <el-form-item>
-                <div class="form-buttons">
-                    <el-button type="primary" @click="onCreateProject">创建</el-button>
-                    <el-button @click="onCancel">取消</el-button>
-                </div>
-            </el-form-item>
         </el-form>
+        <el-button class='button create'type="primary" @click="onCreateProject">创建</el-button>
+        <el-button class='button cancel' @click="onCancel">取消</el-button>
     </div>
 </template>
 <style lang="scss" scoped>
+
+    @use "../../common/global.scss";
+
     .create-project-container {
+
     }
-    
+
+    .button {
+        width: 100%;
+    }
+
+    .button.cancel{
+        margin-top: 10px;
+        margin-left: 0;
+    }
+
+    .form-buttons{
+        display: flex;
+        width: 100%;
+    }
+
     .form-buttons {
         display: flex;
         justify-content: center;

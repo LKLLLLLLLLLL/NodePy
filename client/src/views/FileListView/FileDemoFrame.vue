@@ -90,6 +90,11 @@
         })
     }
 
+    async function handleDownload(file :any){
+        // 使用 downloadFile 函数，传入文件的 key 和文件名
+        await fileStore.downloadFile(file.key, file.filename);
+    }
+
 </script>
 <template>
     <div class="file-container" v-if="props.file!=fileStore.default_file">
@@ -111,7 +116,8 @@
             </div>
         </div>
         <div class="file-right">
-            <el-button @click="handlePreview(file)">预览</el-button>
+            <el-button @click="()=>handlePreview(file)">预览</el-button>
+            <el-button @click="()=>handleDownload(file)">下载</el-button>
             <!-- <el-button @click="handleDelete(file.key)">删除</el-button> -->
         </div>
     </div>
@@ -160,9 +166,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 200px;
-        gap: 8px;
-        padding: 0 4px;
+        width: 190px;
     }
     
     .fileinfo{

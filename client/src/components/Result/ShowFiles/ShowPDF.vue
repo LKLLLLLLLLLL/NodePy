@@ -58,6 +58,13 @@ const updateInputPage = (event: Event) => {
 const handleGoButtonClick = () => {
   goToPage(inputPage.value)
 }
+
+// 处理回车键跳转
+const handleInputEnter = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    handleGoButtonClick()
+  }
+}
 </script>
 
 <template>
@@ -100,6 +107,7 @@ const handleGoButtonClick = () => {
           :max="pageCount"
           class="page-input"
           @input="updateInputPage"
+          @keyup="handleInputEnter"
         />
         <button 
           class="go-btn" 
@@ -123,6 +131,7 @@ const handleGoButtonClick = () => {
   display: flex;
   flex-direction: column;
   position: relative;
+  height: 100%; /* 确保占满容器高度 */
 }
 
 .pdf-content {
@@ -132,6 +141,8 @@ const handleGoButtonClick = () => {
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  /* 修复滚动条问题 */
+  scrollbar-gutter: stable; /* 保持滚动条空间一致 */
 }
 
 .pdf-center {
@@ -141,6 +152,8 @@ const handleGoButtonClick = () => {
   justify-content: center;
   width: 100%;
   height: 100%;
+  /* 添加最小宽度以确保内容正确显示 */
+  min-width: fit-content;
 }
 
 .pdf-embed {
@@ -148,6 +161,8 @@ const handleGoButtonClick = () => {
   flex: 1;
   width: 100%;
   height: 100%;
+  /* 确保PDF适应容器 */
+  object-fit: contain;
 }
 
 .pdf-pagination {
@@ -157,7 +172,6 @@ const handleGoButtonClick = () => {
   gap: 12px;
   padding: 12px 0;
   flex-wrap: wrap;
-  bottom: 0;
   background: white;
   border-top: 1px solid #e4e7ed;
   margin: 0 -12px -12px -12px;

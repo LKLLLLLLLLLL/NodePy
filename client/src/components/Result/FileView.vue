@@ -45,6 +45,9 @@ const excelSheets = ref<any[]>([])
 // JSON 内容
 const jsonData = ref<any>(null)
 
+// 性能优化：虚拟滚动相关
+const maxRenderLines = 1000 // 最大渲染行数
+
 // 类型守卫：检查是否是 File 类型
 const isFile = computed(() => {
     return (
@@ -189,7 +192,7 @@ const txtGoToPage = (page: number) => {
 // 加载文件的函数
 const loadFile = async () => {
     // 重置状态
-    loading.value = false
+    loading.value = true
     error.value = ''
     if (objectUrl) {
         URL.revokeObjectURL(objectUrl)
@@ -209,11 +212,11 @@ const loadFile = async () => {
 
     // 检查是否是有效的文件对象
     if (!isValidFile.value) {
+        loading.value = false
         return
     }
 
     try {
-        loading.value = true
         error.value = ''
 
         // 从 fileStore 获取文件内容
@@ -221,6 +224,7 @@ const loadFile = async () => {
 
         if (!content) {
             error.value = '文件内容为空或加载失败'
+            loading.value = false
             return
         }
 
@@ -238,6 +242,7 @@ const loadFile = async () => {
 
         if (!blob || blob.size === 0) {
             error.value = 'Blob 为空或大小为 0'
+            loading.value = false
             return
         }
 
@@ -464,6 +469,7 @@ const handleImgLoad = () => {
     display: flex;
     flex-direction: column;
     height: 100%;
+    overflow: hidden; /* 防止外部滚动条 */
 }
 
 .file-loading {

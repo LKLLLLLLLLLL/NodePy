@@ -1,7 +1,8 @@
 <script setup lang = "ts">
     import type { ModalInstance } from '../types/modalType';
     import { useModalStore } from '../stores/modalStore';
-    import { ref } from 'vue';
+    import { useResultStore } from '../stores/resultStore';
+    import { ref, computed } from 'vue';
     import {Close} from '@element-plus/icons-vue';
 
     const props = defineProps<{
@@ -9,6 +10,7 @@
     }>();
 
     const modalStore = useModalStore();
+    const resultStore = useResultStore();
 
     const isDragging = ref(false);
     const dragStartPosition = ref<{x: number, y: number}>({x: 0, y: 0});
@@ -19,6 +21,36 @@
     const resizeStartPosition = ref<{x: number, y: number}>({x: 0, y: 0});//光标起始位置
     const resizeStartSize = ref<{width: number, height: number}>(props.modal.size);//弹窗起始尺寸
     const resizeStartModalPosition = ref<{x: number, y: number}>({x: 0, y: 0});
+
+    // 判断是否显示下载按钮
+    const showDownloadButton = computed(() => {
+        // 只有在结果模态框中才显示下载按钮
+        if (!(props.modal as any).isResultModal) {
+            return false;
+        }
+        
+        // 检查是否有有效结果
+        return resultStore.currentResult && 
+               resultStore.currentResult !== resultStore.default_dataview;
+    });
+
+    // 下载结果函数
+    const downloadResult = async () => {
+        try {
+            // 获取当前显示的结果的dataId
+            const currentType = Object.keys(resultStore.currentTypeDataID)[0];
+            const dataId = resultStore.currentTypeDataID[currentType!];
+            
+            if (dataId) {
+                await resultStore.downloadResult(dataId);
+            } else {
+                // 如果没有特定的dataId，尝试下载当前结果
+                await resultStore.downloadResult();
+            }
+        } catch (error) {
+            console.error('下载失败:', error);
+        }
+    };
 
     const closeModal = () => {
         modalStore.deactivateModal(props.modal.id);
@@ -270,7 +302,15 @@
             </div>
         </div>
         <div class = "modal-footer">
-
+            <el-button 
+                v-if="showDownloadButton" 
+                @click="downloadResult"
+                type="primary"
+                size="small"
+                style="margin-right: auto;"
+            >
+                下载结果
+            </el-button>
         </div>
     </div>
 </template>

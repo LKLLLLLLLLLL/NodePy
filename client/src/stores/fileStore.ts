@@ -455,6 +455,127 @@ export const useFileStore = defineStore('file', () => {
         }
     }
 
+    /**
+     * 下载文件
+     * @param key 文件key
+     * @param filename 可选的文件名，如果不提供则使用原始文件名
+     */
+    async function downloadFile(key?: string, filename?: string) {
+        try {
+            notify({
+                message: '开始下载文件',
+                type: 'info'
+            })
+            const keyToUse = key || currentKey.value;
+            if (!keyToUse || keyToUse === default_key) {
+                notify({
+                    message: '未指定要下载的文件',
+                    type: 'error'
+                });
+                return;
+            }
+            
+            // 从缓存或API获取文件内容
+            const content = await getCacheContent(keyToUse);
+            
+            if (!content) {
+                notify({
+                    message: '无法获取文件内容',
+                    type: 'error'
+                });
+                return;
+            }
+            
+            // 确定文件名
+            let downloadFilename = filename;
+            if (!downloadFilename) {
+                // 尝试从当前文件信息获取文件名
+                if (currentFile.value && currentFile.value.key === keyToUse) {
+                    downloadFilename = currentFile.value.filename;
+                } else {
+                    // 从文件列表中查找
+                    const fileItem = userFiles.value.find(file => file.key === keyToUse);
+                    downloadFilename = fileItem?.filename || `file_${keyToUse}`;
+                }
+            }
+            
+            // 确保文件名有扩展名
+            if (downloadFilename && !downloadFilename.includes('.')) {
+                const fileItem = userFiles.value.find(file => file.key === keyToUse);
+                if (fileItem?.format) {
+                    const extMap: Record<string, string> = {
+                        [FileItem.format.PNG]: 'png',
+                        [FileItem.format.JPG]: 'jpg',
+                        [FileItem.format.PDF]: 'pdf',
+                        [FileItem.format.CSV]: 'csv',
+                        [FileItem.format.TXT]: 'txt',
+                        [FileItem.format.JSON]: 'json',
+                    };
+                    const ext = extMap[fileItem.format] || '';
+                    if (ext) {
+                        downloadFilename = `${downloadFilename}.${ext}`;
+                    }
+                }
+            }
+            
+            // 创建下载链接
+            let blob: Blob;
+            
+            if (content instanceof Blob) {
+                // 如果已经是Blob对象，直接使用
+                blob = content;
+            } else if (typeof content === 'string') {
+                // 如果是字符串，转换为Blob
+                blob = new Blob([content], { type: 'text/plain' });
+            } else if (content instanceof ArrayBuffer) {
+                // 如果是ArrayBuffer
+                blob = new Blob([content], { type: 'application/octet-stream' });
+            } else {
+                // 其他类型转换为JSON
+                const jsonStr = JSON.stringify(content, null, 2);
+                blob = new Blob([jsonStr], { type: 'application/json' });
+                if (!downloadFilename?.includes('.')) {
+                    downloadFilename = downloadFilename ? `${downloadFilename}.json` : 'file.json';
+                }
+            }
+            
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = downloadFilename || `file_${keyToUse}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            notify({
+                message: '文件下载成功',
+                type: 'success'
+            });
+            
+        } catch (error) {
+            console.error('下载文件失败:', error);
+            notify({
+                message: `下载失败: ${error instanceof Error ? error.message : '未知错误'}`,
+                type: 'error'
+            });
+        }
+    }
+
+    /**
+     * 下载当前选中的文件
+     */
+    function downloadCurrentFile() {
+        if (currentFile.value && currentFile.value.key) {
+            return downloadFile(currentFile.value.key, currentFile.value.filename);
+        } else {
+            notify({
+                message: '未选中任何文件',
+                type: 'error'
+            });
+        }
+    }
+
     return {
         default_file,
         userFileList,
@@ -472,5 +593,7 @@ export const useFileStore = defineStore('file', () => {
         updateCacheContent,
         removeCacheContent,
         getCacheContent,
+        downloadFile,
+        downloadCurrentFile,
     }
 })

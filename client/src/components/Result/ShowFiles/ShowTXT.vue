@@ -7,6 +7,7 @@ const props = defineProps<{
 
 const txtLinesPerPage = 50
 const txtCurrentPage = ref<number>(1)
+const inputPage = ref<number>(1) // 用于存储输入框的值
 
 // 修改这里以保留空行
 const txtLines = computed(() => {
@@ -27,6 +28,7 @@ const txtCurrentPageContent = computed(() => {
 const txtPrevPage = () => {
   if (txtCurrentPage.value > 1) {
     txtCurrentPage.value--
+    inputPage.value = txtCurrentPage.value
   }
 }
 
@@ -34,6 +36,7 @@ const txtPrevPage = () => {
 const txtNextPage = () => {
   if (txtCurrentPage.value < txtTotalPages.value) {
     txtCurrentPage.value++
+    inputPage.value = txtCurrentPage.value
   }
 }
 
@@ -43,13 +46,35 @@ const txtGoToPage = (page: number) => {
     txtCurrentPage.value = page
   }
 }
+
+// 更新输入框的值，但不立即跳转
+const updateInputPage = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const page = parseInt(target.value) || 1
+  inputPage.value = Math.max(1, Math.min(page, txtTotalPages.value))
+}
+
+// 点击跳转按钮或按回车键时才真正跳转
+const handleGoButtonClick = () => {
+  txtGoToPage(inputPage.value)
+}
+
+// 处理回车键跳转
+const handleInputEnter = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    handleGoButtonClick()
+  }
+}
 </script>
 
 <template>
   <div class="txt-view">
     <div class="txt-content">
-      <!-- 修改这里以更好地显示空行 -->
-      <pre v-for="(line, index) in txtCurrentPageContent" :key="index" class="txt-line"><span v-if="line === ''">&nbsp;</span><span v-else>{{ line }}</span></pre>
+      <!-- 修改这里以更好地显示空行，并取消每段占据一行 -->
+      <div v-for="(line, index) in txtCurrentPageContent" :key="index" class="txt-line">
+        <span v-if="line === ''">&nbsp;</span>
+        <span v-else>{{ line }}</span>
+      </div>
     </div>
     <!-- TXT 分页控件 -->
     <div v-if="txtTotalPages > 1" class="txt-pagination">
@@ -73,15 +98,16 @@ const txtGoToPage = (page: number) => {
       <div class="page-input-container">
         <input 
           type="number" 
-          v-model.number="txtCurrentPage" 
+          :value="inputPage" 
           min="1" 
           :max="txtTotalPages"
           class="page-input"
-          @change="txtGoToPage(txtCurrentPage)"
+          @input="updateInputPage"
+          @keyup="handleInputEnter"
         />
         <button 
           class="go-btn" 
-          @click="txtGoToPage(txtCurrentPage)"
+          @click="handleGoButtonClick"
         >
           跳转
         </button>
@@ -93,22 +119,27 @@ const txtGoToPage = (page: number) => {
 <style scoped>
 .txt-view {
   flex: 1;
-  overflow: auto;
+  overflow: hidden; /* 改为hidden，让内部控制滚动 */
   background: white;
   border: 1px solid #e4e7ed;
   border-radius: 10px;
   padding: 12px;
   display: flex;
   flex-direction: column;
+  height: 100%; /* 确保占满容器高度 */
 }
 
 .txt-content {
   flex: 1;
-  overflow: auto;
+  overflow: auto; /* 让内容区域控制滚动 */
   font-family: 'Courier New', Consolas, Monaco, monospace;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+  white-space: pre-wrap; /* 允许自动换行 */
+  word-wrap: break-word; /* 允许长单词换行 */
   line-height: 1.5;
+  /* 修复滚动条问题 */
+  scrollbar-gutter: stable; /* 保持滚动条空间一致 */
+  padding: 8px; /* 添加一些内边距 */
+  box-sizing: border-box;
 }
 
 .txt-line {
@@ -117,6 +148,8 @@ const txtGoToPage = (page: number) => {
   font-family: inherit;
   /* 确保空行也能正确显示 */
   min-height: 1.2em;
+  /* 不再强制每行占据整行 */
+  display: block;
 }
 
 .txt-pagination {
@@ -126,6 +159,9 @@ const txtGoToPage = (page: number) => {
   gap: 12px;
   padding: 12px 0;
   flex-wrap: wrap;
+  border-top: 1px solid #e4e7ed;
+  margin: 12px -12px -12px -12px;
+  padding: 12px;
 }
 
 .pagination-btn {
@@ -175,11 +211,5 @@ const txtGoToPage = (page: number) => {
   color: white;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s;
-}
-
-.go-btn:hover {
-  background: #66b1ff;
-  border-color: #66b1ff;
 }
 </style>

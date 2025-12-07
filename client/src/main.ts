@@ -1,3 +1,6 @@
+// 引入全局样式
+import './common/node.scss'
+
 //basic
 import { createApp } from 'vue'
 import router from './router/index.ts'
