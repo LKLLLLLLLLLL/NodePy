@@ -253,6 +253,24 @@ export const nodeMenuItems: MenuNode[] = [
         ]
     },
     {
+        label: '时间处理节点',
+        value: 'datetimeProcess',
+        children: [
+            {
+                label: '时间数值运算节点',
+                value: 'DatetimeComputeNode'
+            },
+            {
+                label: '时间差值节点',
+                value: 'DatetimeDiffNode'
+            },
+            {
+                label: '时间转换节点',
+                value: 'ToDatetimeNode'
+            },
+        ]
+    },
+    {
         label: '分析节点',
         value: 'analysis',
         children: []

@@ -792,6 +792,46 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedShiftNode)
         break
+      case 'DatetimeComputeNode':
+        const addedDatetimeComputeNode: Nodetypes.DatetimeComputeNode = {
+          id,
+          position,
+          type: 'DatetimeComputeNode',
+          data: {
+            param: {
+              op: 'ADD',
+              unit: 'DAYS'
+            }
+          }
+        }
+        addNodes(addedDatetimeComputeNode)
+        break
+      case 'DatetimeDiffNode':
+        const addedDatetimeDiffNode: Nodetypes.DatetimeDiffNode = {
+          id,
+          position,
+          type: 'DatetimeDiffNode',
+          data: {
+            param: {
+              unit: 'DAYS'
+            }
+          }
+        }
+        addNodes(addedDatetimeDiffNode)
+        break
+      case 'ToDatetimeNode':
+        const addedToDatetimeNode: Nodetypes.ToDatetimeNode = {
+          id,
+          position,
+          type: 'ToDatetimeNode',
+          data: {
+            param: {
+              unit: 'DAYS'
+            }
+          }
+        }
+        addNodes(addedToDatetimeNode)
+        break
     
       default:
         console.log(type)

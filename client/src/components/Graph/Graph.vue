@@ -69,6 +69,9 @@ import UploadNode from '../nodes/file/UploadNode.vue'
 import TableFromFileNode from '../nodes/file/TableFromFileNode.vue'
 import TableToFileNode from '../nodes/file/TableToFileNode.vue'
 import TextFromFileNode from '../nodes/file/TextFromFileNode.vue'
+import DatetimeComputeNode from '../nodes/datetimeProcess/DatetimeComputeNode.vue'
+import DatetimeDiffNode from '../nodes/datetimeProcess/DatetimeDiffNode.vue'
+import ToDatetimeNode from '../nodes/datetimeProcess/ToDatetimeNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -320,6 +323,10 @@ const nodeColor = (node: BaseNode) => {
     case 'TableToFileNode':
     case 'TextFromFileNode':
       return nodeCategoryColor.file
+    case 'DatetimeComputeNode':
+    case 'DatetimeDiffNode':
+    case 'ToDatetimeNode':
+      return nodeCategoryColor.datetime
     default:
       return nodeCategoryColor.default
   }
@@ -371,6 +378,8 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
       :nodes-connectable="graphStore.project.editable"
       :edges-updatable="graphStore.project.editable"
       :delete-key-code="graphStore.project.editable ? ['Backspace', 'Delete'] : null"
+      :min-zoom="0.2"
+      :max-zoom="4.0"
       id="main"
       >
 
@@ -617,6 +626,18 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-TextFromFileNode="TextFromFileNodeProps">
           <TextFromFileNode v-bind="TextFromFileNodeProps"/>
+        </template>
+
+        <template #node-DatetimeComputeNode="DatetimeComputeNodeProps">
+          <DatetimeComputeNode v-bind="DatetimeComputeNodeProps"/>
+        </template>
+
+        <template #node-DatetimeDiffNode="DatetimeDiffNodeProps">
+          <DatetimeDiffNode v-bind="DatetimeDiffNodeProps"/>
+        </template>
+
+        <template #node-ToDatetimeNode="ToDatetimeNodeProps">
+          <ToDatetimeNode v-bind="ToDatetimeNodeProps"/>
         </template>
 
       </VueFlow>
