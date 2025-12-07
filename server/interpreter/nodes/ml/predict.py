@@ -34,8 +34,6 @@ class PredictNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
             )
-        if self.predict_col is not None and self.predict_col.strip() == "":
-            self.predict_col = None
         return
 
     @override
@@ -124,15 +122,15 @@ class PredictNode(BaseNode):
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         input_table_data = input["table"]
-        assert isinstance(input_table_data, Table)
-        df = input_table_data.df.copy()
+        assert isinstance(input_table_data.payload, Table)
+        df = input_table_data.payload.df.copy()
         assert self._col_types is not None
         assert self._output_col_mapping is not None
 
         input_model_data = input["model"]
-        assert isinstance(input_model_data, Model)
-        model = input_model_data.model
-        model_schema = input_model_data.metadata
+        assert isinstance(input_model_data.payload, Model)
+        model = input_model_data.payload.model
+        model_schema = input_model_data.payload.metadata
 
         # 1. prepare feature data
         feature_cols = list(model_schema.input_cols.keys())

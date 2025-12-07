@@ -305,6 +305,8 @@ class Pattern(BaseModel):
         if schema.type == Schema.Type.MODEL and self.model is not None:
             if schema.model is None:
                 return False
+            if self.model == set(): # any model is acceptable
+                return True
             if schema.model not in self.model:
                 return False
         return True
