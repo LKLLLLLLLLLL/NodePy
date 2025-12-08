@@ -103,22 +103,23 @@ export const writeBackVueFLowProject = (p: Project, vp: vueFlowProject) => {
         return
     }
     for(let i = 0; i < p.workflow.nodes.length; i++) {  //@ts-ignore
-        vp.workflow.nodes[i].data.data_out = p.workflow.nodes[i]?.data_out  //@ts-ignore
-        vp.workflow.nodes[i].data.error = p.workflow.nodes[i]?.error    //@ts-ignore
-        vp.workflow.nodes[i].data.runningtime = p.workflow.nodes[i]?.runningtime    //@ts-ignore
-        vp.workflow.nodes[i].data.schema_out = p.workflow.nodes[i]?.schema_out  //@ts-ignore
-        vp.workflow.nodes[i].data.hint = p.workflow.nodes[i]?.hint
+        if(JSON.stringify(vp.workflow.nodes[i].data.data_out) !== JSON.stringify(p.workflow.nodes[i]?.data_out)) {  //@ts-ignore
+            vp.workflow.nodes[i].data.data_out = p.workflow.nodes[i]?.data_out  
+        }   //@ts-ignore
+        if(JSON.stringify(vp.workflow.nodes[i].data.error) !== JSON.stringify(p.workflow.nodes[i]?.error)) {  //@ts-ignore
+            vp.workflow.nodes[i].data.error = p.workflow.nodes[i]?.error  
+        }   //@ts-ignore
+        if(JSON.stringify(vp.workflow.nodes[i].data.runningtime) !== JSON.stringify(p.workflow.nodes[i]?.runningtime)) {  //@ts-ignore
+            vp.workflow.nodes[i].data.runningtime = p.workflow.nodes[i]?.runningtime 
+        }   //@ts-ignore
+        if(JSON.stringify(vp.workflow.nodes[i].data.schema_out) !== JSON.stringify(p.workflow.nodes[i]?.schema_out)) {  //@ts-ignore
+            vp.workflow.nodes[i].data.schema_out = p.workflow.nodes[i]?.schema_out
+        }   //@ts-ignore
+        if(JSON.stringify(vp.workflow.nodes[i].data.hint) !== JSON.stringify(p.workflow.nodes[i]?.hint)) {  //@ts-ignore
+            vp.workflow.nodes[i].data.hint = p.workflow.nodes[i]?.hint
+        }
     }
-    vp.workflow.error_message = p.workflow.error_message
-}
-
-
-export const writeBackRunningTime = (p: Project, vp: vueFlowProject) => {
-    if(vp.workflow.nodes.length !== p.workflow.nodes.length) {
-        console.log('vp length:', vp.workflow.nodes.length, 'p length:', p.workflow.nodes.length, 'p is out of date')
-        return
-    }
-    for(let i = 0; i < p.workflow.nodes.length; i++) {  //@ts-ignore
-        vp.workflow.nodes[i].data.runningtime = p.workflow.nodes[i]?.runningtime
+    if(JSON.stringify(vp.workflow.error_message) !== JSON.stringify(p.workflow.error_message)) {
+        vp.workflow.error_message = p.workflow.error_message
     }
 }

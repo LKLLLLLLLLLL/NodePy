@@ -1,6 +1,6 @@
 import type { Project } from '@/utils/api'
 import { useGraphStore } from '@/stores/graphStore'
-import { writeBackRunningTime } from './projectConvert'
+import { writeBackVueFLowProject } from './projectConvert'
 
 
 // apply patch
@@ -99,7 +99,7 @@ class TaskManager {
           patch.forEach(p => {
             setDeep(project.workflow, p.key, p.value)
             const graphStore:any = useGraphStore()
-            writeBackRunningTime(project, graphStore.project)
+            writeBackVueFLowProject(project, graphStore.project)
           })
         }
 
