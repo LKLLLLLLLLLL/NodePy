@@ -83,9 +83,9 @@ import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
 
 
     const select = (idx: number) => {
-        if(JSON.stringify(props.options) === JSON.stringify([''])) {
+        if(JSON.stringify(props.options) !== JSON.stringify(localOptions.value)) {
             return
-        }   // if props.options is empty, which means the hint is empty, just return and display the local cache
+        }   // if props.options !== localOptions.value, which means dirty data, just return and display the local cache and wait for next update
         if(!localOptions.value[idx])return
         const id = selectedIdx.value.indexOf(idx)
         if(id !== -1) {
@@ -96,9 +96,9 @@ import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
         emit('selectChange', selectedIdx.value)
     }
     const remove = (idx: number) => {
-        if(JSON.stringify(props.options) === JSON.stringify([''])) {
+        if(JSON.stringify(props.options) !== JSON.stringify(localOptions.value)) {
             return
-        }   // if props.options is empty, which means the hint is empty, just return and display the local cache
+        }   // if props.options !== localOptions.value, which means dirty data, just return and display the local cache and wait for next update
         const id = selectedIdx.value.indexOf(idx)
         if(id !== -1) {
             selectedIdx.value.splice(id, 1)
