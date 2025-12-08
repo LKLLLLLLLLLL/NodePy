@@ -20,7 +20,7 @@
                     class="nodrag"
                 />
             </div>
-            <div class="delimiter">
+            <div class="delimiter" v-show="data.param.language === 'ENGLISH'">
                 <div class="param-description" :class="{'node-has-paramerr': delimiterHasErr.value}">
                     分隔符
                 </div>

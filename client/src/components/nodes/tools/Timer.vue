@@ -1,9 +1,9 @@
 <template>
     <span class="timer">
         <svg-icon type="mdi" :path="waitingPath" v-if="timerStatus === 'waiting'"></svg-icon>
-        <svg-icon type="mdi" :path="runningPath" v-if="timerStatus === 'running'" class="running"></svg-icon>
-        <svg-icon type="mdi" :path="finishedPath" v-if="timerStatus === 'finished'"></svg-icon>
-        <svg-icon type="mdi" :path="errorPath" v-if="timerStatus === 'error'"></svg-icon>
+        <svg-icon type="mdi" :path="runningPath" v-else-if="timerStatus === 'running'" class="running"></svg-icon>
+        <svg-icon type="mdi" :path="finishedPath" v-else-if="timerStatus === 'finished'"></svg-icon>
+        <svg-icon type="mdi" :path="errorPath" v-else-if="timerStatus === 'error'"></svg-icon>
         {{ timerStatus === 'waiting' ? '' : display }}
     </span>
 </template>
