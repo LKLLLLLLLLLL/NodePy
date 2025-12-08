@@ -1250,7 +1250,41 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
 
 ### 10. 机器学习节点(ml)
-#### 10.1 LinearRegressionNode
+#### 10.1 PredictNode
+通用预测节点，使用训练好的模型对输入的表格数据进行预测，并输出包含预测结果的表格。
+
+**参数：**
+无
+
+**输入：**
+- table: 输入的表格，类型为Table。
+- model: 训练好的模型，类型为Model。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含预测结果列。
+
+#### 10.2 LagFeatureNode
+时间序列滞后特征节点，使用输入的表格数据生成滞后特征，并输出包含滞后特征的表格，常用于时间序列预测任务。
+
+**参数：**
+- lag_cols: 滞后列名列表，类型为List[str]，指定要生成滞后特征的列名。
+- window_size: 滞后窗口大小，类型为int，表示生成的滞后特征的窗口大小。
+- generate_target: 是否生成目标列，类型为bool。
+- target_col: 目标列名，类型为str，可选，如果generate_target为True，则指定生成的目标列名。
+- horizon: 滞后步长，类型为int，可选，默认为1，表示生成的滞后特征的步长。
+- drop_nan: 是否删除包含NaN值的行，类型为bool，前端默认为True。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含滞后特征列。
+
+**hint：**
+- lag_col_choices: 列名列表，类型为List[str]，用于在UI中为lag_cols参数提供可选值。
+- target_col_choices: 列名列表，类型为List[str]，用于在UI中为target_col参数提供可选值。
+
+#### 10.3 LinearRegressionNode
 线性回归节点，使用输入的表格数据训练模型，并输出训练好的线性回归模型。
 
 **参数：**
@@ -1267,15 +1301,23 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - feature_col_choices: 列名列表，类型为List[str]，用于在UI中为feature_cols参数提供可选值。
 - target_col_choices: 列名列表，类型为List[str]，用于在UI中为target_col参数提供可选值。
 
-#### 10.2 PredictNode
-通用预测节点，使用训练好的模型对输入的表格数据进行预测，并输出包含预测结果的表格。
+
+#### 10.4 RandomForestRegressionNode
+随机森林回归节点，使用输入的表格数据训练模型，并输出训练好的随机森林回归模型。
 
 **参数：**
-无
+- feature_cols: 特征列名列表，类型为List[str]，指定用于训练模型的特征列名。
+- target_col: 目标列名，类型为str，指定用于训练模型的目标列名。
+- n_estimators: 随机森林中的树的数量，类型为int，默认为100（前端默认值）。
+- max_depth: 树的最大深度，类型为int，可选，如果未提供则默认为None，表示不限制深度
 
 **输入：**
 - table: 输入的表格，类型为Table。
-- model: 训练好的模型，类型为Model。
 
 **输出：**
-- table: 输出的表格，类型为Table，包含预测结果列。
+- model: 训练好的随机森林回归模型，类型为Model。
+
+**hint：**
+- feature_col_choices: 列名列表，类型为List[str]，用于在UI中为feature_cols参数提供可选值。
+- target_col_choices: 列名列表，类型为List[str]，用于在UI中为target_col参数提供可选值。
+
