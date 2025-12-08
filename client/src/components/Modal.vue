@@ -296,7 +296,7 @@
             </div>
         </div>
         <div class = "modal-footer">
-            <div class="download-result-container">
+            <div v-if="modal.isResultModal" class="download-result-container">
                 <button class="button download" @click="downloadResult">
                     <svg-icon type="mdi" :path="mdiDownload" :size="22"></svg-icon>
                 </button>

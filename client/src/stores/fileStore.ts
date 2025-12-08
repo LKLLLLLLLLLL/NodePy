@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { ApiError, FileItem, type UserFileList, type Body_upload_file_api_files_upload__project_id__post} from '@/utils/api';
+import { handleNetworkError } from '@/utils/networkError';
 import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
 import notify from '@/components/Notification/notify';
 
@@ -245,30 +246,18 @@ export const useFileStore = defineStore('file', () => {
                         });
                         break;
                     default:
-                        // 检查是否是网络错误
-                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
-                            notify({
-                                message: '网络错误: ' + error.message,
-                                type: 'error'
-                            });
-                        } else {
-                            notify({
-                                message: '未知网络错误',
-                                type: 'error'
-                            });
-                        }
+                        const errMsg = handleNetworkError(error)
+                        notify({
+                            message: errMsg,
+                            type: 'error'
+                        });
                         break;
                 }
             }
-            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
-                notify({
-                    message: '网络错误: ' + error.message,
-                    type: 'error'
-                });
-            }
             else{
+                const errMsg = handleNetworkError(error)
                 notify({
-                    message: '未知错误',
+                    message: errMsg,
                     type: 'error'
                 });
             }
@@ -298,30 +287,18 @@ export const useFileStore = defineStore('file', () => {
                         });
                         break;
                     default:
-                        // 检查是否是网络错误
-                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
-                            notify({
-                                message: '网络错误: ' + error.message,
-                                type: 'error'
-                            });
-                        } else {
-                            notify({
-                                message: '未知网络错误',
-                                type: 'error'
-                            });
-                        }
+                        const errMsg = handleNetworkError(error)
+                        notify({
+                            message: errMsg,
+                            type: 'error'
+                        });
                         break;
                 }
             }
-            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
-                notify({
-                    message: '网络错误: ' + error.message,
-                    type: 'error'
-                });
-            }
             else{
+                const errMsg = handleNetworkError(error)
                 notify({
-                    message: '未知错误',
+                    message: errMsg,
                     type: 'error'
                 });
             }
@@ -370,30 +347,18 @@ export const useFileStore = defineStore('file', () => {
                         });
                         break;
                     default:
-                        // 检查是否是网络错误
-                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
-                            notify({
-                                message: '网络错误: ' + error.message,
-                                type: 'error'
-                            });
-                        } else {
-                            notify({
-                                message: '未知网络错误',
-                                type: 'error'
-                            });
-                        }
+                        const errMsg = handleNetworkError(error)
+                        notify({
+                            message: errMsg,
+                            type: 'error'
+                        });
                         break;
                 }
             }
-            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
-                notify({
-                    message: '网络错误: ' + error.message,
-                    type: 'error'
-                });
-            }
             else{
+                const errMsg = handleNetworkError(error)
                 notify({
-                    message: '未知错误',
+                    message: errMsg,
                     type: 'error'
                 });
             }
@@ -446,9 +411,9 @@ export const useFileStore = defineStore('file', () => {
                     type: 'error'
                 });
             } else {
-                // 未知错误
+                const errMsg = handleNetworkError(error)
                 notify({
-                    message: '未知错误',
+                    message: errMsg,
                     type: 'error'
                 });
             }

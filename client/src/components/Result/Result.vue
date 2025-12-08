@@ -3,6 +3,7 @@
     import TableView from './TableView.vue';
     import FileView from './FileView.vue';
     import ValueView from './ValueView.vue';
+    import ModelView from './ModelView.vue';
     import NodeInfo from './NodeInfo.vue';
     import Loading from '../Loading.vue'; // 引入Loading组件
     import { watch, ref, computed, onMounted, onUnmounted } from 'vue';
@@ -154,6 +155,10 @@
                                 :value="resultStore.currentResult.value"
                                 class = "view-content value-view">
                     </ValueView>
+                    <ModelView v-else-if="resultStore.currentResult.type === 'Model'"
+                                :value="resultStore.currentResult.value"
+                                class = "view-content model-view">
+                    </ModelView>
                 </div>
             </div>
             <!-- 无结果提示 -->

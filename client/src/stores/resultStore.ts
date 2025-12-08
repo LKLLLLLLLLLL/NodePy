@@ -2,8 +2,9 @@ import { defineStore } from "pinia"
 import {ref,computed, watch} from 'vue'
 import { useModalStore } from "./modalStore"
 import AuthenticatedServiceFactory from "@/utils/AuthenticatedServiceFactory"
-import { DataView, type TableView } from "@/utils/api"
+import { DataView, type TableView, type ModelView } from "@/utils/api"
 import type { File } from "@/utils/api"
+import { handleNetworkError } from "@/utils/networkError"
 import Result from "@/components/Result/Result.vue"
 import { useVueFlow } from "@vue-flow/core"
 import { useFileStore } from "./fileStore"
@@ -11,7 +12,7 @@ import { useGraphStore } from "./graphStore"
 import notify from "@/components/Notification/notify"
 import { ApiError } from "@/utils/api"
 
-export type ResultType = string | number | boolean | File | TableView | null 
+export type ResultType = string | number | boolean | File | TableView | null | ModelView
 
 export const useResultStore = defineStore('result',()=>{
 
@@ -241,22 +242,18 @@ export const useResultStore = defineStore('result',()=>{
                         });
                         break;
                     default:
+                        const errMsg = handleNetworkError(error)
                         notify({
-                            message: '未知网络错误',
+                            message: errMsg,
                             type: 'error'
                         });
                         break;
                 }
-            } else if (error instanceof Error) {
-                // 其他错误
+            }
+            else {
+                const errMsg = handleNetworkError(error)
                 notify({
-                    message: '获取结果失败: ' + error.message,
-                    type: 'error'
-                });
-            } else {
-                // 未知错误
-                notify({
-                    message: '未知错误',
+                    message: errMsg,
                     type: 'error'
                 });
             }

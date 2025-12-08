@@ -11,6 +11,7 @@ import type { LoginRequest } from '@/utils/api'
 import type { SignupRequest } from '@/utils/api' 
 import type { TokenResponse } from '@/utils/api'
 import { ApiError } from '@/utils/api'
+import { handleNetworkError } from '@/utils/networkError'
 import notify from "@/components/Notification/notify"
 
 export const useLoginStore = defineStore('login', () => {
@@ -69,22 +70,18 @@ export const useLoginStore = defineStore('login', () => {
                         });
                         break;
                     default:
+                        const errMsg = handleNetworkError(error)
                         notify({
-                            message: `登录失败 (${error.status}): ${error.statusText || '未知错误'}`,
+                            message: errMsg,
                             type: 'error'
                         });
                         break;
                 }
-            } else if (error instanceof Error) {
-                // 其他错误
+            }
+            else {
+                const errMsg = handleNetworkError(error)
                 notify({
-                    message: '登录失败: ' + error.message,
-                    type: 'error'
-                });
-            } else {
-                // 未知错误
-                notify({
-                    message: '登录过程中发生未知错误，请稍后重试',
+                    message: errMsg,
                     type: 'error'
                 });
             }
@@ -128,22 +125,17 @@ export const useLoginStore = defineStore('login', () => {
                         });
                         break;
                     default:
+                        const errMsg = handleNetworkError(error)
                         notify({
-                            message: `注册失败 (${error.status}): ${error.statusText || '未知错误'}`,
+                            message: errMsg,
                             type: 'error'
                         });
                         break;
                 }
-            } else if (error instanceof Error) {
-                // 其他错误
-                notify({
-                    message: '注册失败: ' + error.message,
-                    type: 'error'
-                });
             } else {
-                // 未知错误
+                const errMsg = handleNetworkError(error)
                 notify({
-                    message: '注册过程中发生未知错误，请稍后重试',
+                    message: errMsg,
                     type: 'error'
                 });
             }
@@ -182,8 +174,9 @@ export const useLoginStore = defineStore('login', () => {
                         });
                         break;
                     default:
+                        const errMsg = handleNetworkError(error)
                         notify({
-                            message: `登出失败 (${error.status}): ${error.statusText || '未知错误'}`,
+                            message: errMsg,
                             type: 'error'
                         });
                         break;
@@ -195,9 +188,9 @@ export const useLoginStore = defineStore('login', () => {
                     type: 'error'
                 });
             } else {
-                // 未知错误
+                const errMsg = handleNetworkError(error)
                 notify({
-                    message: '登出过程中发生未知错误，请手动清除浏览器缓存',
+                    message: errMsg,
                     type: 'error'
                 });
             }

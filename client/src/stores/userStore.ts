@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
+import { handleNetworkError } from '@/utils/networkError';
 import { ApiError } from '@/utils/api';
 import { ref } from 'vue';
 import notify from '@/components/Notification/notify';
@@ -58,30 +59,18 @@ export const useUserStore = defineStore('user',()=>{
                         })
                         break;
                     default:
-                        // 检查是否是网络错误
-                        if (error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
-                            notify({
-                                message: '网络错误: ' + error.message,
-                                type: 'error'
-                            });
-                        } else {
-                            notify({
-                                message: '未知错误',
-                                type: 'error'
-                            });
-                        }
+                        const errMsg = handleNetworkError(error)
+                        notify({
+                            message: errMsg,
+                            type: 'error'
+                        });
                         break;
                 }
             }
-            else if (error instanceof TypeError && error.message && (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
-                notify({
-                    message: '网络错误: ' + error.message,
-                    type: 'error'
-                });
-            }
             else{
+                const errMsg = handleNetworkError(error)
                 notify({
-                    message: '未知错误',
+                    message: errMsg,
                     type: 'error'
                 });
             }
