@@ -3,11 +3,13 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { FileSchema } from './FileSchema';
+import type { ModelSchema } from './ModelSchema';
+import type { server__models__schema__Schema__Type } from './server__models__schema__Schema__Type';
 import type { TableSchema } from './TableSchema';
-import type { Type } from './Type';
 export type Schema = {
-    type: Type;
+    type: server__models__schema__Schema__Type;
     tab?: (TableSchema | null);
     file?: (FileSchema | null);
+    model?: (ModelSchema | null);
 };
 

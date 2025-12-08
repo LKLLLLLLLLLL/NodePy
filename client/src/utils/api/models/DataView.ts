@@ -9,7 +9,7 @@ import type { TableView } from './TableView';
  */
 export type DataView = {
     type: DataView.type;
-    value: (TableView | string | number | boolean | File);
+    value: (TableView | string | number | boolean | File | Record<string, any>);
 };
 export namespace DataView {
     export enum type {
@@ -20,6 +20,7 @@ export namespace DataView {
         TABLE = 'Table',
         FILE = 'File',
         DATETIME = 'Datetime',
+        MODEL = 'Model',
     }
 }
 

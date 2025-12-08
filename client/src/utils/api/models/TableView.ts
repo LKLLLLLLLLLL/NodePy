@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type TableView = {
-    cols: Record<string, Array<(string | boolean | number)>>;
+    cols: Record<string, Array<(string | boolean | number | null)>>;
     col_types: Record<string, string>;
 };
 

@@ -335,7 +335,7 @@ export class DefaultService {
             },
             errors: {
                 403: `User has no access to this data`,
-                404: `Data not found`,
+                404: `Project or Data not found`,
                 422: `Validation Error`,
                 500: `Internal server error`,
             },

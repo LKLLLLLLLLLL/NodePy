@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export enum Type {
+export enum server__models__schema__Schema__Type {
     TABLE = 'Table',
     STR = 'str',
     INT = 'int',
@@ -10,4 +10,5 @@ export enum Type {
     FLOAT = 'float',
     FILE = 'File',
     DATETIME = 'Datetime',
+    MODEL = 'Model',
 }
