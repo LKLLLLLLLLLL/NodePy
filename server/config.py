@@ -15,3 +15,9 @@ CORE_SYMBOLS = {
     "crypto": ["BTCUSDT", "ETHUSDT"],
     "stock": ["AAPL", "GOOGL", "TSLA"],
 }
+
+# Whether to use caching mechanism globally
+USE_CACHE = False
+
+# Whether to enable time tracing for interpreter
+TRACING_ENABLED = True

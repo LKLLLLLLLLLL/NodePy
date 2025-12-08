@@ -1353,7 +1353,25 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - feature_col_choices: 列名列表，类型为List[str]，用于在UI中为feature_cols参数提供可选值。
 - target_col_choices: 列名列表，类型为List[str]，用于在UI中为target_col参数提供可选值。
 
-#### 10.7 ClassificationScoreNode
+#### 10.7 SVCNode
+支持向量分类节点，使用输入的表格数据训练模型，并输出训练好的支持向量分类模型。
+
+**参数：**
+- feature_cols: 特征列名列表，类型为List[str]，指定用于训练模型的特征列名。
+- target_col: 目标列名，类型为str，指定用于训练模型的目标列名。
+- kernel: 核函数类型，类型为str，取值为"linear", "poly", "rbf", "sigmoid"，前端默认为"rbf"。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- model: 训练好的支持向量分类模型，类型为Model。
+
+**hint：**
+- feature_col_choices: 列名列表，类型为List[str]，用于在UI中为feature_cols参数提供可选值。
+- target_col_choices: 列名列表，类型为List[str]，用于在UI中为target_col参数提供可选值。
+
+#### 10.8 ClassificationScoreNode
 分类模型评分节点，使用输入的表格数据和训练好的分类模型计算模型的评分指标，并输出评分结果。
 
 **参数：**

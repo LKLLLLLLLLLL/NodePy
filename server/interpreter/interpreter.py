@@ -3,7 +3,8 @@ from typing import Any, Callable, Literal
 
 from pydantic import ValidationError
 
-from server import DEBUG
+from server import DEBUG, logger
+from server.config import TRACING_ENABLED
 from server.lib.CacheManager import CacheManager
 from server.lib.FileManager import FileManager
 from server.lib.FinancialDataManager import FinancialDataManager
@@ -32,6 +33,11 @@ class ProjectInterpreter:
                  user_id: int,
                 ) -> None:
         import networkx as nx
+
+        trace_begin: float | None = None
+        if TRACING_ENABLED:
+            trace_begin = time.perf_counter()
+
         self._topology: WorkflowTopology = topology
         self._nodes: list[TopoNode] = topology.nodes
         self._edges: list[TopoEdge] = topology.edges
@@ -55,6 +61,11 @@ class ProjectInterpreter:
         )
         # cache unreached node ids, each period will only process nodes not in this list, and may append more unreached nodes 
         self._unreached_node_ids: set[str] = set()
+        
+        if TRACING_ENABLED:
+            assert trace_begin is not None
+            end_time = time.perf_counter()
+            logger.debug(f"[Tracing] Initialized ProjectInterpreter in {(end_time - trace_begin) * 1000:.2f} ms.")
 
     def construct_nodes(self, callback: Callable[[str, Literal["success", "error"], Exception | None], bool]) -> None:
         """ 
@@ -65,6 +76,10 @@ class ProjectInterpreter:
         If continue_execution is False, the execution will stop.
         """
         import networkx as nx
+        
+        trace_begin: float | None = None
+        if TRACING_ENABLED:
+            trace_begin = time.perf_counter()
         
         if self._stage != "init":
             raise AssertionError(f"Graph is already in stage '{self._stage}', cannot construct nodes again.")
@@ -120,6 +135,12 @@ class ProjectInterpreter:
         self._analyze_control_structures()
 
         self._stage = "constructed"
+        
+        if TRACING_ENABLED:
+            assert trace_begin is not None
+            end_time = time.perf_counter()
+            logger.debug(f"[Tracing] Constructed nodes in {(end_time - trace_begin) * 1000:.2f} ms.")
+
         return
 
     def static_analyse(self, callback: Callable[[str, Literal["success", "error"], dict[str, Any] | Exception], bool]) -> None:
@@ -130,6 +151,10 @@ class ProjectInterpreter:
         continue_execution = callback(node_id: str, status: Literal["success", "error"], result: dict[str, Any] | Exception) -> bool
         """
         import networkx as nx
+        
+        trace_begin: float | None = None
+        if TRACING_ENABLED:
+            trace_begin = time.perf_counter()
 
         if self._stage != "constructed":
             raise AssertionError(f"Graph is in stage '{self._stage}', cannot perform static analysis.")
@@ -178,6 +203,12 @@ class ProjectInterpreter:
                     continue
 
         self._stage = "static_analyzed"
+        
+        if TRACING_ENABLED:
+            assert trace_begin is not None
+            end_time = time.perf_counter()
+            logger.debug(f"[Tracing] Static analyzed nodes in {(end_time - trace_begin) * 1000:.2f} ms.")
+
         return
 
     def execute(self, 
@@ -195,6 +226,10 @@ class ProjectInterpreter:
         continue_execution = callafter(node_id: str, status: Literal["success", "error"], result: dict[str, Any] | Exception, running_time(in ms): float | None) -> bool
         """
         import networkx as nx
+        
+        trace_begin: float | None = None
+        if TRACING_ENABLED:
+            trace_begin = time.perf_counter()
 
         if self._stage != "static_analyzed":
             raise AssertionError(f"Graph is in stage '{self._stage}', cannot run.")
@@ -346,6 +381,12 @@ class ProjectInterpreter:
                     running_time=running_time,
                 )
         self._stage = "finished"
+        
+        if TRACING_ENABLED:
+            assert trace_begin is not None
+            end_time = time.perf_counter()
+            logger.debug(f"[Tracing] Executed nodes in {(end_time - trace_begin) * 1000:.2f} ms.")
+
         return
 
     def get_unreached_nodes(self) -> list[int]:

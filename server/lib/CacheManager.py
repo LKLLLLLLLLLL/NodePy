@@ -6,6 +6,7 @@ from typing import Any
 import redis
 from loguru import logger
 
+from server.config import USE_CACHE
 from server.models.data import Data, DataView
 from server.models.file import File
 
@@ -71,6 +72,8 @@ class CacheManager:
 
     def get(self, node_type: str, params: dict[str, Any], inputs: dict[str, Data]) -> tuple[dict[str, Data], float] | None:
         """Get cached result for a node with given parameters and inputs. Return None if not found."""
+        if not USE_CACHE:
+            return None
         cache_key = CacheManager._get_cache_key(node_type, params, inputs)
         cached_value = self.redis_client.get(cache_key)
         if cached_value is not None:
@@ -89,6 +92,8 @@ class CacheManager:
 
     def set(self, node_type: str, params: dict[str, Any], inputs: dict[str, Data], outputs: dict[str, Data], running_time: float) -> None:
         """Set cached result for a node with given parameters and inputs."""
+        if not USE_CACHE:
+            return
         cache_key = CacheManager._get_cache_key(node_type, params, inputs)
         outputs_dict = {}
         for key, data in outputs.items():
