@@ -49,7 +49,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
@@ -77,7 +77,7 @@
     const target_col = ref(props.data.param.target_col)   //  used for defaultSelectedTarget_col
     const defaultSelectedTarget_col = computed(() => target_colHint.value.indexOf(target_col.value))
     const table_type = computed(() => getInputType(props.id, 'table'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['model']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['model']?.type || 'default')
     const modelHasErr = computed(() => handleOutputError(props.id, 'model'))
     const errMsg = ref<string[]>([])
     const feature_colsHasErr = ref({

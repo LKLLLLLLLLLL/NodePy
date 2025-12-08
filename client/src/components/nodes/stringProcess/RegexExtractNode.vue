@@ -31,7 +31,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
@@ -43,7 +43,7 @@
     const props = defineProps<NodeProps<RegexExtractNodeData>>()
     const pattern = ref(props.data.param.pattern)
     const string_type = computed(() => getInputType(props.id, 'string'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['matches']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['matches']?.type || 'default')
     const matchesHasErr = computed(() => handleOutputError(props.id, 'matches'))
     const errMsg = ref<string[]>([])
     const patternHasErr = ref({

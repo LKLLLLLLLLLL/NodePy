@@ -29,7 +29,7 @@
     import {ref, computed, watch } from 'vue'
     import type { NodeProps } from '@vue-flow/core'
     import type {BoolNodeData} from '../../../types/nodeTypes'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import NodepyBoolValue from '../tools/Nodepy-boolValue.vue'
     import { handleExecError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
@@ -39,7 +39,7 @@
 
     const props = defineProps<NodeProps<BoolNodeData>>()
     const value = ref(props.data.param.value)
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['const']?.type || 'default')
     const constHasErr = computed(() => handleOutputError(props.id, 'const'))
     const errMsg = ref<string[]>([])
 

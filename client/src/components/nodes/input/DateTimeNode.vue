@@ -37,7 +37,7 @@
 
 <script lang="ts" setup>
     import {computed, ref, watch} from 'vue'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { handleExecError, handleParamError, handleOutputError } from '../handleError'
@@ -52,7 +52,7 @@
     const props = defineProps<NodeProps<DateTimeNodeData>>()
     const value = ref(props.data.param.value)
     const isNow = ref(props.data.param.isNow)
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['datetime']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['datetime']?.type || 'default')
     const datetimeHasErr = computed(() => handleOutputError(props.id, 'datetime'))
     const errMsg = ref<string[]>([])
     const valueHasErr = ref({

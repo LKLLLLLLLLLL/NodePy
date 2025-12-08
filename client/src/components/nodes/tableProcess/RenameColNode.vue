@@ -57,7 +57,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
@@ -83,7 +83,7 @@
     const propsRename_cols = computed(() => Object.keys(props.data.param.rename_map))
     const propsRename_values = computed(() => Object.values(props.data.param.rename_map))
     const table_type = computed(() => getInputType(props.id, 'table'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['renamed_table']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['renamed_table']?.type || 'default')
     const renamed_tableHasErr = computed(() => handleOutputError(props.id, 'renamed_table'))
     const errMsg = ref<string[]>([])
     const rename_mapHasErr = ref({
@@ -105,7 +105,7 @@
         const newFillValues = newColumns.map((colName: any, newIndex: any) => {
             // 在旧列中找到相同列名的索引
             const oldIndex = oldColumns.indexOf(colName)
-            
+
             if (oldIndex !== -1) {
                 // 列名存在，保留原来的值
                 return oldFillValues[oldIndex]

@@ -54,7 +54,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
@@ -73,7 +73,7 @@
     const table_type = computed(() => getInputType(props.id, 'table'))
     const start_type = computed(() => getInputType(props.id, 'start'))
     const step_type = computed(() => getInputType(props.id, 'step'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['table']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['table']?.type || 'default')
     const outputTableHasErr = computed(() => handleOutputError(props.id, 'table'))
     const errMsg = ref<string[]>([])
     const col_nameHasErr = ref({
@@ -123,7 +123,7 @@
         handleParamError(props.data.error, errMsg, col_nameHasErr, col_typeHasErr)
         handleValidationError(props.id, props.data.error, errMsg, inputTableHasErr, startHasErr, stepHasErr)
     }, {immediate: true})
-    
+
 </script>
 
 <style lang="scss" scoped>

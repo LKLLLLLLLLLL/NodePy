@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
@@ -45,7 +45,7 @@
 
     const props = defineProps<NodeProps<BaseData>>()
     const input_type = computed(() => getInputType(props.id, 'input'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['output']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['output']?.type || 'default')
     const outputHasErr = computed(() => handleOutputError(props.id, 'output'))
     const errMsg = ref<string[]>([])
     const inputHaserr = ref({
@@ -77,8 +77,8 @@
     }
     .all-handle-color {
         background: conic-gradient(
-            $int-color 0 120deg, 
-            $float-color 0 240deg, 
+            $int-color 0 120deg,
+            $float-color 0 240deg,
             $str-color 0 360deg
         );
     }

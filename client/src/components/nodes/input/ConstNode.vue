@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
@@ -59,7 +59,7 @@
 
     const props = defineProps<NodeProps<ConstNodeData>>()
     const value = ref(props.data.param.value)
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['const']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['const']?.type || 'default')
     const constHasErr = computed(() => handleOutputError(props.id, 'const'))
     const data_type_options = ['int', 'float']
     const data_type_options_chinese = ['整数', '浮点数']

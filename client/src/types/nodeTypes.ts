@@ -1,4 +1,4 @@
-import type { File, ProjNode, Type } from '@/utils/api'
+import type { File, ProjNode, server__models__schema__Schema__Type } from '@/utils/api'
 import type { Node } from '@vue-flow/core'
 
 
@@ -847,8 +847,8 @@ export interface CumulativeNode extends BaseNode<CumulativeNodeData> {
 
 /*********************  Control Nodes  **************************/
 export interface CustomScriptNodeParam {
-    input_ports: Array<Record<string, Type>>
-    output_ports: Array<Record<string, Type>>
+    input_ports: Array<Record<string, server__models__schema__Schema__Type>>
+    output_ports: Array<Record<string, server__models__schema__Schema__Type>>
     script: string
 }
 export type CustomScriptNodeData = BaseData & {

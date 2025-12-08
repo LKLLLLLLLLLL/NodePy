@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
@@ -98,7 +98,7 @@
     const plot_type_options_chinese = ["柱状图", "计数图", "散点图", "散点条形图", "蜂群图", "箱线图", "小提琴图", "直方图"]
     const defaultSelected = plot_type_options.indexOf(props.data.param.plot_type)
     const table_type = computed(() => getInputType(props.id, 'input'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['plot']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['plot']?.type || 'default')
     const plotHasErr = computed(() => handleOutputError(props.id, 'plot'))
     const errMsg = ref<string[]>([])
     const tableHasErr = ref({

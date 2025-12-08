@@ -25,7 +25,7 @@
                 <div class="param-description" :class="{'node-has-paramerr': col_nameHasErr.value}">
                     列名
                 </div>
-                <NodepyStringInput 
+                <NodepyStringInput
                 v-model="col_name"
                 placeholder="列名"
                 @update-value="onUpdateValue"
@@ -56,7 +56,7 @@
 
 <script lang="ts" setup>
     import NodeTitle from '../tools/NodeTitle.vue'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
@@ -78,7 +78,7 @@
     const start_type = computed(() => getInputType(props.id, 'start'))
     const end_type = computed(() => getInputType(props.id, 'end'))
     const step_type = computed(() => getInputType(props.id, 'step'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['table']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['table']?.type || 'default')
     const tableHasErr = computed(() => handleOutputError(props.id, 'table'))
     const col_nameHasErr = ref({
         id: 'col_name',

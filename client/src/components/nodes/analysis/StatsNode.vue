@@ -85,7 +85,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
@@ -102,23 +102,23 @@
     const col = ref(props.data.param.col)   //  used for defaultSelectedCol
     const defaultSelectedCol = computed(() => colHint.value.indexOf(col.value))
     const table_type = computed(() => getInputType(props.id, 'table'))
-    const meanSchema_type = computed(():Type|'default' => props.data.schema_out?.['mean']?.type || 'default')
+    const meanSchema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['mean']?.type || 'default')
     const meanHasErr = computed(() => handleOutputError(props.id, 'mean'))
-    const countSchema_type = computed(():Type|'default' => props.data.schema_out?.['count']?.type || 'default')
+    const countSchema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['count']?.type || 'default')
     const countHasErr = computed(() => handleOutputError(props.id, 'count'))
-    const stdSchema_type = computed(():Type|'default' => props.data.schema_out?.['std']?.type || 'default')
+    const stdSchema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['std']?.type || 'default')
     const stdHasErr = computed(() => handleOutputError(props.id, 'std'))
-    const minSchema_type = computed(():Type|'default' => props.data.schema_out?.['min']?.type || 'default')
+    const minSchema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['min']?.type || 'default')
     const minHasErr = computed(() => handleOutputError(props.id, 'min'))
-    const maxSchema_type = computed(():Type|'default' => props.data.schema_out?.['max']?.type || 'default')
+    const maxSchema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['max']?.type || 'default')
     const maxHasErr = computed(() => handleOutputError(props.id, 'max'))
-    const sumSchema_type = computed(():Type|'default' => props.data.schema_out?.['sum']?.type || 'default')
+    const sumSchema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['sum']?.type || 'default')
     const sumHasErr = computed(() => handleOutputError(props.id, 'sum'))
-    const quantile_25Schema_type = computed(():Type|'default' => props.data.schema_out?.['quantile_25']?.type || 'default')
+    const quantile_25Schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['quantile_25']?.type || 'default')
     const quantile_25HasErr = computed(() => handleOutputError(props.id, 'quantile_25'))
-    const quantile_50Schema_type = computed(():Type|'default' => props.data.schema_out?.['quantile_50']?.type || 'default')
+    const quantile_50Schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['quantile_50']?.type || 'default')
     const quantile_50HasErr = computed(() => handleOutputError(props.id, 'quantile_50'))
-    const quantile_75Schema_type = computed(():Type|'default' => props.data.schema_out?.['quantile_75']?.type || 'default')
+    const quantile_75Schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['quantile_75']?.type || 'default')
     const quantile_75HasErr = computed(() => handleOutputError(props.id, 'quantile_75'))
     const errMsg = ref<string[]>([])
     const colHasErr = ref({

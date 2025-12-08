@@ -48,7 +48,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
@@ -65,7 +65,7 @@
     const delimiter = ref(props.data.param.delimiter)
     const result_col = ref(props.data.param.result_col)
     const text_type = computed(() => getInputType(props.id, 'text'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['tokens']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['tokens']?.type || 'default')
     const tokensHasErr = computed(() => handleOutputError(props.id, 'tokens'))
     const errMsg = ref<string[]>([])
     const languageHasErr = ref({

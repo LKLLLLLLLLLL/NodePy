@@ -50,7 +50,7 @@
                 <div class="param-description" :class="{'node-has-paramerr': symbolHasErr.value}">
                     代码
                 </div>
-                <NodepyStringInput 
+                <NodepyStringInput
                 v-model="symbol"
                 placeholder="代码"
                 @update-value="onUpdateSymbol"
@@ -81,7 +81,7 @@
 
 <script lang="ts" setup>
     import NodeTitle from '../tools/NodeTitle.vue'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
@@ -109,7 +109,7 @@
     const symbol = ref(props.data.param.symbol)
     const inputStart_time_type = computed(() => getInputType(props.id, 'start_time'))
     const inputEnd_time_type = computed(() => getInputType(props.id, 'end_time'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['kline_data']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['kline_data']?.type || 'default')
     const kline_dataHasErr = computed(() => handleOutputError(props.id, 'kline_data'))
     const errMsg = ref<string[]>([])
     const data_typeHasErr = ref({

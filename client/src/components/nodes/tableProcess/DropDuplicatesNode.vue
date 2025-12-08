@@ -37,7 +37,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
@@ -58,7 +58,7 @@
         return selectedArray.map(item => hintArray.indexOf(item)).filter(idx => idx !== -1)
     })
     const table_type = computed(() => getInputType(props.id, 'table'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['deduplicated_table']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['deduplicated_table']?.type || 'default')
     const deduplicated_tableHasErr = computed(() => handleOutputError(props.id, 'deduplicated_table'))
     const errMsg = ref<string[]>([])
     const subset_colsHasErr = ref({

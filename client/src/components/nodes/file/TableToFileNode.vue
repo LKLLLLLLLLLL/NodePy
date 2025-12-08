@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
@@ -72,7 +72,7 @@
     const format = ["csv", "xlsx", "json"]
     const defaultSelected = [format.indexOf(props.data.param.format)]
     const table_type = computed(() => getInputType(props.id, 'table'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['file']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['file']?.type || 'default')
     const fileHasErr = computed(() => handleOutputError(props.id, 'file'))
     const errMsg = ref<string[]>([])
     const filenameHasErr = ref({

@@ -33,7 +33,7 @@
 
 <script lang="ts" setup>
     import {computed, ref, watch} from 'vue'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
@@ -48,7 +48,7 @@
     const props = defineProps<NodeProps<DatetimePrintNodeData>>()
     const format = ref(props.data.param.format)
     const datetime_type = computed(() => getInputType(props.id, 'datetime'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['output']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['output']?.type || 'default')
     const outputHasErr = computed(() => handleOutputError(props.id, 'output'))
     const errMsg = ref<string[]>([])
     const formatHasErr = ref({

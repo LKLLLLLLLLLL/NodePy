@@ -132,25 +132,25 @@ class Model(BaseModel):
             model=self.metadata
         )
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_view(self) -> "DataView.ModelView":
         # serialize the sklearn model using joblib
         buf = io.BytesIO()
         joblib.dump(self.model, buf)
         buf.seek(0)
         model_bytes = buf.read()
         model_b64 = base64.b64encode(model_bytes).decode("ascii")
-        return {
+        return DataView.ModelView.model_validate({
             "model": model_b64,
-            "metadata": self.metadata.model_dump(),
-        }
+            "metadata": self.metadata,
+        })
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> 'Model':
-        model_b64 = data["model"]
+    def from_view(cls, data: "DataView.ModelView") -> 'Model':
+        model_b64 = data.model
         model_bytes = base64.b64decode(model_b64)
         buf = io.BytesIO(model_bytes)
         model = joblib.load(buf)
-        metadata = ModelSchema.model_validate(data["metadata"])
+        metadata = data.metadata
         return Model(model=model, metadata=metadata)
 
 
@@ -242,19 +242,9 @@ class Data(BaseModel):
                 value=self.payload.isoformat(),
             )
         elif isinstance(self.payload, Model):
-            # Serialize Model payload
-            buf = io.BytesIO()
-            joblib.dump(self.payload.model, buf)
-            buf.seek(0)
-            model_bytes = buf.read()
-            model_b64 = base64.b64encode(model_bytes).decode("ascii")
-            model_dict = {
-                "model": model_b64,
-                "metadata": self.payload.metadata.model_dump(),
-            }
             return DataView(
                 type="Model",
-                value=model_dict,
+                value=self.payload.to_view(),
             )
         else:
             # Map Python types to allowed Literal values
@@ -325,13 +315,8 @@ class Data(BaseModel):
 
             payload = Table(df=df, col_types=col_types)
         elif payload_type == "Model":
-            assert isinstance(payload_value, dict)
-            model_b64 = payload_value["model"]
-            model_bytes = base64.b64decode(model_b64)
-            buf = io.BytesIO(model_bytes)
-            model = joblib.load(buf)
-            metadata = ModelSchema.model_validate(payload_value["metadata"])
-            payload = Model(model=model, metadata=metadata)
+            assert isinstance(payload_value, DataView.ModelView)
+            payload = Model.from_view(payload_value)
         elif payload_type == "File":
             assert isinstance(payload_value, File)
             payload = payload_value
@@ -382,9 +367,13 @@ class DataView(BaseModel):
                             normalized.append(v)
                 result["cols"][col_name] = normalized
             return result
+    
+    class ModelView(BaseModel):
+        model: str  # base64 encoded model bytes
+        metadata: ModelSchema
 
     type: Literal["int", "float", "str", "bool", "Table", "File", "Datetime", "Model"]
-    value: Union[TableView, str, int, bool, float, File, dict[str, Any]] # datetime is serialized as str
+    value: Union[TableView, str, int, bool, float, File, ModelView] # datetime is serialized as str
 
     model_config = {"arbitrary_types_allowed": True}
     

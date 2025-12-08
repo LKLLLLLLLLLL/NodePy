@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
@@ -64,7 +64,7 @@
     const word_col_default_selected = computed(() => word_col_hint.value.indexOf(word_col.value))
     const frequency_col_default_selected = computed(() => frequency_col_hint.value.indexOf(frequency_col.value))
     const input_type = computed(() => getInputType(props.id, 'input'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['wordcloud_image']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['wordcloud_image']?.type || 'default')
     const wordcloud_imageHasErr = computed(() => handleOutputError(props.id, 'wordcloud_image'))
     const errMsg = ref<string[]>([])
     const inputHasErr = ref({

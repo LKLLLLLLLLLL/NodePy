@@ -25,7 +25,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
@@ -35,7 +35,7 @@
 
     const props = defineProps<NodeProps<BoolUnaryOpNodeData>>()
     const x_type = computed(() => getInputType(props.id, 'x'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['result']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['result']?.type || 'default')
     const resultHasErr = computed(() => handleOutputError(props.id, 'result'))
     const errMsg = ref<string[]>([])
     const xHasErr = ref({

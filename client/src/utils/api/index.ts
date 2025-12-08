@@ -19,6 +19,7 @@ export { FileSchema } from './models/FileSchema';
 export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { LoginRequest } from './models/LoginRequest';
 export type { ModelSchema } from './models/ModelSchema';
+export type { ModelView } from './models/ModelView';
 export type { Position } from './models/Position';
 export type { Project } from './models/Project';
 export type { ProjectList } from './models/ProjectList';

@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import type { NodeProps } from '@vue-flow/core'
     import { Handle, Position } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
@@ -42,7 +42,7 @@
     const props = defineProps<NodeProps<BaseData>>()
     const input1_type = computed(() => getInputType(props.id, 'input1'))
     const input2_type = computed(() => getInputType(props.id, 'input2'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['output']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['output']?.type || 'default')
     const outputHasErr = computed(() => handleOutputError(props.id, 'output'))
     const errMsg = ref<string[]>([])
     const input1HasErr = ref({
@@ -60,7 +60,7 @@
         handleExecError(props.data.error, errMsg)
         handleValidationError(props.id, props.data.error, errMsg, input1HasErr, input2HasErr)
     }, {immediate: true})
-    
+
 </script>
 
 <style lang="scss" scoped>

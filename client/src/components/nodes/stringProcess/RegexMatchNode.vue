@@ -31,7 +31,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
@@ -39,11 +39,11 @@
     import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
     import type { RegexMatchNodeData } from '@/types/nodeTypes'
 
-    
+
     const props = defineProps<NodeProps<RegexMatchNodeData>>()
     const pattern = ref(props.data.param.pattern)
     const string_type = computed(() => getInputType(props.id, 'string'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['is_match']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['is_match']?.type || 'default')
     const is_matchHasErr = computed(() => handleOutputError(props.id, 'is_match'))
     const errMsg = ref<string[]>([])
     const patternHasErr = ref({
@@ -67,7 +67,7 @@
         handleParamError(props.data.error, errMsg, patternHasErr)
         handleValidationError(props.id, props.data.error, errMsg, stringHasErr)
     }, {immediate: true})
-    
+
 </script>
 
 <style lang="scss" scoped>

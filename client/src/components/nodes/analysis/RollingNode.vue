@@ -82,7 +82,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
@@ -110,7 +110,7 @@
     const methodChinese = ['平均值', '标准差', '总和', '最小值', '最大值']
     const defaultSelectedMethod = method.indexOf(props.data.param.method)
     const table_type = computed(() => getInputType(props.id, 'table'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['table']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['table']?.type || 'default')
     const outputTableHasErr = computed(() => handleOutputError(props.id, 'table'))
     const errMsg = ref<string[]>([])
     const colHasErr = ref({

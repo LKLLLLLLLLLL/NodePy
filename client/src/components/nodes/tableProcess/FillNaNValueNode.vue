@@ -98,7 +98,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
-    import type { Type } from '@/utils/api'
+    import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
@@ -129,7 +129,7 @@
     const fill_value = ref<({value: number|string|boolean})[]|undefined|null|any>(props.data.param.fill_value?.map(value => ({value})) || [])
     const fill_value_types = computed(() => props.data.hint?.fill_value_types)
     const table_type = computed(() => getInputType(props.id, 'table'))
-    const schema_type = computed(():Type|'default' => props.data.schema_out?.['filled_table']?.type || 'default')
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['filled_table']?.type || 'default')
     const filled_tableHasErr = computed(() => handleOutputError(props.id, 'filled_table'))
     const errMsg = ref<string[]>([])
     const subset_colsHasErr = ref({
@@ -196,7 +196,7 @@
         const newFillValues = newColumns.map((colName: any, newIndex: any) => {
             // 在旧列中找到相同列名的索引
             const oldIndex = oldColumns.indexOf(colName)
-            
+
             if (oldIndex !== -1) {
                 // 列名存在，保留原来的值
                 return oldFillValues[oldIndex]
@@ -249,7 +249,7 @@
     watch(() => JSON.stringify(props.data.hint?.fill_value_types), (newValue, oldValue) => {
         clearToggle.value = !clearToggle.value
     }, {immediate: false})
-    
+
 </script>
 
 <style lang="scss" scoped>

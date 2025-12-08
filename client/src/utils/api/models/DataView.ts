@@ -3,13 +3,14 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { File } from './File';
+import type { ModelView } from './ModelView';
 import type { TableView } from './TableView';
 /**
  * A dict-like view of data, for transmitting or json serialization.
  */
 export type DataView = {
     type: DataView.type;
-    value: (TableView | string | number | boolean | File | Record<string, any>);
+    value: (TableView | string | number | boolean | File | ModelView);
 };
 export namespace DataView {
     export enum type {
