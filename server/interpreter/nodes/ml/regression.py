@@ -143,6 +143,7 @@ class RandomForestRegressionNode(BaseNode):
     feature_cols: list[str]
     target_col: str
     n_estimators: int # Number of trees in the forest
+    limit_max_depth: bool = False  # Whether to limit the maximum depth of trees
     max_depth: int | None = None  # Maximum depth of the trees, None means no limit
 
     _col_types: Dict[str, ColType] = PrivateAttr(default={})
@@ -180,6 +181,24 @@ class RandomForestRegressionNode(BaseNode):
                 node_id=self.id,
                 err_param_key="target_col",
                 err_msg="Target column name cannot be empty.",
+            )
+        if self.n_estimators <= 0:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="n_estimators",
+                err_msg="Number of estimators must be greater than 0.",
+            )
+        if self.limit_max_depth and (self.max_depth is None or self.max_depth <= 0):
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="max_depth",
+                err_msg="Max depth must be greater than 0 when limiting max depth is enabled.",
+            )
+        if self.limit_max_depth and self.max_depth is not None:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="max_depth",
+                err_msg="Max depth must be an integer when specified.",
             )
         return
 

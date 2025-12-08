@@ -18,7 +18,7 @@ class LagFeatureNode(BaseNode):
     """
     lag_cols: list[str]  # Columns to generate lag features from
     window_size: int     # How many past steps to look back (e.g., 5 means t-1...t-5)
-    gengerate_target: bool  # Whether to generate target feature
+    generate_target: bool  # Whether to generate target feature
     target_col: str | None = None # Column to predict (optional, for training generation)
     horizon: int | None = None  # How many future steps to predict (e.g., 1 means t+1)
     drop_nan: bool # Whether to drop rows with NaN values created by shifting
@@ -38,7 +38,7 @@ class LagFeatureNode(BaseNode):
                 node_id=self.id, 
                 err_param_key="window_size", 
                 err_msg="Window size must be >= 1.")
-        if self.gengerate_target and (self.horizon is None or self.horizon < 1):
+        if self.generate_target and (self.horizon is None or self.horizon < 1):
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="horizon",
@@ -50,7 +50,7 @@ class LagFeatureNode(BaseNode):
                 err_param_key="lag_cols",
                 err_msg="At least one lag column must be specified."
             )
-        if self.gengerate_target and not self.target_col:
+        if self.generate_target and not self.target_col:
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="target_col",
@@ -99,7 +99,7 @@ class LagFeatureNode(BaseNode):
         
         # 2. Add Target Feature (e.g., close_target_1)
         # This shifts the future value to the current row for training
-        if self.gengerate_target:
+        if self.generate_target:
             assert self.target_col is not None
             if self.target_col not in new_schema:
                  raise NodeParameterError(
@@ -134,7 +134,7 @@ class LagFeatureNode(BaseNode):
         
         # 2. Generate Target Feature (Shift Negative)
         # t+1 (future) moved to t (current)
-        if self.gengerate_target:
+        if self.generate_target:
             assert self.target_col is not None
             assert self.horizon is not None
             col_name = f"{self.target_col}_target_{self.horizon}"

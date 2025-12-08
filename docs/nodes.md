@@ -1309,7 +1309,8 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - feature_cols: 特征列名列表，类型为List[str]，指定用于训练模型的特征列名。
 - target_col: 目标列名，类型为str，指定用于训练模型的目标列名。
 - n_estimators: 随机森林中的树的数量，类型为int，默认为100（前端默认值）。
-- max_depth: 树的最大深度，类型为int，可选，如果未提供则默认为None，表示不限制深度
+- limit_max_depth: 是否限制树的最大深度，类型为bool，默认为False（前端默认值），如果为True，则需要提供max_depth参数。
+- max_depth: 树的最大深度，类型为int，可选，如果未提供则默认为None，表示不限制深度。
 
 **输入：**
 - table: 输入的表格，类型为Table。
@@ -1326,11 +1327,41 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 回归模型评分节点，使用输入的表格数据和训练好的回归模型计算模型的评分指标，并输出评分结果。
 
 **参数：**
-- metric: 评分指标，类型为str，取值为"MAE", "MSE", "RMSE", "R2"。
+- metric: 评分指标，类型为str，取值为"mse", "rmse", "mae", "r2"。
 
 **输入：**
-- table: 输入的表格，类型为Table，必须包含特征列和目标列。
+- table: 输入的表格，类型为Table，必须包含模型预测所需的特征列以及用于对比的真实目标列。
 - model: 训练好的回归模型，类型为Model。
+
+**输出：**
+- score: 评分结果，类型为float。
+
+#### 10.6 LogisticRegressionNode
+逻辑回归节点，使用输入的表格数据训练模型，并输出训练好的逻辑回归模型。
+
+**参数：**
+- feature_cols: 特征列名列表，类型为List[str]，指定用于训练模型的特征列名。
+- target_col: 目标列名，类型为str，指定用于训练模型的目标列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- model: 训练好的逻辑回归模型，类型为Model。
+
+**hint：**
+- feature_col_choices: 列名列表，类型为List[str]，用于在UI中为feature_cols参数提供可选值。
+- target_col_choices: 列名列表，类型为List[str]，用于在UI中为target_col参数提供可选值。
+
+#### 10.7 ClassificationScoreNode
+分类模型评分节点，使用输入的表格数据和训练好的分类模型计算模型的评分指标，并输出评分结果。
+
+**参数：**
+- metric: 评分指标，类型为str，取值为"accuracy", "f1", "precision", "recall"。
+
+**输入：**
+- table: 输入的表格，类型为Table，必须包含模型预测所需的特征列以及用于对比的真实目标列。
+- model: 训练好的分类模型，类型为Model。    
 
 **输出：**
 - score: 评分结果，类型为float。
