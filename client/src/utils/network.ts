@@ -6,6 +6,7 @@ import { useVueFlow } from '@vue-flow/core'
 import { getProject, writeBackVueFLowProject } from './projectConvert'
 import AuthenticatedServiceFactory from './AuthenticatedServiceFactory'
 import { useResultStore } from '@/stores/resultStore'
+import { handleNetworkError } from './networkError'
 
 
 const mutex = new Mutex()
@@ -36,9 +37,7 @@ const syncProject = (p: Project, graphStore: any) => {
                 graphStore.project.thumb = p.thumb  //  thumb should writeback immediately
             }
         }catch(err) {
-            const errMsg = err && typeof err === 'object' && 'message' in err
-            ? String(err.message)
-            : '无法连接到服务器，请检查网络或联系管理员。'
+            const errMsg = handleNetworkError(err)
             graphStore.syncing_err_msg = errMsg
             reject(err)
         }
@@ -49,9 +48,7 @@ const syncProject = (p: Project, graphStore: any) => {
             }
             taskResponse = await authService.syncProjectApiProjectSyncPost(p)
         }catch(err) {
-            const errMsg = err && typeof err === 'object' && 'message' in err
-            ? String(err.message)
-            : '无法连接到服务器，请检查网络或联系管理员。'
+            const errMsg = handleNetworkError(err)
             graphStore.syncing_err_msg = errMsg
             reject(err)
         }finally {
@@ -70,9 +67,7 @@ const syncProject = (p: Project, graphStore: any) => {
                     if(err instanceof TaskCancelledError) {
                         reject(err)
                     }else {
-                        const errMsg = err && typeof err === 'object' && 'message' in err
-                        ? String(err.message)
-                        : '无法连接到服务器，请检查网络或联系管理员。'
+                        const errMsg = handleNetworkError(err)
                         graphStore.syncing_err_msg = errMsg
                         reject(err)
                     }
@@ -100,9 +95,7 @@ const syncProjectUiState = (p: Project, graphStore: any) => {
             const res = await authService.syncProjectUiApiProjectSyncUiPost(p.project_id, p.ui_state)
             resolve(res)
         }catch(err) {
-            const errMsg = err && typeof err === 'object' && 'message' in err
-              ? String(err.message)
-              : '无法连接到服务器，请检查网络或联系管理员。'
+            const errMsg = handleNetworkError(err)
             graphStore.syncing_err_msg = errMsg
             reject(err)
         }finally {
