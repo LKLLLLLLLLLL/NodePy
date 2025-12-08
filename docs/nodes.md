@@ -1321,3 +1321,16 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - feature_col_choices: 列名列表，类型为List[str]，用于在UI中为feature_cols参数提供可选值。
 - target_col_choices: 列名列表，类型为List[str]，用于在UI中为target_col参数提供可选值。
 
+
+#### 10.5 RegressionScoreNode
+回归模型评分节点，使用输入的表格数据和训练好的回归模型计算模型的评分指标，并输出评分结果。
+
+**参数：**
+- metric: 评分指标，类型为str，取值为"MAE", "MSE", "RMSE", "R2"。
+
+**输入：**
+- table: 输入的表格，类型为Table，必须包含特征列和目标列。
+- model: 训练好的回归模型，类型为Model。
+
+**输出：**
+- score: 评分结果，类型为float。
