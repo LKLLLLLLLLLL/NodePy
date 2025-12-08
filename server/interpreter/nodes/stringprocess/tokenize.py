@@ -24,7 +24,7 @@ class TokenizeNode(BaseNode):
     It support english and chinese tokenization.
     """
     language: Literal["ENGLISH", "CHINESE"]
-    delimiter: str = " " # Optional delimiter for ENGLISH tokenization
+    delimiter: str | None = None # Optional delimiter for ENGLISH tokenization
     result_col: str | None = None  # Optional result column name for output table
 
     _col_types: Dict[str, ColType] | None = PrivateAttr(default=None)
@@ -37,6 +37,8 @@ class TokenizeNode(BaseNode):
                 err_param_key="type",
                 err_msg="Node type parameter mismatch.",
             )
+        if self.delimiter is None:
+            self.delimiter = " " # Default delimiter for English tokenization
         if self.result_col is not None and self.result_col.strip() == "":
             self.result_col = None
         if self.result_col is None:
@@ -79,6 +81,7 @@ class TokenizeNode(BaseNode):
         assert isinstance(text_value, str)
 
         if self.language == "ENGLISH":
+            assert self.delimiter is not None
             tokens = text_value.split(self.delimiter)
         else:  # CHINESE
             tokens = list(jieba.cut(text_value))
