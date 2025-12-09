@@ -1,4 +1,6 @@
 
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from loguru import logger
 from pydantic import BaseModel, EmailStr
@@ -11,9 +13,9 @@ from server.models.database import UserRecord, get_async_session
 router = APIRouter()
 
 class LoginRequest(BaseModel):
-    username: str
+    type: Literal["username", "email"]
+    identifier: str # username or email
     password: str
-
 
 class SignupRequest(BaseModel):
     username: str
@@ -103,9 +105,17 @@ async def login(
     """Login user and return JWT tokens"""
     try:
         # find user
-        result = await db_client.execute(
-            select(UserRecord).where(UserRecord.username == req.username)
-        )
+        result = None
+        if req.type == "email":
+            result = await db_client.execute(
+                select(UserRecord).where(UserRecord.email == req.identifier)
+            )
+        elif req.type == "username":  # username
+            result = await db_client.execute(
+                select(UserRecord).where(UserRecord.username == req.identifier)
+            )
+        else:
+            assert False, "Unreachable"
         user = result.first()
 
         if user is None or not AuthUtils.verify_password(

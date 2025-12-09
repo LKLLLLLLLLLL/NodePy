@@ -3,7 +3,14 @@
 /* tslint:disable */
 /* eslint-disable */
 export type LoginRequest = {
-    username: string;
+    type: LoginRequest.type;
+    identifier: string;
     password: string;
 };
+export namespace LoginRequest {
+    export enum type {
+        USERNAME = 'username',
+        EMAIL = 'email',
+    }
+}
 
