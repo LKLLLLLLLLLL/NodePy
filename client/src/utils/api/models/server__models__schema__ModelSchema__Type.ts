@@ -5,4 +5,5 @@
 export enum server__models__schema__ModelSchema__Type {
     REGRESSION = 'Regression',
     CLASSIFICATION = 'Classification',
+    CLUSTERING = 'Clustering',
 }

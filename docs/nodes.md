@@ -477,6 +477,34 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - word_col_choices: 列名列表，类型为List[str]，用于在UI中为word_col参数提供可选值。
 - frequency_col_choices: 列名列表，类型为List[str]，用于在UI中为frequency_col参数提供可选值。
 
+#### 2.5 KlinePlotNode
+K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
+
+**参数：**
+- title: 图形标题，类型为str，可以为空。
+- x_col: x轴列名，类型为str，表格中该列的类型必须为Datetime，前端默认为"Open Time"。
+- open_col: 开盘价列名，类型为str，表格中该列的类型必须为float，前端默认为"Open"。
+- high_col: 最高价列名，类型为str，表格中该列的类型必须为float，前端默认为"High"。
+- low_col: 最低价列名，类型为str，表格中该列的类型必须为float，前端默认为"Low"。
+- close_col: 收盘价列名，类型为str，表格中该列的类型必须为float，前端默认为"Close"。
+- volume_col: 成交量列名，类型为str | None，表格中该列的类型必须为float或int，前端默认为"Volume"；如果用户输入为空，则表示不绘制成交量。
+- style_mode: 配色风格，类型为str，取值为"CN"或"US"，分别表示中国和美国的K线配色风格，前端默认为"CN"。
+
+**输入：**
+- input: 输入的K线数据表格，类型为Table。
+
+**输出：**
+- kline_plot: 输出的K线图，类型为File，格式为PNG。
+
+**hint：**
+- x_col_choices: 列名列表，类型为List[str]，用于在UI中为x_col参数提供可选值。
+- open_col_choices: 列名列表，类型为List[str]，用于在UI中为open_col参数提供可选值。
+- high_col_choices: 列名列表，类型为List[str]，用于在UI中为high_col参数提供可选值。
+- low_col_choices: 列名列表，类型为List[str]，用于在UI中为low_col参数提供可选值。
+- close_col_choices: 列名列表，类型为List[str]，用于在UI中为close_col参数提供可选值。
+- volume_col_choices: 列名列表，类型为List[str]，用于在UI中为volume_col参数提供可选值。
+
+
 ### 4. 字符串处理节点(stringprocess)
 #### 4.1 StripNode
 节点用于去除字符串首尾的空白字符或指定字符。

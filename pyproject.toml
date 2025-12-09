@@ -50,6 +50,7 @@ worker = [
     "jieba>=0.42.1",
     "httpx>=0.28.1",
     "yfinance>=0.2.66",
+    "mplfinance>=0.12.10b0",
 ]
 
 [tool.taskipy.tasks]
