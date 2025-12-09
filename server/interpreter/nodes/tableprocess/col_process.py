@@ -197,11 +197,12 @@ class JoinNode(BaseNode):
         left_col_type = left_schema.tab.col_types[self.left_on]
         right_col_type = right_schema.tab.col_types[self.right_on]
         if left_col_type != right_col_type:
+            # Provide a single err_input/err_msg pair to avoid mismatched list lengths
             raise NodeValidationError(
                 node_id=self.id,
-                err_inputs=["left_table", "right_table"],
-                err_msgs=[f"Column '{self.left_on}' in left table has type {left_col_type}, "
-                          f"while column '{self.right_on}' in right table has type {right_col_type}."],
+                err_input="left_table",
+                err_msg=(f"Column '{self.left_on}' in left table has type {left_col_type}, "
+                         f"while column '{self.right_on}' in right table has type {right_col_type}.")
             )
 
         # remove _index column
@@ -216,7 +217,11 @@ class JoinNode(BaseNode):
             if col not in new_col_types:
                 new_col_types[col] = col_type
             else:
-                # handle column name conflict by suffixing with _right
+                # If the conflicting column is the join key, skip adding a suffixed
+                # column because pandas.merge keeps the join key without suffix.
+                if col == self.right_on:
+                    continue
+                # handle other column name conflict by suffixing with _right
                 new_col_types[f"{col}_right"] = col_type
 
         new_tab = TableSchema(col_types=new_col_types)
@@ -234,11 +239,11 @@ class JoinNode(BaseNode):
         left_df = left_table_data.payload.df.copy()
         right_df = right_table_data.payload.df.copy()
         
-        # # remove _index column
-        # if '_index' in left_df.columns:
-        #     left_df = left_df.drop(columns=['_index'])
-        # if '_index' in right_df.columns:
-        #     right_df = right_df.drop(columns=['_index'])
+        # remove _index column to avoid pandas producing suffixed index columns
+        if '_index' in left_df.columns:
+            left_df = left_df.drop(columns=['_index'])
+        if '_index' in right_df.columns:
+            right_df = right_df.drop(columns=['_index'])
 
         joined_df = left_df.merge(
             right_df,

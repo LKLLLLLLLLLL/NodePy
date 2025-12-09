@@ -179,3 +179,13 @@ def test_statisticalplot_hue_normalization(node_ctor):
     # validate_parameters runs during construction; hue_col should be normalized
     assert node.hue_col is None
 
+
+def test_statisticalplot_hint_hist_omits_y(node_ctor):
+    # when plot_type is 'hist', y_col_choices should be omitted per implementation
+    node = node_ctor("StatisticalPlotNode", id="sp_hist_hint", x_col="x", plot_type="hist")
+    schema = schema_from_coltypes({"x": ColType.STR, "y": ColType.INT, "h": ColType.STR})
+    hint = node.get_hint("StatisticalPlotNode", {"input": schema}, {"plot_type": "hist"})
+    assert "x_col_choices" in hint
+    assert "hue_col_choices" in hint
+    assert "y_col_choices" not in hint
+

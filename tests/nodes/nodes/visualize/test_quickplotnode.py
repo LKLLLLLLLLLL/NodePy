@@ -274,3 +274,13 @@ def test_quickplot_area_and_long_x(node_ctor):
     node.infer_schema({"input": schema})
     out = node.execute({"input": tbl})
     assert out["plot"].payload.format == "png"
+
+
+def test_quickplot_nonbar_multiple_y(node_ctor, test_file_root):
+    # no 'bar' types present -> use x values for plotting (area + line)
+    node = node_ctor("QuickPlotNode", id="p_nb", x_col="x", y_col=["a", "b"], plot_type=["area", "line"]) 
+    tbl = table_from_dict({"x": [1, 2, 3], "a": [2, 3, 4], "b": [1, 0, 2]})
+    schema = schema_from_coltypes({"x": ColType.INT, "a": ColType.INT, "b": ColType.INT})
+    node.infer_schema({"input": schema})
+    out = node.execute({"input": tbl})
+    assert out["plot"].payload.format == "png"

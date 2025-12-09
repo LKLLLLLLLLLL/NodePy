@@ -81,7 +81,8 @@ class InsertConstColNode(BaseNode):
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         const_value_schema = input_schemas["const_value"]
-        if const_value_schema.type != self.col_type:
+        # Schema can be compared to ColType via Schema.__eq__ implementation
+        if const_value_schema != self.col_type:
             raise NodeValidationError(
                 node_id=self.id,
                 err_input="const_value",
@@ -186,7 +187,8 @@ class InsertRangeColNode(BaseNode):
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         start_schema = input_schemas["start"]
-        if start_schema.type != self.col_type:
+        expected_coltype = ColType(self.col_type)
+        if start_schema != expected_coltype:
             raise NodeValidationError(
                 node_id=self.id,
                 err_input="start",
@@ -194,7 +196,7 @@ class InsertRangeColNode(BaseNode):
             )
         if "step" in input_schemas:
             step_schema = input_schemas["step"]
-            if step_schema.type != self.col_type:
+            if step_schema != expected_coltype:
                 raise NodeValidationError(
                     node_id=self.id,
                     err_input="step",
@@ -337,14 +339,15 @@ class InsertRandomColNode(BaseNode):
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         min_value_schema = input_schemas["min_value"]
-        if min_value_schema.type != self.col_type:
+        expected_coltype = ColType(self.col_type)
+        if min_value_schema != expected_coltype:
             raise NodeValidationError(
                 node_id=self.id,
                 err_input="min_value",
                 err_msg="Input min_value schema type does not match specified col_type.",
             )
         max_value_schema = input_schemas["max_value"]
-        if max_value_schema.type != self.col_type:
+        if max_value_schema != expected_coltype:
             raise NodeValidationError(
                 node_id=self.id,
                 err_input="max_value",
