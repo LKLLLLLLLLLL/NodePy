@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import Pagination from '@/components/Pagination.vue'
+import Pagination from '@/components/Pagination/Pagination.vue'
 
 // 格式化单元格值
 const formatCellValue = (cell: any): string => {

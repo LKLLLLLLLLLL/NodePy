@@ -3,7 +3,7 @@
     import type { TableView } from '@/utils/api'
     import Loading from '@/components/Loading.vue'
     import type { ResultType } from '@/stores/resultStore';
-    import Pagination from '@/components/Pagination.vue'; // 引入统一的分页组件
+    import Pagination from '@/components/Pagination/Pagination.vue'; // 引入统一的分页组件
 
     const props = defineProps<{
         value: ResultType
