@@ -73,6 +73,7 @@
         <button class="action-btn logout" @click="handleLogout">
           <span class="icon">🚪</span> 登出
         </button>
+        <button @click="tableStore.createTableModal()">点我测试表格编辑</button>
       </div>
     </div>
   </FloatingMenu>
@@ -90,10 +91,12 @@ import FloatingMenu from './FloatingMenu.vue'
 import EditableTableModal from '../EditableTable/EditableTableModal.vue'
 import PyEditor from '../PyEditor/PyEditor.vue'
 import Logout from '../Logout.vue'
+import { useTableStore } from '@/stores/tableStore'
 
 const loginStore = useLoginStore()
 const modalStore = useModalStore()
 const userStore = useUserStore()
+const tableStore = useTableStore()
 
 const router = useRouter()
 
