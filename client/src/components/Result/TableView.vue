@@ -3,6 +3,7 @@
     import type { TableView } from '@/utils/api'
     import Loading from '@/components/Loading.vue'
     import type { ResultType } from '@/stores/resultStore';
+    import Pagination from '@/components/Pagination.vue'; // 引入统一的分页组件
 
     const props = defineProps<{
         value: ResultType
@@ -15,7 +16,6 @@
     // 分页相关状态
     const currentPage = ref(1)
     const rowsPerPage = ref(100)
-    const inputPage = ref('')
 
     // 类型守卫：检查是否是 TableView
     const isTableView = computed(() => {
@@ -82,32 +82,9 @@
         return Math.ceil(tableData.value.rows.length / rowsPerPage.value)
     })
 
-    // 分页方法
-    const prevPage = () => {
-        if (currentPage.value > 1) {
-            currentPage.value--
-        }
-    }
-
-    const nextPage = () => {
-        if (currentPage.value < totalPages.value) {
-            currentPage.value++
-        }
-    }
-
-    const goToPage = (page: number) => {
-        if (page >= 1 && page <= totalPages.value) {
-            currentPage.value = page
-        }
-    }
-
-    // 回车跳转页面
-    const handlePageInput = () => {
-        const page = parseInt(inputPage.value)
-        if (!isNaN(page)) {
-            goToPage(page)
-            inputPage.value = ''
-        }
+    // 分页方法 - 使用Pagination组件的事件
+    const handlePageChange = (page: number) => {
+        currentPage.value = page
     }
 
     const columnTypes = computed(() => {
@@ -252,40 +229,14 @@
                 表格为空（0 行 × {{ paginatedTableData.columns.length }} 列）
             </div>
 
-            <!-- 分页控件 -->
-            <div class="pagination-controls" v-if="totalPages > 1">
-                <button 
-                    class="pagination-btn" 
-                    :disabled="currentPage === 1"
-                    @click="prevPage"
-                >
-                    上一页
-                </button>
-                
-                <span class="pagination-info">
-                    第 {{ currentPage }} 页，共 {{ totalPages }} 页
-                </span>
-                
-                <button 
-                    class="pagination-btn" 
-                    :disabled="currentPage === totalPages"
-                    @click="nextPage"
-                >
-                    下一页
-                </button>
-                
-                <div class="pagination-jump">
-                    <input 
-                        v-model="inputPage" 
-                        type="number" 
-                        min="1" 
-                        :max="totalPages"
-                        placeholder="页码"
-                        @keyup.enter="handlePageInput"
-                    />
-                    <button @click="handlePageInput">跳转</button>
-                </div>
-            </div>
+            <!-- 使用统一的分页组件 -->
+            <Pagination 
+                v-if="totalPages > 1"
+                :current-page="currentPage"
+                :total-pages="totalPages"
+                @update:currentPage="handlePageChange"
+                @change="handlePageChange"
+            />
         </div>
     </div>
 </template>
@@ -422,77 +373,5 @@
     .boolean-false {
         color: #f56c6c; // 红色表示 False
         font-weight: bold;
-    }
-
-    /* 分页控件样式 */
-    .pagination-controls {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px;
-        padding: 15px;
-        border-top: 1px solid #ebeef5;
-        background-color: #fff;
-        flex-shrink: 0;
-    }
-
-    .pagination-btn {
-        padding: 6px 12px;
-        background-color: #f0f0f0;
-        border: 1px solid #dcdfe6;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.3s;
-
-        &:hover:not(:disabled) {
-            background-color: #ecf5ff;
-            border-color: #409eff;
-            color: #409eff;
-        }
-
-        &:disabled {
-            color: #a8abb2;
-            cursor: not-allowed;
-            background-color: #f5f7fa;
-        }
-    }
-
-    .pagination-info {
-        font-size: 14px;
-        color: #606266;
-        white-space: nowrap;
-    }
-
-    .pagination-jump {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        input {
-            width: 60px;
-            padding: 6px 10px;
-            border: 1px solid #dcdfe6;
-            border-radius: 4px;
-            outline: none;
-            transition: border-color 0.3s;
-
-            &:focus {
-                border-color: #409eff;
-            }
-        }
-
-        button {
-            padding: 6px 12px;
-            background-color: #409eff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-
-            &:hover {
-                background-color: #66b1ff;
-            }
-        }
     }
 </style>

@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import { ref, computed } from 'vue'
+import Pagination from '@/components/Pagination.vue'
+
 // 格式化单元格值
 const formatCellValue = (cell: any): string => {
   if (cell === null || cell === undefined) {
@@ -17,9 +20,33 @@ const formatCellValue = (cell: any): string => {
   return String(cell);
 };
 
-defineProps<{
+const props = defineProps<{
   sheets: Array<{ name: string; data: any[] }>
 }>()
+
+// 为每个工作表维护独立的分页状态
+const currentPageMap = ref<Record<string, number>>({})
+
+const getPaginatedSheetData = (sheet: { name: string; data: any[] }) => {
+  const currentPage = currentPageMap.value[sheet.name] || 1
+  const rowsPerPage = 100
+  const totalRows = sheet.data.length
+  
+  const totalPages = Math.ceil(totalRows / rowsPerPage)
+  const start = (currentPage - 1) * rowsPerPage
+  const end = start + rowsPerPage
+  const paginatedData = sheet.data.slice(start, end)
+  
+  return {
+    data: paginatedData,
+    currentPage,
+    totalPages
+  }
+}
+
+const updatePage = (sheetName: string, page: number) => {
+  currentPageMap.value[sheetName] = page
+}
 </script>
 
 <template>
@@ -44,10 +71,12 @@ defineProps<{
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(row, rowIndex) in sheet.data.slice(1)" :key="rowIndex" class="excel-row">
+              <tr v-for="(row, rowIndex) in getPaginatedSheetData(sheet).data.slice(1)" 
+                  :key="(getPaginatedSheetData(sheet).currentPage - 1) * 100 + rowIndex" 
+                  class="excel-row">
                 <td class="index-column">
                   <div class="index-content">
-                    <span class="index-value">{{ rowIndex + 1 }}</span>
+                    <span class="index-value">{{ (getPaginatedSheetData(sheet).currentPage - 1) * 100 + rowIndex + 1 }}</span>
                   </div>
                 </td>
                 <td v-for="(cell, colIndex) in row" :key="colIndex" class="excel-column">
@@ -63,18 +92,28 @@ defineProps<{
       <div v-else class="excel-empty">
         工作表为空
       </div>
+      
+      <!-- 使用统一的分页组件 -->
+      <Pagination 
+        v-if="getPaginatedSheetData(sheet).totalPages > 1"
+        :current-page="getPaginatedSheetData(sheet).currentPage"
+        :total-pages="getPaginatedSheetData(sheet).totalPages"
+        @update:currentPage="(page) => updatePage(sheet.name, page)"
+        class="excel-pagination"
+      />
     </div>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '../../../common/global.scss' as *;
 .excel-view {
   flex: 1;
   overflow: auto;
   background: white;
-  border: 1px solid #e4e7ed;
   border-radius: 10px;
   padding: 12px;
+  @include controller-style;
 }
 
 .excel-sheet {
@@ -165,5 +204,11 @@ defineProps<{
   text-align: center;
   padding: 40px 20px;
   color: #909399;
+}
+
+.excel-pagination {
+  margin: 12px 0 0 0;
+  padding: 12px 0 0 0;
+  border-top: 1px solid #ebeef5;
 }
 </style>

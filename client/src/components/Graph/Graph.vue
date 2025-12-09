@@ -264,6 +264,7 @@ onPaneClick(() => {
   }
 })
 const handlePaneDoubleClick = () => {
+  graphStore.currentNode = undefined
   getNodes.value.forEach((n) => {
     if(n.data.dbclicked) {
       n.data.dbclicked = false

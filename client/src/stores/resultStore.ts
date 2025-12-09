@@ -310,7 +310,7 @@ export const useResultStore = defineStore('result',()=>{
             },
             // 设置最小尺寸
             minSize: {
-                width: 300,
+                width: 500,
                 height: 200
             },
             component: Result

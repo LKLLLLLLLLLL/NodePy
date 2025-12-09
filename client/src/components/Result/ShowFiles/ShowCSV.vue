@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
+import Pagination from '@/components/Pagination.vue'
 
 const props = defineProps<{
   data: string
@@ -109,11 +110,22 @@ const csvTable = computed(() => {
 
   return { headers, rows }
 })
+
+// 分页相关
+const currentPage = defineModel<number>('currentPage', { default: 1 })
+const rowsPerPage = 100
+const totalPages = computed(() => Math.ceil(csvTable.value.rows.length / rowsPerPage))
+
+const paginatedRows = computed(() => {
+  const start = (currentPage.value - 1) * rowsPerPage
+  const end = start + rowsPerPage
+  return csvTable.value.rows.slice(start, end)
+})
 </script>
 
 <template>
   <div class="csv-view">
-    <div v-if="csvTable.rows.length > 0" class="csv-table-wrapper">
+    <div v-if="paginatedRows.length > 0" class="csv-table-wrapper">
       <div class="csv-table-container">
         <table class="result-table">
           <thead>
@@ -131,10 +143,10 @@ const csvTable = computed(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(row, rowIndex) in csvTable.rows" :key="rowIndex" class='data-row'>
+            <tr v-for="(row, rowIndex) in paginatedRows" :key="(currentPage - 1) * rowsPerPage + rowIndex" class='data-row'>
               <td class='index-column'>
                 <div class="index-content">
-                  <span class="index-value">{{ rowIndex + 1 }}</span>
+                  <span class="index-value">{{ (currentPage - 1) * rowsPerPage + rowIndex + 1 }}</span>
                 </div>
               </td>
               <td v-for="header in csvTable.headers" :key="header" class='data-column'>
@@ -148,10 +160,19 @@ const csvTable = computed(() => {
     <div v-else class='table-empty'>
       表格为空（0 行 × {{ csvTable.headers.length }} 列）
     </div>
+    
+    <!-- 使用统一的分页组件 -->
+    <Pagination 
+      v-if="totalPages > 1"
+      v-model:currentPage="currentPage"
+      :total-pages="totalPages"
+      class="csv-pagination"
+    />
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '../../../common/global.scss' as *;
 .csv-view {
   flex: 1;
   display: flex;
@@ -161,6 +182,7 @@ const csvTable = computed(() => {
   overflow: hidden;
   background: #fafafa;
   border-radius: 10px;
+  @include controller-style;
 }
 
 .csv-table-wrapper {
@@ -255,5 +277,11 @@ const csvTable = computed(() => {
   border: 1px solid #ebeef5;
   border-radius: 4px;
   margin: 12px;
+}
+
+.csv-pagination {
+  margin: 0 12px 12px 12px;
+  padding: 12px 0;
+  border-top: 1px solid #ebeef5;
 }
 </style>
