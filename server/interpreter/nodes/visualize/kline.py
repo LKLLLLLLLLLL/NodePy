@@ -67,11 +67,11 @@ class KLinePlotNode(BaseNode):
     @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         input_col_types = {}
-        input_col_types[self.x_col] = ColType.DATETIME
-        input_col_types[self.open_col] = ColType.FLOAT
-        input_col_types[self.high_col] = ColType.FLOAT
-        input_col_types[self.low_col] = ColType.FLOAT
-        input_col_types[self.close_col] = ColType.FLOAT
+        input_col_types[self.x_col] = {ColType.DATETIME}
+        input_col_types[self.open_col] = {ColType.FLOAT}
+        input_col_types[self.high_col] = {ColType.FLOAT}
+        input_col_types[self.low_col] = {ColType.FLOAT}
+        input_col_types[self.close_col] = {ColType.FLOAT}
         if self.volume_col is not None:
             input_col_types[self.volume_col] = {ColType.FLOAT, ColType.INT}
         return [
@@ -93,7 +93,6 @@ class KLinePlotNode(BaseNode):
             type=Schema.Type.FILE,
             file=FileSchema(
                 format="png",
-                col_types={},
             ),
         )
         return {"plot": output_schema}

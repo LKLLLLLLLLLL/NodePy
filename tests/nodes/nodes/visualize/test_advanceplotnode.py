@@ -153,3 +153,29 @@ def test_advanceplotnode_infer_and_execute_error_cases(node_ctor):
     with pytest.raises(Exception):
         node.execute({"input": make_data(42)})
 
+
+def test_statisticalplot_force_line_branch(node_ctor, monkeypatch):
+    # create a valid StatisticalPlotNode then force-assign an unsupported 'line' plot_type
+    from tests.nodes.utils import table_from_dict
+
+    node = node_ctor("StatisticalPlotNode", id="sp_force", x_col="x", y_col="y", hue_col="h", plot_type="scatter")
+    # bypass pydantic validation by setting attribute directly
+    object.__setattr__(node, 'plot_type', 'line')
+
+    # monkeypatch seaborn.lineplot to ensure branch executes without rendering
+    monkeypatch.setattr('seaborn.lineplot', lambda *a, **k: None)
+
+    schema = schema_from_coltypes({"x": ColType.INT, "y": ColType.INT, "h": ColType.STR})
+    tbl = table_from_dict({"x": [1, 2, 3], "y": [2, 3, 4], "h": ["a", "b", "a"]})
+    node.infer_schema({"input": schema})
+    out = node.execute({"input": tbl})
+    assert out["plot"].payload.format == "png"
+
+
+def test_statisticalplot_hue_normalization(node_ctor):
+    # when hue_col is NO_SPECIFIED_COL it should be normalized to None
+    from server.models.schema import NO_SPECIFIED_COL
+    node = node_ctor("StatisticalPlotNode", id="sp_hue", x_col="x", y_col="y", hue_col=NO_SPECIFIED_COL, plot_type="scatter")
+    # validate_parameters runs during construction; hue_col should be normalized
+    assert node.hue_col is None
+

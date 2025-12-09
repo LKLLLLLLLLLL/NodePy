@@ -24,7 +24,7 @@ class TokenizeNode(BaseNode):
     It support english and chinese tokenization.
     """
     language: Literal["ENGLISH", "CHINESE"]
-    delimiter: str | None # Optional delimiter for ENGLISH tokenization
+    delimiter: str | None = None  # Optional delimiter for ENGLISH tokenization
     result_col: str | None = None  # Optional result column name for output table
 
     _col_types: Dict[str, ColType] | None = PrivateAttr(default=None)
