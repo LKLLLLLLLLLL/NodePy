@@ -1,6 +1,7 @@
 <script lang="ts" setup>
     import { ref, computed } from 'vue';
     import { notify } from '@/components/Notification/notify';
+    import { LoginRequest } from '@/utils/api';
     import { useRouter } from 'vue-router';
     // 导入新的认证工具函数
     import { usePageStore } from '@/stores/pageStore';
@@ -26,6 +27,7 @@
     const default_confirmpassword: string = '';
     const default_email: string = '';
     const default_email_username: string = ''
+    
     const password = ref<string>(default_password);
     const confirm_password = ref<string>(default_confirmpassword);
     const email = ref<string>(default_email);
@@ -144,11 +146,20 @@
 
     async function handleLogin(){
         try {
-            // 使用新的登录函数
-            await loginStore.login({
-                username: username.value,
-                password: password.value
-            });
+            if(loginType.value === LoginRequest.type.EMAIL){
+                await loginStore.login({
+                    type: LoginRequest.type.EMAIL,
+                    identifier: email.value,
+                    password: password.value
+                });
+            }
+            else if(loginType.value === LoginRequest.type.USERNAME){
+                await loginStore.login({
+                    type: LoginRequest.type.USERNAME,
+                    identifier: username.value,
+                    password: password.value
+                });
+            }
             notify({ message: '登录成功', type: 'success' });
             pageStore.jumpToPage();
         } catch (error: any) {
