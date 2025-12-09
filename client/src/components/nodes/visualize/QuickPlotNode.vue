@@ -17,7 +17,7 @@
                 class="nodrag"
                 />
             </div>
-            <div class="y_cols"v-for="(y_col, idx) in y_cols" :key="y_col.name">
+            <div class="y_cols"v-for="(y_col, idx) in y_cols" :key="y_col.id">
                 <div class="y_col">
                     <div class="param-description y_col-description" :class="{'node-has-paramerr': y_colHasErr.value}">
                         <span class="y-col-label">y轴列名</span>
@@ -93,6 +93,7 @@
     })
     const y_cols = ref(props.data.param.y_col.map((item, idx) => {
         return {
+            id: Date.now().toString()+`_${idx}`,
             name: item,
             defaultSelected: y_col_hint.value.indexOf(item),
             defaultSelectedPlot_type: plot_type_options.indexOf(props.data.param.plot_type[idx]!)
@@ -143,7 +144,7 @@
     const clearSelectY = (resolve: any) => {
         props.data.param.y_col = ['']
         props.data.param.plot_type = ['line']
-        y_cols.value = [{name: '', defaultSelected: -1, defaultSelectedPlot_type: 1}]
+        y_cols.value = [{id: Date.now().toString()+'_0', name: '', defaultSelected: -1, defaultSelectedPlot_type: 1}]
         resolve()
     }
     const removeY_col = (idx: number) => {
@@ -154,7 +155,7 @@
         }
     }
     const addY_col = () => {
-        y_cols.value.push({name: '', defaultSelected: -1, defaultSelectedPlot_type: 1})
+        y_cols.value.push({id: Date.now().toString()+`_${y_cols.value.length}`, name: '', defaultSelected: -1, defaultSelectedPlot_type: 1})
         props.data.param.y_col.push('')
         props.data.param.plot_type.push('line')
     }
