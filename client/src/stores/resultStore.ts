@@ -40,13 +40,13 @@ export const useResultStore = defineStore('result',()=>{
     const currentInfo = ref<any>(default_info)
     const loading = ref<boolean>(false) // 添加loading状态
 
-    //result modal default 
+    //result modal default
     const marginRight = 20;
-    const marginTop = 60;
-    const marginBottom = 65;
+    const marginTop = 65;
+    const marginBottom = 60;
     const modalWidth = ref<number>(500);
     const modalHeight = ref<number>(window.innerHeight - marginTop - marginBottom);
-    
+
     // 使用函数来动态计算位置，而不是静态值
     const getXPosition = () => {
         // 确保不会出现负数坐标
@@ -87,14 +87,14 @@ export const useResultStore = defineStore('result',()=>{
     // 工具函数：将 data_out 转换为类型:data_id 字典
     function convertDataOutToDict(dataOut: Record<string, any>): Record<string, number> {
         const result: Record<string, number> = {};
-        
+
         for (const [key, value] of Object.entries(dataOut)) {
             // 检查值是否存在且具有 data_id 属性
             if (value && typeof value === 'object' && 'data_id' in value) {
                 result[key] = value.data_id;
             }
         }
-        
+
         return result;
     }
 
@@ -119,7 +119,7 @@ export const useResultStore = defineStore('result',()=>{
                 toBeDeleted.value.push(Number(cacheId))
             }
         })
-        
+
         return toBeDeleted.value.length; // 返回删除的数量
     }
 
@@ -170,7 +170,7 @@ export const useResultStore = defineStore('result',()=>{
         let leastHitId: number = default_id;
         let minHitCount = Infinity;
         let earliestHitTime = Infinity;
-        
+
         resultCache.value.forEach((item, id) => {
             if (item.hitCount < minHitCount || (item.hitCount === minHitCount && item.lastHitTime < earliestHitTime)) {
                 leastHitId = Number(id);
@@ -182,7 +182,7 @@ export const useResultStore = defineStore('result',()=>{
         removeResultCacheContent(leastHitId);
         addResultCacheContent(id,content);
     }
-    
+
     function removeResultCacheContent(id: number){
         if(hitResultCacheContent(id)){
             resultCache.value.delete(id);
@@ -208,7 +208,7 @@ export const useResultStore = defineStore('result',()=>{
             }
         } catch (error) {
             // 检查是否是网络错误
-            if (error instanceof TypeError && error.message && 
+            if (error instanceof TypeError && error.message &&
                 (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
                 notify({
                     message: '网络错误: ' + error.message,
@@ -332,7 +332,7 @@ export const useResultStore = defineStore('result',()=>{
             })
             const dataIdToUse = dataId || default_id;
             const result = await getResultCacheContent(dataIdToUse);
-            
+
             if (!result) {
                 notify({
                     message: '无法获取结果内容',
@@ -340,10 +340,10 @@ export const useResultStore = defineStore('result',()=>{
                 });
                 return;
             }
-            
+
             let blob: Blob;
             let downloadFilename = filename || `result_${dataIdToUse}`;
-            
+
             // 根据结果类型处理不同的下载内容
             switch (result.type) {
                 case DataView.type.INT:
@@ -364,7 +364,7 @@ export const useResultStore = defineStore('result',()=>{
                     const ext = extMap[result.type] || 'txt';
                     downloadFilename = filename || `result_${dataIdToUse}.${ext}`;
                     break;
-                    
+
                 case DataView.type.TABLE:
                     // 处理表格数据
                     if (result.value && typeof result.value === 'object') {
@@ -379,13 +379,13 @@ export const useResultStore = defineStore('result',()=>{
                         downloadFilename = filename || `result_${dataIdToUse}.txt`;
                     }
                     break;
-                    
+
                 case DataView.type.FILE:
                     // 处理文件类型
                     if (result.value && typeof result.value === 'object') {
                         // 假设result.value是File对象
                         const fileValue = result.value as any;
-                        
+
                         // 如果有key属性，使用fileStore下载
                         if ('key' in fileValue && fileValue.key) {
                             const fileStore = useFileStore();
@@ -396,19 +396,19 @@ export const useResultStore = defineStore('result',()=>{
                         else if ('content' in fileValue && fileValue.content) {
                             // 根据content类型创建Blob
                             if (fileValue.content instanceof ArrayBuffer) {
-                                blob = new Blob([fileValue.content], { 
-                                    type: fileValue.contentType || 'application/octet-stream' 
+                                blob = new Blob([fileValue.content], {
+                                    type: fileValue.contentType || 'application/octet-stream'
                                 });
                             } else if (typeof fileValue.content === 'string') {
-                                blob = new Blob([fileValue.content], { 
-                                    type: fileValue.contentType || 'text/plain' 
+                                blob = new Blob([fileValue.content], {
+                                    type: fileValue.contentType || 'text/plain'
                                 });
                             } else {
                                 // 其他类型转为JSON
                                 const jsonStr = JSON.stringify(fileValue.content, null, 2);
                                 blob = new Blob([jsonStr], { type: 'application/json' });
                             }
-                            
+
                             // 确定文件名
                             if ('filename' in fileValue && fileValue.filename) {
                                 downloadFilename = fileValue.filename;
@@ -430,24 +430,24 @@ export const useResultStore = defineStore('result',()=>{
                         return;
                     }
                     break;
-                    
+
                 case DataView.type.DATETIME:
                     // 处理日期时间类型
                     const dateValue = String(result.value);
                     blob = new Blob([dateValue], { type: 'text/plain' });
                     downloadFilename = filename || `result_${dataIdToUse}.txt`;
                     break;
-                    
+
                 default:
                     // 默认处理：转换为JSON格式
-                    const content = typeof result.value === 'string' 
-                        ? result.value 
+                    const content = typeof result.value === 'string'
+                        ? result.value
                         : JSON.stringify(result.value, null, 2);
                     blob = new Blob([content], { type: 'application/json' });
                     downloadFilename = filename || `result_${dataIdToUse}.json`;
                     break;
             }
-            
+
             // 创建下载链接
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -457,12 +457,12 @@ export const useResultStore = defineStore('result',()=>{
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
-            
+
             notify({
                 message: '结果下载成功',
                 type: 'success'
             });
-            
+
         } catch (error) {
             console.error('下载结果失败:', error);
             notify({
@@ -480,7 +480,7 @@ export const useResultStore = defineStore('result',()=>{
         if (!tableData || typeof tableData !== 'object') {
             return '';
         }
-        
+
         try {
             // 处理TableView类型（根据API定义）
             if (tableData.columns && tableData.rows) {
@@ -492,7 +492,7 @@ export const useResultStore = defineStore('result',()=>{
                     }
                     return header;
                 }).join(',');
-                
+
                 const rows = tableData.rows.map((row: any[]) => {
                     return row.map((cell: any) => {
                         const cellStr = cell !== null && cell !== undefined ? String(cell) : '';
@@ -503,10 +503,10 @@ export const useResultStore = defineStore('result',()=>{
                         return cellStr;
                     }).join(',');
                 }).join('\n');
-                
+
                 return `${headers}\n${rows}`;
             }
-            
+
             // 处理二维数组
             if (Array.isArray(tableData) && tableData.length > 0 && Array.isArray(tableData[0])) {
                 const rows = tableData.map(row => {
@@ -519,10 +519,10 @@ export const useResultStore = defineStore('result',()=>{
                         return cellStr;
                     }).join(',');
                 }).join('\n');
-                
+
                 return rows;
             }
-            
+
             // 处理对象数组
             if (Array.isArray(tableData) && tableData.length > 0 && typeof tableData[0] === 'object') {
                 // 获取所有可能的键作为表头
@@ -533,7 +533,7 @@ export const useResultStore = defineStore('result',()=>{
                     }
                     return header;
                 }).join(',');
-                
+
                 const rows = tableData.map(item => {
                     return headers.map(header => {
                         const value = item[header] !== undefined ? String(item[header]) : '';
@@ -543,10 +543,10 @@ export const useResultStore = defineStore('result',()=>{
                         return value;
                     }).join(',');
                 }).join('\n');
-                
+
                 return `${headerRow}\n${rows}`;
             }
-            
+
             // 其他情况返回JSON字符串
             return JSON.stringify(tableData, null, 2);
         } catch (error) {
@@ -570,7 +570,7 @@ export const useResultStore = defineStore('result',()=>{
         marginBottom,
         getXPosition,
         getYPosition,
-        createResultModal, 
+        createResultModal,
         refresh,
         cacheStatus,
         convertDataOutToDict,

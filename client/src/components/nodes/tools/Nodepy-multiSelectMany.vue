@@ -24,25 +24,27 @@
         </div>
 
         <div v-if="open" class="options" @click.stop>
-            <div
-                v-for="(item, idx) in localOptions"
-                :key="item"
-                class="item"
-                @click.stop="select(idx)"
-                :class="[{selected: selectedIdx.includes(idx) && localOptions[idx]}, {'specialColumn' : isSpecialColumn(item)}]"
-            >   <!-- localOptions[idx] means empty value cannot be accepted-->
-                <span class="text">{{columnValue(item)}}</span>
-            </div>
+            <template v-for="(item, idx) in localOptions">
+                <div
+                    v-if="item"
+                    :key="item"
+                    class="item"
+                    @click.stop="select(idx)"
+                    :class="[{selected: selectedIdx.includes(idx) && localOptions[idx]}, {'specialColumn' : isSpecialColumn(item)}]"
+                >   <!-- localOptions[idx] means empty value cannot be accepted-->
+                    <span class="text">{{columnValue(item)}}</span>
+                </div>
+            </template>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
     import type { PropType } from 'vue'
-import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
+    import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
     // @ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon'
-import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
+    import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
 
     const down_path = mdiMenuDown
     const close_path = mdiClose
@@ -226,6 +228,7 @@ import { mdiClose, mdiMenuDown, mdiPlus } from '@mdi/js'
             left: 0;
             right: 0;
             z-index: 100;
+            min-height: 25px;
 
             background: white;
             border-radius: 6px;

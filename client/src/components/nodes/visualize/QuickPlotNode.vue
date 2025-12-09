@@ -7,6 +7,10 @@
                 <div class="input-port-description">表格输入</div>
                 <Handle id="input" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': tableHasErr.value}]"/>
             </div>
+            <div class="title">
+                <div class="param-description">图像标题</div>
+                <NodepyStringInput :allow-null="true" v-model="title" @update-value="onUpdateTitle" class="nodrag" placeholder="图像标题"/>
+            </div>
             <div class="x_col">
                 <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列名</div>
                 <NodepySelectMany
@@ -19,8 +23,9 @@
             </div>
             <div class="y_cols"v-for="(y_col, idx) in y_cols" :key="y_col.id">
                 <div class="y_col">
+                    <hr style="margin-bottom: 4px;"></hr>
                     <div class="param-description y_col-description" :class="{'node-has-paramerr': y_colHasErr.value}">
-                        <span class="y-col-label">y轴列名</span>
+                        <span class="y-col-label">y轴列名 {{ idx + 1 }}</span>
                         <NodepyCross v-if="y_cols.length > 1" :handle-click="() => removeY_col(idx)" class="y-col-close"/>
                     </div>
                     <NodepySelectMany
@@ -42,14 +47,11 @@
                 </div>
             </div>
             <div class="addY_col">
+                <hr style="margin: 8px 0;"></hr>
                 <NodepyButton :handle-click="addY_col">
                     <NodepyPlus/>
                     添加y轴
                 </NodepyButton>
-            </div>
-            <div class="title">
-                <div class="param-description">图像标题</div>
-                <NodepyStringInput :allow-null="true" v-model="title" @update-value="onUpdateTitle" class="nodrag" placeholder="图像标题"/>
             </div>
             <div class="output-plot port">
                 <div class="output-port-description">图像输出</div>
@@ -193,9 +195,10 @@
                         display: flex;
                         align-items: center;
                         cursor: pointer;
-                        opacity: 0.6;
+                        margin-left: auto;
+                        border-radius: 4px;
                         &:hover {
-                            opacity: 1;
+                            background-color: #eee;
                         }
                     }
                 }

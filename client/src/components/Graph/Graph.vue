@@ -199,7 +199,7 @@ const lastNodeId = ref<string>('default')
 onNodeClick((event) => {
   const currentTime = Date.now()
   const currentNodeId = event.node.id
-  
+
   // 检查是否是双击（300ms 内点击同一节点）
   if (currentTime - lastClickTime.value < 300 && currentNodeId === lastNodeId.value) {
     // 重置状态
@@ -247,7 +247,7 @@ async function handleNodeDoubleClick(event) {
     const dataOutDict = resultStore.convertDataOutToDict(dataOut)
     resultStore.currentTypeDataID = dataOutDict
     console.log("@@@@@currentTypeDataID",resultStore.currentTypeDataID)
-    
+
     // 只需要设置currentTypeDataID，Result.vue中的watcher会自动处理结果获取
     // 不需要在这里手动调用getResultCacheContent
   }
@@ -444,7 +444,7 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
         <template #node-TableNode="TableNodeProps">
           <TableNode v-bind="TableNodeProps"/>
         </template>
-        
+
         <template #node-BoolNode="BoolNodeProps">
           <BoolNode v-bind="BoolNodeProps"/>
         </template>
@@ -652,7 +652,7 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
         <template #node-TableFromFileNode="TableFromFileNodeProps">
           <TableFromFileNode v-bind="TableFromFileNodeProps"/>
         </template>
-      
+
         <template #node-TableToFileNode="TableToFileNodeProps">
           <TableToFileNode v-bind="TableToFileNodeProps"/>
         </template>
@@ -756,11 +756,11 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 .vue-flow__panel {
   margin-left: 0;
   margin-right: 0;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .vue-flow__minimap {
-  margin-left: 20px;
+  margin-left: 10px;
 }
 
 /* Remove white border bottom in minimap */

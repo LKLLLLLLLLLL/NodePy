@@ -25,4 +25,8 @@
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
     @use './tools.scss' as *;
+    svg {
+        height: 14px;
+        width: 14px;
+    }
 </style>

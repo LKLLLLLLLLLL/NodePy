@@ -41,50 +41,50 @@
 
     // 监听窗口大小变化，使result-modal右侧边界跟随窗口右侧移动
     let resizeTimer: ReturnType<typeof setTimeout> | null = null
-    
+
     const handleWindowResize = () => {
         // 防抖处理，避免频繁更新
         if (resizeTimer) {
             clearTimeout(resizeTimer)
         }
-        
+
         resizeTimer = setTimeout(() => {
             const resultModal = modalStore.findModal('result')
             if (resultModal && resultModal.isActive) {
                 const currentWidth = resultModal.size?.width || resultStore.modalWidth
                 const currentHeight = resultModal.size?.height || resultStore.modalHeight
-                
+
                 // 限制高度：不超过窗口高度减去上下边距
                 const maxHeight = window.innerHeight - resultStore.marginTop - resultStore.marginBottom
                 const constrainedHeight = Math.min(currentHeight, maxHeight)
-                
+
                 // 限制宽度：不超过窗口宽度减去两侧边距
                 const maxWidth = window.innerWidth - resultStore.marginRight * 2
                 const constrainedWidth = Math.min(currentWidth, maxWidth)
-                
+
                 // 计算X位置：始终将模态框右侧边界放在 marginRight 处
                 // X位置 = 窗口宽度 - 模态框宽度 - marginRight
                 const newX = Math.max(
-                    resultStore.marginRight, 
+                    resultStore.marginRight,
                     window.innerWidth - constrainedWidth - resultStore.marginRight
                 )
-                
+
                 // Y位置保持不变或调整以符合顶部边距
                 const newY = resultStore.marginTop
-                
+
                 // 更新模态框大小和位置
                 modalStore.updateModalSize('result', {
                     width: constrainedWidth,
                     height: constrainedHeight
                 })
                 modalStore.updateModalPosition('result', {
-                    x: newX, 
+                    x: newX,
                     y: newY
                 })
             }
         }, 0)
     }
-    
+
     // 在挂载时添加 resize 事件监听器
     onMounted(() => {
         window.addEventListener('resize', handleWindowResize)
@@ -204,7 +204,7 @@
         display: flex;
         flex-direction: row;
         width: 100vw;
-        padding-left: 240px;
+        padding-left: 235px;
         padding-right: 10px;
         // gap: 8px;
         align-items: center;
@@ -217,7 +217,7 @@
         padding: 3px 5px;
         flex-direction: row;
         gap: 4px;
-        margin-left: 8px;
+        margin-left: 0px;
     }
 
     .graph-controls-right{

@@ -11,7 +11,7 @@
         height?: string
     }>(), {
         width: 'auto',
-        height: 'auto',
+        height: '25px',
     })
 </script>
 
@@ -20,18 +20,21 @@
     @use '../../../common/node.scss' as *;
     @use './tools.scss' as *;
     .NodepyButtonLayout {
-            @include tool-item-style;
-            border-radius: 6px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2px 8px;
-            cursor: pointer;
-            color: #666;
-            transition: all 0.2s;
+        @include tool-item-style;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: $node-description-fontsize - 2px;
+        font-weight: bold;
         &:hover {
             background-color: #ddd;
-            color: $stress-color;
+        }
+        svg {
+            margin-right: 100px;
         }
     }
 </style>

@@ -27,14 +27,14 @@
 
     // 计算是否处于无结果状态
     const isNoResult = computed(() => {
-        return resultStore.currentTypeDataID === resultStore.default_typedataid || 
+        return resultStore.currentTypeDataID === resultStore.default_typedataid ||
                resultStore.currentResult === resultStore.default_dataview;
     });
 
     // 计算当前结果类型的中文标签
     const currentResultTypeLabel = computed(() => {
         if (!resultStore.currentResult || !resultStore.currentResult.type) return '';
-        
+
         const typeLabels: Record<string, string> = {
             'Table': '表格',
             'File': '文件',
@@ -44,7 +44,7 @@
             'float': '浮点数',
             'Datetime': '日期时间'
         };
-        
+
         return typeLabels[resultStore.currentResult.type] || resultStore.currentResult.type;
     });
 
@@ -71,29 +71,29 @@
                 resultStore.currentResult = resultStore.default_dataview
                 resultStore.currentInfo = resultStore.default_info
                 activeTab.value = ''; // 重置激活的标签页
-                return 
+                return
             }
             // 获取字典中的第一个值作为默认结果ID
             const keys = Object.keys(newTypeDataID);
             if (keys.length > 0) {
                 const firstKey = keys[0]!;
                 const dataId = newTypeDataID[firstKey];
-                
+
                 // 检查是否是有效数字
                 if (typeof dataId === 'number' && !isNaN(dataId)) {
                     resultStore.currentInfo = resultStore.default_info;
                     resultStore.currentResult = resultStore.default_dataview;
-                    
+
                     // 获取新结果
                     const result = await resultStore.getResultCacheContent(dataId);
                     resultStore.currentResult = result;
-                    
+
                     // 设置默认选中的标签页为第一个
                     activeTab.value = firstKey;
                     handleChooseResult(firstKey);
                 }
             }
-            
+
         } catch (error) {
             console.error('Result: 加载结果失败:', error);
             resultStore.currentInfo = graphStore.currentNode?.data?.param || {};
@@ -114,16 +114,16 @@
         <div v-if="isNoResult" class="result-control no-result-control">
             无结果
         </div>
-        <el-tabs 
-            v-else-if="tabKeys.length > 0" 
-            v-model="activeTab" 
-            @tab-click="(tab) => handleChooseResult(tab.props.name)" 
+        <el-tabs
+            v-else-if="tabKeys.length > 0"
+            v-model="activeTab"
+            @tab-click="(tab) => handleChooseResult(tab.props.name)"
             class="result-control"
         >
-            <el-tab-pane 
-                v-for="key in tabKeys" 
-                :key="key" 
-                :label="key[0]!.toUpperCase() + key.slice(1)" 
+            <el-tab-pane
+                v-for="key in tabKeys"
+                :key="key"
+                :label="key[0]!.toUpperCase() + key.slice(1)"
                 :name="key">
             </el-tab-pane>
         </el-tabs>
@@ -180,17 +180,19 @@
         flex-direction: column;
         width: 100%;
         height: 100%;
+        flex: 1;
     }
 
     .result-container{
         display: flex;
         width: 100%;
-        height: calc(100% - 70px); /* 调整高度以适应标签页和类型显示 */
+        // height: calc(100% - 70px); /* 调整高度以适应标签页和类型显示 */
         color: grey;
         padding: 0;
         border-radius: 10px;
         position: relative;
         overflow: hidden;
+        flex: 1;
     }
 
     .result-control {
@@ -198,11 +200,11 @@
         :deep(.el-tabs__header) {
             margin: 0;
         }
-        
+
         :deep(.el-tabs__nav-wrap)::after {
             height: 2px;
         }
-        
+
         :deep(.el-tabs__item) {
             height: 30px;
             font-weight: 500;
@@ -210,16 +212,16 @@
             padding: 0 10px;//与下面active-bar中的一致
             transition: all 0.3s ease;
         }
-        
+
         :deep(.el-tabs__item:hover) {
             color: #409eff;
         }
-        
+
         :deep(.el-tabs__item.is-active) {
             color: #409eff;
             font-weight: 600;
         }
-        
+
         :deep(.el-tabs__active-bar) {
             background-color: #409eff;
             transition: all 0.3s ease;
@@ -269,7 +271,7 @@
         min-height: 100%;
         border-radius: 10px;
     }
-    
+
     .loading-container {
         display: flex;
         justify-content: center;
@@ -297,7 +299,7 @@
     .prompt-content {
         text-align: center;
         color: #999;
-        
+
         p {
             font-size: 16px;
             margin: 0;

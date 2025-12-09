@@ -30,9 +30,9 @@
         if (!(props.modal as any).isResultModal) {
             return false;
         }
-        
+
         // 检查是否有有效结果
-        return resultStore.currentResult && 
+        return resultStore.currentResult &&
                resultStore.currentResult !== resultStore.default_dataview;
     });
 
@@ -42,7 +42,7 @@
             // 获取当前显示的结果的dataId
             const currentType = Object.keys(resultStore.currentTypeDataID)[0];
             const dataId = resultStore.currentTypeDataID[currentType!];
-            
+
             if (dataId) {
                 await resultStore.downloadResult(dataId);
             } else {
@@ -216,14 +216,14 @@
     const startResize = (event: MouseEvent, direction: string) => {
         // 对于Result弹窗的特殊处理：只允许向左调整大小
         const isResultModal = (props.modal as any).isResultModal;
-        
+
         // 如果是Result弹窗，只允许left、bottom-left、top-left方向的调整
         if (isResultModal) {
             if (direction !== 'left' && direction !== 'bottom-left' && direction !== 'top-left') {
                 return;
             }
         }
-        
+
         if (!props.modal.isResizable) return
         if (isDragging.value) return;
 
@@ -307,37 +307,30 @@
 <style scoped lang = "scss">
     @use '../common/global.scss' as *;
     .modal-container{
+        @include controller-style;
         position: fixed;
         display: flex;
         flex-direction: column;
-        border-radius: 15px;
-        box-sizing: border-box; /* 添加盒模型计算 */
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 添加阴影效果 */
+        box-sizing: border-box;
+        padding: 10px 15px;
     }
     .modal-head{
         display: flex;
-        min-height: 40px;
+        // min-height: 40px;
         width: 100%;
-        cursor: move; /* 头部显示移动光标 */
+        cursor: move;
         align-items: center;
-        padding-left: 4px;
-        padding-right: 10px;
-        padding-top: 8px;
     }
     .modal-body, .modal-content{
-        height: calc(100% - 40px - 40px); /* 调整高度计算 */
-        margin-top: 0px;
-        margin-left: 20px;
-        margin-right: 20px;
+        // height: calc(100% - 40px - 40px); /* 调整高度计算 */
         display: flex;
         flex-direction: column;
+        margin-bottom: 10px;
         overflow: hidden; /* 改为hidden，让内部组件控制滚动 */
+        flex: 1;
     }
     .modal-footer{
         width: 100%;
-        min-height: 40px;
-        margin-left: 20px;
-        margin-right: 20px;
         display: flex;
         align-items: center;
     }
@@ -345,7 +338,6 @@
     .download-result-container{
         display: flex;
         justify-content: flex-end;
-        padding-right: 40px;
         flex: 1;
     }
 
@@ -360,15 +352,15 @@
         flex: 1;
         display: flex;
         align-items: center;
-        padding-left: 15px;
+        // padding-left: 15px;
     }
 
     .modal-title{
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 600;
         color: #333;
     }
-    
+
     /* 与右键菜单样式一致的关闭按钮样式 */
     .button {
         padding: 3px 3px;
@@ -386,14 +378,10 @@
         height: auto;
     }
 
-    .button.close{
-        margin-right: 10px;
-    }
-    
     .button:hover {
         background-color: rgba(0, 0, 0, 0.1);
     }
-    
+
     /* 调整大小手柄样式 - 隐藏可见元素，仅保留鼠标样式 */
     .resize-handle {
         position: absolute;

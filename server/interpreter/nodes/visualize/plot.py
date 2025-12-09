@@ -90,7 +90,10 @@ class QuickPlotNode(BaseNode):
         assert isinstance(input_table, Table)
         df = input_table.df
 
-        plt.figure(figsize=(10, 6))
+        plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Roboto']
+        plt.rcParams['axes.unicode_minus'] = False
+
+        plt.figure(figsize=(8, 6))
 
         x_data = df[self.x_col]
 
@@ -148,7 +151,7 @@ class QuickPlotNode(BaseNode):
         plt.xlabel(self.x_col)
         plt.legend()
         plt.grid(True, alpha=0.3)
-        plt.tight_layout()  
+        plt.tight_layout()
         # save to byte stream
         file_manager = self.global_config.file_manager
         buf = file_manager.get_buffer()
@@ -269,7 +272,11 @@ class DualAxisPlotNode(BaseNode):
         left_y_data = df[self.left_y_col]
         right_y_data = df[self.right_y_col]
 
-        fig, ax1 = plt.subplots(figsize=(10, 6))
+        plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Roboto']
+        plt.rcParams['axes.unicode_minus'] = False
+
+        plt.figure(figsize=(8, 6))
+        fig, ax1 = plt.subplots(figsize=(8, 6))
 
         if self.left_plot_type == "line":
             ax1.plot(x_data, left_y_data, 'b-', label=self.left_y_col)

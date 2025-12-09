@@ -25,13 +25,14 @@
             <template v-if="data.hint?.rename_col_choices"> <!-- when the hint is empty, don't show the rename_value to avoid complex errors-->
                 <div class="rename_value" v-for="(value, idx) in rename_value" :key="propsRename_cols[idx]">    <!--use the column name as the key-->
                     <div class="param-description rename_value-description">
-                        旧列
+                        列
                         <span :class="{'special-table-column': isSpecialColumn(propsRename_cols[idx])}">
                             {{displayColumnName(propsRename_cols[idx])}}
                         </span>
+                        <hr></hr>
                     </div>
                     <div class="param-description" :class="{'node-has-paramerr': rename_mapHasErr.value}">
-                        新列
+                        重命名为
                     </div>
                     <NodepyStringInput
                         v-model="value.value"
@@ -39,6 +40,7 @@
                         class="nodrag"
                         placeholder="新列"
                     />
+                    <!-- <hr v-if="idx !== rename_value.length - 1"></hr> -->
                 </div>
             </template>
             <div class="output-renamed_table port">
@@ -162,7 +164,7 @@
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
-                    margin-bottom: $node-margin;
+                    margin-bottom: $node-margin - 7px;
                 }
             }
         }
