@@ -121,7 +121,7 @@ const decrementPage = () => {
 </template>
 
 <style scoped lang="scss">
-@use '../common/global.scss' as *;
+@use '../../common/global.scss' as *;
 .pagination-container {
   display: flex;
   align-items: center;

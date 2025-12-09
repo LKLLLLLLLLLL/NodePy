@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import VuePdfEmbed from 'vue-pdf-embed'
-import Pagination from '@/components/Pagination.vue'
+import Pagination from '@/components/Pagination/Pagination.vue'
 
 const props = defineProps<{
   src: string

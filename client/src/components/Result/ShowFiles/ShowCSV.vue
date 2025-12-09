@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import Pagination from '@/components/Pagination.vue'
+import Pagination from '@/components/Pagination/Pagination.vue'
 
 const props = defineProps<{
   data: string
@@ -282,6 +282,5 @@ const paginatedRows = computed(() => {
 .csv-pagination {
   margin: 0 12px 12px 12px;
   padding: 12px 0;
-  border-top: 1px solid #ebeef5;
 }
 </style>

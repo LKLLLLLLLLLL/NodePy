@@ -4,6 +4,8 @@ import type { ResultType } from '@/stores/resultStore';
 import type { ModelView as ModelViewType } from '@/utils/api';
 import type { server__models__schema__ModelSchema__Type } from '@/utils/api/models/server__models__schema__ModelSchema__Type';
 import type { ColType } from '@/utils/api/models/ColType';
+import { ElDivider } from 'element-plus';
+import Loading from '@/components/Loading.vue';
 
 const props = defineProps<{
     value: ResultType
@@ -65,7 +67,7 @@ const getColumnTypeDescription = (colType: ColType) => {
     <div class='model-view-container'>
         <!-- 加载中 -->
         <div v-if="!modelData" class="model-loading">
-            <span>加载中...</span>
+            <Loading></Loading>
         </div>
 
         <!-- 无效数据提示 -->
@@ -84,41 +86,49 @@ const getColumnTypeDescription = (colType: ColType) => {
                 </div>
             </div>
 
+            <ElDivider />
+
             <!-- 输入列信息 -->
             <div class="model-columns-section">
                 <h3>输入列信息</h3>
-                <div v-if="modelData.metadata.input_cols && Object.keys(modelData.metadata.input_cols).length > 0" class="columns-container">
-                    <div class="columns-grid">
-                        <div 
-                            v-for="(colType, colName) in modelData.metadata.input_cols" 
-                            :key="colName" 
-                            class="column-item"
-                        >
-                            <span class="column-name">{{ colName }}</span>
-                            <span class="column-type">{{ getColumnTypeDescription(colType) }}</span>
-                        </div>
-                    </div>
-                </div>
+                <table v-if="modelData.metadata.input_cols && Object.keys(modelData.metadata.input_cols).length > 0" class="columns-table">
+                    <thead>
+                        <tr>
+                            <th>列名</th>
+                            <th>类型</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(colType, colName) in modelData.metadata.input_cols" :key="colName">
+                            <td>{{ colName }}</td>
+                            <td>{{ getColumnTypeDescription(colType) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
                 <div v-else class="no-columns">
                     无输入列信息
                 </div>
             </div>
 
+            <ElDivider />
+
             <!-- 输出列信息 -->
             <div class="model-columns-section">
                 <h3>输出列信息</h3>
-                <div v-if="modelData.metadata.output_cols && Object.keys(modelData.metadata.output_cols).length > 0" class="columns-container">
-                    <div class="columns-grid">
-                        <div 
-                            v-for="(colType, colName) in modelData.metadata.output_cols" 
-                            :key="colName" 
-                            class="column-item"
-                        >
-                            <span class="column-name">{{ colName }}</span>
-                            <span class="column-type">{{ getColumnTypeDescription(colType) }}</span>
-                        </div>
-                    </div>
-                </div>
+                <table v-if="modelData.metadata.output_cols && Object.keys(modelData.metadata.output_cols).length > 0" class="columns-table">
+                    <thead>
+                        <tr>
+                            <th>列名</th>
+                            <th>类型</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(colType, colName) in modelData.metadata.output_cols" :key="colName">
+                            <td>{{ colName }}</td>
+                            <td>{{ getColumnTypeDescription(colType) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
                 <div v-else class="no-columns">
                     无输出列信息
                 </div>
@@ -128,6 +138,8 @@ const getColumnTypeDescription = (colType: ColType) => {
 </template>
 
 <style scoped lang="scss">
+@use '@/common/global.scss' as *;
+
 .model-view-container {
     display: flex;
     flex-direction: column;
@@ -135,110 +147,140 @@ const getColumnTypeDescription = (colType: ColType) => {
     width: 100%;
     padding: 16px;
     box-sizing: border-box;
-    background: #fafafa;
-    border-radius: 4px;
+    background: $background-color;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    border-radius: 10px;
+}
 
-    .model-loading,
-    .model-error {
+.model-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 12px;
+    color: #909399;
+    font-size: 14px;
+}
+
+.model-error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 16px;
+    color: #666;
+}
+
+.model-error {
+    color: $error-message-color;
+    background: $stress-background-color;
+    border-radius: 10px;
+    margin: 16px;
+    padding: 16px;
+    @include controller-style;
+}
+
+.model-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    background: $stress-background-color;
+    border-radius: 10px;
+    padding: 16px;
+    box-sizing: border-box;
+    @include controller-style;
+}
+
+.model-info-section {
+    padding: 16px 0;
+
+    h3 {
+        margin-top: 0;
+        margin-bottom: 16px;
+        color: #333;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .info-item {
         display: flex;
-        justify-content: center;
         align-items: center;
-        height: 100%;
-        font-size: 16px;
-        color: #666;
-    }
+        margin-bottom: 8px;
 
-    .model-error {
-        color: #f44336;
-    }
+        .info-label {
+            font-weight: 500;
+            color: #555;
+            width: 100px;
+            margin-right: 16px;
+        }
 
-    .model-content-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-
-        .model-info-section,
-        .model-columns-section {
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-            h3 {
-                margin-top: 0;
-                margin-bottom: 16px;
-                color: #333;
-                font-size: 18px;
-                font-weight: 600;
-                border-bottom: 1px solid #eee;
-                padding-bottom: 8px;
-            }
-
-            .info-item {
-                display: flex;
-                align-items: center;
-                margin-bottom: 8px;
-
-                .info-label {
-                    font-weight: 500;
-                    color: #555;
-                    width: 100px;
-                    margin-right: 16px;
-                }
-
-                .info-value {
-                    color: #333;
-                    font-weight: 400;
-                }
-            }
-
-            .columns-container {
-                .columns-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                    gap: 12px;
-
-                    .column-item {
-                        display: flex;
-                        flex-direction: column;
-                        padding: 12px;
-                        background: #f5f5f5;
-                        border-radius: 6px;
-                        transition: all 0.2s ease;
-
-                        &:hover {
-                            background: #e9e9e9;
-                            transform: translateY(-2px);
-                            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-                        }
-
-                        .column-name {
-                            font-weight: 500;
-                            color: #333;
-                            margin-bottom: 4px;
-                            word-break: break-all;
-                        }
-
-                        .column-type {
-                            font-size: 12px;
-                            color: #666;
-                            background: #e0e0e0;
-                            padding: 2px 6px;
-                            border-radius: 4px;
-                            align-self: flex-start;
-                        }
-                    }
-                }
-            }
-
-            .no-columns {
-                color: #999;
-                font-style: italic;
-                padding: 16px;
-                text-align: center;
-            }
+        .info-value {
+            color: #333;
+            font-weight: 400;
         }
     }
+}
+
+.model-columns-section {
+    padding: 16px 0;
+
+    h3 {
+        margin-top: 0;
+        margin-bottom: 16px;
+        color: #333;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .columns-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        background: #fff;
+        border: 1px solid #ebeef5;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 12px 0;
+
+        thead {
+            background: #f5f7fa;
+        }
+
+        th {
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 2px solid #ebeef5;
+            font-weight: 600;
+            color: #303133;
+        }
+
+        td {
+            padding: 10px 8px;
+            text-align: center;
+            background: #fafafa;
+            border-bottom: 1px solid #ebeef5;
+            color: #606266;
+        }
+
+        /* 移除最后一行的下边框 */
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f5f7fa;
+        }
+    }
+
+    .no-columns {
+        color: #999;
+        font-style: italic;
+        padding: 16px;
+        text-align: center;
+    }
+}
+
+:deep(.el-divider) {
+    margin: 16px 0;
 }
 </style>

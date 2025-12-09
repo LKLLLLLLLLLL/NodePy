@@ -105,143 +105,146 @@
     </div>
 </template>
 <style lang="scss" scoped>
-    .nodeinfo-container {
-        height: 100%;
-        width: 100%;
-        padding: 12px;
-        box-sizing: border-box;
-        overflow-y: auto;
-        background: #fafafa;
-        color: #303133;
-        font-size: 13px;
-    }
+@use '@/common/global.scss' as *;
 
-    .info-section {
-        margin-bottom: 16px;
-        padding: 12px;
-        background: #fff;
-        border-radius: 4px;
-        border: 1px solid #ebeef5;
-    }
+.nodeinfo-container {
+    height: 100%;
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    background: $background-color;
+    color: #303133;
+    font-size: 13px;
+    border-radius: 10px;
+}
 
-    .section-title {
-        font-weight: 600;
-        color: #303133;
-        margin-bottom: 8px;
-        padding-bottom: 8px;
-        border-bottom: 2px solid #f0f0f0;
-    }
+.info-section {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: $stress-background-color;
+    border-radius: 10px;
+    @include controller-style;
+}
 
-    .info-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 6px 0;
-        line-height: 1.6;
-    }
+.section-title {
+    font-weight: 600;
+    color: #303133;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
+}
 
-    .info-label {
-        font-weight: 500;
-        color: #606266;
-        min-width: 60px;
-    }
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    line-height: 1.6;
+}
 
-    .info-value {
-        color: #303133;
-        word-break: break-all;
-        margin-left: 8px;
-    }
+.info-label {
+    font-weight: 500;
+    color: #606266;
+    min-width: 60px;
+}
 
-    .info-id {
-        font-family: 'Courier New', monospace;
-        background: #f0f0f0;
-        padding: 2px 6px;
-        border-radius: 2px;
-        font-size: 12px;
-    }
+.info-value {
+    color: #303133;
+    word-break: break-all;
+    margin-left: 8px;
+}
 
-    .status-executed {
-        color: #67c23a;
-        font-weight: 500;
-    }
+.info-id {
+    font-family: 'Courier New', monospace;
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: 12px;
+}
 
-    .status-pending {
-        color: #e6a23c;
-        font-weight: 500;
-    }
+.status-executed {
+    color: #67c23a;
+    font-weight: 500;
+}
 
-    .output-item {
-        margin-bottom: 12px;
-        padding: 10px;
-        background: #f9f9f9;
-        border-left: 3px solid #409eff;
-        border-radius: 2px;
-    }
+.status-pending {
+    color: #e6a23c;
+    font-weight: 500;
+}
 
-    .output-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-    }
+.output-item {
+    margin-bottom: 12px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-left: 3px solid $stress-color;
+    border-radius: 2px;
+}
 
-    .output-type {
-        font-weight: 600;
-        color: #409eff;
-        text-transform: uppercase;
-    }
+.output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
 
-    .output-id {
-        font-size: 12px;
-        color: #909399;
-    }
+.output-type {
+    font-weight: 600;
+    color: $stress-color;
+    text-transform: uppercase;
+}
 
-    .output-details {
-        overflow-x: auto;
-    }
+.output-id {
+    font-size: 12px;
+    color: #909399;
+}
 
-    pre {
-        margin: 0;
-        padding: 8px;
-        background: #fff;
-        border: 1px solid #ebeef5;
-        border-radius: 2px;
-        font-size: 11px;
-        font-family: 'Courier New', monospace;
-        color: #606266;
-        white-space: pre-wrap;
-        word-break: break-word;
-    }
+.output-details {
+    overflow-x: auto;
+}
 
-    .no-data {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100px;
-        color: #909399;
-        text-align: center;
-        background: #fff;
-        border: 1px dashed #ebeef5;
-        border-radius: 4px;
-        margin: 12px;
-    }
+pre {
+    margin: 0;
+    padding: 8px;
+    background: $stress-background-color;
+    border-radius: 2px;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    color: #606266;
+    white-space: pre-wrap;
+    word-break: break-word;
+    @include controller-style;
+}
 
-    // 滚动条样式
-    ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-    }
+.no-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+    color: #909399;
+    text-align: center;
+    background: $stress-background-color;
+    border-radius: 10px;
+    margin: 12px;
+    @include controller-style;
+}
 
-    ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-    }
+// 滚动条样式
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
 
-    ::-webkit-scrollbar-thumb {
-        background: #ccc;
-        border-radius: 3px;
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
 
-        &:hover {
-            background: #999;
-        }
+::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+
+    &:hover {
+        background: #999;
     }
+}
 </style>

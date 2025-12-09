@@ -3,7 +3,7 @@
     import type { TableView } from '@/utils/api'
     import Loading from '@/components/Loading.vue'
     import type { ResultType } from '@/stores/resultStore';
-    import Pagination from '@/components/Pagination.vue'; // 引入统一的分页组件
+    import Pagination from '@/components/Pagination/Pagination.vue'; // 引入统一的分页组件
 
     const props = defineProps<{
         value: ResultType
@@ -170,7 +170,6 @@
         <!-- 加载中 -->
         <div v-if="loading" class="table-loading">
             <Loading></Loading>
-            <span>加载中...</span>
         </div>
 
         <!-- 错误提示 -->
@@ -241,137 +240,151 @@
     </div>
 </template>
 <style scoped lang="scss">
-    .table-view-container {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        width: 100%;
-        overflow: hidden;
-        background: #fafafa;
-    }
+@use '@/common/global.scss' as *;
 
-    .table-content-wrapper {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
+.table-view-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: $background-color;
+    border-radius: 10px;
+    padding: 16px;
+    box-sizing: border-box;
+}
 
-    .table-loading {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        color: #909399;
-        font-size: 14px;
-        padding: 16px;
-    }
+.table-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: $stress-background-color;
+    border-radius: 10px;
+    box-sizing: border-box;
+    @include controller-style;
+}
 
-    .table-error,
-    .table-empty {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        color: #909399;
-        font-size: 14px;
-        padding: 16px;
-    }
+.table-loading {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #909399;
+    font-size: 14px;
+    padding: 16px;
+}
 
-    .table-error {
-        background: #fef0f0;
-        color: #f56c6c;
-        border: 1px solid #fde2e2;
-        border-radius: 4px;
-        margin: 16px;
-    }
+.table-error,
+.table-empty {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    color: #909399;
+    font-size: 14px;
+    padding: 16px;
+}
 
-    .table-wrapper {
-        flex: 1;
-        overflow: auto;
-        border: 1px solid #ebeef5;
-        border-radius: 4px;
-        margin: 12px;
-    }
+.table-error {
+    color: $error-message-color;
+    background: $stress-background-color;
+    border-radius: 10px;
+    margin: 16px;
+    padding: 16px;
+    @include controller-style;
+}
 
-    .result-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-        background: #fff;
-    }
+.table-wrapper {
+    flex: 1;
+    overflow: auto;
+    border: 1px solid #ebeef5;
+    border-radius: 4px;
+    margin: 12px;
+}
 
-    thead {
-        position: sticky;
-        top: 0;
-        background: #f5f7fa;
-        z-index: 1;
-    }
+.result-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: #fff;
+}
 
-    th {
-        padding: 12px 8px;
-        text-align: center; /* 修改为居中 */
-        border-bottom: 2px solid #ebeef5;
-        font-weight: 600;
-        color: #303133;
-    }
+.result-table thead {
+    position: sticky;
+    top: 0;
+    background: #f5f7fa;
+    z-index: 1;
+}
 
-    td {
-        padding: 10px 8px;
-        text-align: center; /* 修改为居中 */
-        border-bottom: 1px solid #ebeef5;
-        color: #606266;
-    }
+.result-table th {
+    padding: 12px 8px;
+    text-align: center;
+    border-bottom: 2px solid #ebeef5;
+    font-weight: 600;
+    color: #303133;
+}
 
-    .index-column {
-        width: 80px;
-        min-width: 80px;
-        text-align: center;
-        background: #fafafa;
-        font-weight: 500;
-    }
+.result-table td {
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 1px solid #ebeef5;
+    color: #606266;
+}
 
-    .data-column {
-        word-break: break-word;
-        white-space: normal;
-        text-align: center; /* 添加居中对齐 */
-    }
+.index-column {
+    width: 80px;
+    min-width: 80px;
+    text-align: center;
+    background: #fafafa;
+    font-weight: 500;
+}
 
-    .column-header {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        align-items: center; /* 添加居中对齐 */
-    }
+.data-column {
+    word-break: break-word;
+    white-space: normal;
+    text-align: center;
+}
 
-    .column-name {
-        font-weight: 600;
-        color: #303133;
-    }
+.column-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+}
 
-    .column-type {
-        font-size: 11px;
-        color: #909399;
-        font-weight: normal;
-    }
+.column-name {
+    font-weight: 600;
+    color: #303133;
+}
 
-    .index-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+.column-type {
+    font-size: 11px;
+    color: #909399;
+    font-weight: normal;
+}
 
-    .index-value {
-        font-weight: 500;
-    }
-    
-    .boolean-true {
-        color: #67c23a; // 绿色表示 True
-        font-weight: bold;
-    }
-    
-    .boolean-false {
-        color: #f56c6c; // 红色表示 False
-        font-weight: bold;
-    }
+.index-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.index-value {
+    font-weight: 500;
+}
+
+.data-row:hover {
+    background-color: #f5f7fa;
+}
+
+.boolean-true {
+    color: #67c23a; // 绿色表示 True
+    font-weight: bold;
+}
+
+.boolean-false {
+    color: #f56c6c; // 红色表示 False
+    font-weight: bold;
+}
 </style>

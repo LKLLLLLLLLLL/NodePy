@@ -73,7 +73,6 @@
         <button class="action-btn logout" @click="handleLogout">
           <span class="icon">🚪</span> 登出
         </button>
-        <button @click="handleEdit">点我测试编辑器弹窗</button>
       </div>
     </div>
   </FloatingMenu>
@@ -88,7 +87,8 @@ import { useModalStore } from '@/stores/modalStore'
 import { useUserStore } from '@/stores/userStore'
 import notify from '@/components/Notification/notify'
 import FloatingMenu from './FloatingMenu.vue'
-import PyEditor from '../PyEditor.vue'
+import EditableTableModal from '../EditableTable/EditableTableModal.vue'
+import PyEditor from '../PyEditor/PyEditor.vue'
 import Logout from '../Logout.vue'
 
 const loginStore = useLoginStore()
@@ -97,8 +97,6 @@ const userStore = useUserStore()
 
 const router = useRouter()
 
-const editWidth = 400;
-const editHeight = 600;
 const logoutWidth = 300;
 const logoutHeight = 200;
 
@@ -111,25 +109,6 @@ onMounted(async () => {
 function handleLogin() {
   router.replace({
     name: 'login' 
-  })
-}
-
-function handleEdit() {
-  modalStore.createModal({
-    component: PyEditor,
-    title: '编辑代码',
-    isActive: true,
-    isResizable: true,
-    isDraggable: true,
-    position: {
-      x: window.innerWidth / 2 - editWidth / 2,
-      y: window.innerHeight / 2 - editHeight / 2
-    },
-    size: {
-      width: editWidth,
-      height: editHeight
-    },
-    id: 'edit-modal',
   })
 }
 
