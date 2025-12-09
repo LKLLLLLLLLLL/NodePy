@@ -127,7 +127,8 @@ class ModelSchema(BaseModel):
     class Type(str, Enum):
         REGRESSION = "Regression"
         CLASSIFICATION = "Classification"
-    
+        CLUSTERING = "Clustering"
+
     model_type: Type
     input_cols: dict[str, ColType]
     output_cols: dict[str, ColType]

@@ -1405,3 +1405,20 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **输出：**
 - score: 评分结果，类型为float。
+
+#### 10.9 KMeansClusteringNode
+K均值聚类节点，使用输入的表格数据自动聚类，并输出包含聚类结果的表格和训练好的K均值聚类模型。
+
+**参数：**
+- feature_cols: 特征列名列表，类型为List[str]，指定用于聚类的特征列名。
+- n_clusters: 聚类簇的数量，类型为int，表示要生成的聚类簇的数量。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含聚类结果列。
+- model: 训练好的K均值聚类模型，类型为Model。
+
+**hint：**
+- feature_cols_choices: 列名列表，类型为List[str]，用于在UI中为feature_cols参数提供可选值。
