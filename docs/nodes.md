@@ -1422,3 +1422,18 @@ K均值聚类节点，使用输入的表格数据自动聚类，并输出包含�
 
 **hint：**
 - feature_cols_choices: 列名列表，类型为List[str]，用于在UI中为feature_cols参数提供可选值。
+
+#### 10.10 StandardScalerNode
+标准化缩放节点，对于输入表格中的指定列，使用标准化方法进行缩放，并输出包含缩放结果的表格。
+
+**参数：**
+- feature_cols: 特征列名列表，类型为List[str]，指定用于缩放的特征列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- scaled_table: 输出的表格，类型为Table，包含缩放结果列。
+
+**hint：**
+- feature_cols_choices: 列名列表，类型为List[str]，用于在UI中为feature_cols参数提供可选值。
