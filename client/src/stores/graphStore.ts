@@ -47,6 +47,9 @@ export const useGraphStore = defineStore('graph', () => {
   }
 
   const addNode = (type: string, position: {x: number, y: number}) => {
+    if(!project.value.editable) {
+      return
+    }
     const id = nextId(type)
     switch(type){
       case 'ConstNode':
@@ -422,21 +425,21 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedTextFromFileNode)
         break
-      case 'PlotNode':
-        const addedPlotNode: Nodetypes.PlotNode = {
-          id,
-          position,
-          type: 'PlotNode',
-          data: {
-            param: {
-              x_col: '',
-              y_col: '',
-              plot_type: 'line',
-            }
-          }
-        }
-        addNodes(addedPlotNode)
-        break
+      // case 'PlotNode':
+      //   const addedPlotNode: Nodetypes.PlotNode = {
+      //     id,
+      //     position,
+      //     type: 'PlotNode',
+      //     data: {
+      //       param: {
+      //         x_col: '',
+      //         y_col: '',
+      //         plot_type: 'line',
+      //       }
+      //     }
+      //   }
+      //   addNodes(addedPlotNode)
+      //   break
       case 'AdvancePlotNode':
         const addedAdvancePlotNode: Nodetypes.AdvancePlotNode = {
           id,

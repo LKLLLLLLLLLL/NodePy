@@ -326,17 +326,17 @@ export interface ToBoolNode extends BaseNode {
 
 
 /*********************  Visualize Nodes  **************************/
-export interface PlotNodeParam {
+export interface QuickPlotNodeParam {
     x_col: string
-    y_col: string
-    plot_type: 'scatter' | 'line' | 'bar' | 'pie'
-    title?: string
+    y_col: string[]
+    plot_type: "scatter" | "line" | "bar" | "area"
+    title: string | null
 }
-export type PlotNodeData = BaseData & {
-    param: PlotNodeParam
+export type QuickPlotNodeData = BaseData & {
+    param: QuickPlotNodeParam
 }
-export interface PlotNode extends BaseNode<PlotNodeData>{
-    type: 'PlotNode'
+export interface QuickPlotNode extends BaseNode<QuickPlotNodeData>{
+    type: 'QuickPlotNode'
 }
 
 
