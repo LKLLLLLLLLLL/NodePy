@@ -1,93 +1,93 @@
-# tests/nodes — 测试框架说明
+# tests/nodes — Test Framework Description
 
-## 概述
+## Overview
 
-本目录提供一套轻量的测试框架与便捷函数，用于对 `server/interpreter/nodes` 下的节点代码进行单元、静态和运行时测试。
+This directory provides a lightweight test framework and utility functions for unit, static, and runtime testing of node code under `server/interpreter/nodes`.
 
-## 设计要点
+## Design Points
 
-- 在测试收集（pytest import）阶段注入少量伪实现（`FileManager`、`FinancialDataManager`、`CacheManager`），避免导入时触发对 MinIO/Redis/数据库的依赖。
-- 将所有节点测试放置在 `tests/nodes` 下。
-- 提供若干 helper，简化 `Table` / `Schema` / `Data` 的构造与断言。
+- Inject minimal fake implementations (`FileManager`, `FinancialDataManager`, `CacheManager`) during the test collection (pytest import) phase to avoid triggering dependencies on MinIO/Redis/database during import.
+- Place all node tests under `tests/nodes`.
+- Provide several helpers to simplify the construction and assertions of `Table` / `Schema` / `Data`.
 
-## 快速运行
+## Quick Run
 
-在项目根目录运行（推荐通过 `uv` 以使用项目虚拟环境）：
+Run in the project root directory (recommended via `uv` to use the project virtual environment):
 
 ```bash
 uv run pytest -q tests/nodes
 ```
 
-或者运行单个文件：
+Or run a single file:
 
 ```bash
 uv run pytest -q tests/nodes/test_number_binop.py
 ```
 
-## 主要文件
+## Main Files
 
-- `conftest.py` — 注入伪模块并提供 pytest fixture：`test_file_root`, `inject_fake_modules`, `node_registry`, `global_config`, `node_ctor`。
-- `utils.py` — 提供便捷构造函数（见下文）。
-- `test_*` — 示例测试文件（已包含 `test_node_framework.py` 和 `test_number_binop.py`）。
+- `conftest.py` — Injects fake modules and provides pytest fixtures: `test_file_root`, `inject_fake_modules`, `node_registry`, `global_config`, `node_ctor`.
+- `utils.py` — Provides utility constructors (see below).
+- `test_*` — Example test files (includes `test_node_framework.py` and `test_number_binop.py`).
 
-## 提供的便捷函数（`tests/nodes/utils.py`）
+## Provided Utility Functions (`tests/nodes/utils.py`)
 
 - `table_from_dict(data: Dict[str, list], col_types: Dict[str, ColType] | None = None) -> Data`
-  - 从列字典构造一个 `Table` 并封装为 `Data`；会自动添加 `_index` 列并尝试推断列类型。
+  - Constructs a `Table` from a column dictionary and wraps it as `Data`; automatically adds `_index` column and attempts to infer column types.
 
 - `table_from_records(records: Iterable[Dict[str, Any]]) -> Data`
-  - 从记录（行）列表构造 `Table`。
+  - Constructs a `Table` from a list of records (rows).
 
 - `schema_from_coltypes(col_types: Dict[str, ColType]) -> Schema`
-  - 根据列类型字典构造 `Table` 类型的 `Schema`。
+  - Constructs a `Table` type `Schema` based on a column types dictionary.
 
 - `make_schema(typ: str) -> Schema`
-  - 快速构造原始类型 `Schema`，支持：`int`, `float`, `str`, `bool`, `Datetime`, `Table`, `File`。
+  - Quickly constructs a primitive type `Schema`, supports: `int`, `float`, `str`, `bool`, `Datetime`, `Table`, `File`.
 
 - `make_data(payload: Any) -> Data`
-  - 将一个原始 payload 包装成 `Data` 对象（便于简洁传参）。
+  - Wraps a raw payload into a `Data` object (for concise parameter passing).
 
-## 使用示例
+## Usage Example
 
 ```python
 from tests.nodes.utils import table_from_dict, make_schema, make_data
 
-# 构造 table data
+# Construct table data
 tbl = table_from_dict({"a": [1,2,3], "b": [10.0, 20.0, 30.0]})
 
-# 构造 primitive schema
+# Construct primitive schema
 schema = make_schema("int")
 
-# 包装原始 payload
+# Wrap raw payload
 d = make_data(42)
 ```
 
-## 为更多节点写测试
+## Writing Tests for More Nodes
 
-1. 如果某些节点依赖更复杂的外部行为，先在 `tests/nodes/conftest.py` 中为对应依赖注入更丰富的 fake 实现（例如模拟 `FileManager.read_sync` 返回特定文件内容）。
-2. 使用 `node_ctor` 构造节点：
+1. If some nodes depend on more complex external behavior, first inject richer fake implementations for the corresponding dependencies in `tests/nodes/conftest.py` (e.g., mock `FileManager.read_sync` to return specific file content).
+2. Use `node_ctor` to construct nodes:
 
 ```python
 node = node_ctor("SomeNodeType", id="n1", param1=..., ...)
 ```
 
-3. 使用 `infer_schema` 做静态分析：
+3. Use `infer_schema` for static analysis:
 
 ```python
 out_schema = node.infer_schema(input_schemas)
 ```
 
-4. 使用 `execute` 做运行时测试：
+4. Use `execute` for runtime testing:
 
 ```python
 outputs = node.execute({"in1": Data(payload=...), ...})
 ```
 
-## 测试要求
-- 编写测试用例的参考应为 `docs/nodes.md` 中的节点定义与说明，最好不要参考节点实现细节，如节点的定义文件。
-- 所有测试文件按照分类放到 `tests/nodes/nodes/<category>/test_<nodename>.py`，确保一个节点一个文件。
-- 每个节点都应该有对应的测试文件。
-- 每个节点的测试：
-  - 至少包含四个阶段 (Construction, Hint, Static Analysis, Execution) 的测试 (如果某个节点不支持hint阶段，可省略该阶段测试)。
-  - 每个阶段应包含2个及以上的正常情况测试和3个及以上的异常情况测试。
-- 对应节点定义文件的测试覆盖率不低于90%。
+## Testing Requirements
+- Test cases should reference the node definitions and descriptions in `docs/nodes.md`, preferably without referring to implementation details like node definition files.
+- All test files should be placed in `tests/nodes/nodes/<category>/test_<nodename>.py` by category, ensuring one file per node.
+- Each node should have a corresponding test file.
+- Each node's tests:
+  - Should include at least four phases (Construction, Hint, Static Analysis, Execution) (if a node does not support the hint phase, that phase can be omitted).
+  - Each phase should include 2 or more normal case tests and 3 or more exception case tests.
+- Test coverage for the corresponding node definition files should be no less than 90%.

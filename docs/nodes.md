@@ -396,13 +396,13 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 
 ### 3. 可视化节点(visualize)
-#### 3.1 PlotNode
-绘图节点，支持对表格中的指定列进行绘图操作，支持柱状图(bar)、折线图(line)、散点图(scatter)、饼图(pie)四种图形类型。
+#### 3.1 QuickPlotNode
+快速绘图节点，支持对表格中的多个指定列进行快速可视化操作，每个列克独立指定为支持柱状图(bar)、折线图(line)、散点图(scatter)、面积图(area)四种图形类型。
 
 **参数：**
-- x_col: x轴列名，类型为str，表格中该列的类型必须为int, float或str。
-- y_col: y轴列名，类型为str，表格中该列的类型必须为int或float。
-- plot_type: 图形类型，类型为str，取值为"scatter", "line", "bar", "pie"。
+- x_col: x轴列名，类型为str，表格中该列的类型必须为int, float, str或datetime。
+- y_col: y轴列名，类型为list[str]，表格中该列的类型必须为int或float。
+- plot_type: 图形类型，类型为list[str], str取值为"scatter", "line", "bar", "area"。
 - title: 图形标题，类型为str，可以为空。
 
 **输入：**
@@ -415,11 +415,33 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - x_col_choices: 列名列表，类型为List[str]，用于在UI中为x_col参数提供可选值。
 - y_col_choices: 列名列表，类型为List[str]，用于在UI中为y_col参数提供可选值。
 
-#### 3.2 AdvancePlotNode
-- 高级绘图节点，对于seaborn支持的所有图形类型均可绘制，用户可以自定义更多参数。
+#### 3.2 DualAxisPlotNode
+双轴绘图节点，支持对表格中的多个指定列进行双轴可视化操作，每列支持柱状图(bar)、折线图(line)两种图形类型。
 
 **参数：**
-- x_col: x轴列名，类型为str，表格中该列的类型必须为int, float或str。
+- x_col: x轴列名，类型为str，表格中该列的类型必须为int, float, str或datetime。
+- left_y_col: 左y轴列名，类型为list[str]，表格中该列的类型必须为int或float。
+- left_plot_type: 左y轴图形类型，类型为list[str], str取值为"line", "bar"。
+- right_y_col: 右y轴列名，类型为list[str]，表格中该列的类型必须为int或float。
+- right_plot_type: 右y轴图形类型，类型为list[str], str取值为"line", "bar"。
+- title: 图形标题，类型为str，可以为空。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- plot: 输出的图形，类型为File，格式为PNG。
+
+**hint：**
+- x_col_choices: 列名列表，类型为List[str]，用于在UI中为x_col参数提供可选值。
+- left_y_col_choices: 列名列表，类型为List[str]，用于在UI中为left_y_col参数提供可选值。
+- right_y_col_choices: 列名列表，类型为List[str]，用于在UI中为right_y_col参数提供可选值。
+
+#### 3.3 StatisticalPlotNode
+- 统计绘图节点，对于seaborn支持的所有图形类型均可绘制，用户可以自定义更多参数。
+
+**参数：**
+- x_col: x轴列名，类型为str，表格中该列的类型必须为int, float, str或datetime。
 - y_col: y轴列名，类型为str或None，表格中该列的类型必须为int, float或str。如果为None，则表示不使用y轴数据。
 - hue_col: 色彩分组列名，类型为str或None，表格中该列的类型必须为int, float或str。如果为None，则表示不使用色彩分组数据。
 - plot_type: 图形类型，类型为str，取值为"bar", "count", "scatter", "strip", "swarm", "box", "violin", "hist"。
@@ -438,7 +460,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - y_col_choices: 列名列表，类型为List[str]，用于在UI中为y_col参数提供可选值。
 - hue_col_choices: 列名列表，类型为List[str]，用于在UI中为hue_col参数提供可选值。
 
-#### 3.3 WordcloudNode
+#### 3.4 WordcloudNode
 词云图节点，支持对表格中的指定列进行词云图绘制。
 
 **参数：**
