@@ -346,6 +346,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '预测节点',
                 value: 'PredictNode'
             },
+            {
+                label: '滞后特征节点',
+                value: 'LagFeatureNode'
+            },
         ]
     },
 ]

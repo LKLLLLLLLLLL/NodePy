@@ -878,6 +878,54 @@ export interface ForRollingWindowEndNode extends BaseNode {
     type: 'ForRollingWindowEndNode'
 }
 
+
+export interface UnpackNodeParam {
+    cols: string[]
+}
+export type UnpackNodeData = BaseData & {
+    param: UnpackNodeParam
+}
+export interface UnpackNode extends BaseNode<UnpackNodeData> {
+    type: 'UnpackNode'
+}
+
+
+export interface PackNodeParam {
+    cols: string[]
+}
+export type PackNodeData = BaseData & {
+    param: PackNodeParam
+}
+export interface PackNode extends BaseNode<PackNodeData> {
+    type: 'PackNode'
+}
+
+
+export interface GetCellNodeParam {
+    col: string
+    row: number
+}
+export type GetCellNodeData = BaseData & {
+    param: GetCellNodeParam
+}
+export interface GetCellNode extends BaseNode<GetCellNodeData> {
+    type: 'GetCellNode'
+}
+
+
+export interface SetCellNodeParam {
+    col: string
+    row: number
+}
+export type SetCellNodeData = BaseData & {
+    param: SetCellNodeParam
+}
+export interface SetCellNode extends BaseNode<SetCellNodeData> {
+    type: 'SetCellNode'
+}
+
+
+
 /*********************  MachineLearning Nodes  **************************/
 export interface LinearRegressionNodeParam {
     feature_cols: string[]
@@ -893,4 +941,82 @@ export interface LinearRegressionNode extends BaseNode<LinearRegressionNodeData>
 
 export interface PredictNode extends BaseNode {
     type: 'PredictNode'
+}
+
+
+export interface LagFeatureNodeParam {
+    window_size: number
+    horizon: number
+    lag_cols: string[]
+    target_col: string
+    generate_target: boolean
+    drop_nan: boolean
+}
+export type LagFeatureNodeData = BaseData & {
+    param: LagFeatureNodeParam
+}
+export interface LagFeatureNode extends BaseNode<LagFeatureNodeData> {
+    type: 'LagFeatureNode'
+}
+
+
+export interface RandomForestRegressionNodeParam {
+    n_estimators: number
+    max_depth: number
+    feature_cols: string[]
+    target_col: string
+    limit_max_depth: boolean
+}
+export type RandomForestRegressionNodeData = BaseData & {
+    param: RandomForestRegressionNodeParam
+}
+export interface RandomForestRegressionNode extends BaseNode<RandomForestRegressionNodeData> {
+    type: 'RandomForestRegressionNode'
+}
+
+
+export interface RegressionScoreNodeParam {
+    metric: "mse" | "rmse" | "mae" | "r2"
+}
+export type RegressionScoreNodeData = BaseData & {
+    param: RegressionScoreNodeParam
+}
+export interface RegressionScoreNode extends BaseNode<RegressionScoreNodeData> {
+    type: 'RegressionScoreNode'
+}
+
+
+export interface LogisticRegressionNodeParam {
+    feature_cols: string[]
+    target_col: string
+}
+export type LogisticRegressionNodeData = BaseData & {
+    param: LogisticRegressionNodeParam
+}
+export interface LogisticRegressionNode extends BaseNode<LogisticRegressionNodeData> {
+    type: 'LogisticRegressionNode'
+}
+
+
+export interface SVCNodeParam {
+    feature_cols: string[]
+    target_col: string
+    kernel: "linear" | "poly" | "rbf" | "sigmoid"
+}
+export type SVCNodeData = BaseData & {
+    param: SVCNodeParam
+}
+export interface SVCNode extends BaseNode<SVCNodeData> {
+    type: 'SVCNode'
+}
+
+
+export interface ClassificationScoreNodeParam {
+    metric: "accuracy" | "f1" | "precision" | "recall"
+}
+export type ClassificationScoreNodeData = BaseData & {
+    param: ClassificationScoreNodeParam
+}
+export interface ClassificationScoreNode extends BaseNode<ClassificationScoreNodeData> {
+    type: 'ClassificationScoreNode'
 }

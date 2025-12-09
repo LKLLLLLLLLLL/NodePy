@@ -995,6 +995,24 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedPredictNode)
         break
+      case 'LagFeatureNode':
+        const addedLagFeatureNode: Nodetypes.LagFeatureNode = {
+          id,
+          position,
+          type: 'LagFeatureNode',
+          data: {
+            param: {
+              window_size: 1,
+              horizon: 1,
+              lag_cols: [],
+              generate_target: true,
+              target_col: '',
+              drop_nan: true
+            }
+          }
+        }
+        addNodes(addedLagFeatureNode)
+        break
     
       default:
         console.log(type)

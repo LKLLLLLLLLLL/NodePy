@@ -50,6 +50,7 @@ import BatchConcatNode from '../nodes/stringProcess/BatchConcatNode.vue'
 import RegexMatchNode from '../nodes/stringProcess/RegexMatchNode.vue'
 import BatchRegexMatchNode from '../nodes/stringProcess/BatchRegexMatchNode.vue'
 import RegexExtractNode from '../nodes/stringProcess/RegexExtractNode.vue'
+import TokenizeNode from '../nodes/stringProcess/TokenizeNode.vue'
 import InsertConstColNode from '../nodes/tableProcess/InsertConstColNode.vue'
 import InsertRangeColNode from '../nodes/tableProcess/InsertRangeColNode.vue'
 import InsertRandomColNode from '../nodes/tableProcess/InsertRandomColNode.vue'
@@ -83,7 +84,7 @@ import PctChangeNode from '../nodes/analysis/PctChangeNode.vue'
 import CumulativeNode from '../nodes/analysis/CumulativeNode.vue'
 import LinearRegressionNode from '../nodes/machineLearning/LinearRegressionNode.vue'
 import PredictNode from '../nodes/machineLearning/PredictNode.vue'
-import TokenizeNode from '../nodes/stringProcess/TokenizeNode.vue'
+import LagFeatureNode from '../nodes/machineLearning/LagFeatureNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -352,6 +353,7 @@ const nodeColor = (node: BaseNode) => {
       return nodeCategoryColor.analysis
     case 'LinearRegressionNode':
     case 'PredictNode':
+    case 'LagFeatureNode':
       return nodeCategoryColor.machine
     default:
       return nodeCategoryColor.default
@@ -712,6 +714,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-PredictNode="PredictNodeProps">
           <PredictNode v-bind="PredictNodeProps"/>
+        </template>
+
+        <template #node-LagFeatureNode="LagFeatureNodeProps">
+          <LagFeatureNode v-bind="LagFeatureNodeProps"/>
         </template>
 
       </VueFlow>
