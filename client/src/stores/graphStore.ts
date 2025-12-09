@@ -425,21 +425,22 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedTextFromFileNode)
         break
-      // case 'PlotNode':
-      //   const addedPlotNode: Nodetypes.PlotNode = {
-      //     id,
-      //     position,
-      //     type: 'PlotNode',
-      //     data: {
-      //       param: {
-      //         x_col: '',
-      //         y_col: '',
-      //         plot_type: 'line',
-      //       }
-      //     }
-      //   }
-      //   addNodes(addedPlotNode)
-      //   break
+      case 'QuickPlotNode':
+        const addedQuickPlotNode: Nodetypes.QuickPlotNode = {
+          id,
+          position,
+          type: 'QuickPlotNode',
+          data: {
+            param: {
+              x_col: '',
+              y_col: [''],
+              plot_type: ['line'],
+              title: null
+            }
+          }
+        }
+        addNodes(addedQuickPlotNode)
+        break
       case 'AdvancePlotNode':
         const addedAdvancePlotNode: Nodetypes.AdvancePlotNode = {
           id,

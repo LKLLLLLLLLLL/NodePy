@@ -184,7 +184,6 @@ import { mdiMenuDown } from '@mdi/js'
             gap: 2px;
             padding: 2px 2px;
             cursor: pointer;
-            max-height: 200px;
             overflow-y: auto;
             &::-webkit-scrollbar {
                 width: 4px;

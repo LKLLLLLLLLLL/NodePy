@@ -37,7 +37,7 @@ import ToStringNode from '../nodes/compute/ToStringNode.vue'
 import ToIntNode from '../nodes/compute/ToIntNode.vue'
 import ToFloatNode from '../nodes/compute/ToFloatNode.vue'
 import ToBoolNode from '../nodes/compute/ToBoolNode.vue'
-import PlotNode from '../nodes/visualize/PlotNode.vue'
+import QuickPlotNode from '../nodes/visualize/QuickPlotNode.vue'
 import AdvancePlotNode from '../nodes/visualize/AdvancePlotNode.vue'
 import WordcloudNode from '../nodes/visualize/WordcloudNode.vue'
 import StripNode from '../nodes/stringProcess/StripNode.vue'
@@ -301,7 +301,7 @@ const nodeColor = (node: BaseNode) => {
     case 'ToFloatNode':
     case 'ToBoolNode':
       return nodeCategoryColor.compute
-    case 'PlotNode':
+    case 'QuickPlotNode':
     case 'AdvancePlotNode':
     case 'WordcloudNode':
       return nodeCategoryColor.visualize
@@ -529,8 +529,8 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
           <ToBoolNode v-bind="ToBoolNodeProps"/>
         </template>
 
-        <template #node-PlotNode="PlotNodeProps">
-          <PlotNode v-bind="PlotNodeProps" />
+        <template #node-QuickPlotNode="QuickPlotNodeProps">
+          <QuickPlotNode v-bind="QuickPlotNodeProps" />
         </template>
 
         <template #node-AdvancePlotNode="AdvancePlotNodeProps">

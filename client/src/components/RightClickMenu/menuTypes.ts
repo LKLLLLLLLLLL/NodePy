@@ -321,8 +321,8 @@ export const nodeMenuItems: MenuNode[] = [
         value: 'visualization',
         children: [
             {
-                label: '绘图节点',
-                value: 'PlotNode'
+                label: '快速绘图节点',
+                value: 'QuickPlotNode'
             },
             {
                 label: '高级绘图节点',

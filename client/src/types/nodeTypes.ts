@@ -329,7 +329,7 @@ export interface ToBoolNode extends BaseNode {
 export interface QuickPlotNodeParam {
     x_col: string
     y_col: string[]
-    plot_type: "scatter" | "line" | "bar" | "area"
+    plot_type: ("scatter" | "line" | "bar" | "area")[]
     title: string | null
 }
 export type QuickPlotNodeData = BaseData & {

@@ -46,7 +46,7 @@
         allowEmpty: false
     })
     const emit = defineEmits(['updateValue'])
-    const model = defineModel<number>()
+    const model = defineModel<number|null>()
     const local =  computed(() => {
         return {
             denominator: props.denominator,
@@ -138,7 +138,7 @@
         if(!isEditing.value) return
         const n = Number(editText.value)
         if(props.allowEmpty && editText.value.trim() === '') {
-            model.value = undefined
+            model.value = null
         }else if(Number.isFinite(n)) {
             const min = props.min ?? Number.NEGATIVE_INFINITY
             const max = props.max ?? Number.POSITIVE_INFINITY
