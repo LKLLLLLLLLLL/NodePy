@@ -313,7 +313,6 @@
         <!-- 加载中 -->
         <div v-if="loading" class="value-loading">
             <Loading></Loading>
-            <span>加载中...</span>
         </div>
 
         <!-- 错误提示 -->
@@ -361,134 +360,138 @@
     </div>
 </template>
 <style scoped lang="scss">
-    .value-view-container {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        width: 100%;
-        padding: 16px;
-        box-sizing: border-box;
-        background: #fafafa;
-        border-radius: 4px;
-    }
+@use '@/common/global.scss' as *;
 
-    .value-loading {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        color: #909399;
-        font-size: 14px;
-    }
+.value-view-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+    background: $background-color;
+    border-radius: 10px;
+}
 
-    .value-error {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #f56c6c;
-        background: #fef0f0;
-        border: 1px solid #fde2e2;
-        border-radius: 4px;
-        font-size: 14px;
-        padding: 16px;
-        margin: 16px;
-    }
+.value-loading {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #909399;
+    font-size: 14px;
+}
 
-    .value-header {
-        margin-bottom: 12px;
-        font-size: 12px;
-        color: #909399;
-    }
+.value-error {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $error-message-color;
+    background: $stress-background-color;
+    border-radius: 10px;
+    font-size: 14px;
+    padding: 16px;
+    margin: 16px;
+    @include controller-style;
+}
 
-    .value-content-wrapper {
-        flex: 1;
-        overflow: auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.value-header {
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #909399;
+}
 
-    .value-content {
-        font-size: 32px;
-        font-weight: 500;
-        color: #303133;
-        word-break: break-all;
-        text-align: center;
-        line-height: 1.6;
-        padding: 16px;
-        max-width: 100%;
-        box-sizing: border-box;
-    }
+.value-content-wrapper {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.value-content {
+    font-size: 32px;
+    font-weight: 500;
+    color: #303133;
+    word-break: break-all;
+    text-align: center;
+    line-height: 1.6;
+    padding: 16px;
+    max-width: 100%;
+    box-sizing: border-box;
+    background: $stress-background-color;
+    border-radius: 10px;
+    @include controller-style;
+}
     
-    .boolean-true {
-        color: #67c23a; // 绿色表示 True
-        font-weight: bold;
-    }
+.boolean-true {
+    color: #67c23a; // 绿色表示 True
+    font-weight: bold;
+}
     
-    .boolean-false {
-        color: #f56c6c; // 红色表示 False
-        font-weight: bold;
-    }
+.boolean-false {
+    color: #f56c6c; // 红色表示 False
+    font-weight: bold;
+}
     
-    .full-string-container {
-        text-align: left;
-        font-size: 14px;
-        width: 100%;
-        height: 100%;
-        overflow-y: auto;
-        position: relative;
-        background-color: #fff;
-        border: 1px solid #ebeef5;
-        border-radius: 4px;
-        box-sizing: border-box;
-        /* 移除硬件加速以避免影响窗口拖动 */
-    }
+.full-string-container {
+    text-align: left;
+    font-size: 14px;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    position: relative;
+    background-color: $stress-background-color;
+    border-radius: 10px;
+    box-sizing: border-box;
+    @include controller-style;
+}
     
-    .virtual-scroll-padding {
-        width: 100%;
-    }
+.virtual-scroll-padding {
+    width: 100%;
+}
     
-    .virtual-scroll-content {
-        width: 100%;
-    }
+.virtual-scroll-content {
+    width: 100%;
+}
     
-    .line {
-        padding: 2px 10px;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-    }
+.line {
+    padding: 2px 10px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
     
-    .long-string-controls {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        margin-top: 8px;
-    }
+.long-string-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
     
-    .long-string-hint {
-        font-size: 12px;
-        color: #909399;
-        padding: 4px;
-        background: #f5f5f5;
-        border-radius: 4px;
-    }
+.long-string-hint {
+    font-size: 12px;
+    color: #909399;
+    padding: 4px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
     
-    .toggle-full-string-btn {
-        padding: 6px 12px;
-        background: #409eff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px;
+.toggle-full-string-btn {
+    padding: 6px 12px;
+    background: $stress-color;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
         
-        &:hover {
-            background: #66b1ff;
-        }
+    &:hover {
+        background: $hover-stress-color;
     }
+}
 </style>

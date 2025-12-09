@@ -409,7 +409,6 @@ const handleImgLoad = () => {
         <!-- 加载中 -->
         <div v-if="loading" class="file-loading">
             <Loading></Loading>
-            <span>加载中...</span>
         </div>
 
         <!-- 错误提示 -->
@@ -464,12 +463,18 @@ const handleImgLoad = () => {
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '@/common/global.scss' as *;
+
 .file-view-container {
     display: flex;
     flex-direction: column;
     height: 100%;
-    overflow: hidden; /* 防止外部滚动条 */
+    overflow: hidden;
+    background: $background-color;
+    border-radius: 10px;
+    padding: 16px;
+    box-sizing: border-box;
 }
 
 .file-loading {
@@ -479,6 +484,8 @@ const handleImgLoad = () => {
     justify-content: center;
     height: 100%;
     gap: 12px;
+    color: #909399;
+    font-size: 14px;
 }
 
 .file-error {
@@ -486,9 +493,13 @@ const handleImgLoad = () => {
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #f56c6c;
+    color: $error-message-color;
     font-size: 14px;
-    padding: 20px;
+    padding: 16px;
     text-align: center;
+    background: $stress-background-color;
+    border-radius: 10px;
+    margin: 16px;
+    @include controller-style;
 }
 </style>
