@@ -352,18 +352,18 @@ export interface WordcloudNode extends BaseNode<WordcloudNodeData> {
 }
 
 
-export interface AdvancePlotNodeParam {
+export interface StatisticalPlotNodeParam {
     x_col: string
     y_col: string
     hue_col?: string
     plot_type: "bar" | "count" | "scatter" | "strip" | "swarm" | "box" | "violin" | "hist",
     title?: string
 }
-export type AdvancePlotNodeData = BaseData & {
-    param: AdvancePlotNodeParam
+export type StatisticalPlotNodeData = BaseData & {
+    param: StatisticalPlotNodeParam
 }
-export interface AdvancePlotNode extends BaseNode<AdvancePlotNodeData>{
-    type: 'AdvancePlotNode'
+export interface StatisticalPlotNode extends BaseNode<StatisticalPlotNodeData>{
+    type: 'StatisticalPlotNode'
 }
 
 

@@ -1,6 +1,6 @@
 <template>
-    <div class="AdvancePlotNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="visualize">高级绘图节点</NodeTitle>
+    <div class="StatisticalPlotNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category="visualize">统计绘图节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -71,10 +71,10 @@
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
-    import type { AdvancePlotNodeData } from '@/types/nodeTypes'
+    import type { StatisticalPlotNodeData } from '@/types/nodeTypes'
 
 
-    const props = defineProps<NodeProps<AdvancePlotNodeData>>()
+    const props = defineProps<NodeProps<StatisticalPlotNodeData>>()
     const x_col_hint = computed(() => {
         if(props.data.hint?.x_col_choices?.length === 0) return ['']
         return props.data.hint?.x_col_choices || ['']
@@ -173,7 +173,7 @@
 <style lang="scss" scoped>
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
-    .AdvancePlotNodeLayout {
+    .StatisticalPlotNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;

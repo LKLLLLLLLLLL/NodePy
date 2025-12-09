@@ -325,8 +325,8 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'QuickPlotNode'
             },
             {
-                label: '高级绘图节点',
-                value: 'AdvancePlotNode'
+                label: '统计绘图节点',
+                value: 'StatisticalPlotNode'
             },
             {
                 label: '词云节点',

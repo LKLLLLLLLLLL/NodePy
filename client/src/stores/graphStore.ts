@@ -441,11 +441,11 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedQuickPlotNode)
         break
-      case 'AdvancePlotNode':
-        const addedAdvancePlotNode: Nodetypes.AdvancePlotNode = {
+      case 'StatisticalPlotNode':
+        const addedStatisticalPlotNode: Nodetypes.StatisticalPlotNode = {
           id,
           position,
-          type: 'AdvancePlotNode',
+          type: 'StatisticalPlotNode',
           data: {
             param: {
               x_col: '',
@@ -454,7 +454,7 @@ export const useGraphStore = defineStore('graph', () => {
             }
           }
         }
-        addNodes(addedAdvancePlotNode)
+        addNodes(addedStatisticalPlotNode)
         break
       case 'WordcloudNode':
         const addedWordcloudNode: Nodetypes.WordcloudNode = {
