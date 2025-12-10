@@ -1,9 +1,11 @@
+import pickle
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from server import logger
-from server.models.data import Data, DataRef, DataView
+from server.models.data import Data, DataRef
 from server.models.database import NodeOutputRecord, ProjectRecord
 from server.models.project import ProjWorkflow
 
@@ -21,27 +23,31 @@ class DataManager:
             self.async_db_client = async_db_session
         else:
             raise ValueError("Either sync_db_session or async_db_session must be provided")
-    
+
     def read_sync(self, data_ref: DataRef) -> Data:
         """ Read data synchronously from database given a DataRef """
         if self.db_client is None:
             raise AssertionError("Synchronous DB client is not initialized")
-        
+
         data_record = self.db_client.query(NodeOutputRecord).filter(
             NodeOutputRecord.id == data_ref.data_id
         ).first()
         if not data_record:
             raise KeyError(f"Data not found for DataRef: {data_ref}")
 
-        data_view = DataView.model_validate(data_record.data)
-        data = Data.from_view(data_view)
-        return data
+        try:
+            payload = pickle.loads(data_record.data) # type: ignore
+            assert isinstance(payload, Data)
+            return payload
+        except Exception as e:
+            logger.error(f"Failed to deserialize data {data_ref.data_id}: {e}")
+            raise
 
     async def read_async(self, data_ref: DataRef) -> Data:
         """ Read data asynchronously from database given a DataRef """
         if self.async_db_client is None:
             raise AssertionError("Asynchronous DB client is not initialized")
-        
+
         result = await self.async_db_client.execute(
             select(NodeOutputRecord).where(
                 NodeOutputRecord.id == data_ref.data_id
@@ -51,15 +57,21 @@ class DataManager:
         if not data_record:
             raise KeyError(f"Data not found for DataRef: {data_ref}")
 
-        data_view = DataView.model_validate(data_record.data)
-        data = Data.from_view(data_view)
-        return data
+        try:
+            payload = pickle.loads(data_record.data)  # type: ignore
+            assert isinstance(payload, Data)
+            return payload
+        except Exception as e:
+            logger.error(f"Failed to deserialize data {data_ref.data_id}: {e}")
+            raise
 
     def write_sync(self, data: Data, node_id: str, project_id: int, port: str) -> DataRef:
         """ Write data synchronously to database, return a DataRef """
         # Notice: for cache system in frontend, if data not chaged, we should reuse old data_id
         if self.db_client is None:
             raise AssertionError("Synchronous DB client is not initialized")
+        
+        binary_data = pickle.dumps(data)
 
         # 1. get old data record in database
         old_data_record = self.db_client.query(NodeOutputRecord).filter_by(
@@ -70,22 +82,19 @@ class DataManager:
 
         # 2. if an old record exists, compare data
         if old_data_record:
-            old_data_view = DataView(**old_data_record.data) # type: ignore
-            old_data = Data.from_view(old_data_view)
-            # 2.1. if data is unchanged, reuse old data_id and return
-            if old_data == data:
-                return DataRef(data_id=old_data_record.id) # type: ignore
-            # 2.2. if data has changed, delete the old record.
-            # A new record will be inserted later.
+            # Binary comparison, if same, return old DataRef
+            if old_data_record.data == binary_data: # type: ignore
+                return DataRef(data_id=old_data_record.id)  # type: ignore
+
             self.db_client.delete(old_data_record)
-            self.db_client.flush() # Use flush to execute the delete without committing the transaction
+            self.db_client.flush()
 
         # 3. Insert a new record for the new/changed data
         new_data_record = NodeOutputRecord(
             project_id=project_id,
             node_id=node_id,
             port=port,
-            data=data.to_view().to_dict()
+            data=binary_data
         )
         self.db_client.add(new_data_record)
         self.db_client.flush() # Flush to assign the new ID to the object
@@ -123,5 +132,3 @@ class DataManager:
         self.db_client.commit()
         logger.info(f"Cleaned {len(deleted_datas)} orphan data records for project {project_id}")
         return
-  
-        

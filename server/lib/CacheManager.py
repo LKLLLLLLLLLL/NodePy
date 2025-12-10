@@ -1,13 +1,13 @@
-import hashlib
-import json
 import os
+import pickle
 from typing import Any
 
 import redis
 from loguru import logger
 
 from server.config import USE_CACHE
-from server.models.data import Data, DataView
+from server.lib.utils import safe_hash
+from server.models.data import Data
 from server.models.file import File
 
 CACHE_REDIS_URL = os.getenv("REDIS_URL", "") + "/2"
@@ -21,23 +21,19 @@ class CacheManager:
     """
 
     def __init__(self) -> None:
-        self.redis_client = redis.Redis.from_url(CACHE_REDIS_URL, decode_responses=True)
+        self.redis_client = redis.Redis.from_url(
+            CACHE_REDIS_URL, decode_responses=False
+        )
 
     @staticmethod
     def _get_cache_key(node_type: str, params: dict[str, Any], inputs: dict[str, Data]) -> str:
         """Generate a unique cache key based on node ID, parameters, and inputs."""
         # 1. hash params
-        param_str = json.dumps(params, sort_keys=True)
-        param_hash = hashlib.sha256(param_str.encode()).hexdigest()
+        param_hash = safe_hash(params)
         # 2. hash inputs
-        input_hashes = []
-        for port, data in sorted(inputs.items()):
-            data_str = json.dumps(data.to_view().to_dict(), sort_keys=True)
-            data_hash = hashlib.sha256(data_str.encode()).hexdigest()
-            input_hashes.append(f"{port}:{data_hash}")
-        input_hash = hashlib.sha256("||".join(input_hashes).encode()).hexdigest()
+        input_hash = safe_hash(inputs)
         # 3. combine all
-        signature = hashlib.sha256(param_hash.encode() + input_hash.encode()).hexdigest()
+        signature = safe_hash(param_hash + input_hash)
         return f"cache:{node_type}:{signature}"
 
     def _add_cache_hit_num(self) -> None:
@@ -50,7 +46,7 @@ class CacheManager:
         total = self.redis_client.get(total_key)
         hit = self.redis_client.get(hit_key)
         if total is not None and hit is not None:
-            assert isinstance(total, str) and isinstance(hit, str)
+            assert isinstance(total, bytes) and isinstance(hit, bytes)
             if int(total) % 10 == 0:
                 hit_rate = int(hit) / int(total)
                 logger.info(f"cache_stat:hit_rate: {hit_rate:.2%}")
@@ -64,7 +60,7 @@ class CacheManager:
         total = self.redis_client.get(total_key)
         hit = self.redis_client.get(hit_key)
         if total is not None and hit is not None:
-            assert isinstance(total, str) and isinstance(hit, str)
+            assert isinstance(total, bytes) and isinstance(hit, bytes)
             if int(total) % 10 == 0:
                 hit_rate = int(hit) / int(total)
                 logger.info(f"[cache] hit_rate: {hit_rate:.2%}")
@@ -78,14 +74,15 @@ class CacheManager:
         cached_value = self.redis_client.get(cache_key)
         if cached_value is not None:
             self._add_cache_hit_num()
-            assert isinstance(cached_value, str)
-            cache_data = json.loads(cached_value)
-            outputs_dict = cache_data[0]
-            running_time = cache_data[1]
-            result: dict[str, Data] = {}
-            for key, data_dict in outputs_dict.items():
-                result[key] = Data.from_view(DataView.from_dict(data_dict))
-            return result, running_time
+            try:
+                # Use pickle to deserialize efficiently
+                assert isinstance(cached_value, bytes)
+                cache_data = pickle.loads(cached_value)
+                outputs, running_time = cache_data
+                return outputs, running_time
+            except Exception as e:
+                logger.warning(f"Failed to load cache for {cache_key}: {e}")
+                return None
 
         self._add_cache_miss_num()
         return None
@@ -94,15 +91,20 @@ class CacheManager:
         """Set cached result for a node with given parameters and inputs."""
         if not USE_CACHE:
             return
-        cache_key = CacheManager._get_cache_key(node_type, params, inputs)
-        outputs_dict = {}
+
+        # Check if any output is a File, if so, skip caching
         for key, data in outputs.items():
             if isinstance(data.payload, File):
                 # do not cache the file content in memory
-                # because the file object is only a reference to the file in MinIO,
-                # it may dereference a null object if the file is deleted in MinIO.
                 return
-            outputs_dict[key] = data.to_view().to_dict()
-        cache_value = [outputs_dict, running_time]
-        self.redis_client.set(cache_key, json.dumps(cache_value))
-        self.redis_client.expire(cache_key, CACHE_TTL_SECONDS)
+
+        cache_key = CacheManager._get_cache_key(node_type, params, inputs)
+
+        # Directly pickle the outputs (dict[str, Data])
+        # Data objects and Pandas DataFrames are picklable and much faster than JSON conversion
+        cache_value = (outputs, running_time)
+        try:
+            self.redis_client.set(cache_key, pickle.dumps(cache_value))
+            self.redis_client.expire(cache_key, CACHE_TTL_SECONDS)
+        except Exception as e:
+            logger.warning(f"Failed to set cache for {cache_key}: {e}")

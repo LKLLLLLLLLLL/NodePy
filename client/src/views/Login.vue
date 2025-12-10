@@ -27,7 +27,7 @@
     const default_confirmpassword: string = '';
     const default_email: string = '';
     const default_email_username: string = ''
-    
+
     const password = ref<string>(default_password);
     const confirm_password = ref<string>(default_confirmpassword);
     const email = ref<string>(default_email);
@@ -50,40 +50,40 @@
     // 密码限制函数
     function restrictPassword(): boolean {
         const pwd = password.value;
-        // 检查密码长度（至少8位）
-        if (pwd.length < 8) {
-            return false;
-        }
-        // 检查是否包含数字
-        if (!/\d/.test(pwd)) {
-            return false;
-        }
-        // 检查是否包含字母
-        if (!/[a-zA-Z]/.test(pwd)) {
-            return false;
-        }
-        // 检查是否包含特殊字符
-        if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) {
-            return false;
-        }
+        // // 检查密码长度（至少8位）
+        // if (pwd.length < 8) {
+        //     return false;
+        // }
+        // // 检查是否包含数字
+        // if (!/\d/.test(pwd)) {
+        //     return false;
+        // }
+        // // 检查是否包含字母
+        // if (!/[a-zA-Z]/.test(pwd)) {
+        //     return false;
+        // }
+        // // 检查是否包含特殊字符
+        // if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) {
+        //     return false;
+        // }
         return true;
     }
 
     // 用户名限制函数
     function restrictUsername(): boolean {
         const usr = username.value;
-        // 检查用户名长度（3-20个字符）
-        if (usr.length < 3 || usr.length > 20) {
-            return false;
-        }
-        // 检查是否只包含字母、数字、下划线
-        if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(usr)) {
-            return false;
-        }
-        // 不能以数字开头
-        if (/^\d/.test(usr)) {
-            return false;
-        }
+        // // 检查用户名长度（3-20个字符）
+        // if (usr.length < 3 || usr.length > 20) {
+        //     return false;
+        // }
+        // // 检查是否只包含字母、数字、下划线
+        // if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(usr)) {
+        //     return false;
+        // }
+        // // 不能以数字开头
+        // if (/^\d/.test(usr)) {
+        //     return false;
+        // }
         return true;
     }
 
@@ -176,7 +176,7 @@
         if (!testAllInfo()) {
             return;
         }
-        
+
         try {
             // 使用新的注册函数
             await loginStore.signup({
@@ -390,15 +390,15 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .login-container {
         height: 500px; // 登录界面高度
     }
-    
+
     .register-container {
         height: 600px; // 注册界面高度
     }
-    
+
     .login-head, .register-head {
         display: flex;
         flex-direction: column;
@@ -436,7 +436,7 @@
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 修改为中性阴影，避免蓝光 */
         font-size: 24px;
     }
-    
+
     .brand-highlight {
         font-weight: 700;
         color: $stress-color; /* 使用项目主色 #108efe */
@@ -496,7 +496,7 @@
         height: 30px;
         position: relative;
         color: #999;
-        
+
         &::before {
             content: '';
             position: absolute;
@@ -506,7 +506,7 @@
             height: 1px;
             background: linear-gradient(to right, transparent, #ddd, transparent);
         }
-        
+
         span {
             background: white;
             padding: 0 15px;
@@ -521,7 +521,7 @@
         gap: 15px;
         margin-top: 15px;
     }
-    
+
     .oauth-btn {
         display: flex;
         align-items: center;
@@ -534,30 +534,30 @@
         cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 使用中性阴影，避免蓝光 */
-        
+
         &:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* 使用中性阴影，避免蓝光 */
             border-color: #ddd;
         }
-        
+
         .oauth-icon {
             width: 20px;
             height: 20px;
         }
     }
-    
+
     // 响应式设计
     @media (max-width: 500px) {
         .login-container, .register-container {
             width: 95%;
             padding: 20px;
         }
-        
+
         .login-container {
             height: 450px;
         }
-        
+
         .register-container {
             height: 550px;
         }

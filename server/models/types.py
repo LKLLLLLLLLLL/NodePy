@@ -26,7 +26,7 @@ class ColType(str, Enum):
             ColType.FLOAT: pandas.Float64Dtype,
             ColType.STR: pandas.StringDtype,
             ColType.BOOL: pandas.BooleanDtype,
-            ColType.DATETIME: "datetime64[ns]",
+            ColType.DATETIME: "datetime64[ns, UTC]", # convert to pandas datetime dtype with utc timezone
         }
         return coltype_to_dtype[self]
 

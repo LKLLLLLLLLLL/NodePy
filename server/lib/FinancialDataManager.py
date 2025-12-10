@@ -161,7 +161,49 @@ class FinancialDataManager:
     def _fetch_from_live_api(
         self, symbol: str, data_type: DataType, start: datetime, end: datetime
     ) -> pd.DataFrame:
-        """Fetch data from external API for the specified time range"""
+        """Fetch data from external API for the specified time range, splitting into chunks if necessary."""
+        all_dfs = []
+        current_start = start
+
+        source = DATA_TYPE_SOURCE_MAP[data_type]
+
+        # Define chunk size based on source limits
+        if source == "binance":
+            # Binance limit is 1000 candles. For 1m interval, that's 1000 minutes.
+            chunk_size = timedelta(minutes=1000)
+        elif source == "yfinance":
+            # yfinance 1m data is best fetched in smaller chunks (e.g. 7 days) to avoid timeouts or limits
+            chunk_size = timedelta(days=7)
+        else:
+            # Default to no chunking if unknown
+            chunk_size = end - start + timedelta(seconds=1)
+
+        while current_start < end:
+            current_end = min(current_start + chunk_size, end)
+
+            df_chunk = self._fetch_single_chunk(
+                symbol, data_type, current_start, current_end
+            )
+            if not df_chunk.empty:
+                all_dfs.append(df_chunk)
+
+            # Move to next chunk
+            current_start = current_end
+
+        if not all_dfs:
+            return pd.DataFrame()
+
+        # Concatenate and drop duplicates (in case of overlapping chunks)
+        return (
+            pd.concat(all_dfs)
+            .drop_duplicates(subset=["Open Time"])
+            .sort_values("Open Time")
+        )
+
+    def _fetch_single_chunk(
+        self, symbol: str, data_type: DataType, start: datetime, end: datetime
+    ) -> pd.DataFrame:
+        """Fetch a single chunk of data from external API"""
         source = DATA_TYPE_SOURCE_MAP[data_type]
         try:
             if source == "binance":
@@ -188,6 +230,9 @@ class FinancialDataManager:
                         "Ignore",
                     ],
                 )
+                if df.empty:
+                    return pd.DataFrame()
+
                 df = df[["Open Time", "Open", "High", "Low", "Close", "Volume"]]
                 df["Open Time"] = pd.to_datetime(df["Open Time"], unit="ms")
                 return df

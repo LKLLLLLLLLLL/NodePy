@@ -1,5 +1,7 @@
 import base64
+import hashlib
 import io
+import json
 from datetime import datetime
 from math import isinf, isnan
 from typing import Any, ClassVar, Literal, Union, cast
@@ -100,7 +102,16 @@ class Table(BaseModel):
         new_col_types = self.col_types.copy()
         new_col_types[new_col] = ColType.from_ptype(col.dtype)
         return Table(df=new_df, col_types=new_col_types)
-    
+
+    def fast_hash(self) -> str:
+        from pandas.util import hash_pandas_object
+        col_types_hash = hashlib.md5(json.dumps(
+            {k: v.value for k, v in self.col_types.items()},
+            sort_keys=True
+        ).encode("utf-8")).hexdigest()
+        data_hash = hashlib.md5(hash_pandas_object(self.df, index=True).values.tobytes()).hexdigest() # type: ignore
+        return hashlib.md5((col_types_hash + data_hash).encode("utf-8")).hexdigest()
+
     @staticmethod
     def col_types_from_df(df: DataFrame) -> dict[str, ColType]:
         col_types = {}
@@ -143,6 +154,14 @@ class Model(BaseModel):
             "model": model_b64,
             "metadata": self.metadata,
         })
+
+    def fast_hash(self) -> str:
+        # hash the serialized model bytes
+        buf = io.BytesIO()
+        joblib.dump(self.model, buf)
+        buf.seek(0)
+        model_bytes = buf.read()
+        return hashlib.md5(model_bytes).hexdigest()
 
     @classmethod
     def from_view(cls, data: "DataView.ModelView") -> 'Model':
@@ -198,6 +217,14 @@ class Data(BaseModel):
         self_dict = self.to_view().to_dict()
         other_dict = value.to_view().to_dict()
         return self_dict == other_dict
+
+    def fast_hash(self) -> str:
+        if isinstance(self.payload, Table):
+            return self.payload.fast_hash()
+        elif isinstance(self.payload, Model):
+            return self.payload.fast_hash()
+        else:
+            return hashlib.md5(repr(self.payload).encode("utf-8")).hexdigest()
 
     def to_view(self) -> "DataView":
         if isinstance(self.payload, Table):

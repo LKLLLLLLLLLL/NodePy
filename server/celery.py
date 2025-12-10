@@ -38,12 +38,12 @@ celery_app.conf.beat_schedule = {
     },
     "update-forward-every-5-minutes": {
         "task": "server.lib.FinancialDataManager.update_forward_task",
-        "schedule": 600.0,  # Every 10 minutes
+        "schedule": 300.0,  # Every 5 minutes
         # "schedule": 60.0,  # Every 1 minute (for testing purposes)
     },
     "backfill-history-every-hour": {
         "task": "server.lib.FinancialDataManager.backfill_history_task",
-        "schedule": 3600.0,  # Every hour
+        "schedule": 600.0,  # Every 10 minutes
         # "schedule": 120.0,  # Every 2 minutes (for testing purposes)
     },
 }

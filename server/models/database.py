@@ -94,7 +94,7 @@ class NodeOutputRecord(Base):
     )
     node_id = Column(String, nullable=False, index=True) # reference the node id in project.graph.nodes[i].id
     port = Column(String, nullable=False, index=True)  # output port name
-    data = Column(JSON, nullable=False)  # Arbitrary JSON data
+    data = Column(LargeBinary, nullable=False) # Serialized Data object
 
     __table_args__ = (
         UniqueConstraint('project_id', 'node_id', 'port', name='_project_node_port_uc'),

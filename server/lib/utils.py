@@ -1,9 +1,9 @@
 import base64
 import hashlib
-import json
 import signal
 from typing import Any, Callable
 
+from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.session import Session
 
@@ -174,27 +174,39 @@ def time_check(seconds: float, callback: Callable[[], bool]):
 def safe_hash(obj: Any) -> str:
     """
     A safe hash function that handles unhashable objects.
-    For unhashable objects, if it has write the to_dict() method, use its dict representation for hashing.
+    Optimized for speed.
     """
-    if isinstance(obj, (str, int, float, bool, type(None))):
-        obj_bytes = json.dumps(obj, sort_keys=True).encode('utf-8')
-        return hashlib.sha256(obj_bytes).hexdigest()
-    elif isinstance(obj, (list, tuple)):
-        hash_list = [safe_hash(item) for item in obj]
-        obj_bytes = json.dumps(hash_list).encode("utf-8")
-        return hashlib.sha256(obj_bytes).hexdigest()
-    elif isinstance(obj, dict):
-        hash_dict = {}
-        for k, v in obj.items():
-            hash_dict[safe_hash(k)] = safe_hash(v)
-        obj_bytes = json.dumps(hash_dict, sort_keys=True).encode('utf-8')
-        return hashlib.sha256(obj_bytes).hexdigest()
-    elif isinstance(obj, object): 
-        if hasattr(obj, "__hash__") and callable(getattr(obj, "__hash__")):
-            return hashlib.sha256(repr(obj).encode('utf-8')).hexdigest()
-        elif hasattr(obj, "to_dict") and callable(getattr(obj, "to_dict")):
-            return safe_hash(obj.to_dict()) # type: ignore
+    def _serialize(obj: Any) -> str:
+        if isinstance(obj, (str, int, float, bool, type(None))):
+            return str(obj)
+        elif isinstance(obj, (list, tuple)):
+            return "[" + ",".join(_serialize(item) for item in obj) + "]"
+        elif isinstance(obj, dict):
+            # Sort keys for determinism
+            return (
+                "{"
+                + ",".join(
+                    f"{_serialize(k)}:{_serialize(v)}" for k, v in sorted(obj.items())
+                )
+                + "}"
+            )
+        elif isinstance(obj, object):
+            if hasattr(obj, "fast_hash") and callable(getattr(obj, "fast_hash")):
+                return str(obj.fast_hash())  # type: ignore
+            elif hasattr(obj, "__hash__") and callable(getattr(obj, "__hash__")):
+                return str(hash(obj))  # type: ignore
+            elif hasattr(obj, "to_dict") and callable(getattr(obj, "to_dict")):
+                logger.warning(
+                    f"Object of type {type(obj)} is unhashable; using to_dict() for hashing."
+                )
+                return _serialize(obj.to_dict())  # type: ignore
+            else:
+                raise TypeError(
+                    f"Object of type {type(obj)} is unhashable and has no to_dict() method."
+                )
         else:
-            raise TypeError(f"Object of type {type(obj)} is unhashable and has no to_dict() method.")
-    else:
-        raise TypeError(f"Object of type {type(obj)} is unhashable.")
+            raise TypeError(f"Object of type {type(obj)} is unhashable.")
+
+    serialized = _serialize(obj)
+    hash_value = hashlib.md5(serialized.encode("utf-8")).hexdigest()
+    return hash_value
