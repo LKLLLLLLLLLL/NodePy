@@ -16,6 +16,7 @@ from server.models.schema import (
     TableSchema,
     check_no_illegal_cols,
 )
+from server.models.types import ColType
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
@@ -135,7 +136,19 @@ class TableToFileNode(BaseNode):
     ) -> Dict[str, Schema]:
         assert "table" in input_schemas
         assert input_schemas["table"].tab is not None
-        col_types = input_schemas["table"].tab.col_types
+        col_types = input_schemas["table"].tab.col_types.copy()
+        if self.format == "csv":
+            # convert datetime columns to str in file schema
+            for col_name, col_type in col_types.items():
+                if col_type == ColType.DATETIME:
+                    col_types[col_name] = ColType.STR
+        elif self.format == "json":
+            # convert datetime columns to int in file schema
+            for col_name, col_type in col_types.items():
+                if col_type == ColType.DATETIME:
+                    col_types[col_name] = ColType.INT
+        elif self.format == "xlsx":
+            pass  # keep original col types
         return {
             "file": Schema(
                 type=Schema.Type.FILE,
@@ -153,11 +166,15 @@ class TableToFileNode(BaseNode):
         
         table_data = input["table"]
         assert isinstance(table_data.payload, Table)
-        df = table_data.payload.df
+        df = table_data.payload.df.copy()
         buffer = file_manager.get_buffer()
         if self.format == "csv":
             df.to_csv(buffer, index=False)
         elif self.format == "xlsx":
+            # excel does not support datetime with timezone, convert them to naive datetime first
+            for col_name in df.select_dtypes(include=["datetime64[ns, UTC]", "datetime64[ns]"]).columns: # type: ignore
+                if getattr(df[col_name].dt, "tz", None) is not None:
+                    df[col_name] = df[col_name].dt.tz_convert('UTC').dt.tz_localize(None)
             df.to_excel(buffer, index=False)
         elif self.format == "json":
             df.to_json(buffer, orient="records", index=False)

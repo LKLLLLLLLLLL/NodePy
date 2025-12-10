@@ -179,10 +179,15 @@ class ProjectInterpreter:
 
             # run schema inference
             try:
-                input_schemas_hash = safe_hash(input_schemas) # guide to avoid accidental mutation
+                input_schemas_hash: str = ""
+                if DEBUG:
+                    input_schemas_hash = safe_hash(input_schemas) # guide to avoid accidental mutation
+
                 output_schemas = node.infer_schema(input_schemas)
-                if safe_hash(input_schemas) != input_schemas_hash:
-                    raise AssertionError(f"Node {node_id} in type {node.type} input schemas were modified during inference, which is not allowed.")
+
+                if DEBUG:
+                    if safe_hash(input_schemas) != input_schemas_hash:
+                        raise AssertionError(f"Node {node_id} in type {node.type} input schemas were modified during inference, which is not allowed.")
                 # store output schema
                 for tar_port, schema in output_schemas.items():
                     schema_cache[(node_id, tar_port)] = schema
