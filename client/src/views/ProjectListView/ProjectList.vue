@@ -8,14 +8,14 @@
     import ProjectDemoFrame from './ProjectDemoFrame.vue';
     import CreateProject from './CreateProject.vue';
     import Mask from '../Mask.vue';
-    
+
     const modalStore = useModalStore();
     const projectStore = useProjectStore();
     const pageStore = usePageStore();
     const loginStore = useLoginStore();
     const router = useRouter();
     const route = useRoute();
-    
+
     // 定时器引用
     const refreshTimer = ref<number | null>(null);
 
@@ -29,7 +29,7 @@
                 name: 'login'
             })
         }
-        
+
         // 设置定时刷新，每3分钟刷新一次
         refreshTimer.value = window.setInterval(() => {
             if (loginStore.loggedIn) {
@@ -37,7 +37,7 @@
             }
         }, 3 * 60 * 1000); // 3分钟 = 3 * 60 * 1000毫秒
     });
-    
+
     // 清理定时器，避免内存泄漏
     onBeforeUnmount(() => {
         if (refreshTimer.value) {
@@ -124,7 +124,7 @@
 <style lang="scss" scoped>
 .project-container{
     width: 100%;
-    padding: 28px;
+    padding: 14px 28px;
     box-sizing: border-box;
 }
 /* page background is provided by global .set_background_color */
@@ -134,7 +134,7 @@
     gap: 20px;
     align-items: start;
     justify-items: center;
-    padding: 20px 6px;
+    padding: 6px;
 }
 .thumb-img{
     width: 100%;

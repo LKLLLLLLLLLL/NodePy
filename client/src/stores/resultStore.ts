@@ -41,9 +41,9 @@ export const useResultStore = defineStore('result',()=>{
     const loading = ref<boolean>(false) // 添加loading状态
 
     //result modal default
-    const marginRight = 20;
-    const marginTop = 65;
-    const marginBottom = 60;
+    const marginRight = 5;
+    const marginTop = 60;
+    const marginBottom = 55;
     const modalWidth = ref<number>(500);
     const modalHeight = ref<number>(window.innerHeight - marginTop - marginBottom);
 

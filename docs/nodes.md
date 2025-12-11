@@ -406,7 +406,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - title: 图形标题，类型为str，可以为空。
 
 **输入：**
-- table: 输入的表格，类型为Table。
+- input: 输入的表格，类型为Table。
 
 **输出：**
 - plot: 输出的图形，类型为File，格式为PNG。
@@ -427,7 +427,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - title: 图形标题，类型为str，可以为空。
 
 **输入：**
-- table: 输入的表格，类型为Table。
+- input: 输入的表格，类型为Table。
 
 **输出：**
 - plot: 输出的图形，类型为File，格式为PNG。
