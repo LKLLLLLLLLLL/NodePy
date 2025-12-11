@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from server import logger
-from server.models.data import Data, DataRef
+from server.models.data import Data
+from server.models.data_view import DataRef
 from server.models.database import NodeOutputRecord, ProjectRecord
 from server.models.project import ProjWorkflow
 

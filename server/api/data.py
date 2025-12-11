@@ -3,7 +3,7 @@ from loguru import logger
 
 from server.lib.AuthUtils import get_current_user
 from server.lib.DataManager import DataManager
-from server.models.data import DataRef, DataView
+from server.models.data_view import DataRef, DataView
 from server.models.database import (
     AsyncSession,
     NodeOutputRecord,

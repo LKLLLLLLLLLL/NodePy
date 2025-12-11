@@ -2,7 +2,7 @@ from typing import Any, Literal, Self
 
 from pydantic import BaseModel, model_validator
 
-from server.models.data import DataRef
+from server.models.data_view import DataRef
 from server.models.project_topology import TopoEdge, TopoNode, WorkflowTopology
 from server.models.schema import Schema
 

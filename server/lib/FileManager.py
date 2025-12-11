@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from server.celery import celery_app
 from server.lib.DataManager import DataManager
-from server.models.data import DataRef
+from server.models.data_view import DataRef
 from server.models.database import (
     FileRecord,
     ProjectRecord,

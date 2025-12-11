@@ -12,6 +12,7 @@ from pydantic import BaseModel, model_validator
 from sklearn.base import BaseEstimator
 from typing_extensions import Self
 
+from server.models.data_view import DataView, ModelView, TableView
 from server.models.file import File
 from server.models.schema import (
     FileSchema,
@@ -23,7 +24,7 @@ from server.models.schema import (
 from server.models.types import ColType
 
 """
-Actual runtime data passed between nodes.
+Runtime data passed between nodes.
 """
 
 class Table(BaseModel):
@@ -119,11 +120,80 @@ class Table(BaseModel):
             col_types[col] = ColType.from_ptype(df[col].dtype)
         return col_types
 
+    def to_view(self) -> TableView:
+        cols = {}
+        for col in self.df.columns:
+            # Convert Timestamp objects to ISO format strings
+            if self.col_types[col] == ColType.DATETIME:
+                cols[col] = [
+                    v.isoformat() if isinstance(v, datetime) else v
+                    for v in self.df[col].tolist()
+                ]
+            else:
+                normalized = []
+                for v in self.df[col].tolist():
+                    # convert nan/NA to None
+                    if isna(v):
+                        normalized.append(None)
+                        continue
+                    # convert +/-Infinity and NaN to string markers so JSON can carry them
+                    try:
+                        if isinf(v):
+                            normalized.append("Infinity" if v > 0 else "-Infinity")
+                            continue
+                        if isnan(v):
+                            normalized.append("NaN")
+                            continue
+                    except TypeError:
+                        # non-numeric types will raise TypeError for isinf/isnan, ignore
+                        pass
+                    normalized.append(v)
+                cols[col] = normalized
+        table_view = TableView(
+            cols=cols,
+            col_types={k: v.value for k, v in self.col_types.items()},
+        )
+        return table_view
+
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> 'Table':
-        df = DataFrame.from_dict(data["data"])
-        col_types = {k: ColType(v) for k, v in data["col_types"].items()}
+    def from_view(cls, data: TableView) -> 'Table':
+        df = DataFrame.from_dict(data.cols)
+        col_types = {k: ColType(v) for k, v in data.col_types.items()}
+        for col, col_type in col_types.items():
+            if len(df) == 0:
+                continue
+
+            if col_type == ColType.DATETIME:
+                # convert ISO format strings to datetime
+                df[col] = df[col].apply(
+                    lambda x: datetime.fromisoformat(x) if isinstance(x, str) else x
+                )
+            else:
+                # convert null to nullable types
+                # make None to pd.NA/NaN
+                ptype = col_type.to_ptype()
+                if callable(ptype):
+                    ptype = ptype()
+                # If float column, convert special string markers back to float values
+                if col_type == ColType.FLOAT:
+                    def _convert_special(x):
+                        if isinstance(x, str):
+                            if x == "Infinity":
+                                return float("inf")
+                            if x == "-Infinity":
+                                return float("-inf")
+                            if x == "NaN":
+                                return float("nan")
+                        return x
+                    df[col] = df[col].apply(_convert_special)
+                df[col] = df[col].astype(ptype) # type: ignore
         return Table(df=df, col_types=col_types)
+
+    # @classmethod
+    # def from_dict(cls, data: dict[str, Any]) -> 'Table':
+    #     df = DataFrame.from_dict(data["data"])
+    #     col_types = {k: ColType(v) for k, v in data["col_types"].items()}
+    #     return Table(df=df, col_types=col_types)
 
 
 class Model(BaseModel):
@@ -143,18 +213,6 @@ class Model(BaseModel):
             model=self.metadata
         )
 
-    def to_view(self) -> "DataView.ModelView":
-        # serialize the sklearn model using joblib
-        buf = io.BytesIO()
-        joblib.dump(self.model, buf)
-        buf.seek(0)
-        model_bytes = buf.read()
-        model_b64 = base64.b64encode(model_bytes).decode("ascii")
-        return DataView.ModelView.model_validate({
-            "model": model_b64,
-            "metadata": self.metadata,
-        })
-
     def fast_hash(self) -> str:
         # hash the serialized model bytes
         buf = io.BytesIO()
@@ -163,8 +221,22 @@ class Model(BaseModel):
         model_bytes = buf.read()
         return hashlib.md5(model_bytes).hexdigest()
 
+    def to_view(self) -> ModelView:
+        # serialize the sklearn model using joblib
+        buf = io.BytesIO()
+        joblib.dump(self.model, buf)
+        buf.seek(0)
+        model_bytes = buf.read()
+        model_b64 = base64.b64encode(model_bytes).decode("ascii")
+        return ModelView.model_validate(
+            {
+                "model": model_b64,
+                "metadata": self.metadata,
+            }
+        )
+
     @classmethod
-    def from_view(cls, data: "DataView.ModelView") -> 'Model':
+    def from_view(cls, data: ModelView) -> 'Model':
         model_b64 = data.model
         model_bytes = base64.b64decode(model_b64)
         buf = io.BytesIO(model_bytes)
@@ -228,40 +300,7 @@ class Data(BaseModel):
 
     def to_view(self) -> "DataView":
         if isinstance(self.payload, Table):
-            # Serialize Table payload
-            cols = {}
-            for col in self.payload.df.columns:
-                # Convert Timestamp objects to ISO format strings
-                if self.payload.col_types[col] == ColType.DATETIME:
-                    cols[col] = [
-                        v.isoformat() if isinstance(v, datetime) else v
-                        for v in self.payload.df[col].tolist()
-                    ]
-                else:
-                    normalized = []
-                    for v in self.payload.df[col].tolist():
-                        # convert nan/NA to None
-                        if isna(v):
-                            normalized.append(None)
-                            continue
-                        # convert +/-Infinity and NaN to string markers so JSON can carry them
-                        try:
-                            if isinf(v):
-                                normalized.append("Infinity" if v > 0 else "-Infinity")
-                                continue
-                            if isnan(v):
-                                normalized.append("NaN")
-                                continue
-                        except TypeError:
-                            # non-numeric types will raise TypeError for isinf/isnan, ignore
-                            pass
-                        normalized.append(v)
-                    cols[col] = normalized
-
-            table_view = DataView.TableView(
-                cols=cols,
-                col_types={k: v.value for k, v in self.payload.col_types.items()},
-            )
+            table_view = self.payload.to_view()
             return DataView(type="Table", value=table_view)
         elif isinstance(self.payload, datetime):
             return DataView(
@@ -297,8 +336,8 @@ class Data(BaseModel):
                 value=value,
             )
 
-    def to_dict(self) -> dict[str, Any]:
-        return self.to_view().to_dict()
+    # def to_dict(self) -> dict[str, Any]:
+    #     return self.to_view().to_dict()
 
     @classmethod
     def from_view(cls, data_view: "DataView") -> "Data":
@@ -307,42 +346,10 @@ class Data(BaseModel):
 
         payload: Any
         if payload_type == "Table":
-            assert isinstance(payload_value, DataView.TableView)
-            df = DataFrame.from_dict(payload_value.cols)
-            col_types = {k: ColType(v) for k, v in payload_value.col_types.items()}
-
-            for col, col_type in col_types.items():
-                if len(df) == 0:
-                    continue
-
-                if col_type == ColType.DATETIME:
-                    # convert ISO format strings to datetime
-                    df[col] = df[col].apply(
-                        lambda x: datetime.fromisoformat(x) if isinstance(x, str) else x
-                    )
-                else:
-                    # convert null to nullable types
-                    # make None to pd.NA/NaN
-                    ptype = col_type.to_ptype()
-                    if callable(ptype):
-                        ptype = ptype()
-                    # If float column, convert special string markers back to float values
-                    if col_type == ColType.FLOAT:
-                        def _convert_special(x):
-                            if isinstance(x, str):
-                                if x == "Infinity":
-                                    return float("inf")
-                                if x == "-Infinity":
-                                    return float("-inf")
-                                if x == "NaN":
-                                    return float("nan")
-                            return x
-                        df[col] = df[col].apply(_convert_special)
-                    df[col] = df[col].astype(ptype) # type: ignore
-
-            payload = Table(df=df, col_types=col_types)
+            assert isinstance(payload_value, TableView)
+            payload = Table.from_view(payload_value)
         elif payload_type == "Model":
-            assert isinstance(payload_value, DataView.ModelView)
+            assert isinstance(payload_value, ModelView)
             payload = Model.from_view(payload_value)
         elif payload_type == "File":
             assert isinstance(payload_value, File)
@@ -366,61 +373,3 @@ class Data(BaseModel):
             raise TypeError(f"Unsupported payload type for deserialization: {payload_type}")
         
         return cls(payload=payload)
-
-class DataView(BaseModel):
-    """
-    A dict-like view of data, for transmitting or json serialization.
-    """
-    class TableView(BaseModel):
-        cols: dict[str, list[str | bool | int | float | None]] 
-        # the datetime columns are serialized as ISO format strings
-        # the nan values are serialized as None
-        col_types: dict[str, str]  # col name -> col type
-        
-        def model_dump(self, **kwargs):
-            """Override to handle Timestamp serialization"""
-            result = super().model_dump(**kwargs)
-            # Normalize values: datetimes -> ISO string, NaN/pandas.NA -> None
-            for col_name, values in result["cols"].items():
-                normalized = []
-                for v in values:
-                    if isinstance(v, datetime):
-                        normalized.append(v.isoformat())
-                    else:
-                        # pandas.isna covers: numpy.nan, pandas.NA, None, etc.
-                        if isna(v):
-                            normalized.append(None)
-                        else:
-                            normalized.append(v)
-                result["cols"][col_name] = normalized
-            return result
-    
-    class ModelView(BaseModel):
-        model: str  # base64 encoded model bytes
-        metadata: ModelSchema
-
-    type: Literal["int", "float", "str", "bool", "Table", "File", "Datetime", "Model"]
-    value: Union[TableView, str, int, bool, float, File, ModelView] # datetime is serialized as str
-
-    model_config = {"arbitrary_types_allowed": True}
-    
-    @model_validator(mode="after")
-    def convert(self) -> Self:
-        if self.type == "File":
-            if not isinstance(self.value, File):
-                self.value = File.model_validate(self.value)
-        return self
-
-    def to_dict(self) -> dict[str, Any]:
-        return super().model_dump()
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "DataView":
-        return cls.model_validate(data)
-
-class DataRef(BaseModel):
-    """
-    A lightweight representation of output data from a node port,
-    it store only the url of the data object.
-    """
-    data_id: int

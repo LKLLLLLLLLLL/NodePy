@@ -181,7 +181,7 @@ class ProjectInterpreter:
             try:
                 input_schemas_hash: str = ""
                 if DEBUG:
-                    input_schemas_hash = safe_hash(input_schemas) # guide to avoid accidental mutation
+                    input_schemas_hash = safe_hash(input_schemas) # guard to avoid accidental mutation
 
                 output_schemas = node.infer_schema(input_schemas)
 
@@ -335,7 +335,7 @@ class ProjectInterpreter:
                     input_data_hash: str = ""
 
                     if DEBUG:
-                        input_data_hash = safe_hash(input_data)  # guide to avoid accidental mutation
+                        input_data_hash = safe_hash(input_data)  # guard to avoid accidental mutation
 
                     @time_check(periodic_time_check_seconds, periodic_time_check_callback)
                     def _wrapped_execute(node: BaseNode, input_data: dict[str, Data]) -> dict[str, Data]:
