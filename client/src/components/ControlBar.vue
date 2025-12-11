@@ -13,6 +13,26 @@ import { useProjectStore } from "@/stores/projectStore";
 import Logout from "./Logout.vue";
 import { useLoginStore } from "@/stores/loginStore";
 import UserInfoMenu from "./FloatingMenu/UserInfoMenu.vue";
+import SvgIcon from '@jamescoyle/vue-icon';
+import {
+  mdiCompassOutline,
+  mdiCompass,
+  mdiHomeOutline,
+  mdiHome,
+  mdiFolderOutline,
+  mdiFolder,
+  mdiProjectorScreenOutline,
+  mdiProjectorScreen,
+} from '@mdi/js';
+
+const explore_path_outline = mdiCompassOutline;
+const explore_path_filled = mdiCompass;
+const home_path_outline = mdiHomeOutline;
+const home_path_filled = mdiHome;
+const project_path_outline = mdiProjectorScreenOutline;
+const project_path_filled = mdiProjectorScreen;
+const file_path_outline = mdiFolderOutline;
+const file_path_filled = mdiFolder;
 
 const graphStore = useGraphStore()
 const modalStore = useModalStore()
@@ -33,10 +53,10 @@ const isReadOnly = computed(() => {
 
 // 导航项
 const navItems = [
-  { name: 'Home', path: '/home', label: '首页' },
-  { name: 'Example', path: '/example', label: '探索' },
-  { name: 'Project', path: '/project', label: '工作室' },
-  { name: 'File', path: '/file', label: '文件管理' },
+  { name: 'Home', path: '/home', label: '首页', iconOutline: home_path_outline, iconFilled: home_path_filled },
+  { name: 'Example', path: '/example', label: '探索', iconOutline: explore_path_outline, iconFilled: explore_path_filled },
+  { name: 'Project', path: '/project', label: '工作室', iconOutline: project_path_outline, iconFilled: project_path_filled },
+  { name: 'File', path: '/file', label: '文件管理', iconOutline: file_path_outline, iconFilled: file_path_filled },
 ]
 
 // 判断当前页面是否激活
@@ -60,14 +80,22 @@ const isActive = (path: string) => {
         </div>
         <nav class="nav-bar" v-if="!showProjectName">
           <RouterLink
-            v-for="item in navItems"
-            :key="item.path"
-            :to="item.path"
-            class="nav-link"
-            :class="{ active: isActive(item.path) }"
-          >
-            {{ item.label }}
-          </RouterLink>
+              v-for="item in navItems"
+              :key="item.path"
+              :to="item.path"
+              class="nav-link"
+              :class="{ active: isActive(item.path) }"
+            >
+              <span class="nav-inner">
+                <SvgIcon
+                  v-if="item.iconOutline"
+                  type="mdi"
+                  :path="isActive(item.path) ? item.iconFilled : item.iconOutline"
+                  class="nav-icon"
+                />
+                <span class="nav-label">{{ item.label }}</span>
+              </span>
+            </RouterLink>
         </nav>
 
         <div v-else class="project-name">
@@ -91,6 +119,7 @@ const isActive = (path: string) => {
 </template>
 
 <style lang="scss" scoped>
+@import '../common/global.scss';
 .control-bar {
   display: flex;
   flex-direction: row;
@@ -98,6 +127,7 @@ const isActive = (path: string) => {
   width: 100%;
   color: black;
   box-shadow: 0 0px 15px rgba(128, 128, 128, 0.1);
+  // border-bottom: 1px solid #e0e0e0;
 
   .control-content {
     display: flex;
@@ -125,29 +155,53 @@ const isActive = (path: string) => {
     .nav-bar {
       display: flex;
       align-items: center;
-      gap: 6px;
+      // gap: 6px;
       flex: 1;
       justify-content: center;
-
       .nav-link {
         color: #000000;
         text-decoration: none;
         font-size: 18px;
-        font-weight: 500;
-        padding: 8px 16px;
-        margin: 0 0.4%;
-        border-bottom: 2px solid transparent;
-        transition: all 0.3s ease;
-        width: 105px;
+        font-weight: bold;
+        padding: 9px 15px;
+        margin: 0 6px;
+        transition: all 0.18s ease;
+        min-width: 120px;
         text-align: center;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(40, 40, 40, 0.76);
 
         &:hover {
-          color: #108EFE;
+          background-color: rgba(0, 0, 0, 0.06);
+        }
+
+        .nav-inner {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .nav-icon {
+          width: 22px;
+          height: 22px;
+          display: inline-block;
+          fill: currentColor;
+          // margin-right: 1px;
+        }
+
+        .nav-label {
+          line-height: 1;
         }
 
         &.active {
-          color: #000000;
-          border-bottom-color: #108EFE;
+          border-radius: 19px;
+          color: $stress-color;
+          background-color: white;
+            box-shadow: 0px 3px 5px rgba(128, 128, 128, 0.10);
+          // transform: translateY(-1px);
         }
       }
     }
