@@ -26,7 +26,7 @@ defineProps<{
   background: white;
   border: 1px solid #e4e7ed;
   border-radius: 10px;
-  padding: 12px;
+  /* padding: 12px; */
   display: flex;
   justify-content: center;
   align-items: center;

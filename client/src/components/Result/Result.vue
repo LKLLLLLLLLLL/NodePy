@@ -114,19 +114,21 @@
         <div v-if="isNoResult" class="result-control no-result-control">
             无结果
         </div>
-        <el-tabs
-            v-else-if="tabKeys.length > 0"
-            v-model="activeTab"
-            @tab-click="(tab) => handleChooseResult(tab.props.name)"
-            class="result-control"
-        >
-            <el-tab-pane
-                v-for="key in tabKeys"
-                :key="key"
-                :label="key[0]!.toUpperCase() + key.slice(1)"
-                :name="key">
-            </el-tab-pane>
-        </el-tabs>
+        <div v-else-if="tabKeys.length > 0" class="result-control">
+            <div class="tab-list" role="tablist">
+                <button
+                    v-for="key in tabKeys"
+                    :key="key"
+                    class="tab-item"
+                    :class="{ active: activeTab === key }"
+                    @click="() => handleChooseResult(key)"
+                    role="tab"
+                    :aria-selected="activeTab === key ? 'true' : 'false'"
+                >
+                    {{ key[0]!.toUpperCase() + key.slice(1) }}
+                </button>
+            </div>
+        </div>
         <!-- 结果类型显示区域 -->
         <div class="result-type-container" v-if="currentResultTypeLabel && !isNoResult">
             当前结果类型: {{ currentResultTypeLabel }}
@@ -175,6 +177,8 @@
     </div>
 </template>
 <style lang = "scss" scoped>
+@use '../../common/global.scss' as *;
+
     .result-total-container{
         display: flex;
         flex-direction: column;
@@ -196,37 +200,48 @@
     }
 
     .result-control {
-        height: 40px; /* 增加高度以适应标签页 */
-        :deep(.el-tabs__header) {
-            margin: 0;
-        }
+        height: 40px; /* match nav bar height */
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+    }
 
-        :deep(.el-tabs__nav-wrap)::after {
-            height: 2px;
-        }
+    .result-control .tab-list {
+        display: flex;
+        gap: 6px;
+        margin: 0; /* 左对齐 */
+        align-items: center;
+        justify-content: flex-start;
+    }
 
-        :deep(.el-tabs__item) {
-            height: 30px;
-            font-weight: 500;
-            color: #666;
-            padding: 0 10px;//与下面active-bar中的一致
-            transition: all 0.3s ease;
-        }
+    .result-control .tab-item {
+        height: 30px;
+        font-weight: 700;
+        color: rgba(40, 40, 40, 0.76);
+        padding: 9px 15px;
+        transition: all 0.18s ease;
+        min-width: 120px;
+        text-align: center;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+    }
 
-        :deep(.el-tabs__item:hover) {
-            color: #409eff;
-        }
+    .result-control .tab-item:hover {
+        background-color: rgba(0, 0, 0, 0.06);
+        color: $stress-color;
+    }
 
-        :deep(.el-tabs__item.is-active) {
-            color: #409eff;
-            font-weight: 600;
-        }
-
-        :deep(.el-tabs__active-bar) {
-            background-color: #409eff;
-            transition: all 0.3s ease;
-            padding: 0 10px;//与上面item中的一致
-        }
+    .result-control .tab-item.active {
+        border-radius: 19px;
+        color: #ffffff; /* white text for emphasis */
+        background-color: $stress-color; /* emphasized background */
+        box-shadow: 0px 3px 6px rgba(16, 142, 254, 0.12);
+        font-weight: 600;
     }
 
     // 无结果时的标签栏样式

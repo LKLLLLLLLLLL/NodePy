@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import { useFileStore } from '@/stores/fileStore'
 import { onMounted, onUnmounted, ref, computed, watch } from 'vue'
+//@ts-ignore
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiDownload } from '@mdi/js';
 import Loading from '@/components/Loading.vue'
 import { type File, type TableView } from '@/utils/api'
 import type { ResultType } from '@/stores/resultStore'
@@ -268,7 +271,7 @@ const loadFile = async () => {
         // 处理 Word 文件，增加样式保留
         try {
             const arrayBuffer = await blob.arrayBuffer()
-            
+
             // 配置 Mammoth 以保留更多原始样式
             const options = {
                 styleMap: [
@@ -280,39 +283,39 @@ const loadFile = async () => {
                     "p[style-name='Heading 4'] => h4:fresh",
                     "p[style-name='Heading 5'] => h5:fresh",
                     "p[style-name='Heading 6'] => h6:fresh",
-                    
+
                     // 强调样式映射
                     "r[style-name='Strong'] => strong",
                     "r[style-name='Emphasis'] => em",
                     "r[style-name='Underline'] => u",
                     "r[style-name='Strikethrough'] => s",
-                    
+
                     // 列表样式映射
                     "p[style-name='List Paragraph'] => li:fresh",
                     "p[style-name='Caption'] => figcaption:fresh",
-                    
+
                     // 表格样式映射
                     "table => table",
                     "tr => tr",
                     "td => td",
                     "th => th",
-                    
+
                     // 更多样式映射
                     "p[style-name='Normal'] => p:fresh",
                     "r[style-name='Font Color'] => span",
                     "r[style-name='Background Color'] => span",
                     "p[style-name='Quote'] => blockquote:fresh",
                     "p[style-name='Code'] => pre:fresh",
-                    
+
                     // 上下标映射
                     "r[style-name='Superscript'] => sup",
                     "r[style-name='Subscript'] => sub",
-                    
+
                     // 更多文本样式映射
                     "r[style-name='Highlight'] => span",
                     "r[style-name='Bold'] => strong",
                     "r[style-name='Italic'] => em",
-                    
+
                     // 增加更多样式支持
                     "r[style-name='Double Underline'] => span.ql-double-underline",
                     "r[style-name='Wave Underline'] => span.ql-wave-underline",
@@ -330,7 +333,7 @@ const loadFile = async () => {
                     });
                 })
             }
-            
+
             const result = await Mammoth.convertToHtml({ arrayBuffer }, options)
             wordContent.value = result.value
             } catch (err) {
@@ -341,7 +344,7 @@ const loadFile = async () => {
             try {
                 const arrayBuffer = await blob.arrayBuffer()
                 const workbook = XLSX.read(arrayBuffer, { type: 'array' })
-                
+
                 // 提取所有工作表数据
                 const sheets: any[] = []
                 workbook.SheetNames.forEach(sheetName => {
@@ -402,9 +405,47 @@ const handleImgError = () => {
 const handleImgLoad = () => {
     console.log('FileView: 图片加载成功')
 }
+
+// 是否可以下载（文件预览时显示下载）
+const canDownload = computed(() => {
+    // isFile 表示 props.value 具有文件结构
+    if (!isFile.value) return false
+    // 如果文件有效且有 key，则可下载
+    if (isValidFile.value) return true
+    // 或者当已有可展示的内容时（如 displaySrc/csv/txt/word/excel/json），也允许下载
+    if (displaySrc.value) return true
+    if (csvData.value) return true
+    if (txtLines.value.length > 0) return true
+    if (wordContent.value) return true
+    if (excelSheets.value.length > 0) return true
+    if (jsonData.value) return true
+    return false
+})
+
+// 下载当前文件（优先使用 key，如果没有则调用 downloadCurrentFile）
+const handleDownloadFile = async () => {
+    try {
+        if (isValidFile.value && fileKey.value) {
+            await fileStore.downloadFile(fileKey.value, fileName.value)
+        } else {
+            // 回退到 downloadCurrentFile，fileStore 内部会处理当前文件名
+            await fileStore.downloadCurrentFile()
+        }
+    } catch (err) {
+        console.error('File download failed', err)
+    }
+}
 </script>
 
 <template>
+    <div class="file-toolbar">
+        <div class="file-title">{{ fileName }}</div>
+        <div class="file-actions">
+            <button v-if="isValidFile" class="button download" @click="handleDownloadFile">
+                <svg-icon type="mdi" :path="mdiDownload" :size="18"></svg-icon>
+            </button>
+        </div>
+    </div>
     <div class="file-view-container">
         <!-- 加载中 -->
         <div v-if="loading" class="file-loading">
@@ -417,47 +458,47 @@ const handleImgLoad = () => {
         </div>
 
         <!-- 图片显示 -->
-        <ShowIMG 
-            v-else-if="isImage && displaySrc" 
-            :src="displaySrc" 
+        <ShowIMG
+            v-else-if="isImage && displaySrc"
+            :src="displaySrc"
             :alt="fileName"
             :on-error="handleImgError"
             :on-load="handleImgLoad"
         />
 
         <!-- PDF 显示 -->
-        <ShowPDF 
-            v-else-if="isPdf && displaySrc" 
+        <ShowPDF
+            v-else-if="isPdf && displaySrc"
             :src="displaySrc"
         />
 
         <!-- CSV 显示 -->
-        <ShowCSV 
-            v-else-if="isCsv && csvData" 
+        <ShowCSV
+            v-else-if="isCsv && csvData"
             :data="csvData"
         />
 
         <!-- TXT 显示 -->
-        <ShowTXT 
-            v-else-if="isTxt && txtLines.length > 0" 
+        <ShowTXT
+            v-else-if="isTxt && txtLines.length > 0"
             :data="txtLines.join('\n')"
         />
 
         <!-- Word 显示 -->
-        <ShowWord 
-            v-else-if="isWord && wordContent" 
+        <ShowWord
+            v-else-if="isWord && wordContent"
             :content="wordContent"
         />
 
         <!-- Excel 显示 -->
-        <ShowExcel 
-            v-else-if="isXlsx && excelSheets.length > 0" 
+        <ShowExcel
+            v-else-if="isXlsx && excelSheets.length > 0"
             :sheets="excelSheets"
         />
 
         <!-- JSON 显示 -->
-        <ShowJSON 
-            v-else-if="isJson && jsonData" 
+        <ShowJSON
+            v-else-if="isJson && jsonData"
             :data="jsonData"
         />
     </div>
@@ -473,8 +514,24 @@ const handleImgLoad = () => {
     overflow: hidden;
     background: $background-color;
     border-radius: 10px;
-    padding: 16px;
+    // padding: 16px;
     box-sizing: border-box;
+}
+
+.file-toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 8px 12px;
+    gap: 8px;
+}
+
+.file-title{
+    font-weight:600;
+}
+
+.file-actions .button.download{
+    padding:6px;
 }
 
 .file-loading {

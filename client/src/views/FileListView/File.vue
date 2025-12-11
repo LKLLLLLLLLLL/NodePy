@@ -16,7 +16,7 @@
     const loginStore = useLoginStore()
 
     const router = useRouter()
-    
+
     const test: boolean = true
 
     type SortType = 'project_a'|'project_z'|'size_big'|'size_small'|'type_a'|'type_z'|'time_new'|'time_old'|'name_a'|'name_z'
@@ -88,48 +88,48 @@
                     const projectB = (b.project_name || '').toLowerCase()
                     return projectA.localeCompare(projectB)
                 })
-            
+
             case('project_z'):
                 return toBeSortedFiles.sort((a, b) => {
                     const projectA = (a.project_name || '').toLowerCase()
                     const projectB = (b.project_name || '').toLowerCase()
                     return projectB.localeCompare(projectA)
                 })
-            
+
             case('size_big'):
                 return toBeSortedFiles.sort((a, b) => {
                     return b.size - a.size
                 })
-            
+
             case('size_small'):
                 return toBeSortedFiles.sort((a, b) => {
                     return a.size - b.size
                 })
-            
+
             case('type_a'):
                 return toBeSortedFiles.sort((a, b) => {
                     const typeA = (a.format || '').toLowerCase()
                     const typeB = (b.format || '').toLowerCase()
                     return typeA.localeCompare(typeB)
                 })
-                
+
             case('type_z'):
                 return toBeSortedFiles.sort((a, b) => {
                     const typeA = (a.format || '').toLowerCase()
                     const typeB = (b.format || '').toLowerCase()
                     return typeB.localeCompare(typeA)
                 })
-                
+
             case('time_new'):
                 return toBeSortedFiles.sort((a, b) => {
                     return b.modified_at - a.modified_at
                 })
-            
+
             case('time_old'):
                 return toBeSortedFiles.sort((a, b) => {
                     return a.modified_at - b.modified_at
                 })
-            
+
             case('name_a'):
                 return toBeSortedFiles.sort((a, b) => {
                     const nameA = (a.filename || '').toLowerCase()
@@ -143,7 +143,7 @@
                     const nameB = (b.filename || '').toLowerCase()
                     return nameB.localeCompare(nameA)
                 })
-            
+
             default:
                 return toBeSortedFiles
         }
@@ -193,7 +193,7 @@
                         </div>
                     </div>
                     <div class="header-item header-info">
-                        <div class="header-item header-project" 
+                        <div class="header-item header-project"
                             @click="()=>{
                                 if(sortType=='project_a')handleSort('project_z')
                                 else handleSort('project_a')
@@ -202,7 +202,7 @@
                             所属项目
                             <svg-icon v-if="projectSortIcon" type="mdi" :path="projectSortIcon" class="sort-icon" />
                         </div>
-                        <div class="header-item header-size" 
+                        <div class="header-item header-size"
                             @click="()=>{
                                 if(sortType=='size_big')handleSort('size_small')
                                 else handleSort('size_big')
@@ -211,7 +211,7 @@
                             大小
                             <svg-icon v-if="sizeSortIcon" type="mdi" :path="sizeSortIcon" class="sort-icon" />
                         </div>
-                        <div class="header-item header-modified" 
+                        <div class="header-item header-modified"
                             @click="()=>{
                                 if(sortType=='time_new')handleSort('time_old')
                                 else handleSort('time_new')
@@ -247,7 +247,7 @@
 <style lang="scss" scoped>
     @use '../../common/global.scss' as *;
     @use "sass:color";
-    
+
     .fileview-container{
         display: flex;
         width: 100%;
@@ -258,7 +258,7 @@
         min-height: 0;
         box-sizing: border-box;
     }
-    
+
     .middle-container{
         display: flex;
         flex-direction: column;
@@ -268,7 +268,7 @@
         height: 100%;
         overflow: auto;
     }
-    
+
     .file-controlbar{
         height: 60px;
         width: 100%;
@@ -279,7 +279,7 @@
         align-items: center;
         flex-shrink: 0; /* 防止控制栏被压缩 */
     }
-    
+
     .control-header{
         display: flex;
         width: 100%;
@@ -288,7 +288,7 @@
         color: #2d3748;
         font-size: 14px;
     }
-    
+
     .header-item{
         padding: 0 16px;
         // border: 2px solid black;
@@ -300,7 +300,7 @@
         cursor: pointer; /* 添加指针样式表明可点击 */
         position: relative;
     }
-    
+
     .header-type-name{
         width: 200px;
         text-align: center;
@@ -327,14 +327,14 @@
         flex-direction: row;
         white-space: nowrap;
     }
-    
+
     .header-info{
         flex: 1;
         display: flex;
         justify-content: flex-end;
         gap: 32px;
     }
-    
+
     .header-project{
         width: 200px;
         text-align: center;
@@ -345,7 +345,7 @@
         flex-direction: row;
         white-space: nowrap;
     }
-    
+
     .header-size{
         width: 120px;
         text-align: center;
@@ -356,7 +356,7 @@
         flex-direction: row;
         white-space: nowrap;
     }
-    
+
     .header-modified{
         width: 200px;
         text-align: center;
@@ -367,7 +367,7 @@
         flex-direction: row;
         white-space: nowrap;
     }
-    
+
     .header-actions{
         width: 200px;
         display: flex;
@@ -377,46 +377,46 @@
     .actions-header-container{
         margin-right: 40px;
     }
-    
+
     .header-icon {
         width: 16px;
         height: 16px;
     }
-    
+
     .sort-icon {
         width: 16px;
         height: 16px;
         margin-left: 5px;
     }
-    
+
     .filelist-container{
         flex: 1;
         background-color: $stress-background-color;
         border-radius: 10px;
-        padding: 24px;
+        // padding: 24px;
         min-height: 0;
         overflow: auto;
         height: 0; /* 关键：设置高度为0，让flex:1控制实际高度 */
-        
+
         /* 自定义滚动条样式 */
         &::-webkit-scrollbar {
             width: 8px;
         }
-        
+
         &::-webkit-scrollbar-track {
             background: $mix-background-color;
             border-radius: 4px;
         }
-        
+
         &::-webkit-scrollbar-thumb {
             background: color.adjust($mix-background-color, $lightness: -20%);
             border-radius: 4px;
-            
+
             &:hover {
                 background: color.adjust($mix-background-color, $lightness: -30%)
             }
         }
-        
+
         /* Firefox 滚动条样式 */
         scrollbar-width: thin;
         scrollbar-color: color.adjust($mix-background-color, $lightness: -20%) $mix-background-color;
