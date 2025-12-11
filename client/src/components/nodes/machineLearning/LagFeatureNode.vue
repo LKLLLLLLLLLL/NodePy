@@ -23,23 +23,9 @@
                     :disabled="window_sizeDisabled"
                  />
             </div>
-            <div class="input-horizon port">
-                <div class="input-port-description" :class="{'node-has-paramerr': horizonHasErr.value}">
-                    滞后步长
-                </div>
-                <!-- <Handle id="horizon" type="target" :position="Position.Left" :class="[`${inputHorizon_type}-handle-color`, {'node-errhandle': inputHorizonHasErr.value}]"/> -->
-            </div>
-            <div class="horizon">
-                <NodepyNumberInput
-                    v-model="horizon"
-                    class="nodrag"
-                    @update-value="onUpdateHorizon"
-                    :disabled="horizonDisabled"
-                 />
-            </div>
             <div class="lag_cols">
                 <div class="param-description" :class="{'node-has-paramerr': lag_colsHasErr.value}">
-                    滞后列名
+                    特征列名
                 </div>
                 <NodepyMultiSelectMany
                     :options="lag_colsHint"
@@ -56,12 +42,26 @@
                     width="20px"
                     height="20px"
                 >
-                    是否生成目标列
+                    是否生成预测列
                 </NodepyBoolValue>
+            </div>
+            <div class="input-horizon port" v-show="data.param.generate_target">
+                <div class="input-port-description" :class="{'node-has-paramerr': horizonHasErr.value}">
+                    预测步长
+                </div>
+                <!-- <Handle id="horizon" type="target" :position="Position.Left" :class="[`${inputHorizon_type}-handle-color`, {'node-errhandle': inputHorizonHasErr.value}]"/> -->
+            </div>
+            <div class="horizon" v-show="data.param.generate_target">
+                <NodepyNumberInput
+                    v-model="horizon"
+                    class="nodrag"
+                    @update-value="onUpdateHorizon"
+                    :disabled="horizonDisabled"
+                 />
             </div>
             <div class="target_col" v-show="data.param.generate_target">
                 <div class="param-description" :class="{'node-has-paramerr': target_colHasErr.value}">
-                    目标列名
+                    预测列名
                 </div>
                 <NodepySelectMany
                     :options="target_colHint"

@@ -241,7 +241,6 @@
             padding: 6px 6px;
             cursor: pointer;
 
-            max-height: 200px;
             overflow-y: auto;
 
             &::-webkit-scrollbar {

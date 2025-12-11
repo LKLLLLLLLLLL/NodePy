@@ -420,10 +420,10 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **参数：**
 - x_col: x轴列名，类型为str，表格中该列的类型必须为int, float, str或datetime。
-- left_y_col: 左y轴列名，类型为list[str]，表格中该列的类型必须为int或float。
-- left_plot_type: 左y轴图形类型，类型为list[str], str取值为"line", "bar"。
-- right_y_col: 右y轴列名，类型为list[str]，表格中该列的类型必须为int或float。
-- right_plot_type: 右y轴图形类型，类型为list[str], str取值为"line", "bar"。
+- left_y_col: 左y轴列名，类型为str，表格中该列的类型必须为int或float。
+- left_plot_type: 左y轴图形类型，类型为str, str取值为"line", "bar"。
+- right_y_col: 右y轴列名，类型为str，表格中该列的类型必须为int或float。
+- right_plot_type: 右y轴图形类型，类型为str, str取值为"line", "bar"。
 - title: 图形标题，类型为str，可以为空。
 
 **输入：**
