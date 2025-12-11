@@ -325,6 +325,10 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'QuickPlotNode'
             },
             {
+                label: '双轴绘图节点',
+                value: 'DualAxisPlotNode'
+            },
+            {
                 label: '统计绘图节点',
                 value: 'StatisticalPlotNode'
             },

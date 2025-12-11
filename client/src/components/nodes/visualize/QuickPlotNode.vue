@@ -5,7 +5,7 @@
         <div class="data">
             <div class="input-table port">
                 <div class="input-port-description">表格输入</div>
-                <Handle id="input" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': tableHasErr.value}]"/>
+                <Handle id="table" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': tableHasErr.value}]"/>
             </div>
             <div class="title">
                 <div class="param-description">图像标题</div>
@@ -32,7 +32,7 @@
                     :options="y_col_hint"
                     :default-selected="y_col.defaultSelected"
                     @select-change="(e: any) => onUpdateY_col(e, idx)"
-                    @clear-select="clearSelectY"
+                    @clear-select="(e) => clearSelectY(e, idx)"
                     class="nodrag"
                     />
                 </div>
@@ -96,18 +96,17 @@
     const y_cols = ref(props.data.param.y_col.map((item, idx) => {
         return {
             id: Date.now().toString()+`_${idx}`,
-            name: item,
             defaultSelected: y_col_hint.value.indexOf(item),
             defaultSelectedPlot_type: plot_type_options.indexOf(props.data.param.plot_type[idx]!)
         }
     }))
     const title = ref(props.data.param.title)
-    const table_type = computed(() => getInputType(props.id, 'input'))
+    const table_type = computed(() => getInputType(props.id, 'table'))
     const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['plot']?.type || 'default')
     const plotHasErr = computed(() => handleOutputError(props.id, 'plot'))
     const errMsg = ref<string[]>([])
     const tableHasErr = ref({
-        handleId: 'input',
+        handleId: 'table',
         value: false
     })
     const x_colHasErr = ref({
@@ -140,13 +139,12 @@
         props.data.param.title = title.value
     }
     const onUpdateY_col = (hintIdx: number, y_colsIdx: number) => {
-        y_cols.value[y_colsIdx]!.name = y_col_hint.value[hintIdx]
         props.data.param.y_col[y_colsIdx] = y_col_hint.value[hintIdx]
     }
-    const clearSelectY = (resolve: any) => {
-        props.data.param.y_col = ['']
-        props.data.param.plot_type = ['line']
-        y_cols.value = [{id: Date.now().toString()+'_0', name: '', defaultSelected: -1, defaultSelectedPlot_type: 1}]
+    const clearSelectY = (resolve: any, idx: number) => {
+        props.data.param.y_col[idx] = ''
+        props.data.param.plot_type[idx] = 'line'
+        y_cols.value[idx] = {id: Date.now().toString()+`_${idx}`, defaultSelected: -1, defaultSelectedPlot_type: 1}
         resolve()
     }
     const removeY_col = (idx: number) => {
@@ -157,7 +155,7 @@
         }
     }
     const addY_col = () => {
-        y_cols.value.push({id: Date.now().toString()+`_${y_cols.value.length}`, name: '', defaultSelected: -1, defaultSelectedPlot_type: 1})
+        y_cols.value.push({id: Date.now().toString()+`_${y_cols.value.length}`, defaultSelected: -1, defaultSelectedPlot_type: 1})
         props.data.param.y_col.push('')
         props.data.param.plot_type.push('line')
     }

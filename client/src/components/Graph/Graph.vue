@@ -38,6 +38,7 @@ import ToIntNode from '../nodes/compute/ToIntNode.vue'
 import ToFloatNode from '../nodes/compute/ToFloatNode.vue'
 import ToBoolNode from '../nodes/compute/ToBoolNode.vue'
 import QuickPlotNode from '../nodes/visualize/QuickPlotNode.vue'
+import DualAxisPlotNode from '../nodes/visualize/DualAxisPlotNode.vue'
 import StatisticalPlotNode from '../nodes/visualize/StatisticalPlotNode.vue'
 import WordcloudNode from '../nodes/visualize/WordcloudNode.vue'
 import StripNode from '../nodes/stringProcess/StripNode.vue'
@@ -304,6 +305,7 @@ const nodeColor = (node: BaseNode) => {
     case 'QuickPlotNode':
     case 'StatisticalPlotNode':
     case 'WordcloudNode':
+    case 'DualAxisPlotNode':
       return nodeCategoryColor.visualize
     case 'StripNode':
     case 'SliceNode':
@@ -531,6 +533,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-QuickPlotNode="QuickPlotNodeProps">
           <QuickPlotNode v-bind="QuickPlotNodeProps" />
+        </template>
+
+        <template #node-DualAxisPlotNode="DualAxisPlotNodeProps">
+          <DualAxisPlotNode v-bind="DualAxisPlotNodeProps" />
         </template>
 
         <template #node-StatisticalPlotNode="StatisticalPlotNodeProps">

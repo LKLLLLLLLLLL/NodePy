@@ -441,6 +441,24 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedQuickPlotNode)
         break
+      case 'DualAxisPlotNode':
+        const addedDualAxisPlotNode: Nodetypes.DualAxisPlotNode = {
+          id,
+          position,
+          type: 'DualAxisPlotNode',
+          data: {
+            param: {
+              x_col: '',
+              left_y_col: [''],
+              left_plot_type: ['line'],
+              right_y_col: [''],
+              right_plot_type: ['line'],
+              title: null
+            }
+          }
+        }
+        addNodes(addedDualAxisPlotNode)
+        break
       case 'StatisticalPlotNode':
         const addedStatisticalPlotNode: Nodetypes.StatisticalPlotNode = {
           id,

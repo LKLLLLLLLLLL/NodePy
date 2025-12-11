@@ -340,6 +340,22 @@ export interface QuickPlotNode extends BaseNode<QuickPlotNodeData>{
 }
 
 
+export interface DualAxisPlotNodeParam {
+    x_col: string
+    left_y_col: string[]
+    left_plot_type: ("line" | "bar")[]
+    right_y_col: string[]
+    right_plot_type: ("line" | "bar")[]
+    title: string | null
+}
+export type DualAxisPlotNodeData = BaseData & {
+    param: DualAxisPlotNodeParam
+}
+export interface DualAxisPlotNode extends BaseNode<DualAxisPlotNodeData>{
+    type: 'DualAxisPlotNode'
+}
+
+
 export interface WordcloudNodeParam {
     word_col: string
     frequency_col: string
@@ -364,6 +380,24 @@ export type StatisticalPlotNodeData = BaseData & {
 }
 export interface StatisticalPlotNode extends BaseNode<StatisticalPlotNodeData>{
     type: 'StatisticalPlotNode'
+}
+
+
+export interface KlinePlotNodeParam {
+    title: string | null
+    x_col: string
+    open_col: string
+    high_col: string
+    low_col: string
+    close_col: string
+    volume_col: string | null
+    style_mode: "CN" | "US"
+}
+export type KlinePlotNodeData = BaseData & {
+    param: KlinePlotNodeParam
+}
+export interface KlinePlotNode extends BaseNode<KlinePlotNodeData>{
+    type: 'KlinePlotNode'
 }
 
 
