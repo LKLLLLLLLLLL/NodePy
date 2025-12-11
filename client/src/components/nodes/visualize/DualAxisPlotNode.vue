@@ -3,9 +3,9 @@
         <NodeTitle node-category="visualize">双轴绘图节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
-            <div class="input-table port">
+            <div class="input-input port">
                 <div class="input-port-description">表格输入</div>
-                <Handle id="table" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': tableHasErr.value}]"/>
+                <Handle id="input" type="target" :position="Position.Left" :class="[`${input_type}-handle-color`, {'node-errhandle': inputHasErr.value}]"/>
             </div>
             <div class="title">
                 <div class="param-description">图像标题</div>
@@ -146,12 +146,12 @@
         }
     }))
     const title = ref(props.data.param.title)
-    const table_type = computed(() => getInputType(props.id, 'table'))
+    const input_type = computed(() => getInputType(props.id, 'input'))
     const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['plot']?.type || 'default')
     const plotHasErr = computed(() => handleOutputError(props.id, 'plot'))
     const errMsg = ref<string[]>([])
-    const tableHasErr = ref({
-        handleId: 'table',
+    const inputHasErr = ref({
+        handleId: 'input',
         value: false
     })
     const x_colHasErr = ref({
@@ -198,8 +198,7 @@
     }
     const clearSelectLeft_y_col = (resolve: any, idx: number) => {
         props.data.param.left_y_col[idx] = ''
-        props.data.param.left_plot_type[idx] = 'line'
-        left_y_cols.value[idx] = {id: Date.now().toString()+`_${idx}`, defaultSelected: -1, defaultSelectedPlot_type: [1]}
+        left_y_cols.value[idx]!.defaultSelected = -1
         resolve()
     }
     const removeLeft_y_col = (idx: number) => {
@@ -219,8 +218,7 @@
     }
     const clearSelectRight_y_col = (resolve: any, idx: number) => {
         props.data.param.right_y_col[idx] = ''
-        props.data.param.right_plot_type[idx] = 'line'
-        right_y_cols.value[idx] = {id: Date.now().toString()+`_${idx}`, defaultSelected: -1, defaultSelectedPlot_type: [1]}
+        right_y_cols.value[idx]!.defaultSelected = -1
         resolve()
     }
     const removeRight_y_col = (idx: number) => {
@@ -241,7 +239,7 @@
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
         handleParamError(props.data.error, errMsg, x_colHasErr, left_y_colHasErr, left_plot_typeHasErr, right_y_colHasErr, right_plot_typeHasErr)
-        handleValidationError(props.id, props.data.error, errMsg, tableHasErr)
+        handleValidationError(props.id, props.data.error, errMsg, inputHasErr)
     }, {immediate: true})
 
 </script>
@@ -254,7 +252,7 @@
         .data {
             padding-top: $node-padding-top;
             padding-bottom: $node-padding-bottom;
-            .input-table {
+            .input-input {
                 margin-bottom: $node-margin;
             }
             .x_col, .left_y_col, .right_y_col, .addLeft_y_col, .addRight_y_col, .left_plot_type, .right_plot_type, .title {
