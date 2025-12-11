@@ -342,10 +342,10 @@ export interface QuickPlotNode extends BaseNode<QuickPlotNodeData>{
 
 export interface DualAxisPlotNodeParam {
     x_col: string
-    left_y_col: string[]
-    left_plot_type: ("line" | "bar")[]
-    right_y_col: string[]
-    right_plot_type: ("line" | "bar")[]
+    left_y_col: string
+    left_plot_type: "line" | "bar"
+    right_y_col: string
+    right_plot_type: "line" | "bar"
     title: string | null
 }
 export type DualAxisPlotNodeData = BaseData & {

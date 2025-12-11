@@ -449,10 +449,10 @@ export const useGraphStore = defineStore('graph', () => {
           data: {
             param: {
               x_col: '',
-              left_y_col: [''],
-              left_plot_type: ['line'],
-              right_y_col: [''],
-              right_plot_type: ['line'],
+              left_y_col: '',
+              left_plot_type: 'line',
+              right_y_col: '',
+              right_plot_type: 'line',
               title: null
             }
           }
