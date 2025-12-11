@@ -316,8 +316,8 @@ class DualAxisPlotNode(BaseNode):
     @classmethod
     def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
         hint = {}
-        if "table" in input_schemas:
-            input_schema = input_schemas["table"]
+        if "input" in input_schemas:
+            input_schema = input_schemas["input"]
             if input_schema.type == Schema.Type.TABLE and input_schema.tab is not None:
                 x_col_choices = []
                 y_col_choices = []

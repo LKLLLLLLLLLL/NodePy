@@ -5,6 +5,11 @@ import { useProjectStore } from '@/stores/projectStore';
 import { useModalStore } from '@/stores/modalStore';
 import DeleteProject from './DeleteProject.vue';
 import UpdateProjectSetting from './UpdateProjectSetting.vue';
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiPencil, mdiDelete } from '@mdi/js';
+
+const edit_path = mdiPencil;
+const delete_path = mdiDelete;
 
 const props = defineProps<{
     id: number,
@@ -19,12 +24,12 @@ const props = defineProps<{
 // 计算属性：将 Base64 转换为完整的 Data URL
 const thumbSrc = computed(() => {
     if (!props.thumb) return null
-    
+
     // 如果已经是 Data URL，直接返回
     if (props.thumb.startsWith('data:image')) {
         return props.thumb
     }
-    
+
     // 如果是纯 Base64，添加前缀
     return `data:image/png;base64,${props.thumb}`
 })
@@ -124,12 +129,12 @@ async function handleClickUpdate(){
                 </div>
             </slot>
             <div v-if="props.id !== 0" class="card-actions">
-                <el-button type="text" class="action-btn" @click.stop="handleClickUpdate" title="更新">
-                    <el-icon><Edit/></el-icon>
-                </el-button>
-                <el-button type="text" class="action-btn" @click.stop="handleClickDelete" title="删除">
-                    <el-icon><Delete/></el-icon>
-                </el-button>
+                <div @click.stop="handleClickUpdate" title="编辑" class="project-edit-btn project-action-btn">
+                    <svg-icon type="mdi" :path="edit_path"></svg-icon>
+                </div>
+                <div @click.stop="handleClickDelete" title="删除" class="project-delete-btn project-action-btn">
+                    <svg-icon type="mdi" :path="delete_path"></svg-icon>
+                </div>
             </div>
         </div>
 
@@ -195,7 +200,7 @@ async function handleClickUpdate(){
     right: 8px;
     top: 8px;
     display: flex;
-    gap: 6px;
+    gap: 4px;
     z-index: 5;
 }
 .action-btn{
@@ -250,5 +255,24 @@ async function handleClickUpdate(){
 
 @media (max-width: 480px){
     .project-card{ max-width: 100%; }
+}
+
+.project-action-btn{
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    svg{
+        width: 18px;
+        height: 18px;
+        color: rgba(0, 0, 0, 0.60);
+    }
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
 }
 </style>

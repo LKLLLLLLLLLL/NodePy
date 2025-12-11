@@ -477,7 +477,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 - word_col_choices: 列名列表，类型为List[str]，用于在UI中为word_col参数提供可选值。
 - frequency_col_choices: 列名列表，类型为List[str]，用于在UI中为frequency_col参数提供可选值。
 
-#### 2.5 KlinePlotNode
+#### 3.5 KlinePlotNode
 K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 
 **参数：**
