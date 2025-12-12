@@ -9,7 +9,7 @@ from ..base_node import BaseNode, InPort, OutPort, register_node
 
 
 @register_node()
-class KLinePlotNode(BaseNode):
+class KlinePlotNode(BaseNode):
     """
     A node to create K-Line (Candlestick) plots from financial data.
     """
@@ -24,7 +24,7 @@ class KLinePlotNode(BaseNode):
 
     @override
     def validate_parameters(self) -> None:
-        if not self.type == "KLinePlotNode":
+        if not self.type == "KlinePlotNode":
             raise NodeParameterError(
                 node_id=self.id,
                 err_param_key="type",
