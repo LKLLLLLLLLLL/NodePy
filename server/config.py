@@ -17,7 +17,7 @@ CORE_SYMBOLS = {
 }
 
 # Whether to use caching mechanism globally
-USE_CACHE = False
+USE_CACHE = True
 
 # Whether to enable time tracing for interpreter
 TRACING_ENABLED = True

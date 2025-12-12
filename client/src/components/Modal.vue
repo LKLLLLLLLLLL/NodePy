@@ -278,7 +278,8 @@
         display: flex;
         flex-direction: column;
         box-sizing: border-box;
-        padding: 10px 15px;
+        // padding: 10px 15px;
+        background-color: $background-color;
     }
     .modal-head{
         display: flex;
@@ -286,12 +287,14 @@
         width: 100%;
         cursor: move;
         align-items: center;
+        padding: 10px 15px;
+        padding-bottom: 0px;
     }
     .modal-body, .modal-content{
         // height: calc(100% - 40px - 40px); /* 调整高度计算 */
         display: flex;
         flex-direction: column;
-        margin-bottom: 10px;
+        // margin-bottom: 10px;
         overflow: hidden; /* 改为hidden，让内部组件控制滚动 */
         flex: 1;
     }
