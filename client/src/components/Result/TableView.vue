@@ -294,9 +294,9 @@
     width: 100%;
     overflow: hidden;
     background: $background-color;
-    border-radius: 10px;
-    padding: 16px;
-    box-sizing: border-box;
+    // border-radius: 10px;
+    // padding: 16px;
+    box-sizing: border-box;;
 }
 
 .table-content-wrapper {
@@ -304,9 +304,9 @@
     flex-direction: column;
     height: 100%;
     background: $stress-background-color;
-    border-radius: 10px;
+    // border-radius: 10px;
     box-sizing: border-box;
-    @include controller-style;
+    // @include controller-style;
 }
 
 .table-loading {
@@ -318,7 +318,7 @@
     gap: 12px;
     color: #909399;
     font-size: 14px;
-    padding: 16px;
+    // padding: 16px;
 }
 
 .table-error,
@@ -328,7 +328,7 @@
     justify-content: center;
     color: #909399;
     font-size: 14px;
-    padding: 16px;
+    // padding: 16px;
 }
 
 .table-error {
@@ -336,16 +336,16 @@
     background: $stress-background-color;
     border-radius: 10px;
     margin: 16px;
-    padding: 16px;
+    // padding: 16px;
     @include controller-style;
 }
 
 .table-wrapper {
     flex: 1;
     overflow: auto;
-    border: 1px solid #ebeef5;
-    border-radius: 4px;
-    margin: 12px;
+    // border: 1px solid #ebeef5;
+    // border-radius: 4px;
+    // margin: 12px;
 }
 
 .result-table {

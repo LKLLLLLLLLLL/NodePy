@@ -193,7 +193,7 @@
         // height: calc(100% - 70px); /* 调整高度以适应标签页和类型显示 */
         color: grey;
         padding: 0;
-        border-radius: 10px;
+        // border-radius: 10px;
         position: relative;
         overflow: hidden;
         flex: 1;
@@ -270,7 +270,7 @@
         flex: 1;
         margin-top: 10px;
         margin-left: 0;
-        border-radius: 10px;
+        // border-radius: 10px;
         overflow: hidden;
         background: transparent;
     }
@@ -284,7 +284,7 @@
     .view-content{
         width: 100%;
         min-height: 100%;
-        border-radius: 10px;
+        // border-radius: 10px;
     }
 
     .loading-container {

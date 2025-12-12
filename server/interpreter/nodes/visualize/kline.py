@@ -3,7 +3,7 @@ from typing import Any, Literal, override
 from server.config import FIGURE_DPI
 from server.models.data import Data, Table
 from server.models.exception import NodeParameterError
-from server.models.schema import ColType, FileSchema, Pattern, Schema
+from server.models.schema import NO_SPECIFIED_COL, ColType, FileSchema, Pattern, Schema
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
@@ -181,7 +181,7 @@ class KLinePlotNode(BaseNode):
             high_col_choices = []
             low_col_choices = []
             close_col_choices = []
-            volume_col_choices = []
+            volume_col_choices = [NO_SPECIFIED_COL]
             if schema.type == Schema.Type.TABLE and schema.tab is not None:
                 for col, col_type in schema.tab.col_types.items():
                     if col_type == ColType.DATETIME:
