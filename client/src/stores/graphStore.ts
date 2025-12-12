@@ -1072,6 +1072,19 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedRandomForestRegressionNode)
         break
+      case 'RegressionScoreNode':
+        const addedRegressionScoreNode: Nodetypes.RegressionScoreNode = {
+          id,
+          position,
+          type: 'RegressionScoreNode',
+          data: {
+            param: {
+              metric: 'mse'
+            }
+          }
+        }
+        addNodes(addedRegressionScoreNode)
+        break
     
       default:
         console.log(type)

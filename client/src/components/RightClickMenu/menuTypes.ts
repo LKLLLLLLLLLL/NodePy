@@ -362,6 +362,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '随机森林回归节点',
                 value: 'RandomForestRegressionNode'
             },
+            {
+                label: '回归评分节点',
+                value: 'RegressionScoreNode'
+            },
         ]
     },
 ]
