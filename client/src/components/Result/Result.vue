@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-    import type { ResultType } from '@/stores/resultStore';
+
     import TableView from './TableView.vue';
     import FileView from './FileView.vue';
     import ValueView from './ValueView.vue';
@@ -16,6 +16,9 @@
     // 当前激活的标签页
     const activeTab = ref('');
 
+    // 每个标签对应的类型标签与颜色信息
+    const tabMeta = ref<Record<string, { label: string; type: string; color: string }>>({});
+
     // 计算标签页数据
     const tabKeys = computed(() => {
         // 如果是默认的无结果状态，返回空数组以显示"无结果"提示
@@ -31,22 +34,7 @@
                resultStore.currentResult === resultStore.default_dataview;
     });
 
-    // 计算当前结果类型的中文标签
-    const currentResultTypeLabel = computed(() => {
-        if (!resultStore.currentResult || !resultStore.currentResult.type) return '';
 
-        const typeLabels: Record<string, string> = {
-            'Table': '表格',
-            'File': '文件',
-            'int': '整数',
-            'str': '字符串',
-            'bool': '布尔值',
-            'float': '浮点数',
-            'Datetime': '日期时间'
-        };
-
-        return typeLabels[resultStore.currentResult.type] || resultStore.currentResult.type;
-    });
 
     // 监听窗口大小变化
     const handleWindowResize = () => {
@@ -71,6 +59,7 @@
                 resultStore.currentResult = resultStore.default_dataview
                 resultStore.currentInfo = resultStore.default_info
                 activeTab.value = ''; // 重置激活的标签页
+                tabMeta.value = {};
                 return
             }
             // 获取字典中的第一个值作为默认结果ID
@@ -94,6 +83,47 @@
                 }
             }
 
+            // 异步为所有标签读取类型信息，用于在标签上显示小徽章
+            const typeColorMap: Record<string, string> = {
+                'int': '#1c6bbf',
+                'float': '#ecbc00',
+                'str': '#10b981',
+                'Table': 'pink',
+                'File': '#f97316',
+                'bool': '#77b021',
+                'Datetime': '#00c8ff',
+                'Model': '#9f03c2'
+            };
+
+            const typeLabelMap: Record<string, string> = {
+                'Table': '表格',
+                'File': '文件',
+                'int': '整数',
+                'str': '字符串',
+                'bool': '布尔',
+                'float': '浮点',
+                'Datetime': '时间',
+                'Model': '模型'
+            };
+
+            const metaPromises = Object.keys(newTypeDataID).map(async (k) => {
+                const id = newTypeDataID[k];
+                try {
+                    if (typeof id === 'number' && !isNaN(id)) {
+                        const r = await resultStore.getResultCacheContent(id);
+                        const t = r?.type || '';
+                        const label = typeLabelMap[t] || t || '';
+                        const color = typeColorMap[t] || '#9b9b9b';
+                        tabMeta.value[k] = { label, type: t, color };
+                    } else {
+                        tabMeta.value[k] = { label: '', type: '', color: '#9b9b9b' };
+                    }
+                } catch (e) {
+                    tabMeta.value[k] = { label: '', type: '', color: '#9b9b9b' };
+                }
+            });
+            await Promise.all(metaPromises);
+
         } catch (error) {
             console.error('Result: 加载结果失败:', error);
             resultStore.currentInfo = graphStore.currentNode?.data?.param || {};
@@ -104,7 +134,11 @@
 
     async function handleChooseResult(key: string){
         activeTab.value = key;
-        resultStore.currentResult = await resultStore.getResultCacheContent(resultStore.currentTypeDataID[key]!)
+        // 点击切换时确保当前结果和当前info也被设置
+        const id = resultStore.currentTypeDataID[key]!;
+        if (typeof id === 'number') {
+            resultStore.currentResult = await resultStore.getResultCacheContent(id);
+        }
     }
 
 </script>
@@ -121,18 +155,18 @@
                     :key="key"
                     class="tab-item"
                     :class="{ active: activeTab === key }"
-                    @click="() => handleChooseResult(key)"
+                    @click="handleChooseResult(key)"
                     role="tab"
                     :aria-selected="activeTab === key ? 'true' : 'false'"
+                    :title="(key[0]!.toUpperCase() + key.slice(1)) + (tabMeta[key]?.label ? ' — ' + tabMeta[key].label : '')"
+                    :style="{ '--type-color': tabMeta[key]?.color || '#9b9b9b' }"
                 >
-                    {{ key[0]!.toUpperCase() + key.slice(1) }}
+                    <span class="tab-title">{{ key[0]!.toUpperCase() + key.slice(1) }}</span>
+                    <span class="tab-badge" v-if="tabMeta[key]">{{ tabMeta[key].label }}</span>
                 </button>
             </div>
         </div>
-        <!-- 结果类型显示区域 -->
-        <div class="result-type-container" v-if="currentResultTypeLabel && !isNoResult">
-            当前结果类型: {{ currentResultTypeLabel }}
-        </div>
+        <!-- 结果类型现在显示在每个标签上 -->
         <div class = "result-container">
             <!-- 显示loading状态 -->
             <div v-if="resultStore.loading" class="loading-container">
@@ -185,6 +219,9 @@
         width: 100%;
         height: 100%;
         flex: 1;
+        padding: 15px;
+        padding-top: 0px;
+        box-sizing: border-box;
     }
 
     .result-container{
@@ -193,55 +230,105 @@
         // height: calc(100% - 70px); /* 调整高度以适应标签页和类型显示 */
         color: grey;
         padding: 0;
-        // border-radius: 10px;
+        border-radius: 8px;
+        // border: 1px solid #e0e0e0;
+        // box-shadow: 0px 1px 20px rgba(128, 128, 128, 0.3);
         position: relative;
         overflow: hidden;
         flex: 1;
+        background: white; /* 确保有背景色，否则阴影可能看起来奇怪 */
     }
 
     .result-control {
-        height: 40px; /* match nav bar height */
+        height: 54px;
         display: flex;
         align-items: center;
-        padding: 0 12px;
+        padding: 0; /* 取消默认内边距，让标签紧贴左侧 */
+        margin-bottom: 4px; /* 增加一点下边距，与内容区隔开 */
     }
 
     .result-control .tab-list {
         display: flex;
-        gap: 6px;
+        gap: 10px; /* 增加标签间距，避免阴影重叠 */
         margin: 0; /* 左对齐 */
-        align-items: center;
+        align-items: flex-start; /* 顶部对齐 */
         justify-content: flex-start;
+        overflow-x: auto;
+        overflow-y: hidden; /* 避免垂直滚动 */
+        height: 100%; /* 固定高度 */
+        box-sizing: border-box;
+        padding: 8px 0px 0px 0px;
+        scrollbar-gutter: stable;
     }
 
     .result-control .tab-item {
-        height: 30px;
-        font-weight: 700;
-        color: rgba(40, 40, 40, 0.76);
-        padding: 9px 15px;
+        height: 34px;
+        font-size: 13px; /* 缩小字体 */
+        font-weight: bold;
+        color: rgba(20,20,20,0.9);
+        padding: 6px 8px;
         transition: all 0.18s ease;
-        min-width: 120px;
+        min-width: 90px;
+        max-width: 220px;
         text-align: center;
-        border-radius: 20px;
+        border-radius: 18px;
         display: inline-flex;
         align-items: center;
+        gap: 4px;
         justify-content: center;
-        background: transparent;
+        // background: transparent;
         border: none;
         cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        // box-shadow: 0px 3px 7px rgba(128, 128, 128, 0.14);
+        background-color: white;
     }
 
     .result-control .tab-item:hover {
         background-color: rgba(0, 0, 0, 0.06);
-        color: $stress-color;
+        // color: $stress-color;
     }
 
     .result-control .tab-item.active {
-        border-radius: 19px;
-        color: #ffffff; /* white text for emphasis */
-        background-color: $stress-color; /* emphasized background */
-        box-shadow: 0px 3px 6px rgba(16, 142, 254, 0.12);
-        font-weight: 600;
+        color: #ffffff;
+        background-color: $stress-color;
+        box-shadow: 0px 3px 5px rgba(128, 128, 128, 0.2);
+    }
+
+    .result-control .tab-item .tab-title{
+        display: inline-block;
+        max-width: 110px;
+        min-width: auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: middle;
+    }
+
+    .result-control .tab-item .tab-badge{
+        display: inline-block;
+        font-size: 11px;
+        color: white;
+        background: var(--type-color, rgba(0,0,0,0.06));
+        padding: 2px 8px;
+        border-radius: 12px;
+        line-height: 1;
+        vertical-align: middle;
+        opacity: 0.95;
+    }
+
+    .result-control .tab-item:focus {
+        outline: none;
+    }
+
+    /* Hide scrollbar but keep scrollability */
+    .result-control .tab-list::-webkit-scrollbar {
+        height: 6px;
+    }
+    .result-control .tab-list::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.08);
+        border-radius: 3px;
     }
 
     // 无结果时的标签栏样式
@@ -256,19 +343,11 @@
         font-weight: 500;
     }
 
-    .result-type-container {
-        height: 30px;
-        line-height: 30px;
-        padding: 0 15px;
-        font-size: 14px;
-        color: #666;
-        background-color: #f5f7fa;
-        border-bottom: 1px solid #e4e7ed;
-    }
+    /* 结果类型现在在标签上显示，不需要独立容器样式 */
 
     .if-result{
         flex: 1;
-        margin-top: 10px;
+        // margin-top: 10px;
         margin-left: 0;
         // border-radius: 10px;
         overflow: hidden;

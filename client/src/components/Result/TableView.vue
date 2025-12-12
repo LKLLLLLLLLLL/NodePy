@@ -15,6 +15,7 @@
 
     // 虚拟滚动相关状态
     const tableWrapperRef = ref<HTMLElement | null>(null)
+    let resizeObserver: ResizeObserver | null = null
     const scrollTop = ref(0)
     const containerHeight = ref(0)
     const containerWidth = ref(0)
@@ -95,10 +96,12 @@
 
         const tableStyle = computed(() => {
             // Use camelCase property names to satisfy Vue/TS style typing
+            // When horizontal scroll is needed, set the table width to the
+            // required pixel width so the parent `.table-wrapper` will overflow
+            // and show a horizontal scrollbar instead of compressing columns.
             const styleObj: Record<string, any> = {
                 ['--min-col-width']: `${minColWidth.value}px`,
-                width: '100%',
-                minWidth: needHorizontalScroll.value ? `${requiredWidth.value}px` : '100%'
+                width: needHorizontalScroll.value ? `${requiredWidth.value}px` : '100%'
             }
             // tableLayout must be camelCase when used as CSSProperties
             styleObj.tableLayout = needHorizontalScroll.value ? 'auto' : 'fixed'
@@ -202,11 +205,42 @@
         })
         window.addEventListener('resize', updateContainerSize)
         if (tableWrapperRef.value) tableWrapperRef.value.addEventListener('scroll', onScroll)
+        // 使用 ResizeObserver 更可靠地监听容器尺寸变化（处理布局变动导致的宽度变化）
+        try {
+            if (typeof ResizeObserver !== 'undefined') {
+                resizeObserver = new ResizeObserver(() => {
+                    updateContainerSize()
+                })
+                if (tableWrapperRef.value) resizeObserver.observe(tableWrapperRef.value)
+            }
+        } catch (e) {
+            // ignore if ResizeObserver not available
+        }
+    })
+
+    // 如果 ref 在挂载后才被赋值，观察其变化以便开始监听尺寸
+    watch(tableWrapperRef, (el, oldEl) => {
+        if (oldEl && resizeObserver) {
+            try { resizeObserver.unobserve(oldEl) } catch (e) { /* ignore */ }
+        }
+        if (el && resizeObserver) {
+            try { resizeObserver.observe(el) } catch (e) { /* ignore */ }
+            // 更新一次尺寸以防最初未测量到
+            updateContainerSize()
+        }
     })
 
     onUnmounted(() => {
         window.removeEventListener('resize', updateContainerSize)
         if (tableWrapperRef.value) tableWrapperRef.value.removeEventListener('scroll', onScroll)
+        try {
+            if (resizeObserver) {
+                resizeObserver.disconnect()
+                resizeObserver = null
+            }
+        } catch (e) {
+            // ignore
+        }
     })
 </script>
 <template>
@@ -293,7 +327,7 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
-    background: $background-color;
+    // background: $background-color;
     // border-radius: 10px;
     // padding: 16px;
     box-sizing: border-box;;
@@ -337,7 +371,7 @@
     border-radius: 10px;
     margin: 16px;
     // padding: 16px;
-    @include controller-style;
+    // @include controller-style;
 }
 
 .table-wrapper {
@@ -359,8 +393,9 @@
 .result-table thead {
     position: sticky;
     top: 0;
-    background: #f5f7fa;
+    // background: #f5f7fa;
     z-index: 1;
+    background-color: rgb(235, 241, 245);
 }
 
 .result-table th {
@@ -382,8 +417,9 @@
     width: 80px;
     min-width: 80px;
     text-align: center;
-    background: #fafafa;
+    // background: #fafafa;
     font-weight: 500;
+    background-color: rgb(233, 236, 240);
 }
 
 .data-column {
