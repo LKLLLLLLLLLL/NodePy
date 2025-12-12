@@ -2,7 +2,7 @@ from typing import Any, Literal, override
 
 from server.config import FIGURE_DPI
 from server.models.data import Data, Table
-from server.models.exception import NodeParameterError, NodeExecutionError
+from server.models.exception import NodeExecutionError, NodeParameterError
 from server.models.schema import NO_SPECIFIED_COL, ColType, FileSchema, Pattern, Schema
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
@@ -62,6 +62,10 @@ class KlinePlotNode(BaseNode):
             )
         if self.volume_col is not None and self.volume_col.strip() == "":
             self.volume_col = None
+        if self.volume_col == NO_SPECIFIED_COL:
+            self.volume_col = None
+        if self.title is not None and self.title.strip() == "":
+            self.title = None
         return
 
     @override
@@ -123,38 +127,44 @@ class KlinePlotNode(BaseNode):
             mpf_df["Volume"] = df[self.volume_col]
 
         # config style
-        up_color = "#ef5350" if self.style_mode == "CN" else "#26a69a"  # 红/绿
-        down_color = "#26a69a" if self.style_mode == "CN" else "#ef5350"  # 绿/红
+        up_color = "#ef5350" if self.style_mode == "CN" else "#26a69a"
+        down_color = "#26a69a" if self.style_mode == "CN" else "#ef5350" 
 
         mc = mpf.make_marketcolors(
             up=up_color,
             down=down_color,
             edge="inherit",
             wick="inherit",
-            volume="in",
-            ohlc="i",
+            # volume="blue",
+            ohlc="inherit",
         )
 
         s = mpf.make_mpf_style(
             marketcolors=mc,
-            gridstyle="--",
+            # gridstyle="--",
             y_on_right=True,
             facecolor="white",
             edgecolor="#e0e0e0",
             figcolor="white",
+            rc={
+                "font.family": "sans-serif",
+                "font.sans-serif": ["Noto Sans CJK JP", "Roboto", "sans-serif"],
+                "axes.unicode_minus": False,
+                "font.size": 8,
+                "axes.labelsize": 8,
+                "xtick.labelsize": 8,
+                "ytick.labelsize": 8,
+            },
         )
-
-        fig_title = self.title if self.title is not None else "K-Line Plot"
 
         fig, axlist = mpf.plot(
             mpf_df,
             type="candle",
             volume=self.volume_col is not None,
-            title=fig_title,
+            title=self.title,
             style=s,
             returnfig=True,
-            figsize=(10, 6),
-            # dpi=FIGURE_DPI,
+            figsize=(8, 6),
             warn_too_much_data=10000,
         )
 
