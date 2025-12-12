@@ -1054,3 +1054,26 @@ export type ClassificationScoreNodeData = BaseData & {
 export interface ClassificationScoreNode extends BaseNode<ClassificationScoreNodeData> {
     type: 'ClassificationScoreNode'
 }
+
+
+export interface KMeansClusteringNodeParam {
+    feature_cols: string[]
+    n_clusters: number
+}
+export type KMeansClusteringNodeData = BaseData & {
+    param: KMeansClusteringNodeParam
+}
+export interface KMeansClusteringNode extends BaseNode<KMeansClusteringNodeData> {
+    type: 'KMeansClusteringNode'
+}
+
+
+export interface StandardScalerNodeParam {
+    feature_cols: string[]
+}
+export type StandardScalerNodeData = BaseData & {
+    param: StandardScalerNodeParam
+}
+export interface StandardScalerNode extends BaseNode<StandardScalerNodeData> {
+    type: 'StandardScalerNode'
+}

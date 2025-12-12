@@ -9,3 +9,7 @@ export const updateSimpleSelectFew = (param: Record<string, any>, k: string, opt
 export const updateSimpleSelectMany = (param: Record<string, any>, k: string, options: string[], idx: number) => {
     param[k] = options[idx]
 }
+
+export const updateSimpleMultiSelectMany = (param: Record<string, any>, k: string, options: string[], idx: number[]) => {
+    param[k] = idx.map(i => options[i])
+}

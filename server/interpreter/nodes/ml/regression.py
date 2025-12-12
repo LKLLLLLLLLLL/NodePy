@@ -194,12 +194,6 @@ class RandomForestRegressionNode(BaseNode):
                 err_param_key="max_depth",
                 err_msg="Max depth must be greater than 0 when limiting max depth is enabled.",
             )
-        if self.limit_max_depth and self.max_depth is not None:
-            raise NodeParameterError(
-                node_id=self.id,
-                err_param_key="max_depth",
-                err_msg="Max depth must be an integer when specified.",
-            )
         return
 
     @override

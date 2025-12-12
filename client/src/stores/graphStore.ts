@@ -1055,6 +1055,23 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedLagFeatureNode)
         break
+      case 'RandomForestRegressionNode':
+        const addedRandomForestRegressionNode: Nodetypes.RandomForestRegressionNode = {
+          id,
+          position,
+          type: 'RandomForestRegressionNode',
+          data: {
+            param: {
+              feature_cols: [],
+              target_col: '',
+              n_estimators: 100,
+              max_depth: 4,
+              limit_max_depth: false
+            }
+          }
+        }
+        addNodes(addedRandomForestRegressionNode)
+        break
     
       default:
         console.log(type)
