@@ -390,7 +390,7 @@ export interface KlinePlotNodeParam {
     high_col: string
     low_col: string
     close_col: string
-    volume_col: string | null
+    volume_col: string
     style_mode: "CN" | "US"
 }
 export type KlinePlotNodeData = BaseData & {

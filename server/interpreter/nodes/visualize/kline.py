@@ -2,7 +2,7 @@ from typing import Any, Literal, override
 
 from server.config import FIGURE_DPI
 from server.models.data import Data, Table
-from server.models.exception import NodeParameterError
+from server.models.exception import NodeParameterError, NodeExecutionError
 from server.models.schema import NO_SPECIFIED_COL, ColType, FileSchema, Pattern, Schema
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
@@ -20,7 +20,7 @@ class KlinePlotNode(BaseNode):
     low_col: str
     close_col: str
     volume_col: str | None = None
-    style_mode: Literal["CN", "EN"]
+    style_mode: Literal["CN", "US"]
 
     @override
     def validate_parameters(self) -> None:
@@ -84,7 +84,7 @@ class KlinePlotNode(BaseNode):
                 ),
             ),
         ], [
-            OutPort(name="plot", description="The generated K-Line plot image."),
+            OutPort(name="kline_plot", description="The generated K-Line plot image."),
         ]
 
     @override
@@ -95,7 +95,7 @@ class KlinePlotNode(BaseNode):
                 format="png",
             ),
         )
-        return {"plot": output_schema}
+        return {"kline_plot": output_schema}
 
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
@@ -107,6 +107,11 @@ class KlinePlotNode(BaseNode):
         assert isinstance(table_data, Table)
 
         df = table_data.df.copy()
+        if len(df) == 0:
+            raise NodeExecutionError(
+                node_id=self.id,
+                err_msg="Input table is empty.",
+            )
         df[self.x_col] = pd.to_datetime(df[self.x_col])
         df.set_index(self.x_col, inplace=True)
 
@@ -149,7 +154,7 @@ class KlinePlotNode(BaseNode):
             style=s,
             returnfig=True,
             figsize=(10, 6),
-            dpi=FIGURE_DPI,
+            # dpi=FIGURE_DPI,
             warn_too_much_data=10000,
         )
 
@@ -168,7 +173,7 @@ class KlinePlotNode(BaseNode):
             project_id=self.global_config.project_id,
             user_id=self.global_config.user_id,
         )
-        return {"plot": Data(payload=file)}
+        return {"kline_plot": Data(payload=file)}
 
     @override
     @classmethod

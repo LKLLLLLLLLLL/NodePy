@@ -488,6 +488,26 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedWordcloudNode)
         break
+      case 'KlinePlotNode':
+        const addedKlinePlotNode: Nodetypes.KlinePlotNode = {
+          id,
+          position,
+          type: 'KlinePlotNode',
+          data: {
+            param: {
+              title: null,
+              x_col: 'Open Time',
+              open_col: 'Open',
+              high_col: 'High',
+              low_col: 'Low',
+              close_col: 'Close',
+              volume_col: 'Volume',
+              style_mode: 'CN'
+            }
+          }
+        }
+        addNodes(addedKlinePlotNode)
+        break
       case 'StripNode':
         const addedStripNode: Nodetypes.StripNode = {
           id,

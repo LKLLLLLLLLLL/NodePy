@@ -336,6 +336,10 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '词云节点',
                 value: 'WordcloudNode'
             },
+            {
+                label: 'K线图节点',
+                value: 'KlinePlotNode'
+            },
         ]
     },
     {

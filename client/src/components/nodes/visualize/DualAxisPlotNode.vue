@@ -16,7 +16,7 @@
                 <NodepySelectMany
                 :options="x_col_hint"
                 :default-selected="x_col_default_selected"
-                @select-change="onUpdateX_col"
+                @select-change="(e: any) => updateSimpleSelectMany(data.param, 'x_col', x_col_hint, e)"
                 @clear-select="clearSelectX"
                 class="nodrag"
                 />
@@ -26,13 +26,13 @@
                 <NodepySelectMany
                 :options="left_y_col_hint"
                 :default-selected="left_y_col_default_selected"
-                @select-change="onUpdateLeft_y_col"
+                @select-change="(e: any) => updateSimpleSelectMany(data.param, 'left_y_col', left_y_col_hint, e)"
                 @clear-select="clearSelectLeft_y_col"
                 class="nodrag"
                 />
             </div>
             <div class="left_plot_type">
-                <div class="param-description">
+                <div class="param-description" :class="{'node-has-paramerr': left_plot_typeHasErr.value}">
                     图形类型
                 </div>
                 <NodepySelectFew
@@ -47,13 +47,13 @@
                 <NodepySelectMany
                 :options="right_y_col_hint"
                 :default-selected="right_y_col_default_selected"
-                @select-change="onUpdateRight_y_col"
+                @select-change="(e: any) => updateSimpleSelectMany(data.param, 'right_y_col', right_y_col_hint, e)"
                 @clear-select="clearSelectRight_y_col"
                 class="nodrag"
                 />
             </div>
             <div class="right_plot_type">
-                <div class="param-description">
+                <div class="param-description" :class="{'node-has-paramerr': right_plot_typeHasErr.value}">
                     图形类型
                 </div>
                 <NodepySelectFew
@@ -85,7 +85,7 @@
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
-    import { updateSimpleStringNumberBoolValue, updateSimpleSelectFew } from '../updateParam'
+    import { updateSimpleStringNumberBoolValue, updateSimpleSelectFew, updateSimpleSelectMany } from '../updateParam'
     import type { DualAxisPlotNodeData } from '@/types/nodeTypes'
 
 
@@ -143,24 +143,15 @@
     })
 
 
-    const onUpdateX_col = (e: any) => {
-        props.data.param.x_col = x_col_hint.value[e]
-    }
     const clearSelectX = (resolve: any) => {
         props.data.param.x_col = ''
         x_col_default_selected.value = -1
         resolve()
     }
-    const onUpdateLeft_y_col = (e: any) => {
-        props.data.param.left_y_col = left_y_col_hint.value[e]
-    }
     const clearSelectLeft_y_col = (resolve: any) => {
         props.data.param.left_y_col = ''
         left_y_col_default_selected.value = -1
         resolve()
-    }
-    const onUpdateRight_y_col = (e: any) => {
-        props.data.param.right_y_col = right_y_col_hint.value[e]
     }
     const clearSelectRight_y_col = (resolve: any) => {
         props.data.param.right_y_col = ''
@@ -189,41 +180,9 @@
             .input-input {
                 margin-bottom: $node-margin;
             }
-            .x_col, .left_y_col, .right_y_col, .addLeft_y_col, .addRight_y_col, .left_plot_type, .right_plot_type, .title {
+            .x_col, .left_y_col, .right_y_col, .left_plot_type, .right_plot_type, .title {
                 padding: 0 $node-padding-hor;
                 margin-bottom: $node-margin;
-            }
-            .left_y_col {
-                .left_y_col-description {
-                    display: flex;
-                    align-items: center;
-                    .left-y-col-close {
-                        display: flex;
-                        align-items: center;
-                        cursor: pointer;
-                        margin-left: auto;
-                        border-radius: 4px;
-                        &:hover {
-                            background-color: #eee;
-                        }
-                    }
-                }
-            }
-            .right_y_col {
-                .right_y_col-description {
-                    display: flex;
-                    align-items: center;
-                    .right-y-col-close {
-                        display: flex;
-                        align-items: center;
-                        cursor: pointer;
-                        margin-left: auto;
-                        border-radius: 4px;
-                        &:hover {
-                            background-color: #eee;
-                        }
-                    }
-                }
             }
         }
     }

@@ -18,6 +18,9 @@ export function handleNetworkError<T>(err: MustExist<T>): string {
             case 404:
                 errMsg = '资源未找到。'
                 break
+            case 423:
+                errMsg = '项目被锁定，可能是因为并发操作。'
+                break
             case 500:
                 errMsg = '服务器内部错误，请联系管理员。'
                 break

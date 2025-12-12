@@ -41,6 +41,7 @@ import QuickPlotNode from '../nodes/visualize/QuickPlotNode.vue'
 import DualAxisPlotNode from '../nodes/visualize/DualAxisPlotNode.vue'
 import StatisticalPlotNode from '../nodes/visualize/StatisticalPlotNode.vue'
 import WordcloudNode from '../nodes/visualize/WordcloudNode.vue'
+import KlinePlotNode from '../nodes/visualize/KlinePlotNode.vue'
 import StripNode from '../nodes/stringProcess/StripNode.vue'
 import SliceNode from '../nodes/stringProcess/SliceNode.vue'
 import ReplaceNode from '../nodes/stringProcess/ReplaceNode.vue'
@@ -306,6 +307,7 @@ const nodeColor = (node: BaseNode) => {
     case 'StatisticalPlotNode':
     case 'WordcloudNode':
     case 'DualAxisPlotNode':
+    case 'KlinePlotNode':
       return nodeCategoryColor.visualize
     case 'StripNode':
     case 'SliceNode':
@@ -545,6 +547,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-WordcloudNode="WordcloudNodeProps">
           <WordcloudNode v-bind="WordcloudNodeProps" />
+        </template>
+
+        <template #node-KlinePlotNode="KlinePlotNodeProps">
+          <KlinePlotNode v-bind="KlinePlotNodeProps" />
         </template>
 
         <template #node-StripNode="StripNodeProps">
