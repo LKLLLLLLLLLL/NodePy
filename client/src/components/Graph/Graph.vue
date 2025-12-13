@@ -89,6 +89,9 @@ import PredictNode from '../nodes/machineLearning/PredictNode.vue'
 import LagFeatureNode from '../nodes/machineLearning/LagFeatureNode.vue'
 import RandomForestRegressionNode from '../nodes/machineLearning/RandomForestRegressionNode.vue'
 import RegressionScoreNode from '../nodes/machineLearning/RegressionScoreNode.vue'
+import LogisticRegressionNode from '../nodes/machineLearning/LogisticRegressionNode.vue'
+import SVCNode from '../nodes/machineLearning/SVCNode.vue'
+import ClassificationScoreNode from '../nodes/machineLearning/ClassificationScoreNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -363,6 +366,9 @@ const nodeColor = (node: BaseNode) => {
     case 'LagFeatureNode':
     case 'RandomForestRegressionNode':
     case 'RegressionScoreNode':
+    case 'LogisticRegressionNode':
+    case 'SVCNode':
+    case 'ClassificationScoreNode':
       return nodeCategoryColor.machine
     default:
       return nodeCategoryColor.default
@@ -743,6 +749,18 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-RegressionScoreNode="RegressionScoreNodeProps">
           <RegressionScoreNode v-bind="RegressionScoreNodeProps"/>
+        </template>
+
+        <template #node-LogisticRegressionNode="LogisticRegressionNodeProps">
+          <LogisticRegressionNode v-bind="LogisticRegressionNodeProps"/>
+        </template>
+
+        <template #node-SVCNode="SVCNodeProps">
+          <SVCNode v-bind="SVCNodeProps"/>
+        </template>
+
+        <template #node-ClassificationScoreNode="ClassificationScoreNodeProps">
+          <ClassificationScoreNode v-bind="ClassificationScoreNodeProps"/>
         </template>
 
       </VueFlow>

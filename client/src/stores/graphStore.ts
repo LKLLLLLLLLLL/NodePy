@@ -1085,6 +1085,48 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedRegressionScoreNode)
         break
+      case 'LogisticRegressionNode':
+        const addedLogisticRegressionNode: Nodetypes.LogisticRegressionNode = {
+          id,
+          position,
+          type: 'LogisticRegressionNode',
+          data: {
+            param: {
+              feature_cols: [],
+              target_col: ''
+            }
+          }
+        }
+        addNodes(addedLogisticRegressionNode)
+        break
+      case 'SVCNode':
+        const addedSVCNode: Nodetypes.SVCNode = {
+          id,
+          position,
+          type: 'SVCNode',
+          data: {
+            param: {
+              feature_cols: [],
+              target_col: '',
+              kernel: 'rbf'
+            }
+          }
+        }
+        addNodes(addedSVCNode)
+        break
+      case 'ClassificationScoreNode':
+        const addedClassificationScoreNode: Nodetypes.ClassificationScoreNode = {
+          id,
+          position,
+          type: 'ClassificationScoreNode',
+          data: {
+            param: {
+              metric: 'accuracy'
+            }
+          }
+        }
+        addNodes(addedClassificationScoreNode)
+        break
     
       default:
         console.log(type)

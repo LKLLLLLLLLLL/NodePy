@@ -347,6 +347,14 @@ export const nodeMenuItems: MenuNode[] = [
         value: 'machineLearning',
         children: [
             {
+                label: '分类评分节点',
+                value: 'ClassificationScoreNode'
+            },
+            {
+                label: '回归评分节点',
+                value: 'RegressionScoreNode'
+            },
+            {
                 label: '线性回归节点',
                 value: 'LinearRegressionNode'
             },
@@ -363,8 +371,12 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'RandomForestRegressionNode'
             },
             {
-                label: '回归评分节点',
-                value: 'RegressionScoreNode'
+                label: '逻辑回归节点',
+                value: 'LogisticRegressionNode'
+            },
+            {
+                label: '支持向量分类节点',
+                value: 'SVCNode'
             },
         ]
     },

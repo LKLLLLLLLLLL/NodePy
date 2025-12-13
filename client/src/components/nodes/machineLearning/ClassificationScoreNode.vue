@@ -1,6 +1,6 @@
 <template>
-    <div class="RegressionScoreNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="machineLearning">回归评分节点</NodeTitle>
+    <div class="ClassificationScoreNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category="machineLearning">分类评分节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -49,11 +49,11 @@
     import Timer from '../tools/Timer.vue'
     import NodepySelectMany from '../tools/Nodepy-selectMany.vue'
     import { updateSimpleSelectMany } from '../updateParam'
-    import type { RegressionScoreNodeData } from '@/types/nodeTypes'
+    import type { ClassificationScoreNodeData } from '@/types/nodeTypes'
 
 
-    const props = defineProps<NodeProps<RegressionScoreNodeData>>()
-    const metric = ["mse", "rmse", "mae", "r2"]
+    const props = defineProps<NodeProps<ClassificationScoreNodeData>>()
+    const metric = ["accuracy", "f1", "precision", "recall"]
     const defaultSelected = metric.indexOf(props.data.param.metric)
     const table_type = computed(() => getInputType(props.id, 'table'))
     const model_type = computed(() => getInputType(props.id, 'model'))
@@ -86,7 +86,7 @@
 <style lang="scss" scoped>
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
-    .RegressionScoreNodeLayout {
+    .ClassificationScoreNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;
