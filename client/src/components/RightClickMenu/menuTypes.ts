@@ -378,6 +378,14 @@ export const nodeMenuItems: MenuNode[] = [
                 label: '支持向量分类节点',
                 value: 'SVCNode'
             },
+            {
+                label: 'K均值节点',
+                value: 'KMeansClusteringNode'
+            },
+            {
+                label: '特征标准化节点',
+                value: 'StandardScalerNode'
+            },
         ]
     },
 ]

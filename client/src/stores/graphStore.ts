@@ -1127,6 +1127,33 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedClassificationScoreNode)
         break
+      case 'KMeansClusteringNode':
+        const addedKMeansClusteringNode: Nodetypes.KMeansClusteringNode = {
+          id,
+          position,
+          type: 'KMeansClusteringNode',
+          data: {
+            param: {
+              feature_cols: [],
+              n_clusters: 2
+            }
+          }
+        }
+        addNodes(addedKMeansClusteringNode)
+        break
+      case 'StandardScalerNode':
+        const addedStandardScalerNode: Nodetypes.StandardScalerNode = {
+          id,
+          position,
+          type: 'StandardScalerNode',
+          data: {
+            param: {
+              feature_cols: []
+            }
+          }
+        }
+        addNodes(addedStandardScalerNode)
+        break
     
       default:
         console.log(type)

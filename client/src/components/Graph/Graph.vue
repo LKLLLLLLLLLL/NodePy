@@ -92,6 +92,8 @@ import RegressionScoreNode from '../nodes/machineLearning/RegressionScoreNode.vu
 import LogisticRegressionNode from '../nodes/machineLearning/LogisticRegressionNode.vue'
 import SVCNode from '../nodes/machineLearning/SVCNode.vue'
 import ClassificationScoreNode from '../nodes/machineLearning/ClassificationScoreNode.vue'
+import KMeansClusteringNode from '../nodes/machineLearning/KMeansClusteringNode.vue'
+import StandardScalerNode from '../nodes/machineLearning/StandardScalerNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -369,6 +371,8 @@ const nodeColor = (node: BaseNode) => {
     case 'LogisticRegressionNode':
     case 'SVCNode':
     case 'ClassificationScoreNode':
+    case 'KMeansClusteringNode':
+    case 'StandardScalerNode':
       return nodeCategoryColor.machine
     default:
       return nodeCategoryColor.default
@@ -761,6 +765,14 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-ClassificationScoreNode="ClassificationScoreNodeProps">
           <ClassificationScoreNode v-bind="ClassificationScoreNodeProps"/>
+        </template>
+
+        <template #node-KMeansClusteringNode="KMeansClusteringNodeProps">
+          <KMeansClusteringNode v-bind="KMeansClusteringNodeProps"/>
+        </template>
+
+        <template #node-StandardScalerNode="StandardScalerNodeProps">
+          <StandardScalerNode v-bind="StandardScalerNodeProps"/>
         </template>
 
       </VueFlow>
