@@ -116,7 +116,16 @@ export const nodeMenuItems: MenuNode[] = [
     {
         label: '控制节点',
         value: 'control',
-        children: []
+        children: [
+            {
+                label: '单元格获取节点',
+                value: 'GetCellNode'
+            },
+            {
+                label: '单元格设置节点',
+                value: 'SetCellNode'
+            },
+        ]
     },
     {
         label: '文件节点',

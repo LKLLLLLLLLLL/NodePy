@@ -1154,6 +1154,34 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedStandardScalerNode)
         break
+      case 'GetCellNode':
+        const addedGetCellNode: Nodetypes.GetCellNode = {
+          id,
+          position,
+          type: 'GetCellNode',
+          data: {
+            param: {
+              col: '',
+              row: 0
+            }
+          }
+        }
+        addNodes(addedGetCellNode)
+        break
+      case 'SetCellNode':
+        const addedSetCellNode: Nodetypes.SetCellNode = {
+          id,
+          position,
+          type: 'SetCellNode',
+          data: {
+            param: {
+              col: '',
+              row: 0
+            }
+          }
+        }
+        addNodes(addedSetCellNode)
+        break
     
       default:
         console.log(type)
