@@ -31,11 +31,17 @@
                     @update-value="() => updateSimpleStringNumberBoolValue(data.param, 'n_clusters', n_clusters)"
                  />
             </div>
+            <div class="output-table port">
+                <div class="output-port-description">
+                    表格输出
+                </div>
+                <Handle id="table" type="source" :position="Position.Right" :class="[`${tableSchema_type}-handle-color`, {'node-errhandle': tableHasErr}]"/>
+            </div>
             <div class="output-model port">
                 <div class="output-port-description">
                     模型输出
                 </div>
-                <Handle id="model" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': modelHasErr}]"/>
+                <Handle id="model" type="source" :position="Position.Right" :class="[`${modelSchema_type}-handle-color`, {'node-errhandle': modelHasErr}]"/>
             </div>
         </div>
         <ErrorMsg :err-msg="errMsg"/>
@@ -66,7 +72,9 @@
     const defaultSelectedFeature_cols = ref(props.data.param.feature_cols.map(item => feature_colsHint.value.indexOf(item)).filter(idx => idx !== -1))
     const n_clusters = ref(props.data.param.n_clusters)
     const table_type = computed(() => getInputType(props.id, 'table'))
-    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['model']?.type || 'default')
+    const tableSchema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['table']?.type || 'default')
+    const tableHasErr = computed(() => handleOutputError(props.id, 'table'))
+    const modelSchema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['model']?.type || 'default')
     const modelHasErr = computed(() => handleOutputError(props.id, 'model'))
     const errMsg = ref<string[]>([])
     const feature_colsHasErr = ref({
@@ -112,6 +120,9 @@
             }
             .feature_cols, .n_clusters {
                 padding: 0 $node-padding-hor;
+                margin-bottom: $node-margin;
+            }
+            .output-table {
                 margin-bottom: $node-margin;
             }
         }
