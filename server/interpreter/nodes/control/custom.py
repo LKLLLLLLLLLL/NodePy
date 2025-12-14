@@ -18,7 +18,7 @@ from server.models.schema import Pattern, Schema
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
-AllowedTypes = Literal["STR", "INT", "FLOAT", "BOOL", "DATETIME"]
+AllowedTypes = Literal["str", "int", "float", "bool", "Datetime"]
 
 _TEMPLATE_CACHE = None
 
