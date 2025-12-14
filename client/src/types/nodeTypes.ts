@@ -882,8 +882,8 @@ export interface CumulativeNode extends BaseNode<CumulativeNodeData> {
 
 /*********************  Control Nodes  **************************/
 export interface CustomScriptNodeParam {
-    input_ports: Array<Record<string, server__models__schema__Schema__Type>>
-    output_ports: Array<Record<string, server__models__schema__Schema__Type>>
+    input_ports: Record<string, "int" | "float" | "bool" | "str" | "Datetime">
+    output_ports: Record<string, "int" | "float" | "bool" | "str" | "Datetime">
     script: string
 }
 export type CustomScriptNodeData = BaseData & {

@@ -7,7 +7,7 @@
                 <div class="param-description" :class="{'node-has-paramerr': tableParamHasErr}">
                     自定义表格
                 </div>
-                <NodepyButton :handle-click="updateTableParam">
+                <NodepyButton :handle-click="tableStore.createTableModal">
                     <span class="tableParam-description">编辑</span>
                 </NodepyButton>
             </div>
@@ -32,13 +32,12 @@
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import Timer from '../tools/Timer.vue'
     import NodepyButton from '../tools/Nodepy-button.vue'
+    import { useTableStore } from '@/stores/tableStore'
     import type {TableNodeData} from '../../../types/nodeTypes'
 
 
+    const tableStore = useTableStore()
     const props = defineProps<NodeProps<TableNodeData>>()
-    const rows = ref(props.data.param.rows)
-    const col_names = ref(props.data.param.col_names)
-    const col_types = ref(props.data.param.col_types)
     const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['table']?.type || 'default')
     const tableHasErr = computed(() => handleOutputError(props.id, 'table'))
     const errMsg = ref<string[]>([])
@@ -60,9 +59,9 @@
 
 
     const updateTableParam = () => {
-        props.data.param.rows = rows.value
-        props.data.param.col_names = col_names.value
-        props.data.param.col_types = col_types.value
+        props.data.param.rows = tableStore.currentTableData.rows
+        props.data.param.col_names = tableStore.currentTableData.colNames
+        props.data.param.col_types = tableStore.currentTableData.colTypes
     }
 
 

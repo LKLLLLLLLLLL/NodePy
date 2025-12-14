@@ -118,6 +118,10 @@ export const nodeMenuItems: MenuNode[] = [
         value: 'control',
         children: [
             {
+                label: '自定义脚本节点',
+                value: 'CustomScriptNode'
+            },
+            {
                 label: '解包节点',
                 value: 'UnpackNode'
             },            

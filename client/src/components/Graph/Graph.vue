@@ -94,6 +94,7 @@ import SVCNode from '../nodes/machineLearning/SVCNode.vue'
 import ClassificationScoreNode from '../nodes/machineLearning/ClassificationScoreNode.vue'
 import KMeansClusteringNode from '../nodes/machineLearning/KMeansClusteringNode.vue'
 import StandardScalerNode from '../nodes/machineLearning/StandardScalerNode.vue'
+import CustomScriptNode from '../nodes/control/CustomScriptNode.vue'
 import UnpackNode from '../nodes/control/UnpackNode.vue'
 import GetCellNode from '../nodes/control/GetCellNode.vue'
 import SetCellNode from '../nodes/control/SetCellNode.vue'
@@ -377,6 +378,7 @@ const nodeColor = (node: BaseNode) => {
     case 'KMeansClusteringNode':
     case 'StandardScalerNode':
       return nodeCategoryColor.machine
+    case 'CustomScriptNode':
     case 'UnpackNode':
     case 'GetCellNode':
     case 'SetCellNode':
@@ -780,6 +782,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-StandardScalerNode="StandardScalerNodeProps">
           <StandardScalerNode v-bind="StandardScalerNodeProps"/>
+        </template>
+
+        <template #node-CustomScriptNode="CustomScriptNodeProps">
+          <CustomScriptNode v-bind="CustomScriptNodeProps"/>
         </template>
 
         <template #node-UnpackNode="UnpackNodeProps">

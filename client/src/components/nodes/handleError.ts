@@ -4,7 +4,7 @@ import type { Ref } from "vue"
 
 const {getEdges} = useVueFlow('main')
 
-export const handleValidationError = (nodeId: string, err: ProjNodeError | null | undefined, errMsg: Ref<string[]>, ...handleErrObj: any[]) => {
+export const handleValidationError = (nodeId: string, err: ProjNodeError | null | undefined, errMsg: Ref<string[]>, ...handleErrObj: Ref<{ handleId: string; value: boolean }>[]) => {
     getEdges.value.filter(e => e.target === nodeId).forEach(e => { e.data = null })  //  reset edge data
     handleErrObj.forEach((v) => {
         v.value.value = false
@@ -26,7 +26,7 @@ export const handleValidationError = (nodeId: string, err: ProjNodeError | null 
     }
 }
 
-export const handleParamError = (err: ProjNodeError | null | undefined, errMsg: Ref<string[]>, ...paramErrObj: any[]) => {
+export const handleParamError = (err: ProjNodeError | null | undefined, errMsg: Ref<string[]>, ...paramErrObj: Ref<{ id: string; value: boolean }>[]) => {
     paramErrObj.forEach((v) => {v.value.value = false})   //  reset hasParamErr
     if(!err) return
     if(err.type === 'param') {

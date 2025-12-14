@@ -1155,6 +1155,21 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedStandardScalerNode)
         break
+      case 'CustomScriptNode':
+        const addedCustomScriptNode: Nodetypes.CustomScriptNode = {
+          id,
+          position,
+          type: 'CustomScriptNode',
+          data: {
+            param: {
+              input_ports: {'输入0': 'int'},
+              output_ports: {'输出0': 'int'},
+              script: ''
+            }
+          }
+        }
+        addNodes(addedCustomScriptNode)
+        break
       case 'UnpackNode':
         const addedUnpackNode: Nodetypes.UnpackNode ={
           id,
