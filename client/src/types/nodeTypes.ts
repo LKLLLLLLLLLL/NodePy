@@ -79,6 +79,7 @@ export interface StringNode extends BaseNode<StringNodeData>{
 export interface TableNodeParam {
     rows: Record<string, number|string|boolean>[]
     col_names: string[]
+    col_types: Record<string, 'int'|'float'|'str'|'bool'|'Datetime'> | null
 }
 export type TableNodeData = BaseData & {
     param: TableNodeParam

@@ -87,7 +87,8 @@ export const useGraphStore = defineStore('graph', () => {
           data: {
             param: {
               rows: [],
-              col_names: []
+              col_names: [],
+              col_types: null
             }
           }
         }
