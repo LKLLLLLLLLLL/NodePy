@@ -1,6 +1,5 @@
 import asyncio
 import signal
-import threading
 from typing import Any, Literal
 
 from celery.exceptions import SoftTimeLimitExceeded
@@ -39,10 +38,6 @@ from .interpreter import ProjectInterpreter
 class RevokeException(Exception):
     pass
 
-# Thread-safe flag for revocation
-_revoke_flags = {}
-_revoke_lock = threading.Lock()
-
 @celery_app.task(
     bind=True,
     time_limit=10*60,  # 10 minutes
@@ -59,19 +54,9 @@ def execute_project_task(self, project_id: int, user_id: int):
     def _signal_handler(signum, frame):
         """Signal handler for SIGTERM"""
         logger.debug(f"Received signal {signum} for task {task_id}")
-        with _revoke_lock:
-            _revoke_flags[task_id] = True
+        raise RevokeException("Task was revoked.")
     # Set up signal handler for graceful termination
     signal.signal(signal.SIGTERM, _signal_handler)
-    # Initialize revoke flag for this task
-    with _revoke_lock:
-        _revoke_flags[task_id] = False
-    def check_revoke() -> None:
-        """Check if task has been revoked using multiple methods"""
-        with _revoke_lock:
-            if _revoke_flags.get(task_id, False):
-                logger.debug(f"Task {task_id} revoked via signal")
-                raise RevokeException()
 
     # lock to prevent concurrent runs on the same project
     with (ProjectLock(project_id=project_id, max_block_time=30.0, identity=task_id, scope="workflow"), 
@@ -164,7 +149,6 @@ def execute_project_task(self, project_id: int, user_id: int):
             assert graph is not None
             def hint_reporter(node_id: str, hint: dict[str, Any]) -> bool:
                 # logger.debug(f"Hint reported for node {node_id}: {hint}")
-                check_revoke()
                 node_index = topo_graph.get_index_by_node_id(node_id)
                 assert node_index is not None
                 patch = ProjWorkflowPatch(
@@ -190,7 +174,6 @@ def execute_project_task(self, project_id: int, user_id: int):
             # 4. Construct nodes
             has_exception = False
             def construct_reporter(node_id: str, status: Literal["success", "error"], exception: Exception | None) -> bool:
-                check_revoke()
                 nonlocal has_exception
                 if status == "success":
                     meta = {
@@ -258,7 +241,6 @@ def execute_project_task(self, project_id: int, user_id: int):
             # 5. Static analysis
             assert graph is not None
             def anl_reporter(node_id: str, status: Literal["success", "error"], result: dict[str, Any] | Exception) -> bool:
-                check_revoke()
                 nonlocal has_exception
                 if status == "success":
                     assert isinstance(result, dict)
@@ -340,12 +322,12 @@ def execute_project_task(self, project_id: int, user_id: int):
                     }
                 )
             queue.push_message_sync(Status.IN_PROGRESS, {"stage": "STATIC_ANALYSIS", "status": "SUCCESS"})
+            db_client.commit()  # commit after static analysis to save schemas
 
             # 6. Execute graph
             assert graph is not None
 
             def exec_before_reporter(node_id: str) -> None: # for timer in frontend
-                check_revoke()
                 meta = {
                     "stage": "EXECUTION",
                     "status": "IN_PROGRESS",
@@ -364,6 +346,7 @@ def execute_project_task(self, project_id: int, user_id: int):
                         # write data to database
                         data_ref = data_manager.write_sync(data=data, node_id=node_id, project_id=project_id, port=port)
                         data_zips[port] = data_ref
+                    db_client.commit()  # commit after each node execution to save intermediate data
                     # 3. report to frontend
                     node_index = topo_graph.get_index_by_node_id(node_id)
                     assert node_index is not None
@@ -457,15 +440,12 @@ def execute_project_task(self, project_id: int, user_id: int):
                     )
                     workflow.apply_patch(patch)
                     return True
-            def time_check_callback() -> bool:
-                check_revoke()
-                return True
             
             graph.execute(
                 callbefore=exec_before_reporter, 
                 callafter=exec_after_reporter,
                 periodic_time_check_seconds=1.0,
-                periodic_time_check_callback=time_check_callback,
+                periodic_time_check_callback=lambda: True,
             )
 
             unreached_node_indices = graph.get_unreached_nodes()
@@ -553,14 +533,22 @@ async def revoke_project_task(task_id: str, timeout: float = 30) -> None:
     Wrapper to revoke a task only it has been started.
     """
     total_wait = 0.0
+    signal_sent = False
     while total_wait < timeout:
         task_result = AsyncResult(task_id, app=celery_app)
-        if task_result.state != "PENDING":
+        
+        # If task is ready (SUCCESS, FAILURE, REVOKED), we are done
+        if task_result.ready():
+            logger.debug(f"Task {task_id} has finished (state: {task_result.state})")
+            break
+
+        if not signal_sent:
             celery_app.control.revoke(
                 task_id, terminate=True, signal=signal.SIGTERM
             )
-            logger.debug(f"Task {task_id} terminated")
-            break
-        else:
-            await asyncio.sleep(0.5)
-            total_wait += 0.5
+            logger.debug(f"Task {task_id} revoke signal sent")
+            signal_sent = True
+        await asyncio.sleep(0.5)
+        total_wait += 0.5
+    if total_wait >= timeout:
+        logger.warning(f"Revoke task {task_id} timeout exceeded. Task may still run.")

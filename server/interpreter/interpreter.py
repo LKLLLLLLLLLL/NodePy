@@ -220,7 +220,7 @@ class ProjectInterpreter:
                 callbefore: Callable[[str], None], 
                 callafter: Callable[[str, Literal["success", "error"], dict[str, Any] | Exception, float | None], bool],
                 periodic_time_check_seconds: float,
-                periodic_time_check_callback: Callable[[], bool]
+                periodic_time_check_callback: Callable[[], bool],
     ) -> None:
         """ 
         Execute the graph in topological order.
@@ -293,7 +293,7 @@ class ProjectInterpreter:
                     output_data = _wrapped_execute(node_id, input_data)
 
                     running_time = (time.perf_counter() - start_time) * 1000  # in ms
-                
+
                 # 4. call callafter
                 except Exception as e:
                     self._unreached_node_ids.update(

@@ -1160,8 +1160,8 @@ K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 注意：在节点中的代码编辑器中，应该为用户提供基本的模版，即`server/engine/nodes/utiliy/custom_template.py`文件中的内容。
 
 **参数：**
-- input_ports: 输入端口定义，类型为List[tuple[str, type]]，每个输入端口由名称和类型组成。
-- output_ports: 输出端口定义，类型为List[tuple[str, type]]，每个输出端口由名称和类型组成。
+- input_ports: 输入端口定义，类型为Dict[str, type]，每个输入端口由名称和类型组成。
+- output_ports: 输出端口定义，类型为Dict[str, type]，每个输出端口由名称和类型组成。
 - script: 用户自定义的Python脚本，类型为str。脚本必须定义一个名为`script`的函数。
 
 注：上述输入输出类型(Type)允许使用："str", "int", "float", "bool", "Datetime"。

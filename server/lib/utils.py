@@ -1,8 +1,13 @@
 import base64
 import hashlib
+import os
+import pickle
 import signal
+import tempfile
 from typing import Any, Callable
 
+import billiard
+from billiard.queues import Queue
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.session import Session
@@ -170,6 +175,77 @@ def time_check(seconds: float, callback: Callable[[], bool]):
 
         return _wrapper
     return _decorator
+
+def _process_wrapper(queue: Queue, func: Callable, args: tuple, kwargs: dict) -> None:
+    """
+    Helper function to run the target function in a separate process.
+    Must be defined at module level for pickling.
+    """
+    # Reset SIGTERM handler to default so p.terminate() kills the process immediately
+    signal.signal(signal.SIGTERM, signal.SIG_DFL)
+
+    try:
+        result = func(*args, **kwargs)
+        # Use temp file to avoid pipe buffer limits and deadlocks with large data
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pkl") as f:
+            pickle.dump(result, f)
+            temp_path = f.name
+        queue.put({"status": "success", "result_path": temp_path})
+    except Exception as e:
+        queue.put({"status": "error", "error": e})
+
+
+def run_in_process(func: Callable):
+    """
+    A decorator to run a function (usually a node's process method) in a separate process.
+    This allows the main thread to remain responsive to signals (like SIGTERM for revocation)
+    even if the function executes blocking C-extension code (e.g., numpy, scikit-learn) that holds the GIL.
+    """
+
+    def _wrapper(*args, **kwargs) -> Any:
+        # This is safe on Linux/Docker
+        ctx = billiard.context.ForkContext()
+        queue = Queue(ctx=ctx)
+
+        # Start the subprocess
+        p = ctx.Process(target=_process_wrapper, args=(queue, func, args, kwargs))
+        p.start()
+
+        try:
+            # Wait for process to finish, checking for signals periodically
+            while p.is_alive():
+                p.join(timeout=0.5)
+        except Exception:
+            # If any exception occurs (including RevokeException from signal handler),
+            # terminate the child process immediately to reclaim resources.
+            if p.is_alive():
+                logger.warning(f"Terminating process {p.pid} due to interruption.")
+                p.terminate()
+                p.join()
+            raise
+
+        # Check result from queue
+        if p.exitcode != 0:
+            raise RuntimeError(f"Process exited with code {p.exitcode}")
+
+        if not queue.empty():
+            res = queue.get()
+            if res["status"] == "error":
+                raise res["error"]
+
+            # Success, read from file
+            temp_path = res["result_path"]
+            try:
+                with open(temp_path, "rb") as f:
+                    result = pickle.load(f)
+                return result
+            finally:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+        else:
+            raise RuntimeError("Process finished but returned no result")
+
+    return _wrapper
 
 def safe_hash(obj: Any) -> str:
     """

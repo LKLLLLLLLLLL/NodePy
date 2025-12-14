@@ -2,6 +2,7 @@ from typing import Any, Dict, Literal, override
 
 from pydantic import PrivateAttr
 
+from server.lib.utils import run_in_process
 from server.models.data import Data, Model, Table
 from server.models.exception import (
     NodeParameterError,
@@ -104,6 +105,7 @@ class LogisticRegressionNode(BaseNode):
         }
 
     @override
+    @run_in_process
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         from sklearn.linear_model import LogisticRegression
 
@@ -232,6 +234,7 @@ class SVCNode(BaseNode):
         }
 
     @override
+    @run_in_process
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         from sklearn.svm import SVC
 
@@ -244,7 +247,6 @@ class SVCNode(BaseNode):
         # Train SVC model with specified kernel
         model = SVC(kernel=self.kernel)
         model.fit(x, y)
-
         # Create Model object
         assert self._model_schema is not None
         model_obj = Model(
@@ -252,9 +254,7 @@ class SVCNode(BaseNode):
             metadata=self._model_schema,
         )
 
-        return {
-            "model": Data(payload=model_obj)
-        }
+        return {"model": Data(payload=model_obj)}
 
     @override
     @classmethod
