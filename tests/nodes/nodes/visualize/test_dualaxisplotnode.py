@@ -51,7 +51,7 @@ def test_dualaxis_hint_accepts_table_key(node_ctor):
     from server.interpreter.nodes.visualize import plot as plot_mod
     node = node_ctor("DualAxisPlotNode", id="d_hint_table", x_col="x", left_y_col="l", left_plot_type="line", right_y_col="r", right_plot_type="bar")
     schema = schema_from_coltypes({"x": ColType.INT, "l": ColType.INT, "r": ColType.INT})
-    hint = plot_mod.DualAxisPlotNode.get_hint("DualAxisPlotNode", {"table": schema}, {})
+    hint = plot_mod.DualAxisPlotNode.get_hint("DualAxisPlotNode", {"input": schema}, {})
     assert "x_col_choices" in hint
     assert "left_y_col_choices" in hint
     assert "right_y_col_choices" in hint

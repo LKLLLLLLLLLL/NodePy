@@ -207,6 +207,8 @@ class KlinePlotNode(BaseNode):
                         low_col_choices.append(col)
                         close_col_choices.append(col)
                         volume_col_choices.append(col)
+                    if col_type == ColType.INT:
+                        volume_col_choices.append(col)
             hint["x_col_choices"] = x_col_choices
             hint["open_col_choices"] = open_col_choices
             hint["high_col_choices"] = high_col_choices
