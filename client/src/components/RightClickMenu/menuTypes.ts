@@ -118,6 +118,10 @@ export const nodeMenuItems: MenuNode[] = [
         value: 'control',
         children: [
             {
+                label: '解包节点',
+                value: 'UnpackNode'
+            },            
+            {
                 label: '单元格获取节点',
                 value: 'GetCellNode'
             },
@@ -356,20 +360,8 @@ export const nodeMenuItems: MenuNode[] = [
         value: 'machineLearning',
         children: [
             {
-                label: '分类评分节点',
-                value: 'ClassificationScoreNode'
-            },
-            {
-                label: '回归评分节点',
-                value: 'RegressionScoreNode'
-            },
-            {
                 label: '线性回归节点',
                 value: 'LinearRegressionNode'
-            },
-            {
-                label: '预测节点',
-                value: 'PredictNode'
             },
             {
                 label: '滞后特征节点',
@@ -394,6 +386,18 @@ export const nodeMenuItems: MenuNode[] = [
             {
                 label: '特征标准化节点',
                 value: 'StandardScalerNode'
+            },
+            {
+                label: '分类评分节点',
+                value: 'ClassificationScoreNode'
+            },
+            {
+                label: '回归评分节点',
+                value: 'RegressionScoreNode'
+            },
+            {
+                label: '预测节点',
+                value: 'PredictNode'
             },
         ]
     },

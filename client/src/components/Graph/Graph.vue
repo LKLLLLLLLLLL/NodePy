@@ -94,6 +94,7 @@ import SVCNode from '../nodes/machineLearning/SVCNode.vue'
 import ClassificationScoreNode from '../nodes/machineLearning/ClassificationScoreNode.vue'
 import KMeansClusteringNode from '../nodes/machineLearning/KMeansClusteringNode.vue'
 import StandardScalerNode from '../nodes/machineLearning/StandardScalerNode.vue'
+import UnpackNode from '../nodes/control/UnpackNode.vue'
 import GetCellNode from '../nodes/control/GetCellNode.vue'
 import SetCellNode from '../nodes/control/SetCellNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -376,6 +377,7 @@ const nodeColor = (node: BaseNode) => {
     case 'KMeansClusteringNode':
     case 'StandardScalerNode':
       return nodeCategoryColor.machine
+    case 'UnpackNode':
     case 'GetCellNode':
     case 'SetCellNode':
       return nodeCategoryColor.control
@@ -778,6 +780,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-StandardScalerNode="StandardScalerNodeProps">
           <StandardScalerNode v-bind="StandardScalerNodeProps"/>
+        </template>
+
+        <template #node-UnpackNode="UnpackNodeProps">
+          <UnpackNode v-bind="UnpackNodeProps"/>
         </template>
 
         <template #node-GetCellNode="GetCellNodeProps">
