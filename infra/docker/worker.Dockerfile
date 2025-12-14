@@ -6,9 +6,11 @@
 #   │   ├── app/
 #   │   │   └── main.py
 #   │   └── ...
-#   └── static/          # frontend static files (-> project-root/client/dist/)
-#       ├── index.html
-#       ├── assets/
+#   ├── static/          # frontend static files (-> project-root/client/dist/)
+#   │   ├── index.html
+#   │   ├── assets/
+#   │   └── ...
+#   └── scripts/         # utility scripts
 #       └── ...
 
 FROM python:3.13 AS development
@@ -44,5 +46,7 @@ RUN uv sync --no-group server --no-group dev --group worker
 COPY server /nodepy/server
 # copy frontend build artifacts produced on host into image
 COPY client/dist /nodepy/static
+# copy scripts
+COPY scripts /nodepy/scripts
 # run server
 CMD ["uv", "run", "celery", "-A", "server.celery", "worker", "--beat", "--loglevel=info"]

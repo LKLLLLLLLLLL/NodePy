@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from server.lib.ExampleProjManager import initialize_example_projects
 from server.lib.FinancialDataManager import initialize_core_symbols
 
 # from server.lib.ApiLoggerMiddleware import ApiLoggerMiddleware
@@ -41,6 +42,9 @@ init_database()
 
 # init financial data for core symbols
 initialize_core_symbols()
+
+# init example projects for learning user
+initialize_example_projects()
 
 # Include API routes
 app.include_router(router, prefix="/api")

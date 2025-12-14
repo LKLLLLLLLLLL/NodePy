@@ -57,3 +57,4 @@ worker = [
 build = "python -m scripts.build build"
 dev = "python -m scripts.build dev"
 prod = "python -m scripts.build prod"
+persist = "python -m scripts.persist_project"

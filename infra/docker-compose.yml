@@ -89,6 +89,8 @@ services:
       - ../server:/nodepy/server
       # mount frontend build output for serving static files in development
       - ../client/dist:/nodepy/static:ro
+      # mount scripts
+      - ../scripts:/nodepy/scripts
     environment:
       - DATABASE_URL=postgresql://user:password@postgres:5432/nodepy
       - REDIS_URL=redis://redis:6379

@@ -6,10 +6,13 @@
 #   │   ├── app/
 #   │   │   └── main.py
 #   │   └── ...
-#   └── static/          # frontend static files (-> project-root/client/dist/)
-#       ├── index.html
-#       ├── assets/
+#   ├── static/          # frontend static files (-> project-root/client/dist/)
+#   │   ├── index.html
+#   │   ├── assets/
+#   │   └── ...
+#   └── scripts/         # utility scripts
 #       └── ...
+
 
 FROM python:3.13-slim AS development
 WORKDIR /nodepy
@@ -34,5 +37,7 @@ RUN uv sync --no-group worker --no-group dev --group server
 COPY server /nodepy/server
 # copy frontend build artifacts produced on host into image
 COPY client/dist /nodepy/static
+# copy scripts
+COPY scripts /nodepy/scripts
 # run server
 CMD ["uv", "run", "uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000", "--access-log"]

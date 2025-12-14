@@ -59,7 +59,7 @@
 
 
     const updateTableParam = () => {
-        props.data.param.rows = tableStore.currentTableData.rows
+        // props.data.param.rows = tableStore.currentTableData.rows
         props.data.param.col_names = tableStore.currentTableData.colNames
         props.data.param.col_types = tableStore.currentTableData.colTypes
     }

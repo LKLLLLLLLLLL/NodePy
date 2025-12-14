@@ -17,17 +17,22 @@ from server.models.project import Project, ProjUIState, ProjWorkflow
 
 
 async def get_project_by_id(
-    db: AsyncSession, project_id: int, user_id: int
+    db: AsyncSession, project_id: int, user_id: int | None
 ) -> Project | None:
+    """
+    Asynchronous version of get_project_by_id.
+    If user_id is None, indicates previliged operation.
+    """
     project_record = await db.get(ProjectRecord, project_id)
     if project_record is None:
         return None
     editable = True
-    if project_record.owner_id != user_id:  # type: ignore
-        if not project_record.show_in_explore:  # type: ignore
-            raise PermissionError("User does not have access to this project.")
-        else:
-            editable = False
+    if user_id is not None:
+        if project_record.owner_id != user_id:  # type: ignore
+            if not project_record.show_in_explore:  # type: ignore
+                raise PermissionError("User does not have access to this project.")
+            else:
+                editable = False
     workflow = ProjWorkflow(**project_record.workflow)  # type: ignore
     ui_state = ProjUIState(**project_record.ui_state)  # type: ignore
     return Project(
@@ -42,17 +47,22 @@ async def get_project_by_id(
     )
 
 def get_project_by_id_sync(
-    db: Session, project_id: int, user_id: int
+    db: Session, project_id: int, user_id: int | None
 ) -> Project | None:
+    """
+    Synchronous version of get_project_by_id.
+    If user_id is None, indicates previliged operation.
+    """
     project_record = db.get(ProjectRecord, project_id)
     if project_record is None:
         return None
     editable = True
-    if project_record.owner_id != user_id:  # type: ignore
-        if not project_record.show_in_examples:  # type: ignore
-            raise PermissionError("User does not have access to this project.")
-        else:
-            editable = False
+    if user_id is not None:
+        if project_record.owner_id != user_id:  # type: ignore
+            if not project_record.show_in_examples:  # type: ignore
+                raise PermissionError("User does not have access to this project.")
+            else:
+                editable = False
     workflow = ProjWorkflow(**project_record.workflow)  # type: ignore
     ui_state = ProjUIState(**project_record.ui_state)  # type: ignore
     return Project(

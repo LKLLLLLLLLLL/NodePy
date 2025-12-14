@@ -1,4 +1,5 @@
 from datetime import timezone
+from pathlib import Path
 
 """
 This file set some global configurations for the NodePy.
@@ -21,3 +22,8 @@ USE_CACHE = True
 
 # Whether to enable time tracing for interpreter
 TRACING_ENABLED = True
+
+# Configure example projects
+EXAMPLE_USER_USERNAME = "NodePy-Learning"
+EXAMPLE_USER_EMAIL = "learning@nodepy.com"
+EXAMPLES_DIR = Path("/nodepy/server/assets/examples")
