@@ -29,8 +29,8 @@ class CustomScriptNode(BaseNode):
     The function should take inputs as defined in the input ports and return outputs as defined in the output ports.
     """
 
-    input_ports: list[tuple[str, AllowedTypes]]  # List of tuples (port_name, type)
-    output_ports: list[tuple[str, AllowedTypes]]  # List of tuples (port_name, type)
+    input_ports: dict[str, AllowedTypes]  # port_name -> type
+    output_ports: dict[str, AllowedTypes]  # port_name -> type
     script: str  # The user-defined Python script
 
     @override
@@ -46,7 +46,7 @@ class CustomScriptNode(BaseNode):
     @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         in_ports = []
-        for name, type_str in self.input_ports:
+        for name, type_str in self.input_ports.items():
             schema_type = Schema.Type[type_str]
             in_ports.append(
                 InPort(
@@ -57,7 +57,7 @@ class CustomScriptNode(BaseNode):
                 )
             )
         out_ports = []
-        for name, type_str in self.output_ports:
+        for name, type_str in self.output_ports.items():
             out_ports.append(
                 OutPort(
                     name=name,

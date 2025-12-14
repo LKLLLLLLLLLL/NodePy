@@ -93,7 +93,7 @@ class TimeoutException(Exception):
     pass
 
 
-class InterruptedError(Exception):
+class InterruptedError(BaseException):
     """Exception raised when execution is interrupted by callback"""
     pass
 

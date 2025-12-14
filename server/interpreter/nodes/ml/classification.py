@@ -65,7 +65,7 @@ class LogisticRegressionNode(BaseNode):
     @override
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         feature_col_types = {col: {ColType.FLOAT, ColType.INT} for col in self.feature_cols}
-        target_col_types = {self.target_col: {ColType.BOOL, ColType.INT, ColType.STR}} if self.target_col else {}
+        target_col_types = {self.target_col: {ColType.BOOL, ColType.INT, ColType.STR, ColType.FLOAT}} if self.target_col else {}
         return [
             InPort(
                 name="table",
@@ -94,6 +94,7 @@ class LogisticRegressionNode(BaseNode):
             input_cols={col: table_col_types[col] for col in self.feature_cols},
             output_cols={self.target_col: ColType.BOOL} if self.target_col else {}
         )
+        self._model_schema = model_schema
         
         return {
             "model": Schema(
@@ -137,7 +138,7 @@ class LogisticRegressionNode(BaseNode):
                 for col, col_type in table_schema.tab.col_types.items():
                     if col_type in {ColType.FLOAT, ColType.INT}:
                         hint.setdefault("feature_col_choices", []).append(col)
-                    elif col_type in {ColType.BOOL, ColType.INT, ColType.STR}:
+                    if col_type in {ColType.BOOL, ColType.INT, ColType.STR, ColType.FLOAT}:
                         hint.setdefault("target_col_choices", []).append(col)
         return hint
 
@@ -221,6 +222,7 @@ class SVCNode(BaseNode):
             input_cols={col: table_col_types[col] for col in self.feature_cols},
             output_cols={self.target_col: ColType.BOOL} if self.target_col else {}
         )
+        self._model_schema = model_schema
         
         return {
             "model": Schema(
@@ -239,8 +241,8 @@ class SVCNode(BaseNode):
         # Prepare feature matrix and target vector
         x = input_table.df[self.feature_cols]
         y = input_table.df[self.target_col]
-        # Train SVC model
-        model = SVC()
+        # Train SVC model with specified kernel
+        model = SVC(kernel=self.kernel)
         model.fit(x, y)
 
         # Create Model object

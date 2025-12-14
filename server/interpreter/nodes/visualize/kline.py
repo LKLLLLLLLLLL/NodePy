@@ -161,7 +161,7 @@ class KlinePlotNode(BaseNode):
             mpf_df,
             type="candle",
             volume=self.volume_col is not None,
-            title=self.title,
+            title=self.title if self.title else "",
             style=s,
             returnfig=True,
             figsize=(8, 6),

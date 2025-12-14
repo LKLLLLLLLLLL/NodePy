@@ -228,18 +228,18 @@ class ClassificationScoreNode(BaseNode):
         table_col_types = input_table_schema.tab.col_types.copy()
         model_schema = input_model_schema.model
         model_feature_cols = model_schema.input_cols
-        for col, col_type in table_col_types.items():
-            if col not in model_feature_cols:
+        for col, col_type in model_feature_cols.items():
+            if col not in table_col_types:
                 raise NodeValidationError(
                     node_id=self.id,
                     err_input="table",
                     err_msg=f"Column '{col}' is not a required feature for the model."
                 )
-            if col_type != model_feature_cols[col]:
+            if table_col_types[col] != col_type:
                 raise NodeValidationError(
                     node_id=self.id,
                     err_input="table",
-                    err_msg=f"Column '{col}' type mismatch: expected {model_feature_cols[col]}, got {col_type}."
+                    err_msg=f"Column '{col}' type mismatch: expected {col_type}, got {table_col_types[col]}."
                 )
         # check if the model output matches the columns in the input table
         model_output_cols = model_schema.output_cols
