@@ -9,6 +9,7 @@
         <svg-icon type="mdi" :path="timer_outline_path" v-else-if="nodeCategory === 'datetimeProcess'"></svg-icon>
         <svg-icon type="mdi" :path="ruler_square_path" v-else-if="nodeCategory === 'analysis'"></svg-icon>
         <svg-icon type="mdi" :path="school_outline_path" v-else-if="nodeCategory === 'machineLearning'"></svg-icon>
+        <svg-icon type="mdi" :path="source_fork_path" v-else-if="nodeCategory === 'control'"></svg-icon>
         <slot/>
     </div>
 </template>
@@ -16,7 +17,7 @@
 <script lang="ts" setup>
     //@ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon'
-    import { mdiAlphabeticalVariant, mdiChartScatterPlot, mdiFileOutline, mdiImport, mdiMathCompass, mdiRulerSquare, mdiTable, mdiTimerOutline, mdiSchoolOutline } from '@mdi/js'
+    import { mdiAlphabeticalVariant, mdiChartScatterPlot, mdiFileOutline, mdiImport, mdiMathCompass, mdiRulerSquare, mdiTable, mdiTimerOutline, mdiSchoolOutline, mdiSourceFork } from '@mdi/js'
 
 
     const props = defineProps<{
@@ -41,6 +42,7 @@
     const timer_outline_path = mdiTimerOutline
     const ruler_square_path = mdiRulerSquare
     const school_outline_path = mdiSchoolOutline
+    const source_fork_path = mdiSourceFork
 
 </script>
 
