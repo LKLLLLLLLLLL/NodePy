@@ -894,22 +894,46 @@ export interface CustomScriptNode extends BaseNode<CustomScriptNodeData> {
 }
 
 
-export interface ForEachRowBeginNode extends BaseNode {
+export interface ForEachRowBeginNodeParam {
+    pair_id: number
+}
+export type ForEachRowBeginNodeData = BaseData & {
+    param: ForEachRowBeginNodeParam
+}
+export interface ForEachRowBeginNode extends BaseNode<ForEachRowBeginNodeData> {
     type: 'ForEachRowBeginNode'
 }
 
 
-export interface ForEachRowEndNode extends BaseNode {
+export interface ForEachRowEndNodeParam {
+    pair_id: number
+}
+export type ForEachRowEndNodeData = BaseData & {
+    param: ForEachRowEndNodeParam
+}
+export interface ForEachRowEndNode extends BaseNode<ForEachRowEndNodeData> {
     type: 'ForEachRowEndNode'
 }
 
 
-export interface ForRollingWindowBeginNode extends BaseNode {
+export interface ForRollingWindowBeginNodeParam {
+    pair_id: number
+}
+export type ForRollingWindowBeginNodeData = BaseData & {
+    param: ForRollingWindowBeginNodeParam
+}
+export interface ForRollingWindowBeginNode extends BaseNode<ForRollingWindowBeginNodeData> {
     type: 'ForRollingWindowBeginNode'
 }
 
 
-export interface ForRollingWindowEndNode extends BaseNode {
+export interface ForRollingWindowEndNodeParam {
+    pair_id: number
+}
+export type ForRollingWindowEndNodeData = BaseData & {
+    param: ForRollingWindowEndNodeParam
+}
+export interface ForRollingWindowEndNode extends BaseNode<ForRollingWindowEndNodeData> {
     type: 'ForRollingWindowEndNode'
 }
 

@@ -26,7 +26,7 @@
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
     import type { server__models__schema__Schema__Type } from '@/utils/api'
-    import { handleValidationError, handleExecError, handleOutputError } from '../handleError'
+    import { handleValidationError, handleExecError, handleOutputError, handleParamError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
@@ -42,11 +42,16 @@
         handleId: 'table',
         value: false
     })
+    const pair_idHasErr = ref({
+        id: 'pair_id',
+        value: false
+    })
 
 
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
+        handleParamError(props.data.error, errMsg, pair_idHasErr)
         handleValidationError(props.id, props.data.error, errMsg, tableHasErr)
     }, {immediate: true})
 

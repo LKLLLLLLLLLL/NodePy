@@ -1175,6 +1175,7 @@ export const useGraphStore = defineStore('graph', () => {
         const containerHeight = 500
         const nodeWidth = 210
         const padding = 30
+        const pair_id = Date.now() + Math.floor(Math.random() * 10)
         const addedForEachRowNode: Nodetypes.BaseNode = {
           id,
           position,
@@ -1193,7 +1194,9 @@ export const useGraphStore = defineStore('graph', () => {
           type: 'ForEachRowBeginNode',
           parentNode: id,
           data: {
-            param: {}
+            param: {
+              pair_id
+            }
           }
         }
         const addedForEachRowEndNode: Nodetypes.ForEachRowEndNode = {
@@ -1205,7 +1208,9 @@ export const useGraphStore = defineStore('graph', () => {
           type: 'ForEachRowEndNode',
           parentNode: id,
           data: {
-            param: {}
+            param: {
+              pair_id
+            }
           }
         }
         addNodes([addedForEachRowNode, addedForEachRowBeginNode, addedForEachRowEndNode])
