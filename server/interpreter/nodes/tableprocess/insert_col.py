@@ -111,10 +111,10 @@ class InsertConstColNode(BaseNode):
 
         # append the new column to the table
         assert self.col_name is not None
-        new_table = input_table._append_col(self.col_name, const_series)
+        new_data = input_table_data.append_col(self.col_name, const_series)
 
         return {
-            "table": Data(payload=new_table)
+            "table": new_data
         }
 
 @register_node()

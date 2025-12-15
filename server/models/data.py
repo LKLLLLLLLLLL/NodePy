@@ -99,7 +99,7 @@ class Table(BaseModel):
         if len(self.df) != len(col):
             raise ValueError(f"Cannot add column '{new_col}': length mismatch {len(self.df)} vs {len(col)}.")
         new_df = self.df.copy()
-        new_df[new_col] = col
+        new_df[new_col] = col.values
         new_col_types = self.col_types.copy()
         new_col_types[new_col] = ColType.from_ptype(col.dtype)
         return Table(df=new_df, col_types=new_col_types)
@@ -189,12 +189,6 @@ class Table(BaseModel):
                 df[col] = df[col].astype(ptype) # type: ignore
         return Table(df=df, col_types=col_types)
 
-    # @classmethod
-    # def from_dict(cls, data: dict[str, Any]) -> 'Table':
-    #     df = DataFrame.from_dict(data["data"])
-    #     col_types = {k: ColType(v) for k, v in data["col_types"].items()}
-    #     return Table(df=df, col_types=col_types)
-
 
 class Model(BaseModel):
     """
@@ -276,12 +270,6 @@ class Data(BaseModel):
             raise ValueError("Can only append column to Table data.")
         new_table = self.payload._append_col(new_col, ser)
         return Data(payload=new_table)
-    
-    # def print(self) -> str:
-    #     if isinstance(self.payload, Table):
-    #         return str(self.payload.df)
-    #     else:
-    #         return str(self.payload)
 
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, Data):
