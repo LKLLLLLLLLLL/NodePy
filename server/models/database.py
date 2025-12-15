@@ -1,4 +1,3 @@
-import os
 from typing import AsyncIterator, Iterator
 
 from sqlalchemy import (
@@ -22,12 +21,13 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 from sqlalchemy.sql import func
 
+from server.config import ASYNC_DATABASE_URL, DATABASE_URL, USER_DEFAULT_STORAGE_MB
+
 """
 Session management.
 """
 
 # sync engine and session
-DATABASE_URL = os.getenv("DATABASE_URL", "")
 engine = create_engine(DATABASE_URL, pool_size=20, max_overflow=40, pool_timeout=30)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def get_session() -> Iterator[Session]:
@@ -38,7 +38,6 @@ def get_session() -> Iterator[Session]:
         db.close()
 
 # async engine and session
-ASYNC_DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
 async_engine = create_async_engine(ASYNC_DATABASE_URL, echo=False, pool_pre_ping=True)
 AsyncSessionLocal = async_sessionmaker(
     bind=async_engine, 
@@ -61,7 +60,7 @@ class UserRecord(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=True)
 
-    file_total_space = Column(BigInteger, default=5 * 1024 * 1024 * 1024, nullable=False)  # 5 GB default
+    file_total_space = Column(BigInteger, default=USER_DEFAULT_STORAGE_MB * 1024 * 1024, nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
 class ProjectRecord(Base):

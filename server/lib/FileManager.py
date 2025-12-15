@@ -1,6 +1,5 @@
 import asyncio
 import io
-import os
 import time
 from typing import cast
 from urllib.parse import quote
@@ -13,6 +12,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from server.celery import celery_app
+from server.config import (
+    MINIO_ACCESS_KEY,
+    MINIO_SECRET_KEY,
+    MINIO_SECURE,
+    MINIO_URL,
+)
 from server.lib.DataManager import DataManager
 from server.models.data_view import DataRef
 from server.models.database import (
@@ -39,10 +44,10 @@ class FileManager:
     """
     def __init__(self, async_db_session: AsyncSession | None = None, sync_db_session: Session | None = None) -> None:
         self.minio_client = Minio(
-            endpoint=os.getenv("MINIO_ENDPOINT", ""),
-            access_key=os.getenv("MINIO_ROOT_USER", ""),
-            secret_key=os.getenv("MINIO_ROOT_PASSWORD", ""),
-            secure=False  # MinIO in Docker is HTTP, not HTTPS
+            endpoint=MINIO_URL,
+            access_key=MINIO_ACCESS_KEY,
+            secret_key=MINIO_SECRET_KEY,
+            secure=MINIO_SECURE
         )
         if async_db_session:
             assert sync_db_session is None

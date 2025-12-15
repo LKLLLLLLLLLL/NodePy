@@ -130,8 +130,8 @@ def execute_project_task(self, project_id: int, user_id: int):
                     value=ProjNodeError(
                         type="validation",
                         params=None,
-                        inputs=None,
-                        message="Validation Error: " + str(e)
+                        inputs=[''],
+                        message=["Validation Error: " + str(e)]
                     )
                 )
                 queue.push_message_sync(

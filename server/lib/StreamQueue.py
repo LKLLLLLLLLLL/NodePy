@@ -1,13 +1,13 @@
 import json
-import os
 from enum import Enum
 from typing import Any, Optional
 
 import redis as redis_sync
 import redis.asyncio as redis
 
-STREAMQUEUE_REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379") + "/1"
-STREAM_TTL_SECONDS = 3600  # 1 hour
+from server.config import STREAMQUEUE_REDIS_URL
+from server.config import STREAMQUEUE_TTL_SECONDS as STREAM_TTL_SECONDS
+
 
 class Status(str, Enum):
     SUCCESS = "success"

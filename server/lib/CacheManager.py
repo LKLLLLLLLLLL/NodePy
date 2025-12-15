@@ -1,17 +1,14 @@
-import os
 import pickle
 from typing import Any
 
 import redis
 from loguru import logger
 
-from server.config import USE_CACHE
+from server.config import CACHE_REDIS_URL, CACHE_TTL_SECONDS, USE_CACHE
 from server.lib.utils import safe_hash
 from server.models.data import Data
 from server.models.file import File
 
-CACHE_REDIS_URL = os.getenv("REDIS_URL", "") + "/2"
-CACHE_TTL_SECONDS  = 24 * 60 * 60 # 24 hour
 
 class CacheManager:
     """

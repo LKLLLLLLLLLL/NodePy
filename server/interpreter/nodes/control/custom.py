@@ -8,6 +8,7 @@ import re
 import typing
 from typing import Any, Literal, override
 
+from server.config import CUSTOM_SCRIPT_MAX_TIME_SEC
 from server.lib.utils import timeout
 from server.models.data import Data
 from server.models.exception import (
@@ -100,7 +101,7 @@ class CustomScriptNode(BaseNode):
             }
             local_env = {}
             
-            @timeout(5)
+            @timeout(CUSTOM_SCRIPT_MAX_TIME_SEC)
             def wrap_exec(code, globals_dict, locals_dict):
                 exec(code, globals_dict, locals_dict)
 

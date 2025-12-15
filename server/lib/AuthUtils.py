@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -8,12 +7,19 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from server.config import (
+    AUTH_ACCESS_TOKEN_EXPIRE_MINUTES as ACCESS_TOKEN_EXPIRE_MINUTES,
+)
+from server.config import (
+    AUTH_ALGORITHM as ALGORITHM,
+)
+from server.config import (
+    AUTH_REFRESH_TOKEN_EXPIRE_DAYS as REFRESH_TOKEN_EXPIRE_DAYS,
+)
+from server.config import (
+    AUTH_SECRET_KEY as SECRET_KEY,
+)
 from server.models.database import UserRecord, get_async_session
-
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 pwd_context = CryptContext(
     schemes=["argon2"],

@@ -1,5 +1,4 @@
 import asyncio
-import os
 import time
 from typing import Literal, Optional, Self
 
@@ -7,11 +6,17 @@ import redis as redis_sync
 import redis.asyncio as redis
 from loguru import logger
 
+from server.config import (
+    PROJ_LOCK_APPOINTED_LOCK_EXPIRY as APPOINTED_LOCK_EXPIRY,
+)
+from server.config import (
+    PROJ_LOCK_REDIS_URL as LOCK_REDIS_URL,
+)
+from server.config import (
+    PROJ_LOCK_RETRY_INTERVAL as RETRY_INTERVAL,
+)
 from server.models.exception import ProjectLockError, ProjLockIdentityError
 
-LOCK_REDIS_URL = os.getenv("REDIS_URL", "") + "/3"
-RETRY_INTERVAL = 0.1  # seconds
-APPOINTED_LOCK_EXPIRY = 30  # seconds
 
 class ProjectLock:
     """
