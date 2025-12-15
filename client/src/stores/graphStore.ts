@@ -1181,7 +1181,7 @@ export const useGraphStore = defineStore('graph', () => {
           type: 'NodeContainer',
           data: {
             param: {},
-            virtual_node: true
+            is_virtual_node: true
           }
         }
         const addedForEachRowBeginNode: Nodetypes.ForEachRowBeginNode = {

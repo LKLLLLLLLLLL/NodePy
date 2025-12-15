@@ -13,7 +13,7 @@ export const getProject = (vp: vueFlowProject): Project => {
             id: n.id,
             type: n.type,
             param: n.data.param,
-            virtual_node: n.data.virtual_node,
+            is_virtual_node: n.data.is_virtual_node,
             runningtime: n.data.runningtime,
             schema_out: n.data.schema_out,
             data_out: n.data.data_out,
@@ -73,7 +73,7 @@ export const initVueFlowProject = (p: Project, vp: vueFlowProject) => {
                 data_out: p.workflow.nodes[i]?.data_out,
                 error: p.workflow.nodes[i]?.error,
                 hint: p.workflow.nodes[i]?.hint,
-                virtual_node: p.workflow.nodes[i]?.virtual_node
+                is_virtual_node: p.workflow.nodes[i]?.is_virtual_node
             },
             parentNode: p.ui_state.nodes[i]?.parentNode
         })
