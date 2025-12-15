@@ -72,7 +72,6 @@ async def list_projects(
     status_code=201,
     responses={
         201: {"description": "Project copied successfully"},
-        400: {"description": "Project name already exists"},
         404: {"description": "Project not found"},
         500: {"description": "Internal server error"},
     },
@@ -93,16 +92,19 @@ async def copy_project(
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found")
         # 2. check if project name exists
-        existing_project = await db_client.execute(
-            select(ProjectRecord).where(
-                (ProjectRecord.name == f"{project.project_name}_copy") & 
-                (ProjectRecord.owner_id == user_id))
-        )
-        if existing_project.first() is not None:
-            raise HTTPException(status_code=400, detail="Project name already exists")
+        new_project_name = project.project_name 
+        for i in range(1000):
+            existing_project = await db_client.execute(
+                select(ProjectRecord).where(
+                    (ProjectRecord.name == new_project_name) & 
+                    (ProjectRecord.owner_id == user_id))
+            )
+            if existing_project.first() is None:
+                break
+            new_project_name = f"{project.project_name}_copy{i}"
         # 3. create new project
         new_project = ProjectRecord(
-            name=f"{project.project_name}_copy",
+            name=new_project_name,
             owner_id=user_id,
             workflow=project.workflow.model_dump(),
             ui_state=project.ui_state.model_dump(),
