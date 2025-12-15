@@ -122,6 +122,10 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'CustomScriptNode'
             },
             {
+                label: '表格逐行处理节点',
+                value: 'ForEachRowNode'
+            },
+            {
                 label: '解包节点',
                 value: 'UnpackNode'
             },            

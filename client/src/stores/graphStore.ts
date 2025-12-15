@@ -1170,6 +1170,46 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedCustomScriptNode)
         break
+      case 'ForEachRowNode':
+        const containerWidth = 1000
+        const containerHeight = 500
+        const nodeWidth = 210
+        const padding = 30
+        const addedForEachRowNode: Nodetypes.BaseNode = {
+          id,
+          position,
+          type: 'NodeContainer',
+          data: {
+            param: {},
+            virtual_node: true
+          }
+        }
+        const addedForEachRowBeginNode: Nodetypes.ForEachRowBeginNode = {
+          id: nextId('ForEachRowBeginNode'),
+          position: {
+            x: padding,
+            y: containerHeight / 2
+          },
+          type: 'ForEachRowBeginNode',
+          parentNode: id,
+          data: {
+            param: {}
+          }
+        }
+        const addedForEachRowEndNode: Nodetypes.ForEachRowEndNode = {
+          id: nextId('ForEachRowEndNode'),
+          position: {
+            x: containerWidth - nodeWidth - padding,
+            y: containerHeight / 2
+          },
+          type: 'ForEachRowEndNode',
+          parentNode: id,
+          data: {
+            param: {}
+          }
+        }
+        addNodes([addedForEachRowNode, addedForEachRowBeginNode, addedForEachRowEndNode])
+        break;
       case 'UnpackNode':
         const addedUnpackNode: Nodetypes.UnpackNode ={
           id,

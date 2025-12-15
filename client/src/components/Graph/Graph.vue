@@ -13,6 +13,7 @@ import GraphControls from './GraphControls.vue'
 import GraphInfo from './GraphInfo.vue'
 import NodePyEdge from '../NodePyEdge.vue'
 import NodePyConnectionLine from '../NodePyConnectionLine.vue'
+import NodeContainer from '../nodes/tools/NodeContainer.vue'
 import ConstNode from '../nodes/input/ConstNode.vue'
 import StringNode from '../nodes/input/StringNode.vue'
 import TableNode from '../nodes/input/TableNode.vue'
@@ -95,6 +96,8 @@ import ClassificationScoreNode from '../nodes/machineLearning/ClassificationScor
 import KMeansClusteringNode from '../nodes/machineLearning/KMeansClusteringNode.vue'
 import StandardScalerNode from '../nodes/machineLearning/StandardScalerNode.vue'
 import CustomScriptNode from '../nodes/control/CustomScriptNode.vue'
+import ForEachRowBeginNode from '../nodes/control/ForEachRowBeginNode.vue'
+import ForEachRowEndNode from '../nodes/control/ForEachRowEndNode.vue'
 import UnpackNode from '../nodes/control/UnpackNode.vue'
 import GetCellNode from '../nodes/control/GetCellNode.vue'
 import SetCellNode from '../nodes/control/SetCellNode.vue'
@@ -379,6 +382,8 @@ const nodeColor = (node: BaseNode) => {
     case 'StandardScalerNode':
       return nodeCategoryColor.machine
     case 'CustomScriptNode':
+    case 'ForEachRowBeginNode':
+    case 'ForEachRowEndNode':
     case 'UnpackNode':
     case 'GetCellNode':
     case 'SetCellNode':
@@ -458,6 +463,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #connection-line="ConnectionLineProps">
           <NodePyConnectionLine v-bind="ConnectionLineProps"/>
+        </template>
+
+        <template #node-NodeContainer="NodeContainerProps">
+          <NodeContainer v-bind="NodeContainerProps"/>
         </template>
 
         <template #node-ConstNode="ConstNodeProps">
@@ -786,6 +795,14 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-CustomScriptNode="CustomScriptNodeProps">
           <CustomScriptNode v-bind="CustomScriptNodeProps"/>
+        </template>
+
+        <template #node-ForEachRowBeginNode="ForEachRowBeginNodeProps">
+          <ForEachRowBeginNode v-bind="ForEachRowBeginNodeProps"/>
+        </template>
+
+        <template #node-ForEachRowEndNode="ForEachRowEndNodeProps">
+          <ForEachRowEndNode v-bind="ForEachRowEndNodeProps"/>
         </template>
 
         <template #node-UnpackNode="UnpackNodeProps">
