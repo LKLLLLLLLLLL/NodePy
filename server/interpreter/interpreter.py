@@ -39,15 +39,15 @@ class ProjectInterpreter:
             trace_begin = time.perf_counter()
 
         self._topology: WorkflowTopology = topology
-        self._nodes: list[TopoNode] = topology.nodes
+        self._nodes: list[TopoNode | None] = topology.nodes
         self._edges: list[TopoEdge] = topology.edges
         self._graph: nx.MultiDiGraph = nx.MultiDiGraph()
-        self._graph.add_nodes_from(node.id for node in self._nodes) # add nodes as indices
+        self._graph.add_nodes_from(node.id for node in self._nodes if node is not None) # add nodes as indices
         for edge in self._edges:
             self._graph.add_edge(edge.src, edge.tar, src_port=edge.src_port, tar_port=edge.tar_port)
         if not nx.is_directed_acyclic_graph(self._graph):
             raise ValueError("The graph must be a Directed Acyclic Graph (DAG)")
-        self._node_map: dict[str, TopoNode] = {node.id: node for node in self._nodes}
+        self._node_map: dict[str, TopoNode] = {node.id: node for node in self._nodes if node is not None}
         self._node_objects: dict[str, BaseNode] = {}
         self._exec_queue: list[str] = []
         self._stage: Literal["init", "constructed", "static_analyzed", "running", "finished"] = "init"
@@ -401,7 +401,7 @@ class ProjectInterpreter:
         # convert node id to the index in the topology nodes list
         unreached_node_indices = []
         for index, node in enumerate(self._nodes):
-            if node.id in self._unreached_node_ids:
+            if node is not None and node.id in self._unreached_node_ids:
                 unreached_node_indices.append(index)
         return unreached_node_indices
 

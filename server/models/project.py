@@ -46,8 +46,9 @@ class ProjNode(BaseModel):
     """
     id: str
     type: str
+    is_virtual_node: bool = False  # whether this node is a virtual node (not executed)
     param: dict[str, Any]
-    
+
     runningtime: float | None = None  # in ms
 
     schema_out: dict[str, Schema] = {}
@@ -80,7 +81,14 @@ class ProjWorkflow(BaseModel):
 
     def to_topo(self, project_id: int) -> WorkflowTopology:
         """Convert to WorkflowTopology"""
-        topo_nodes = [TopoNode(id=node.id, type=node.type, params=node.param) for node in self.nodes]
+        topo_nodes = []
+        for node in self.nodes:
+            if node.is_virtual_node:
+                topo_nodes.append(None)
+            else:
+                topo_nodes.append(
+                    TopoNode(id=node.id, type=node.type, params=node.param)
+                )
         topo_edges = [TopoEdge(src=edge.src, src_port=edge.src_port, tar=edge.tar, tar_port=edge.tar_port) for edge in self.edges]
         return WorkflowTopology(
             project_id=project_id,
@@ -202,7 +210,7 @@ class ProjUIState(BaseModel):
     """
 
     nodes: list[NodeUIState]
-    
+
     @classmethod
     def get_empty_ui_state(cls) -> "ProjUIState":
         return cls(

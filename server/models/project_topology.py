@@ -25,13 +25,13 @@ class WorkflowTopology(BaseModel):
     """
 
     project_id: int
-    nodes: list[TopoNode]
+    nodes: list[TopoNode | None]  # None as a placeholder for virtual nodes
     edges: list[TopoEdge]
 
     @model_validator(mode="after")
     def all_nodes_unique(self) -> "WorkflowTopology":
         """Validate all node ids are unique"""
-        node_ids = [node.id for node in self.nodes]
+        node_ids = [node.id for node in self.nodes if node is not None]
         if len(node_ids) != len(set(node_ids)):
             raise ModelValidationError("Node ids must be unique")
         return self
@@ -39,7 +39,7 @@ class WorkflowTopology(BaseModel):
     @model_validator(mode="after")
     def all_edges_valid(self) -> "WorkflowTopology":
         """Validate all edges connect valid nodes"""
-        node_ids = {node.id for node in self.nodes}
+        node_ids = {node.id for node in self.nodes if node is not None}
         for edge in self.edges:
             if edge.src not in node_ids:
                 raise ModelValidationError(f"Edge source '{edge.src}' does not exist")
@@ -62,6 +62,6 @@ class WorkflowTopology(BaseModel):
     def get_index_by_node_id(self, node_id: str) -> int | None:
         """Get index of node by its id"""
         for index, node in enumerate(self.nodes):
-            if node.id == node_id:
+            if node is not None and node.id == node_id:
                 return index
         return None
