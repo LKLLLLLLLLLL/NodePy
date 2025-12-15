@@ -4,17 +4,20 @@ from enum import Enum
 from typing import Any, Callable, Generator, Literal
 
 import networkx as nx
-import pandas as pd
 from pydantic import ValidationError
 
 from server import DEBUG, logger
 from server.config import TRACING_ENABLED
+from server.interpreter.nodes.control.for_base_node import (
+    ForBaseBeginNode,
+    ForBaseEndNode,
+)
 from server.lib.CacheManager import CacheManager
 from server.lib.FileManager import FileManager
 from server.lib.FinancialDataManager import FinancialDataManager
-from server.lib.utils import safe_hash, time_check
-from server.models.data import Data, Schema, Table
-from server.models.exception import NodeExecutionError, NodeParameterError
+from server.lib.utils import safe_hash
+from server.models.data import Data, Schema
+from server.models.exception import NodeParameterError
 from server.models.project import TopoEdge, TopoNode, WorkflowTopology
 
 from .nodes.base_node import BaseNode
@@ -372,8 +375,6 @@ class ProjectInterpreter:
     def execute(self, 
                 callbefore: Callable[[str], None], 
                 callafter: Callable[[str, Literal["success", "error"], dict[str, Any] | Exception, float | None], bool],
-                periodic_time_check_seconds: float,
-                periodic_time_check_callback: Callable[[], bool],
     ) -> None:
         """ 
         Execute the graph in topological order.
@@ -401,7 +402,6 @@ class ProjectInterpreter:
             if self._control_structure_manager.is_end_node(node_id):
                 # end nodes' outputs are set in control structure execution
                 continue
-            node = self._node_objects[node_id]
             in_edges = list(self._graph.in_edges(node_id, data=True)) # type: ignore
 
             # 1. get input data
@@ -413,89 +413,31 @@ class ProjectInterpreter:
                 src_data = data_cache[(src_id, src_port)]
                 input_data[tar_port] = src_data
 
-            # 2. search cache
-            cache_data = self._cache_manager.get( 
-                node_type=self._node_map[node_id].type,
-                params=self._node_map[node_id].params,
-                inputs=input_data,
-            )
-
             output_data: dict[str, Data]
             running_time: float
             
             # special handling for control structures
-            if self._control_structure_manager.is_begin_node(node_id):
-                end_node_id = self._control_structure_manager.get_end_node_id(node_id)
-                # 3. execute control structure
-                try:
-                    callbefore(node_id)
-                    start_time = time.perf_counter()
-
-                    @time_check(periodic_time_check_seconds, periodic_time_check_callback)
-                    def _wrapped_execute(begin_node_id: str, inputs: dict[str, Data]) -> dict[str, Data]:
-                        return self._execute_control_structure(begin_node_id, inputs)
-
-                    output_data = _wrapped_execute(node_id, input_data)
-
-                    running_time = (time.perf_counter() - start_time) * 1000  # in ms
-
-                # 4. call callafter
-                except Exception as e:
-                    self._unreached_node_ids.update(
-                        [node_id, *nx.descendants(self._graph, node_id)]
-                    )
-                    continue_execution = callafter(node_id, "error", e, None)
-                    if not continue_execution:
-                        self._unreached_node_ids.update(
-                            [node_id, *nx.descendants(self._graph, node_id)]
-                        )
-                        return
-                    else:
-                        continue
-                else:
-                    continue_execution = callafter(node_id, "success", output_data, running_time)
-                    if not continue_execution:
-                        return
-                    else:
-                        pass
-                
-                # 5. store output data as the output data from end node to self cache
-                for tar_port, data in output_data.items():
-                    if data_cache.get((end_node_id, tar_port)) is not None:
-                        raise RuntimeError(f"Node '{end_node_id}' output on port '{tar_port}' already exists in cache.")
-                    data_cache[(end_node_id, tar_port)] = data
-
-                # 6. store to CacheManager
-                # pass
-                continue
+            is_control_structure = self._control_structure_manager.is_begin_node(node_id)
             
+            # 2. execute normal node
             try:
-                # 3. execute node if cache miss
-                if cache_data is None:
-                    # call callbefore, only when cache miss
-                    callbefore(node_id)
-
-                    # run node
-                    start_time = time.perf_counter()
-                    input_data_hash: str = ""
-
-                    if DEBUG:
-                        input_data_hash = safe_hash(input_data)  # guard to avoid accidental mutation
-
-                    @time_check(periodic_time_check_seconds, periodic_time_check_callback)
-                    def _wrapped_execute(node: BaseNode, input_data: dict[str, Data]) -> dict[str, Data]:
-                        return node.execute(input_data)
-
-                    output_data = _wrapped_execute(node, input_data)
-
-                    if DEBUG:
-                        if safe_hash(input_data) != input_data_hash:
-                            raise AssertionError(f"Node {node_id} in type {node.type} input data were modified during execution, which is not allowed.")
-
-                    running_time = (time.perf_counter() - start_time) * 1000  # in ms
+                if is_control_structure:
+                    res = self._execute_control_structure(
+                        begin_node_id=node_id,
+                        inputs=input_data,
+                        callbefore=callbefore,
+                        callafter=callafter,
+                    )
+                    if res is None:
+                        # execution was stopped in control structure
+                        return
+                    else:
+                        output_data, running_time = res
                 else:
-                    output_data, running_time = cache_data
-            # 4. call callafter
+                    output_data, running_time = self._execute_single_node(
+                        node_id, input_data, callbefore
+                    )
+            # 3. call callafter
             except Exception as e:
                 self._unreached_node_ids.update(
                     [node_id, *nx.descendants(self._graph, node_id)]
@@ -509,27 +451,27 @@ class ProjectInterpreter:
                 else:
                     continue
             else:
-                continue_execution = callafter(node_id, "success", output_data, running_time)
+                callafter_node_id = node_id if not is_control_structure else self._control_structure_manager.get_end_node_id(node_id)
+                continue_execution = callafter(callafter_node_id, "success", output_data, running_time)
                 if not continue_execution:
                     return
                 else:
                     pass
 
-            # 5. store output data to self cache
-            for tar_port, data in output_data.items():
-                if data_cache.get((node_id, tar_port)) is not None:
-                    raise RuntimeError(f"Node '{node_id}' output on port '{tar_port}' already exists in cache.")
-                data_cache[(node_id, tar_port)] = data
-            
-            # 6. store to CacheManager
-            if output_data is not None:
-                self._cache_manager.set(
-                    node_type=self._node_map[node_id].type,
-                    params=self._node_map[node_id].params,
-                    inputs=input_data,
-                    outputs=output_data,
-                    running_time=running_time,
-                )
+            # 4. store output data to self cache
+            if is_control_structure:
+                # for control structures, save outputs to the end node only
+                end_node_id = self._control_structure_manager.get_end_node_id(node_id)
+                for tar_port, data in output_data.items():
+                    if data_cache.get((end_node_id, tar_port)) is not None:
+                        raise RuntimeError(f"Node '{end_node_id}' output on port '{tar_port}' already exists in cache.")
+                    data_cache[(end_node_id, tar_port)] = data
+            else:
+                for tar_port, data in output_data.items():
+                    if data_cache.get((node_id, tar_port)) is not None:
+                        raise RuntimeError(f"Node '{node_id}' output on port '{tar_port}' already exists in cache.")
+                    data_cache[(node_id, tar_port)] = data
+
         self._stage = "finished"
         
         if TRACING_ENABLED:
@@ -608,10 +550,67 @@ class ProjectInterpreter:
             if not continue_execution:
                 break  
 
-    """
-    Helper methods to process control structures in the graph.
-    """
-    def _execute_control_structure(self, begin_node_id: str, inputs: dict[str, Data]) -> dict[str, Data]:
+    def _execute_single_node(
+        self, 
+        node_id: str, 
+        input_data: dict[str, Data],
+        callbefore: Callable[[str], None], 
+    ) -> tuple[dict[str, Data], float]:
+        """
+        Execute a single node by its id with given inputs.
+        """
+        node = self._node_objects.get(node_id, None)
+        if node is None:
+            raise ValueError(f"Node {node_id} is not constructed.")
+
+        output_data: dict[str, Data]
+        running_time: float
+        # 1. search cache
+        cache_data = self._cache_manager.get(
+            node_type=self._node_map[node_id].type,
+            params=self._node_map[node_id].params,
+            inputs=input_data,
+        )    
+        
+        if cache_data is None:
+            # 2. execute node if cache miss
+            # call callbefore, only when cache miss
+            callbefore(node_id)
+
+            # run node
+            start_time = time.perf_counter()
+            input_data_hash: str = ""
+
+            if DEBUG:
+                input_data_hash = safe_hash(input_data)  # guard to avoid accidental mutation
+
+            output_data = node.execute(input_data)
+
+            if DEBUG:
+                if safe_hash(input_data) != input_data_hash:
+                    raise AssertionError(f"Node {node_id} in type {node.type} input data were modified during execution, which is not allowed.")
+
+            running_time = (time.perf_counter() - start_time) * 1000  # in ms
+        else:
+            output_data, running_time = cache_data   
+        # 3. store to CacheManager
+        if output_data is not None:
+            self._cache_manager.set(
+                node_type=self._node_map[node_id].type,
+                params=self._node_map[node_id].params,
+                inputs=input_data,
+                outputs=output_data,
+                running_time=running_time,
+            )
+        return output_data, running_time
+
+    def _execute_control_structure(
+        self, 
+        begin_node_id: str, 
+        inputs: dict[str, Data],
+        callbefore: Callable[[str], None],
+        callafter: Callable[[str, Literal["success", "error"], dict[str, Any] | Exception, float | None], bool],
+    ) -> tuple[dict[str, Data], float] | None:
         """
         Execute a control structure starting from the given begin node id.
         You can call it like a normal node's execute method.
@@ -619,30 +618,21 @@ class ProjectInterpreter:
         assert self._control_structure_manager is not None, "Control structure manager is not initialized."
         if not self._control_structure_manager.is_begin_node(begin_node_id):
             raise ValueError(f"Node {begin_node_id} is not a begin node of a control structure.")
-        control_structure_begin_type = self._node_objects[begin_node_id].type
-        
-        if control_structure_begin_type == "ForEachRowBeginNode":
-            # ForEachRow control structure
-            input_table_data = inputs.get("table")
-            assert input_table_data is not None
-            assert isinstance(input_table_data.payload, Table)
-            input_table_df = input_table_data.payload.df
-            output_rows: list[Data] = []
-            for index in range(0, len(input_table_df)):
+        end_node_id = self._control_structure_manager.get_end_node_id(begin_node_id)
+        begin_node = self._node_objects[begin_node_id]
+        end_node = self._node_objects[end_node_id]
+        begin_time = time.perf_counter()
+        if isinstance(begin_node, ForBaseBeginNode):
+            assert isinstance(end_node, ForBaseEndNode), "Begin node and end node types do not match."
+            for input_datas in begin_node.iter_loop(inputs):
                 res_cache: dict[tuple[str, str], Data] = {} # local cache for exec result in this iteration: (node_id, port) -> Data
 
-                # set the current row data to the output port of the begin node
-                row_data = Data(
-                    payload=Table(
-                        df=input_table_df.iloc[index: index + 1],
-                        col_types=input_table_data.payload.col_types
-                    )
-                )
-                res_cache[(begin_node_id, "row")] = row_data
+                # collect inputs for begin node
+                for input_port, data in input_datas.items():
+                    res_cache[(begin_node_id, input_port)] = data
 
-                # a sample interpreter to execute body nodes
+                # execute body nodes
                 for node_id in self._control_structure_manager.iter_control_structure(self._graph, begin_node_id):
-                    node = self._node_objects[node_id]
                     in_edges = list(self._graph.in_edges(node_id, data=True)) # type: ignore
 
                     # 1. get input data
@@ -652,167 +642,45 @@ class ProjectInterpreter:
                         tar_port = edge_data['tar_port']
                         input_data[tar_port] = res_cache[(src_id, src_port)]
 
-                    # 2. search cache in cache manager
-                    cache_data = self._cache_manager.get(
-                        node.type, 
-                        self._node_map[node_id].params, 
-                        input_data
-                    )
-
-                    output_data: dict[str, Data]
-                    if cache_data is not None:
-                        output_data, execution_time = cache_data
+                    # 2. execute node
+                    try:
+                        output_data, running_time = self._execute_single_node(
+                            node_id, input_data, callbefore
+                        )
+                    # 3. call callafter
+                    except Exception as e:
+                        self._unreached_node_ids.update(
+                            [node_id, *nx.descendants(self._graph, node_id)]
+                        )
+                        continue_execution = callafter(node_id, "error", e, None)
+                        if not continue_execution:
+                            self._unreached_node_ids.update(
+                                [node_id, *nx.descendants(self._graph, node_id)]
+                            )
+                            return None
+                        else:
+                            continue
                     else:
-                        # 3. execute node if cache miss
-                        start_time = time.perf_counter()
-                        output_data = node.execute(input_data)
-                        end_time = time.perf_counter()
-                        execution_time = (end_time - start_time) * 1000  # in ms
-
+                        continue_execution = callafter(node_id, "success", output_data, running_time)
+                        if not continue_execution:
+                            return None
+                        else:
+                            pass
                     # 4. store output data to local cache
                     for tar_port, data in output_data.items():
                         res_cache[(node_id, tar_port)] = data
-                    
-                    # 5. store to CacheManager
-                    if output_data is not None:
-                        self._cache_manager.set(
-                            node_type=self._node_map[node_id].type,
-                            params=self._node_map[node_id].params,
-                            inputs=input_data,
-                            outputs=output_data,
-                            running_time=execution_time,
-                        )
 
-                # collect output from the input of the end node
-                end_node_id = self._control_structure_manager.get_end_node_id(begin_node_id)
+                # collect output in this interation for end node
                 end_in_edges = list(self._graph.in_edges(end_node_id, data=True)) # type: ignore
+                end_node_inputs: dict[str, Data] = {}
                 for src_id, _, edge_data in end_in_edges:
                     src_port = edge_data['src_port']
                     tar_port = edge_data['tar_port']
-                    output_rows.append(res_cache[(src_id, src_port)])
-            # combine all output rows into a single table
-            for row in output_rows:
-                assert isinstance(row.payload, Table)
-            combined_df = pd.concat([row.payload.df for row in output_rows], ignore_index=True) # type: ignore
-            assert isinstance(output_rows[0].payload, Table)
-            combined_col_types = output_rows[0].payload.col_types
-            
-            # find the output port name of the end node
-            end_node_id = self._control_structure_manager.get_end_node_id(begin_node_id)
-            end_node = self._node_objects[end_node_id]
-            _, out_ports = end_node.port_def()
-            if not out_ports:
-                return {} # End node has no output
-            output_port_name = out_ports[0].name
-            
-            return {
-                output_port_name: Data(
-                    payload=Table(
-                        df=combined_df,
-                        col_types=combined_col_types
-                    )
-                )
-            }
-        elif control_structure_begin_type == "ForRollingWindowBeginNode":
-            input_table_data = inputs.get("table")
-            assert input_table_data is not None
-            input_node = self._node_objects[begin_node_id]
-            window_size = getattr(input_node, "window_size", None)
-            assert isinstance(window_size, int)
-            
-            # if windows size is too small, raise error
-            assert isinstance(input_table_data.payload, Table)
-            assert input_table_data.payload.df is not None
-            if window_size > len(input_table_data.payload.df):
-                raise NodeExecutionError(
-                    node_id=begin_node_id,
-                    err_msg=f"Window size {window_size} is larger than the number of rows {len(input_table_data.payload.df)} in the input table.",
-                )
-
-            output_rows: list[Data] = []
-            for index in range(0, len(input_table_data.payload.df) - window_size + 1):
-                res_cache: dict[tuple[str, str], Data] = {} # local cache for exec result in this iteration: (node_id, port) -> Data
-
-                # set the current window data to the output port of the begin node
-                window_data = Data(
-                    payload=Table(
-                        df=input_table_data.payload.df.iloc[index: index + window_size],
-                        col_types=input_table_data.payload.col_types
-                    )
-                )
-                res_cache[(begin_node_id, "window")] = window_data
-
-                # a sample interpreter to execute body nodes
-                for node_id in self._control_structure_manager.iter_control_structure(self._graph, begin_node_id):
-                    node = self._node_objects[node_id]
-                    in_edges = list(self._graph.in_edges(node_id, data=True)) # type: ignore
-
-                    # 1. get input data
-                    input_data : dict[str, Data] = {}
-                    for src_id, _, edge_data in in_edges:
-                        src_port = edge_data['src_port']
-                        tar_port = edge_data['tar_port']
-                        input_data[tar_port] = res_cache[(src_id, src_port)]
-
-                    # 2. search cache in cache manager
-                    cache_data = self._cache_manager.get(
-                        node.type, 
-                        self._node_map[node_id].params, 
-                        input_data
-                    )
-
-                    output_data: dict[str, Data]
-                    if cache_data is not None:
-                        output_data, execution_time = cache_data
-                    else:
-                        # 3. execute node if cache miss
-                        start_time = time.perf_counter()
-                        output_data = node.execute(input_data)
-                        end_time = time.perf_counter()
-                        execution_time = (end_time - start_time) * 1000  # in ms
-
-                    # 4. store output data to local cache
-                    for tar_port, data in output_data.items():
-                        res_cache[(node_id, tar_port)] = data
-                    
-                    # 5. store to CacheManager
-                    if output_data is not None:
-                        self._cache_manager.set(
-                            node_type=self._node_map[node_id].type,
-                            params=self._node_map[node_id].params,
-                            inputs=input_data,
-                            outputs=output_data,
-                            running_time=execution_time,
-                        )
-                    
-                # collect output from the input of the end node
-                end_node_id = self._control_structure_manager.get_end_node_id(begin_node_id)
-                end_in_edges = list(self._graph.in_edges(end_node_id, data=True)) # type: ignore
-                for src_id, _, edge_data in end_in_edges:
-                    src_port = edge_data['src_port']
-                    tar_port = edge_data['tar_port']
-                    output_rows.append(res_cache[(src_id, src_port)])
-            # combine all output rows into a single table
-            for row in output_rows:
-                assert isinstance(row.payload, Table)
-            combined_df = pd.concat([row.payload.df for row in output_rows], ignore_index=True) # type: ignore
-            combined_col_types = input_table_data.payload.col_types
-
-            # find the output port name of the end node
-            end_node_id = self._control_structure_manager.get_end_node_id(begin_node_id)
-            end_node = self._node_objects[end_node_id]
-            _, out_ports = end_node.port_def()
-            if not out_ports:
-                return {} # End node has no output
-            output_port_name = out_ports[0].name
-            return {
-                output_port_name: Data(
-                    payload=Table(
-                        df=combined_df,
-                        col_types=combined_col_types
-                    )
-                )
-            }
-            
+                    end_node_inputs[tar_port] = res_cache[(src_id, src_port)]
+                end_node.end_iter_loop(end_node_inputs)
+            # combine outputs
+            outputs = end_node.finalize_loop()
+            running_time = (time.perf_counter() - begin_time) * 1000  # in ms
+            return outputs, running_time
         else:
-            raise NotImplementedError(f"Control structure type '{control_structure_begin_type}' is not implemented yet.")
+            assert False, f"Unknown control structure begin node type {begin_node.type}."

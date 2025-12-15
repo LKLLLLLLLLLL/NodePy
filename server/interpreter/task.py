@@ -444,8 +444,6 @@ def execute_project_task(self, project_id: int, user_id: int):
             graph.execute(
                 callbefore=exec_before_reporter, 
                 callafter=exec_after_reporter,
-                periodic_time_check_seconds=1.0,
-                periodic_time_check_callback=lambda: True,
             )
 
             unreached_node_indices = graph.get_unreached_nodes()

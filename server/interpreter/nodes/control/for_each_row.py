@@ -1,6 +1,9 @@
-from typing import Dict, override
+from typing import Dict, Generator, override
 
-from server.models.data import Data
+import pandas as pd
+from pydantic import PrivateAttr
+
+from server.models.data import Data, Table
 from server.models.exception import (
     NodeParameterError,
 )
@@ -9,14 +12,15 @@ from server.models.schema import (
     Schema,
 )
 
-from ..base_node import BaseNode, InPort, OutPort, register_node
+from ..base_node import InPort, OutPort, register_node
+from .for_base_node import ForBaseBeginNode, ForBaseEndNode
 
 """
 This file defines a pair for node for ForEachRow loop control.
 """
 
 @register_node(pair=True)
-class ForEachRowBeginNode(BaseNode):
+class ForEachRowBeginNode(ForBaseBeginNode):
     """
     Marks the beginning of a row-by-row loop.
     """
@@ -59,18 +63,37 @@ class ForEachRowBeginNode(BaseNode):
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
-        # Processing is handled in the interpreter's loop control logic
+        # Processing is handled in iter loop
         raise NotImplementedError("Processing is handled in the interpreter's loop control logic.")
 
+    @override
+    def iter_loop(
+        self, inputs: Dict[str, Data]
+    ) -> Generator[Dict[str, Data], None, None]:
+        """ForEachRow control structure"""
+        input_table_data = inputs.get("table")
+        assert input_table_data is not None
+        assert isinstance(input_table_data.payload, Table)
+        input_table_df = input_table_data.payload.df
+        for index in range(0, len(input_table_df)):
+            row_data = Data(
+                payload=Table(
+                    df=input_table_df.iloc[index : index + 1],
+                    col_types=input_table_data.payload.col_types,
+                )
+            )
+            yield {"row": row_data}
 
 @register_node(pair=True)
-class ForEachRowEndNode(BaseNode):
+class ForEachRowEndNode(ForBaseEndNode):
     """
     Marks the end of a loop, collecting results.
     """
 
     pair_id: int # ID to link with its corresponding begin node
     _PAIR_TYPE = "END"
+
+    _output_rows: list[Data] = PrivateAttr(default=[])
 
     @override
     def validate_parameters(self) -> None:
@@ -110,3 +133,41 @@ class ForEachRowEndNode(BaseNode):
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         # Processing is handled in the interpreter's loop control logic
         return {}
+
+    @override
+    def end_iter_loop(self, loop_outputs: Dict[str, Data]) -> None:
+        """save outputs for each iteration"""
+        row_data = loop_outputs.get("row")
+        assert row_data is not None
+        self._output_rows.append(row_data)
+
+    @override
+    def finalize_loop(self) -> Dict[str, Data]:
+        """combine all output rows into a single table"""
+        if len(self._output_rows) == 0:
+            return {
+                "table": Data(
+                    payload=Table(
+                        df=pd.DataFrame(),
+                        col_types={},
+                    )
+                )
+            }
+
+        df_rows = []
+        for row in self._output_rows:
+            assert isinstance(row.payload, Table)
+            df_rows.append(row.payload.df)
+        combined_df = pd.concat(
+            df_rows, ignore_index=True
+        )  # type: ignore
+        assert isinstance(self._output_rows[0].payload, Table)
+        combined_col_types = self._output_rows[0].payload.col_types
+        return {
+            "table": Data(
+                    payload=Table(
+                        df=combined_df,
+                        col_types=combined_col_types
+                    )
+                )
+        }

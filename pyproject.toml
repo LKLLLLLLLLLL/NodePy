@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13.0, <3.14.0"
 dependencies = [
+    "networkx>=3.5",
     "sqlalchemy>=2.0.44",
     "psycopg2-binary>=2.9.10",
     "asyncpg>=0.30.0",
@@ -40,7 +41,6 @@ server = [
     "python-multipart>=0.0.20",
 ]
 worker = [
-    "networkx>=3.5",
     "matplotlib>=3.10.7",
     "restrictedpython>=8.1",
     "wordcloud>=1.9.4",
