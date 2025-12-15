@@ -33,3 +33,17 @@ def test_groupnode_errors(node_ctor):
     bad_schema = schema_from_coltypes({"k": ColType.STR, "v": ColType.INT, "_index": ColType.INT})
     with pytest.raises(NodeValidationError):
         node.infer_schema({"table": bad_schema})
+
+
+def test_group_count_and_mean(node_ctor):
+    g = node_ctor("GroupNode", id="g_count", group_cols=["g"], agg_cols=["v"], agg_func="COUNT")
+    schema_g = schema_from_coltypes({"g": ColType.INT, "v": ColType.INT, "_index": ColType.INT})
+    g.infer_schema({"table": schema_g})
+    tbl_g = table_from_dict({"g": [1, 1, 2], "v": [10, 20, 30]}, col_types={"g": ColType.INT, "v": ColType.INT, "_index": ColType.INT})
+    out_g = g.execute({"table": tbl_g})
+    assert "grouped_table" in out_g
+
+    g2 = node_ctor("GroupNode", id="g_mean", group_cols=["g"], agg_cols=["v"], agg_func="MEAN")
+    g2.infer_schema({"table": schema_g})
+    out_g2 = g2.execute({"table": tbl_g})
+    assert out_g2["grouped_table"].payload.df["v"].dtype in (float,)

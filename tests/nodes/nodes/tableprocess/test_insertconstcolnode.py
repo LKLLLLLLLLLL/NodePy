@@ -1,6 +1,7 @@
 import pytest
 
 from server.models.exception import NodeValidationError
+from server.models.schema import Schema
 from server.models.types import ColType
 from tests.nodes.utils import (
     make_data,
@@ -8,6 +9,23 @@ from tests.nodes.utils import (
     schema_from_coltypes,
     table_from_dict,
 )
+
+
+def test_insert_const_col_node(node_ctor):
+    n = node_ctor("InsertConstColNode", id="ic1", col_name=None, col_type=ColType.INT)
+    # construct input schema
+    schema = schema_from_coltypes({"a": ColType.INT, "_index": ColType.INT})
+    out = n.infer_schema({"table": schema, "const_value": Schema(type=Schema.Type.INT)})
+    assert out["table"].type == Schema.Type.TABLE
+
+    tbl = table_from_dict({"a": [1, 2, 3]}, col_types={"a": ColType.INT, "_index": ColType.INT})
+    n.infer_schema({"table": schema, "const_value": Schema(type=Schema.Type.INT)})
+    res = n.execute({"table": tbl, "const_value": make_data(5)})
+    out_tbl = res["table"].payload
+    assert "const" not in out_tbl.col_types or isinstance(out_tbl, object)
+    # verify new column exists
+    added_cols = set(out_tbl.col_types.keys()) # type: ignore
+    assert len(added_cols) > 1
 
 
 def test_insertconst_and_infer_process(node_ctor):

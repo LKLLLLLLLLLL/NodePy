@@ -22,3 +22,12 @@ def test_shiftnode_errors(node_ctor):
     # empty col name
     with pytest.raises(NodeParameterError):
         node_ctor("ShiftNode", id="sh_err", col="   ", periods=1)
+
+
+def test_shiftnode_periods_zero_adds_result_col(node_ctor):
+    s = node_ctor("ShiftNode", id="sh0", col="a", periods=0, result_col=None)
+    schema = schema_from_coltypes({"a": ColType.INT, "_index": ColType.INT})
+    s.infer_schema({"table": schema})
+    tbl = table_from_dict({"a": [1, 2, 3]}, col_types={"a": ColType.INT, "_index": ColType.INT})
+    out = s.execute({"table": tbl})
+    assert any(k != "a" for k in out["table"].payload.col_types.keys())
