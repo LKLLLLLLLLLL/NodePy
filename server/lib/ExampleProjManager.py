@@ -74,32 +74,25 @@ def initialize_example_projects() -> None:
             db.flush()
 
         file_manager = FileManager(sync_db_session=db)
+        
+        # 2. remove old example projects
+        old_projects = db.query(ProjectRecord).filter_by(owner_id=user.id).all()
+        
+        for old_proj in old_projects:
+            logger.info(f"Removing old example project: {old_proj.name} (ID: {old_proj.id})")
+            db.delete(old_proj)
+        db.flush()
 
-        # 2. Iterate over JSON files
+        # 3. Iterate over JSON files
         for file_path in sorted(EXAMPLES_DIR.glob("*.json")):
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     example = ExampleProject(**data)
 
-                # Check if project already exists
-                # if exists override it
-                existing_project = (
-                    db.query(ProjectRecord)
-                    .filter_by(owner_id=user.id, name=example.project_name)
-                    .first()
-                )
-
-                if existing_project:
-                    logger.info(
-                        f"Example project '{example.project_name}' already exists. Overriding it."
-                    )
-                    db.delete(existing_project)
-                    db.flush()
-
                 logger.info(f"Creating example project: {example.project_name}")
 
-                # 3. Create ProjectRecord (to get new project_id)
+                # 4. Create ProjectRecord (to get new project_id)
                 new_project = ProjectRecord(
                     name=example.project_name,
                     owner_id=user.id,
@@ -118,7 +111,7 @@ def initialize_example_projects() -> None:
                 db.flush()  # Flush to get new_project.id
                 logger.info(f"Created example project, ID: {new_project.id}, name: {new_project.name}")
 
-                # 4. Restore Files
+                # 5. Restore Files
                 for ex_file in example.files:
                     # Check if file key already exists (global uniqueness check)
                     # Since we use UUIDs, collision is rare, but if it exists, we assume it's the same file
@@ -148,7 +141,7 @@ def initialize_example_projects() -> None:
                             length=len(content_bytes),
                         )
 
-                # 5. Restore Data and Build ID Mapping
+                # 6. Restore Data and Build ID Mapping
                 id_map: dict[int, int] = {}  # old_id -> new_id
                 for ex_data in example.datas:
                     data_bytes = base64.b64decode(ex_data.data)
@@ -162,7 +155,7 @@ def initialize_example_projects() -> None:
                     db.flush()  # Get new ID
                     id_map[ex_data.old_id] = new_data_record.id # type: ignore
 
-                # 6. Update Workflow with new Data IDs
+                # 7. Update Workflow with new Data IDs
                 # We modify the workflow object in memory and then save it back
                 current_workflow = example.workflow
                 for node in current_workflow.nodes:

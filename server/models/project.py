@@ -193,7 +193,7 @@ class ProjWorkflow(BaseModel):
                 )
         return result
 
-NodeState = dict[str, Any]  # e.g., position: (x, y)
+NodeUIState = dict[str, Any]  # e.g., position: (x, y)
 
 class ProjUIState(BaseModel):
     """
@@ -201,7 +201,7 @@ class ProjUIState(BaseModel):
     The index of nodes is correspond to the index in workflow.
     """
 
-    nodes: list[NodeState]
+    nodes: list[NodeUIState]
     
     @classmethod
     def get_empty_ui_state(cls) -> "ProjUIState":
@@ -233,7 +233,7 @@ class Project(BaseModel):
         workflow_nodes = self.workflow.nodes
         ui_state_nodes = self.ui_state.nodes
         workflow_node_ids = {node.id for node in workflow_nodes}
-        ui_state_node_ids = {node.id for node in ui_state_nodes if 'id' in node} # type: ignore
+        ui_state_node_ids = {node['id'] for node in ui_state_nodes if 'id' in node}
         if workflow_node_ids != ui_state_node_ids:
             raise ValueError("Node IDs in workflow and ui_state do not match.")
         return self
