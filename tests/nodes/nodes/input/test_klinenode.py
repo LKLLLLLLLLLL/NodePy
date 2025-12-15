@@ -56,8 +56,8 @@ def test_klinenode_execute_calls_financial_manager(node_ctor, monkeypatch):
         df = DataFrame([{"Open Time": start_time, "Open": 1.0, "High": 1.0, "Low": 1.0, "Close": 1.0, "Volume": 0.0}])
         return Table(df=df, col_types={"Open Time": ColType.DATETIME, "Open": ColType.FLOAT, "High": ColType.FLOAT, "Low": ColType.FLOAT, "Close": ColType.FLOAT, "Volume": ColType.FLOAT})
 
-    monkeypatch.setattr(node.global_config, "financial_data_manager", node.global_config.financial_data_manager)
-    setattr(node.global_config.financial_data_manager, "get_data", fake_get_data)
+    monkeypatch.setattr(node.context, "financial_data_manager", node.context.financial_data_manager)
+    setattr(node.context.financial_data_manager, "get_data", fake_get_data)
 
     out = node.process({})
     assert "kline_data" in out
@@ -85,8 +85,8 @@ def test_klinenode_execute_malformed_table_from_manager_raises(node_ctor, monkey
         df = DataFrame([{"Open": 1.0}])
         return Table(df=df, col_types={})
 
-    monkeypatch.setattr(node.global_config, "financial_data_manager", node.global_config.financial_data_manager)
-    setattr(node.global_config.financial_data_manager, "get_data", fake_get_data_bad)
+    monkeypatch.setattr(node.context, "financial_data_manager", node.context.financial_data_manager)
+    setattr(node.context.financial_data_manager, "get_data", fake_get_data_bad)
 
     with pytest.raises(NodeExecutionError):
         node.process({})
@@ -101,8 +101,8 @@ def test_klinenode_process_propagates_manager_error(node_ctor, monkeypatch):
     def fake_get_data_raises(symbol, data_type, start_time, end_time, interval):
         raise RuntimeError("downstream service failed")
 
-    monkeypatch.setattr(node.global_config, "financial_data_manager", node.global_config.financial_data_manager)
-    setattr(node.global_config.financial_data_manager, "get_data", fake_get_data_raises)
+    monkeypatch.setattr(node.context, "financial_data_manager", node.context.financial_data_manager)
+    setattr(node.context.financial_data_manager, "get_data", fake_get_data_raises)
 
     with pytest.raises(NodeExecutionError):
         node.process({})
@@ -128,8 +128,8 @@ def test_klinenode_process_with_input_ports(node_ctor, monkeypatch):
         df = DataFrame([{"Open Time": start_time, "Open": 1.0, "High": 1.0, "Low": 1.0, "Close": 1.0, "Volume": 0.0}])
         return Table(df=df, col_types={"Open Time": ColType.DATETIME, "Open": ColType.FLOAT, "High": ColType.FLOAT, "Low": ColType.FLOAT, "Close": ColType.FLOAT, "Volume": ColType.FLOAT})
 
-    monkeypatch.setattr(node.global_config, "financial_data_manager", node.global_config.financial_data_manager)
-    setattr(node.global_config.financial_data_manager, "get_data", fake_get_data)
+    monkeypatch.setattr(node.context, "financial_data_manager", node.context.financial_data_manager)
+    setattr(node.context.financial_data_manager, "get_data", fake_get_data)
 
     out = node.process({"start_time": Data(payload=st), "end_time": Data(payload=et)})
     assert "kline_data" in out

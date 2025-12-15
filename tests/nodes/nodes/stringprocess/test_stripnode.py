@@ -38,7 +38,7 @@ def test_stripnode_construction_error_cases(node_ctor):
     # 3) creating unknown node type raises ValueError (framework-level)
     from server.interpreter.nodes.base_node import BaseNode
     with pytest.raises(ValueError):
-        BaseNode.create_from_type(node.global_config, "NoSuchNode", id="x")
+        BaseNode.create_from_type(node.context, "NoSuchNode", id="x")
 
 
 def test_stripnode_hint_normals_and_errors(node_ctor):

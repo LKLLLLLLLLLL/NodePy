@@ -183,6 +183,17 @@ def global_config():
 
 
 @pytest.fixture
+def context(global_config):
+    """Alias fixture for `global_config` named `context` for compatibility.
+
+    Some parts of the codebase/tests use the name `context` instead of
+    `global_config`. Provide both names to avoid breaking tests when the
+    project renames the fixture.
+    """
+    return global_config
+
+
+@pytest.fixture
 def node_ctor(global_config):
     """Helper to construct node instances safely in tests.
 
