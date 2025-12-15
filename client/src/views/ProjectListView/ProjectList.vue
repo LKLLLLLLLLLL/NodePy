@@ -19,6 +19,22 @@
     // 定时器引用
     const refreshTimer = ref<number | null>(null);
 
+    // 页面可见性变化处理函数
+    const handleVisibilityChange = () => {
+        // 当页面从不可见到可见时，刷新项目列表
+        if (!document.hidden && loginStore.loggedIn) {
+            projectStore.initializeProjects();
+        }
+    };
+
+    // 页面获得焦点时的处理函数
+    const handleFocus = () => {
+        // 当页面获得焦点时，刷新项目列表
+        if (loginStore.loggedIn) {
+            projectStore.initializeProjects();
+        }
+    };
+
     onMounted(()=>{
         loginStore.checkAuthStatus()
         if(loginStore.loggedIn==true){
@@ -36,14 +52,24 @@
                 projectStore.initializeProjects()
             }
         }, 3 * 60 * 1000); // 3分钟 = 3 * 60 * 1000毫秒
+
+        // 添加页面可见性变化监听器
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        // 添加窗口焦点变化监听器
+        window.addEventListener('focus', handleFocus);
     });
 
-    // 清理定时器，避免内存泄漏
+    // 清理定时器和事件监听器，避免内存泄漏
     onBeforeUnmount(() => {
         if (refreshTimer.value) {
             window.clearInterval(refreshTimer.value);
             refreshTimer.value = null;
         }
+        
+        // 移除事件监听器
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('focus', handleFocus);
     });
 
     // 监听路由变化，当进入项目列表页面时刷新数据

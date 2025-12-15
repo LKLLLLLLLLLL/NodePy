@@ -35,6 +35,9 @@ const syncProject = (p: Project, graphStore: any) => {
 
                 p.thumb = pureBase64
                 graphStore.project.thumb = p.thumb  //  thumb should writeback immediately
+            }else {
+                p.thumb = null
+                graphStore.project.thumb = null
             }
         }catch(err) {
             const errMsg = handleNetworkError(err)

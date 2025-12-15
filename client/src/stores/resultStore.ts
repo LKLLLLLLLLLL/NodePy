@@ -44,7 +44,7 @@ export const useResultStore = defineStore('result',()=>{
     const marginRight = 20;
     const marginTop = 60;
     const marginBottom = 55;
-    const modalWidth = ref<number>(500);
+    const modalWidth = ref<number>(window.innerWidth*0.33);
     const modalHeight = ref<number>(window.innerHeight - marginTop - marginBottom);
 
     // 使用函数来动态计算位置，而不是静态值
@@ -310,8 +310,8 @@ export const useResultStore = defineStore('result',()=>{
             },
             // 设置最小尺寸
             minSize: {
-                width: 500,
-                height: 200
+                width: modalWidth.value,
+                height: modalHeight.value
             },
             component: Result
         });

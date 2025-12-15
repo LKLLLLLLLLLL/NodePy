@@ -322,15 +322,16 @@ export const useProjectStore = defineStore('project', () => {
         console.log('Copying project by ID:', id)
         try{
             const projectName = graphStore.project.project_name;
-            projectIdToNameMap.value.set(id,projectName);
             const response = await authService.copyProjectApiProjectCopyProjectIdPost(id);
+            projectIdToNameMap.value.set(response,projectName)
             if(response){
                 notify({
                     message: '项目' + projectName + '添加成功',
                     type: 'success'
                 });
             }
-            return true;
+            initializeProjects()
+            return response;
         }
         catch(error){
             if(error instanceof ApiError){
@@ -375,7 +376,6 @@ export const useProjectStore = defineStore('project', () => {
                     type: 'error'
                 });
             }
-            return false;
         }
     }
 

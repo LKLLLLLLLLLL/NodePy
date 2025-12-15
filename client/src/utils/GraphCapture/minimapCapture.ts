@@ -1,3 +1,4 @@
+import { useGraphStore } from '@/stores/graphStore';
 import html2canvas from 'html2canvas'
 
 /**
@@ -309,7 +310,12 @@ export const captureMiniMap = async (vueFlowRef: any): Promise<string | null> =>
       return null
     }
 
-
+    // 检查是否存在节点，如果没有节点则直接返回null
+    const graphStore = useGraphStore()
+    if (graphStore.nodes.length === 0) {
+      console.log('minimapCapture: no nodes found')
+      return null
+    }
 
     let imageData: string | null = null
 

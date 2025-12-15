@@ -12,6 +12,8 @@ interface UserInfo{
     file_space_used: number;
     file_space_total: number;
     username: string;
+    // 为将来支持头像功能预留字段
+    avatar_url?: string;
 }
 
 export const useUserStore = defineStore('user',()=>{
@@ -22,7 +24,9 @@ export const useUserStore = defineStore('user',()=>{
         project_count: -1,
         file_space_used: -1,
         file_space_total: -1,
-        username: 'default_user'
+        username: 'default_user',
+        // 为将来支持头像功能预留字段
+        avatar_url: undefined
     }
 
     const authService = AuthenticatedServiceFactory.getService();

@@ -198,15 +198,15 @@
                 </div>
             </div>
             <!-- 无结果提示 -->
-            <div class="no-result-prompt" v-else>
+            <!-- <div class="no-result-prompt" v-else>
                 <div class="prompt-content">
                     <p>当前节点无结果，请检查节点输入或双击其他节点</p>
                 </div>
-            </div>
-            <div class="if-info" v-if="resultStore.currentInfo!=resultStore.default_info">
+            </div> -->
+            <!-- <div class="if-info" v-if="resultStore.currentInfo!=resultStore.default_info">
                 <NodeInfo :data="resultStore.currentInfo">
                 </NodeInfo>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>

@@ -24,6 +24,7 @@ import {
   mdiProjectorScreenOutline,
   mdiProjectorScreen,
 } from '@mdi/js';
+import notify from "./Notification/notify";
 
 const explore_path_outline = mdiCompassOutline;
 const explore_path_filled = mdiCompass;
@@ -63,8 +64,16 @@ const navItems = [
 const isActive = (path: string) => {
   return route.path === path
 }
-
-// 用户头像点击已移至 UserInfoMenu 组件处理
+// 添加到我的项目
+const handleAddToMyProject = async () => {
+  const projectId = await projectStore.copyProject(Number(route.params.projectId))
+  router.push({ name: 'editor-project', params: { projectId: projectId } });
+  notify({
+    message: '跳转成功',
+    type: 'success'
+  })
+  graphStore.project.editable = true
+}
 
 </script>
 
@@ -105,7 +114,7 @@ const isActive = (path: string) => {
             只读
           </div>
           <div class="add-to-my-project">
-            <el-button v-if="isReadOnly" @click="()=>projectStore.copyProject(Number(route.params.projectId))">
+            <el-button v-if="isReadOnly" @click="handleAddToMyProject">
               添加到我的项目
             </el-button>
           </div>

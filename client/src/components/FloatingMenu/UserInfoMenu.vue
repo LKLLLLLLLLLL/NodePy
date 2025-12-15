@@ -3,11 +3,10 @@
     <!-- 触发元素：头像 -->
     <template #trigger>
       <div class="user-avatar-trigger">
-        <el-avatar
-          v-if="!avatarUrl"
-          :icon="Avatar"
-          size="small"
-        />
+        <!-- 显示用户名首字母 -->
+        <div v-if="!avatarUrl" class="initials-avatar small">
+          {{ userInitials }}
+        </div>
         <img
           v-else
           :src="avatarUrl"
@@ -20,18 +19,22 @@
     <div class="user-info-menu">
       <!-- 未登录提示 -->
       <div v-if="!loginStore.isAuthenticated" class="not-logged-in">
-        <div class="not-logged-in-icon"><el-avatar :icon="Avatar" size="default" /></div>
+        <div class="not-logged-in-icon">
+          <!-- 显示用户名首字母 -->
+          <div class="initials-avatar large">
+            {{ userInitials }}
+          </div>
+        </div>
         <div class="not-logged-in-text">请先登录</div>
         <el-button @click="handleLogin">立即登录</el-button>
       </div>
       
       <!-- 用户头部 -->
       <div v-else class="user-header">
-        <el-avatar
-          v-if="!avatarUrl"
-          :icon="Avatar"
-          size="large"
-        />
+        <!-- 显示用户名首字母 -->
+        <div v-if="!avatarUrl" class="initials-avatar large">
+          {{ userInitials }}
+        </div>
         <img
           v-else
           :src="avatarUrl"
@@ -73,8 +76,8 @@
         <button class="action-btn logout" @click="handleLogout">
           <span class="icon">🚪</span> 登出
         </button>
-        <button @click="tableStore.createTableModal()">点我测试表格编辑</button>
-        <button @click="editorStore.createEditorModal()">点我测试脚本编辑</button>
+        <!-- <button @click="tableStore.createTableModal()">点我测试表格编辑</button>
+        <button @click="editorStore.createEditorModal()">点我测试脚本编辑</button> -->
       </div>
     </div>
   </FloatingMenu>
@@ -137,9 +140,25 @@ function handleLogout() {
   })
 }
 
-// 头像 URL（当没有用户头像时为空）
+// 判断是否有头像功能（未来可能添加）
+const hasAvatar = computed(() => {
+  // 目前不支持头像功能，返回false
+  // 未来可以基于用户信息或其他条件来判断
+  return false
+})
+
+// 判断是否有头像URL
 const avatarUrl = computed(() => {
-  return ''
+  // 检查用户信息中是否有头像URL
+  return userStore.currentUserInfo?.avatar_url || ''
+})
+
+// 获取用户名首字母（支持中文和其他语言）
+const userInitials = computed(() => {
+  const username = userStore.currentUserInfo?.username || 'G'
+  // 获取第一个字符，支持中文和其他语言
+  const firstChar = username.charAt(0)
+  return firstChar.toUpperCase()
 })
 
 // 过滤掉不需要显示的字段（包括存储空间字段，因为我们要合并显示它们）
@@ -250,6 +269,31 @@ const formatStorageSpace = () => {
     border: 2px solid #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
+
+  .initials-avatar {
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    // border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    
+    &.small {
+      width: 40px;
+      height: 40px;
+      font-size: 14px;
+    }
+
+    &.large {
+      width: 56px;
+      height: 56px;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+  }
 }
 
 .user-info-menu {
@@ -263,6 +307,8 @@ const formatStorageSpace = () => {
     .not-logged-in-icon {
       font-size: 48px;
       margin-bottom: 12px;
+      display: flex;
+      justify-content: center;
     }
 
     .not-logged-in-text {
@@ -297,6 +343,25 @@ const formatStorageSpace = () => {
       border-radius: 50%;
       object-fit: cover;
       flex-shrink: 0;
+    }
+
+    .initials-avatar {
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      // border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      
+      &.large {
+        width: 56px;
+        height: 56px;
+        font-size: 20px;
+        flex-shrink: 0;
+      }
     }
 
     .user-details {

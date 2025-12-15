@@ -4,7 +4,7 @@
     import { ref, computed } from 'vue';
     //@ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon';
-    import { mdiCloseThick, mdiClose } from '@mdi/js';
+    import { mdiCloseThick, mdiClose, mdiEye } from '@mdi/js';
 
     const props = defineProps<{
         modal: ModalInstance
@@ -22,7 +22,28 @@
     const resizeStartSize = ref<{width: number, height: number}>(props.modal.size);//弹窗起始尺寸
     const resizeStartModalPosition = ref<{x: number, y: number}>({x: 0, y: 0});
 
-
+    const iconPath = computed(()=>{
+        switch(props.modal.id){
+            case 'logout':
+                return mdiCloseThick;
+            case 'edit-modal':
+                return mdiClose;
+            case 'result':
+                return mdiEye;
+            case 'table-modal':
+                return mdiCloseThick;
+            case 'upload-file':
+                return mdiCloseThick;
+            case 'file-preview':
+                return mdiCloseThick;
+            case 'delete-modal':
+                return mdiCloseThick;
+            case 'update-modal':
+                return mdiCloseThick;
+            case 'create-project':
+                return mdiCloseThick;
+        }
+    })
 
     const closeModal = () => {
         modalStore.deactivateModal(props.modal.id);
@@ -247,6 +268,7 @@
         <div class="resize-handle resize-handle-top-left" @mousedown="startResize($event, 'top-left')"></div>
         <div class = "modal-head" @mousedown="startDrag" >
             <div class = "modal-title-container">
+                <div class="modal-icon-container" v-if="modal.id=='result'"><svg-icon type="mdi" :path="iconPath" :size="22"></svg-icon></div>
                 <div class="modal-title">{{ modal.title }}</div>
             </div>
             <div class = "modal-control">
@@ -322,6 +344,12 @@
         display: flex;
         align-items: center;
         // padding-left: 15px;
+    }
+
+    .modal-icon-container{
+        display: flex;
+        justify-content: center;
+        margin-right: 6px;
     }
 
     .modal-title{

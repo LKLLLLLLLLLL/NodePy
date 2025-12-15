@@ -1,5 +1,5 @@
 import html2canvas from 'html2canvas'
-
+import { useGraphStore } from '@/stores/graphStore'
 /**
  * 创建完整的流程图克隆 - 只保留节点和边，确保所有内容可见
  */
@@ -388,7 +388,12 @@ export const captureDetailed = async (vueFlowRef: any): Promise<string | null> =
       return null
     }
 
-
+    // 检查是否存在节点，如果没有节点则直接返回null
+    const graphStore = useGraphStore()
+    if (graphStore.nodes.length === 0) {
+      console.log('minimapCapture: no nodes found')
+      return null
+    }
     
     let imageData: string | null = null
     
