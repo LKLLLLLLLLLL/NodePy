@@ -13,7 +13,7 @@ from server.models.exception import (
 )
 from server.models.schema import Pattern, Schema
 
-from .config import GlobalConfig
+from .config import NodeContext
 
 """
 This file defines the base class for all nodes.
@@ -36,7 +36,7 @@ class OutPort(BaseModel):
 class BaseNode(BaseModel):
     id: str
     type: str
-    global_config: GlobalConfig
+    context: NodeContext
 
     _schemas_in: dict[str, Schema] | None = PrivateAttr(None) # cache for input schema
     _schemas_out: dict[str, Schema] | None = PrivateAttr(None) # cache for output schema
@@ -144,11 +144,11 @@ class BaseNode(BaseModel):
     methods to be called by outside
     """
     @classmethod
-    def create_from_type(cls, global_config: GlobalConfig, type: str, **data) -> "BaseNode":
+    def create_from_type(cls, context: NodeContext, type: str, **data) -> "BaseNode":
         node_type = _NODE_REGISTRY.get(type)
         if node_type is None:
             raise ValueError(f"Node type '{type}' is not registered.")
-        return node_type(type=type, **data, global_config=global_config)
+        return node_type(type=type, **data, context=context)
     
     def is_pair(self) -> bool:
         """ check if this node is a pair node """

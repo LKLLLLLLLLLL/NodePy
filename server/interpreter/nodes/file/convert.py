@@ -75,8 +75,8 @@ class TableFromFileNode(BaseNode):
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         file_data = input["file"]
         assert isinstance(file_data.payload, File)
-        file_manager = self.global_config.file_manager
-        user_id = self.global_config.user_id
+        file_manager = self.context.file_manager
+        user_id = self.context.user_id
         file_content = file_manager.read_sync(file_data.payload, user_id=user_id)
         file_format = file_data.payload.format
         df: pandas.DataFrame
@@ -161,7 +161,7 @@ class TableToFileNode(BaseNode):
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
-        file_manager = self.global_config.file_manager
+        file_manager = self.context.file_manager
         assert self.filename is not None
         
         table_data = input["table"]
@@ -183,9 +183,9 @@ class TableToFileNode(BaseNode):
         file = file_manager.write_sync(
             self.filename, 
             buffer, self.format,
-            user_id=self.global_config.user_id,
+            user_id=self.context.user_id,
             node_id=self.id,
-            project_id=self.global_config.project_id
+            project_id=self.context.project_id
         )
         return {"file": Data(payload=file)}
 
@@ -227,8 +227,8 @@ class TextFromFileNode(BaseNode):
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         file_data = input["file"]
         assert isinstance(file_data.payload, File)
-        file_manager = self.global_config.file_manager
-        user_id = self.global_config.user_id
+        file_manager = self.context.file_manager
+        user_id = self.context.user_id
         file_content = file_manager.read_sync(file_data.payload, user_id=user_id)
         file_format = file_data.payload.format
 

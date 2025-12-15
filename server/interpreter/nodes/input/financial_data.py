@@ -154,7 +154,7 @@ class KlineNode(BaseNode):
                 err_msg="start_time must be earlier than end_time during execution.",
             )
         # Fetch Kline data from FinancialDataManager API
-        financial_data_manager = self.global_config.financial_data_manager
+        financial_data_manager = self.context.financial_data_manager
         try:
             table = financial_data_manager.get_data(
                 symbol=self.symbol,

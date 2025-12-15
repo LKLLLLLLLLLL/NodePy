@@ -80,7 +80,7 @@ class WordcloudNode(BaseNode):
         assert isinstance(table_data.payload, Table)
         table_df = table_data.payload.df
         
-        file_manager = self.global_config.file_manager
+        file_manager = self.context.file_manager
 
         plt.rcParams["font.sans-serif"] = ["Noto Sans CJK JP", "Roboto"]
         plt.rcParams["axes.unicode_minus"] = False
@@ -117,8 +117,8 @@ class WordcloudNode(BaseNode):
             filename=f"{self.id}.png",
             format="png",
             node_id=self.id,
-            project_id=self.global_config.project_id,
-            user_id=self.global_config.user_id
+            project_id=self.context.project_id,
+            user_id=self.context.user_id
         )
         return {"wordcloud_image": Data(payload=file)}
 

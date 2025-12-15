@@ -168,7 +168,7 @@ class KlinePlotNode(BaseNode):
             warn_too_much_data=10000,
         )
 
-        file_manager = self.global_config.file_manager
+        file_manager = self.context.file_manager
         buf = file_manager.get_buffer()
 
         fig.savefig(buf, format="png", dpi=FIGURE_DPI, bbox_inches="tight")
@@ -180,8 +180,8 @@ class KlinePlotNode(BaseNode):
             filename=f"{self.id}.png",
             format="png",
             node_id=self.id,
-            project_id=self.global_config.project_id,
-            user_id=self.global_config.user_id,
+            project_id=self.context.project_id,
+            user_id=self.context.user_id,
         )
         return {"kline_plot": Data(payload=file)}
 

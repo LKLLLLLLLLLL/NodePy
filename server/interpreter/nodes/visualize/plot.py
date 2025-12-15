@@ -153,7 +153,7 @@ class QuickPlotNode(BaseNode):
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
         # save to byte stream
-        file_manager = self.global_config.file_manager
+        file_manager = self.context.file_manager
         buf = file_manager.get_buffer()
         plt.savefig(buf, format="png", dpi=FIGURE_DPI)
         plt.close()
@@ -162,8 +162,8 @@ class QuickPlotNode(BaseNode):
             filename=f"{self.id}.png",
             format="png",
             node_id=self.id,
-            project_id=self.global_config.project_id,
-            user_id=self.global_config.user_id
+            project_id=self.context.project_id,
+            user_id=self.context.user_id
         )
         return {"plot": Data(payload=file)}
 
@@ -298,7 +298,7 @@ class DualAxisPlotNode(BaseNode):
             plt.title(self.title)
         fig.tight_layout()  
         # save to byte stream
-        file_manager = self.global_config.file_manager
+        file_manager = self.context.file_manager
         buf = file_manager.get_buffer()
         plt.savefig(buf, format="png", dpi=FIGURE_DPI)
         plt.close()
@@ -307,8 +307,8 @@ class DualAxisPlotNode(BaseNode):
             filename=f"{self.id}.png",
             format="png",
             node_id=self.id,
-            project_id=self.global_config.project_id,
-            user_id=self.global_config.user_id
+            project_id=self.context.project_id,
+            user_id=self.context.user_id
         )
         return {"plot": Data(payload=file)}
 
@@ -415,7 +415,7 @@ class StatisticalPlotNode(BaseNode):
             y_data = None
         hue_data = input_table.df[self.hue_col] if self.hue_col else None  # type: ignore
 
-        file_manager = self.global_config.file_manager
+        file_manager = self.context.file_manager
         
         plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Roboto']
         plt.rcParams['axes.unicode_minus'] = False
@@ -451,8 +451,8 @@ class StatisticalPlotNode(BaseNode):
             filename=f"{self.id}.png",
             format="png",
             node_id=self.id,
-            project_id=self.global_config.project_id,
-            user_id=self.global_config.user_id
+            project_id=self.context.project_id,
+            user_id=self.context.user_id
         )
         return {"plot": Data(payload=file)}
 

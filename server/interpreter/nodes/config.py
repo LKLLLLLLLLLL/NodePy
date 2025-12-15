@@ -5,9 +5,9 @@ from server.lib.FileManager import FileManager
 from server.lib.FinancialDataManager import FinancialDataManager
 
 
-class GlobalConfig(BaseModel):
+class NodeContext(BaseModel):
     """
-    Global config shared by all nodes for same requests.
+    Context shared by all nodes for same requests.
     Manage context like FileManager etc.
     """
     

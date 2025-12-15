@@ -28,7 +28,7 @@ class UploadNode(BaseNode):
                 err_param_key="file",
                 err_msg="File parameter must be provided."
             )
-        file_manager = self.global_config.file_manager
+        file_manager = self.context.file_manager
         if not file_manager.check_file_exists_sync(self.file):
             raise NodeParameterError(
                 node_id=self.id,
