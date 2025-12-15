@@ -4,40 +4,27 @@ import { useGraphStore } from './graphStore';
 import { ref, computed } from 'vue';
 import EditableTableModal from '@/components/EditableTable/EditableTableModal.vue';
 import { useVueFlow } from '@vue-flow/core';
-
-// 表格单元格数据类型
-export type TableCellValue = string | number | boolean | null;
-
-// 表格行数据类型
-export interface TableRowData {
-  [key: string]: TableCellValue;
-}
-
-// 表格数据结构
-export interface TableData {
-  rows: TableRowData[];
-  colNames: string[];
-  colTypes: { [key: string]: 'int' | 'float' | 'str' | 'bool' | 'Datetime' };
-}
+import { type TableNode, type TableNodeParam } from '@/types/nodeTypes';
 
 export const useTableStore = defineStore('table', () => {
     const modalStore = useModalStore();
-    const graphStore = useGraphStore();
+    const graphStore = useGraphStore(); 
+
     const { findNode } = useVueFlow('main');
 
     // 模态框尺寸
     const modalWidth = 800;
-    const modalHeight = 600;
+    const modalHeight = 800;
 
     // 默认表格数据
-    const defaultTableData: TableData = {
+    const defaultTableData: TableNodeParam = {
         rows: [
             { "A": 1, "B": 2, "C": 3 },
             { "A": 4, "B": 5, "C": 6 },
             { "A": 7, "B": 8, "C": 9 }
         ],
-        colNames: ['A', 'B', 'C'],
-        colTypes: {
+        col_names: ['A', 'B', 'C'],
+        col_types: {
             'A': 'int',
             'B': 'int',
             'C': 'int'
@@ -45,14 +32,14 @@ export const useTableStore = defineStore('table', () => {
     };
 
     // 当前编辑的表格数据
-    const currentTableData = ref<TableData>({ ...defaultTableData });
+    const currentTableData = ref<TableNodeParam>({ ...defaultTableData });
     
     // 正在编辑的表格节点ID
     const editingNodeId = ref<string>('');
     
     // 表格的临时修改（用于撤销/重做）
-    const historyStack = ref<TableData[]>([]);
-    const redoStack = ref<TableData[]>([]);
+    const historyStack = ref<TableNodeParam[]>([]);
+    const redoStack = ref<TableNodeParam[]>([]);
     const maxHistorySize = 20;
 
     // 当前选中的单元格位置
@@ -66,7 +53,7 @@ export const useTableStore = defineStore('table', () => {
      * @param nodeId 节点ID
      * @param initialData 初始表格数据
      */
-    function initTableEdit(nodeId: string, initialData?: TableData) {
+    function initTableEdit(nodeId: string, initialData?: TableNodeParam) {
         editingNodeId.value = nodeId;
         
         if (initialData) {
@@ -80,8 +67,8 @@ export const useTableStore = defineStore('table', () => {
                     const param = node.data.param;
                     currentTableData.value = {
                         rows: param.rows || defaultTableData.rows,
-                        colNames: param.col_names || defaultTableData.colNames,
-                        colTypes: param.col_types || defaultTableData.colTypes
+                        col_names: param.col_names || defaultTableData.col_names,
+                        col_types: param.col_types || defaultTableData.col_types
                     };
                 } catch (error) {
                     console.error('解析表格数据失败:', error);
@@ -141,9 +128,24 @@ export const useTableStore = defineStore('table', () => {
     function addRow(position: number = -1) {
         saveToHistory();
         
-        const newRow: TableRowData = {};
-        currentTableData.value.colNames.forEach(colName => {
-            newRow[colName] = null;
+        const newRow = {};
+        currentTableData.value.col_names.forEach(colName => {
+            // 根据列类型设置默认值
+            const colType = currentTableData.value.col_types![colName];
+            switch (colType) {
+                case 'int':
+                case 'float':
+                    newRow[colName] = 0;
+                    break;
+                case 'bool':
+                    newRow[colName] = false;
+                    break;
+                case 'str':
+                case 'Datetime':
+                default:
+                    newRow[colName] = '';
+                    break;
+            }
         });
         
         if (position === -1 || position >= currentTableData.value.rows.length) {
@@ -176,23 +178,36 @@ export const useTableStore = defineStore('table', () => {
         // 确保列名唯一
         let uniqueColName = colName;
         let counter = 1;
-        while (currentTableData.value.colNames.includes(uniqueColName)) {
+        while (currentTableData.value.col_names.includes(uniqueColName)) {
             uniqueColName = `${colName}_${counter}`;
             counter++;
         }
         
         // 添加列名和类型
-        if (position === -1 || position >= currentTableData.value.colNames.length) {
-            currentTableData.value.colNames.push(uniqueColName);
-            currentTableData.value.colTypes[uniqueColName] = colType;
+        if (position === -1 || position >= currentTableData.value.col_names.length) {
+            currentTableData.value.col_names.push(uniqueColName);
+            currentTableData.value.col_types![uniqueColName] = colType;
         } else {
-            currentTableData.value.colNames.splice(position, 0, uniqueColName);
-            currentTableData.value.colTypes[uniqueColName] = colType;
+            currentTableData.value.col_names.splice(position, 0, uniqueColName);
+            currentTableData.value.col_types![uniqueColName] = colType;
         }
         
-        // 为每一行添加新列
+        // 为每一行添加新列，根据类型设置默认值
         currentTableData.value.rows.forEach(row => {
-            row[uniqueColName] = null;
+            switch (colType) {
+                case 'int':
+                case 'float':
+                    row[uniqueColName] = 0;
+                    break;
+                case 'bool':
+                    row[uniqueColName] = false;
+                    break;
+                case 'str':
+                case 'Datetime':
+                default:
+                    row[uniqueColName] = '';
+                    break;
+            }
         });
     }
 
@@ -201,16 +216,16 @@ export const useTableStore = defineStore('table', () => {
      * @param colIndex 列索引
      */
     function deleteColumn(colIndex: number) {
-        if (currentTableData.value.colNames.length <= 1) return;
+        if (currentTableData.value.col_names.length <= 1) return;
         
         saveToHistory();
-        const colName = currentTableData.value.colNames[colIndex];
+        const colName = currentTableData.value.col_names[colIndex];
         
         // 从列名列表中删除
-        currentTableData.value.colNames.splice(colIndex, 1);
+        currentTableData.value.col_names.splice(colIndex, 1);
         
         // 从列类型中删除
-        delete currentTableData.value.colTypes[colName!];
+        delete currentTableData.value.col_types![colName!];
         
         // 从每一行中删除该列
         currentTableData.value.rows.forEach(row => {
@@ -224,9 +239,9 @@ export const useTableStore = defineStore('table', () => {
      * @param colName 列名
      * @param value 新值
      */
-    function updateCell(rowIndex: number, colName: string, value: TableCellValue) {
+    function updateCell(rowIndex: number, colName: string, value) {
         if (rowIndex < 0 || rowIndex >= currentTableData.value.rows.length) return;
-        if (!currentTableData.value.colNames.includes(colName)) return;
+        if (!currentTableData.value.col_names.includes(colName)) return;
         
         saveToHistory();
         currentTableData.value.rows[rowIndex]![colName] = value;
@@ -238,13 +253,13 @@ export const useTableStore = defineStore('table', () => {
      * @param newColName 新列名
      */
     function updateColumnName(oldColName: string, newColName: string) {
-        if (!currentTableData.value.colNames.includes(oldColName)) return;
+        if (!currentTableData.value.col_names.includes(oldColName)) return;
         if (oldColName === newColName) return;
         
         // 确保新列名唯一
         let uniqueNewName = newColName;
         let counter = 1;
-        while (currentTableData.value.colNames.includes(uniqueNewName)) {
+        while (currentTableData.value.col_names.includes(uniqueNewName)) {
             uniqueNewName = `${newColName}_${counter}`;
             counter++;
         }
@@ -252,12 +267,12 @@ export const useTableStore = defineStore('table', () => {
         saveToHistory();
         
         // 更新列名列表
-        const colIndex = currentTableData.value.colNames.indexOf(oldColName);
-        currentTableData.value.colNames[colIndex] = uniqueNewName;
+        const colIndex = currentTableData.value.col_names.indexOf(oldColName);
+        currentTableData.value.col_names[colIndex] = uniqueNewName;
         
         // 更新列类型映射
-        currentTableData.value.colTypes[uniqueNewName] = currentTableData.value.colTypes[oldColName]!;
-        delete currentTableData.value.colTypes[oldColName];
+        currentTableData.value.col_types![uniqueNewName] = currentTableData.value.col_types![oldColName]!;
+        delete currentTableData.value.col_types![oldColName];
         
         // 更新每一行中的数据
         currentTableData.value.rows.forEach(row => {
@@ -272,10 +287,10 @@ export const useTableStore = defineStore('table', () => {
      * @param colType 新类型
      */
     function updateColumnType(colName: string, colType: 'int' | 'float' | 'str' | 'bool' | 'Datetime') {
-        if (!currentTableData.value.colNames.includes(colName)) return;
+        if (!currentTableData.value.col_names.includes(colName)) return;
         
         saveToHistory();
-        currentTableData.value.colTypes[colName] = colType;
+        currentTableData.value.col_types![colName] = colType;
         
         // 根据新类型转换现有数据
         currentTableData.value.rows.forEach(row => {
@@ -302,7 +317,7 @@ export const useTableStore = defineStore('table', () => {
                     }
                 } catch (error) {
                     console.warn(`转换列 ${colName} 的值失败:`, error);
-                    row[colName] = null;
+                    row[colName] = '';
                 }
             }
         });
@@ -333,7 +348,7 @@ export const useTableStore = defineStore('table', () => {
         }
         
         // 调整列数
-        const currentCols = currentTableData.value.colNames.length;
+        const currentCols = currentTableData.value.col_names.length;
         if (numCols > currentCols) {
             // 添加新列
             for (let i = currentCols; i < numCols; i++) {
@@ -347,17 +362,25 @@ export const useTableStore = defineStore('table', () => {
         }
     }
 
+
+    function applyChanges() {
+        const simpleEvent = new Event('ApplyTableChanges');
+        window.dispatchEvent(simpleEvent);
+    }
+
     /**
      * 应用表格修改到节点
      */
-    function applyChanges() {
-        
+    function confirmChanges(){
+        modalStore.deactivateModal('table-modal');
+        modalStore.destroyModal('table-modal');
+        applyChanges();
     }
 
     /**
      * 取消表格编辑
      */
-    function cancelEdit() {
+    function cancelChanges() {
         modalStore.deactivateModal('table-modal');
         modalStore.destroyModal('table-modal');
         
@@ -398,16 +421,16 @@ export const useTableStore = defineStore('table', () => {
      * 获取表格的二维数组表示（用于显示）
      */
     const tableArray = computed(() => {
-        const result: TableCellValue[][] = [];
+        const result: string[][] = [];
         
         // 第一行是列名
-        result.push([...currentTableData.value.colNames]);
+        result.push([...currentTableData.value.col_names]);
         
         // 后续行是数据
         currentTableData.value.rows.forEach(row => {
-            const rowData: TableCellValue[] = [];
-            currentTableData.value.colNames.forEach(colName => {
-                rowData.push(row[colName]!);
+            const rowData: string[] = [];
+            currentTableData.value.col_names.forEach(colName => {
+                rowData.push(row[colName] as string);
             });
             result.push(rowData);
         });
@@ -419,8 +442,8 @@ export const useTableStore = defineStore('table', () => {
      * 获取列类型列表
      */
     const columnTypes = computed(() => {
-        return currentTableData.value.colNames.map(colName => 
-            currentTableData.value.colTypes[colName] || 'str'
+        return currentTableData.value.col_names.map(colName => 
+            currentTableData.value.col_types![colName] || 'str'
         );
     });
     
@@ -435,7 +458,7 @@ export const useTableStore = defineStore('table', () => {
         
         // 计算属性
         numRows: computed(() => currentTableData.value.rows.length),
-        numCols: computed(() => currentTableData.value.colNames.length),
+        numCols: computed(() => currentTableData.value.col_names.length),
         canUndo: computed(() => historyStack.value.length > 1),
         canRedo: computed(() => redoStack.value.length > 0),
         
@@ -453,7 +476,8 @@ export const useTableStore = defineStore('table', () => {
         updateColumnType,
         resizeTable,
         applyChanges,
-        cancelEdit,
+        confirmChanges,
+        cancelChanges,
         createTableModal
     }
 });

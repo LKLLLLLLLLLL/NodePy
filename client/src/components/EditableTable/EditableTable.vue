@@ -28,19 +28,19 @@ const colHeaderHeight = 40;
 
 // 计算列宽（根据列名长度）
 const calculateColumnWidths = () => {
-    if (!tableStore.currentTableData.colNames?.length) return;
+    if (!tableStore.currentTableData.col_names?.length) return;
     
     const baseWidth = 100; // 基础宽度
     const charWidth = 8; // 每个字符的宽度
     const minWidth = 80; // 最小宽度
     const maxWidth = 300; // 最大宽度
     
-    columnWidths.value = tableStore.currentTableData.colNames.map(colName => {
+    columnWidths.value = tableStore.currentTableData.col_names.map(colName => {
         // 计算基于列名的宽度
         let width = baseWidth + (colName.length * charWidth);
         
         // 考虑列类型标签的宽度
-        const colType = tableStore.currentTableData.colTypes[colName] || 'str';
+        const colType = tableStore.currentTableData.col_types[colName] || 'str';
         width += colType.length * 6;
         
         // 添加删除按钮的宽度
@@ -55,7 +55,7 @@ const calculateColumnWidths = () => {
  * 开始编辑单元格
  */
 function startEditCell(rowIndex: number, colIndex: number) {
-    const colName = tableStore.currentTableData.colNames[colIndex];
+    const colName = tableStore.currentTableData.col_names[colIndex];
     const cellValue = tableStore.currentTableData.rows[rowIndex]?.[colName!];
     
     editingCell.value = { row: rowIndex, col: colIndex };
@@ -77,24 +77,40 @@ function finishEditCell() {
     if (!editingCell.value) return;
     
     const { row, col } = editingCell.value;
-    const colName = tableStore.currentTableData.colNames[col]!;
+    const colName = tableStore.currentTableData.col_names[col]!;
     
     // 转换值类型
     let finalValue: any = editValue.value.trim();
-    const colType = tableStore.currentTableData.colTypes[colName];
+    const colType = tableStore.currentTableData.col_types[colName];
     
-    if (finalValue === '') {
-        finalValue = null;
+    // 更严格的空值检测
+    if (finalValue === '' || finalValue === null || finalValue === undefined) {
+        // 根据类型设置默认值
+        switch (colType) {
+            case 'int':
+            case 'float':
+                finalValue = 0;
+                break;
+            case 'str':
+            case 'Datetime':
+                finalValue = '';
+                break;
+            case 'bool':
+                finalValue = false;
+                break;
+            default:
+                finalValue = null;
+        }
     } else {
         try {
             switch (colType) {
                 case 'int':
                     finalValue = parseInt(finalValue, 10);
-                    if (isNaN(finalValue)) finalValue = null;
+                    if (isNaN(finalValue)) finalValue = 0; // int类型无效时默认为0
                     break;
                 case 'float':
                     finalValue = parseFloat(finalValue);
-                    if (isNaN(finalValue)) finalValue = null;
+                    if (isNaN(finalValue)) finalValue = 0; // float类型无效时默认为0
                     break;
                 case 'bool':
                     finalValue = finalValue.toLowerCase() === 'true' || finalValue === '1';
@@ -106,7 +122,7 @@ function finishEditCell() {
                     // 尝试解析日期
                     const date = new Date(finalValue);
                     if (isNaN(date.getTime())) {
-                        finalValue = null;
+                        finalValue = ''; // Datetime类型无效时默认为空字符串
                     } else {
                         finalValue = date.toISOString();
                     }
@@ -114,7 +130,22 @@ function finishEditCell() {
             }
         } catch (error) {
             console.warn('值转换失败:', error);
-            finalValue = null;
+            // 转换失败时设置默认值
+            switch (colType) {
+                case 'int':
+                case 'float':
+                    finalValue = 0;
+                    break;
+                case 'str':
+                case 'Datetime':
+                    finalValue = '';
+                    break;
+                case 'bool':
+                    finalValue = false;
+                    break;
+                default:
+                    finalValue = null;
+            }
         }
     }
     
@@ -206,8 +237,8 @@ function selectCell(rowIndex: number, colIndex: number) {
  * 修改列（支持同时修改列名和类型）
  */
 function modifyColumn(colIndex: number) {
-    const colName = tableStore.currentTableData.colNames[colIndex]!;
-    const currentType = tableStore.currentTableData.colTypes[colName] || 'str';
+    const colName = tableStore.currentTableData.col_names[colIndex]!;
+    const currentType = tableStore.currentTableData.col_types[colName] || 'str';
     
     // 创建一个对话框来同时修改列名和类型
     const newName = prompt('输入新列名:', colName);
@@ -220,7 +251,7 @@ function modifyColumn(colIndex: number) {
     
     if (newName !== colName) {
         // 检查列名是否已存在
-        if (tableStore.currentTableData.colNames.includes(newName) && newName !== colName) {
+        if (tableStore.currentTableData.col_names.includes(newName) && newName !== colName) {
             alert(`列名 "${newName}" 已存在`);
             return;
         }
@@ -260,7 +291,7 @@ function addColumnAtPosition(position: number) {
     }
     
     // 检查列名是否已存在
-    if (tableStore.currentTableData.colNames.includes(colName)) {
+    if (tableStore.currentTableData.col_names.includes(colName)) {
         alert(`列名 "${colName}" 已存在`);
         return;
     }
@@ -295,7 +326,7 @@ watch(() => [tableStore.numRows, tableStore.numCols], () => {
 }, { immediate: true });
 
 // 监听列名变化，重新计算列宽
-watch(() => tableStore.currentTableData.colNames, () => {
+watch(() => tableStore.currentTableData.col_names, () => {
     calculateColumnWidths();
 }, { deep: true });
 
@@ -330,17 +361,17 @@ onMounted(() => {
                     
                     <!-- 列标题 -->
                     <div 
-                        v-for="(colName, colIndex) in tableStore.currentTableData.colNames" 
+                        v-for="(colName, colIndex) in tableStore.currentTableData.col_names" 
                         :key="`col-${colIndex}`"
                         class="table-cell header-cell column-header"
                         :style="{ width: columnWidths[colIndex] ? columnWidths[colIndex] + 'px' : '150px' }"
-                        :title="`${colName} (${tableStore.currentTableData.colTypes[colName] || 'str'})`"
+                        :title="`${colName} (${tableStore.currentTableData.col_types[colName] || 'str'})`"
                         @dblclick="modifyColumn(colIndex)"
                         @contextmenu.prevent="modifyColumn(colIndex)"
                     >
                         <div class="column-header-content">
                             <span class="column-name">{{ colName }}</span>
-                            <span class="column-type">{{ tableStore.currentTableData.colTypes[colName] || 'str' }}</span>
+                            <span class="column-type">{{ tableStore.currentTableData.col_types[colName] || 'str' }}</span>
                             <button 
                                 class="delete-column-btn"
                                 @click.stop="tableStore.deleteColumn(colIndex)"
@@ -376,7 +407,7 @@ onMounted(() => {
                     
                     <!-- 数据单元格 -->
                     <div 
-                        v-for="(colName, colIndex) in tableStore.currentTableData.colNames" 
+                        v-for="(colName, colIndex) in tableStore.currentTableData.col_names" 
                         :key="`cell-${rowIndex}-${colIndex}`"
                         class="table-cell data-cell"
                         :style="{ width: columnWidths[colIndex] ? columnWidths[colIndex] + 'px' : '150px' }"
@@ -438,7 +469,7 @@ onMounted(() => {
         <div class="table-statusbar">
             <div v-if="tableStore.selectedCell" class="status-selection">
                 选中: 行 {{ tableStore.selectedCell.row + 1 }}, 列 {{ tableStore.selectedCell.col + 1 }}
-                ({{ tableStore.currentTableData.colNames[tableStore.selectedCell.col] }})
+                ({{ tableStore.currentTableData.col_names[tableStore.selectedCell.col] }})
             </div>
             <div v-else class="status-default">
                 双击单元格编辑，双击列名修改列名和类型，右键列名也可修改

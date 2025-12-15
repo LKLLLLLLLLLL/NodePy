@@ -39,41 +39,16 @@ function applyStructureChange() {
  * 提交表格编辑
  */
 function submit() {
-    tableStore.applyChanges();
+    tableStore.confirmChanges();
 }
 
 /**
  * 取消表格编辑
  */
 function cancel() {
-    tableStore.cancelEdit();
+    tableStore.cancelChanges();
 }
 
-/**
- * 添加新列（在末尾添加）
- */
-function addNewColumn() {
-    const colName = prompt('请输入新列名:', `Column_${tableStore.numCols + 1}`);
-    if (colName) {
-        const colType = prompt('请选择列类型 (int, float, str, bool, Datetime):', 'str');
-        if (colType && ['int', 'float', 'str', 'bool', 'Datetime'].includes(colType)) {
-            tableStore.addColumn(colName, colType as any, -1); // -1 表示在末尾添加
-        }
-    }
-}
-
-/**
- * 在指定位置添加新列
- */
-function addColumnAtPosition(position: number) {
-    const colName = prompt('请输入新列名:', `Column_${tableStore.numCols + 1}`);
-    if (colName) {
-        const colType = prompt('请选择列类型 (int, float, str, bool, Datetime):', 'str');
-        if (colType && ['int', 'float', 'str', 'bool', 'Datetime'].includes(colType)) {
-            tableStore.addColumn(colName, colType as any, position);
-        }
-    }
-}
 </script>
 
 <template>
@@ -123,10 +98,6 @@ function addColumnAtPosition(position: number) {
             
             <button @click="applyStructureChange" class="apply-btn">
                 应用尺寸
-            </button>
-            
-            <button @click="addNewColumn" class="add-column-btn">
-                + 添加列
             </button>
         </div>
         

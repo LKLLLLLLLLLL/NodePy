@@ -7,7 +7,7 @@
                 <div class="param-description" :class="{'node-has-paramerr': tableParamHasErr}">
                     自定义表格
                 </div>
-                <NodepyButton :handle-click="tableStore.createTableModal">
+                <NodepyButton :handle-click="openTableEditModal">
                     <span class="tableParam-description">编辑</span>
                 </NodepyButton>
             </div>
@@ -59,11 +59,20 @@
 
 
     const updateTableParam = () => {
-        // props.data.param.rows = tableStore.currentTableData.rows
-        props.data.param.col_names = tableStore.currentTableData.colNames
-        props.data.param.col_types = tableStore.currentTableData.colTypes
+        props.data.param.rows = JSON.parse(JSON.stringify(tableStore.currentTableData.rows))
+        props.data.param.col_names = JSON.parse(JSON.stringify(tableStore.currentTableData.col_names))
+        props.data.param.col_types = JSON.parse(JSON.stringify(tableStore.currentTableData.col_types))
     }
 
+    const openTableEditModal = ()=> {
+        window.addEventListener('ApplyTableChanges', () => {
+            updateTableParam()
+        },{once: true})
+        tableStore.currentTableData.rows = JSON.parse(JSON.stringify(props.data.param.rows))
+        tableStore.currentTableData.col_names = JSON.parse(JSON.stringify(props.data.param.col_names))
+        tableStore.currentTableData.col_types = JSON.parse(JSON.stringify(props.data.param.col_types))
+        tableStore.createTableModal()
+    }
 
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []
