@@ -42,6 +42,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { useEditorStore } from '@/stores/editorStore';
 
 // 引入Prism.js和Python语法高亮
 import Prism from 'prismjs';
@@ -56,6 +57,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
 }>();
+
+const editorStore = useEditorStore()
 
 const editor = ref<HTMLElement | null>(null);
 const highlighter = ref<HTMLElement | null>(null);
@@ -72,7 +75,7 @@ if __name__ == "__main__":
     hello_world()`;
 
 // 响应式数据
-const code = ref(props.modelValue || defaultCode);
+const code = ref(props.modelValue || defaultCode || editorStore.currentScript);
 const editable = ref(!props.readOnly);
 
 // 计算属性
@@ -492,12 +495,19 @@ onMounted(() => {
     highlightCode();
   }
 });
+
+// 暴露code变量和getCode方法供父组件访问
+defineExpose({
+  code,
+  getCode: () => code.value
+});
 </script>
 
 <style scoped>
 .python-editor-modal {
   display: flex;
   flex-direction: column;
+  width: 100%;
   height: 100%;
   /* 使用等宽字体族，确保英文字符对齐 */
   font-family: 'Consolas', 'Courier New', monospace, 'Microsoft YaHei', 'SimHei';

@@ -74,6 +74,7 @@
           <span class="icon">🚪</span> 登出
         </button>
         <button @click="tableStore.createTableModal()">点我测试表格编辑</button>
+        <button @click="editorStore.createEditorModal()">点我测试脚本编辑</button>
       </div>
     </div>
   </FloatingMenu>
@@ -86,6 +87,7 @@ import { Avatar } from '@element-plus/icons-vue'
 import { useLoginStore } from '@/stores/loginStore'
 import { useModalStore } from '@/stores/modalStore'
 import { useUserStore } from '@/stores/userStore'
+import { useEditorStore } from '@/stores/editorStore'
 import notify from '@/components/Notification/notify'
 import FloatingMenu from './FloatingMenu.vue'
 import EditableTableModal from '../EditableTable/EditableTableModal.vue'
@@ -97,6 +99,7 @@ const loginStore = useLoginStore()
 const modalStore = useModalStore()
 const userStore = useUserStore()
 const tableStore = useTableStore()
+const editorStore = useEditorStore()
 
 const router = useRouter()
 

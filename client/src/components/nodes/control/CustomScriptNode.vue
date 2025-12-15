@@ -41,7 +41,7 @@
             </div>
             <div class="script">
                 <div class="param-description" :class="{'node-has-paramerr': scriptHasErr.value}">自定义Python脚本</div>
-                <NodepyButton :handle-click="openEditor">
+                <NodepyButton :handle-click="openEditorModal">
                     编辑脚本
                 </NodepyButton>
             </div>
@@ -100,7 +100,9 @@
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
     import type { CustomScriptNodeData } from '@/types/nodeTypes'
+    import { useEditorStore } from '@/stores/editorStore'
 
+    const editorStore = useEditorStore()
 
     const props = defineProps<NodeProps<CustomScriptNodeData>>()
     const portType = ["int", "float", "bool", "str", "Datetime"]
@@ -121,7 +123,7 @@
             defaultSelectedType: portType.indexOf(type)
         }
     }))
-    const script = ref(props.data.param.script)
+    // const script = ref(props.data.param.script)
     const outPutHasErr = computed(() => {
         return outputPorts.value.map((port) => handleOutputError(props.id, port.name))
     })
@@ -185,11 +187,15 @@
         })
         props.data.param.output_ports[outputPorts.value[outputPorts.value.length-1]!.name] = 'int'
     }
-    const openEditor = () => {
-
+    const openEditorModal = () => {
+        window.addEventListener('ApplyEditorChanges', () => {
+            updateScript()
+        },{once: true})
+        editorStore.currentScript = JSON.parse(JSON.stringify(props.data.param.script))
+        editorStore.createEditorModal()
     }
     const updateScript = () => {
-        props.data.param.script = script.value
+        props.data.param.script = JSON.parse(JSON.stringify(editorStore.currentScript))
     }
     const onUpdateInputPortName = () => {
         props.data.param.input_ports = inputPorts.value.reduce((acc, cur) => {
