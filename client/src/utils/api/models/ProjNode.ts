@@ -11,7 +11,7 @@ import type { Schema } from './Schema';
 export type ProjNode = {
     id: string;
     type: string;
-    virtual_node?: boolean;
+    is_virtual_node?: boolean;
     param: Record<string, any>;
     runningtime?: (number | null);
     schema_out?: Record<string, Schema>;
