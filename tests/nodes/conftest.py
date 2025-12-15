@@ -168,13 +168,13 @@ def node_registry() -> dict:
 @pytest.fixture
 def global_config():
     """Return a GlobalConfig instance populated with fake managers."""
-    from server.interpreter.nodes.config import GlobalConfig
+    from server.interpreter.nodes.context import NodeContext
 
     # import fake classes from our injected modules
     from server.lib.FileManager import FileManager as FM
     from server.lib.FinancialDataManager import FinancialDataManager as FDM
 
-    return GlobalConfig(
+    return NodeContext(
         file_manager=FM(),
         financial_data_manager=FDM(),  # type: ignore
         user_id=1,

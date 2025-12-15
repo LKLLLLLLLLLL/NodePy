@@ -14,7 +14,7 @@ from server.models.exception import NodeExecutionError, NodeParameterError
 from server.models.project import TopoEdge, TopoNode, WorkflowTopology
 
 from .nodes.base_node import BaseNode
-from .nodes.config import NodeContext
+from .nodes.context import NodeContext
 
 """
 Graph classes to analyze and execute node graphs.
@@ -53,7 +53,7 @@ class ProjectInterpreter:
         self._stage: Literal["init", "constructed", "static_analyzed", "running", "finished"] = "init"
         # construct global config
         self.cache_manager = cache_manager # used only by NodeGraph, no need to pass to nodes
-        self._global_config = NodeContext(
+        self._context = NodeContext(
             file_manager=file_manager, 
             financial_data_manager=financial_data_manager, 
             user_id=user_id, 
@@ -93,7 +93,7 @@ class ProjectInterpreter:
             params = node.params
 
             try:
-                node_object = BaseNode.create_from_type(type=type, global_config=self._global_config, id=id, **params)
+                node_object = BaseNode.create_from_type(type=type, context=self._context, id=id, **params)
                 if self._node_objects is None:
                     raise RuntimeError("Node objects initialized failed.")
                 self._node_objects[id] = node_object
@@ -425,7 +425,7 @@ class ProjectInterpreter:
             try:
                 node_object = BaseNode.create_from_type(
                     type=topo_node.type, 
-                    global_config=self._global_config, 
+                    context=self._context, 
                     id=topo_node.id, 
                     **topo_node.params
                 )

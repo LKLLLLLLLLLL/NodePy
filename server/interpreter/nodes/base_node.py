@@ -13,7 +13,7 @@ from server.models.exception import (
 )
 from server.models.schema import Pattern, Schema
 
-from .config import NodeContext
+from .context import NodeContext
 
 """
 This file defines the base class for all nodes.
