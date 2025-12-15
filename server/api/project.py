@@ -414,7 +414,7 @@ async def sync_project(
             old_topo = old_project.workflow.to_topo(project_id=project_id)
             if old_topo == new_topo:
                 need_exec = False
-            
+
             # 3. save to db
             if not need_exec:
                 logger.warning(f"Project {project.project_id} topology not changed, no need to execute. Please use /sync_ui to update UI only.")
