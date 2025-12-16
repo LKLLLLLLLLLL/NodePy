@@ -1,6 +1,7 @@
 <script lang='ts' setup>
 import { ref, onMounted, watch, nextTick, onUnmounted, computed } from 'vue'
 import { VueFlow, useVueFlow, ConnectionMode, Panel } from '@vue-flow/core'
+import {debounce} from 'lodash'
 import type { NodeDragEvent } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
@@ -160,21 +161,23 @@ onNodesInitialized(() => {
   } // fitView when first loading nodes
 })
 
-watch([
-  () => nodes.value.length, // @ts-ignore
-  () => nodes.value.map(n => JSON.stringify(n.data.param)).join('|'),
-  () => edges.value.length
-], async (newValue, oldValue) => {
-  console.log("new: ", newValue, "old: ", oldValue, 'shouldWatch:', shouldWatch.value)
-  if(!shouldWatch.value) return
+const debounceSync = debounce(() => {
   if(graphStore.project) {
     sync(graphStore)
   }else {
     console.error('project is undefined')
-  }
-
+  }  
+}, 300)
+watch([
+  () => nodes.value.length, // @ts-ignore
+  () => nodes.value.map(n => JSON.stringify(n.data.param)).join('|'),
+  () => edges.value.length
+], (newValue, oldValue) => {
+  console.log("new: ", newValue, "old: ", oldValue, 'shouldWatch:', shouldWatch.value)
+  if(!shouldWatch.value) return
+  debounceSync()
 }, {deep: false, immediate: false})
-onNodeDragStop(async (event: NodeDragEvent) => {
+onNodeDragStop((event: NodeDragEvent) => {
   if(!listenNodePosition.value || !shouldWatch.value) return
   listenNodePosition.value = false
 
