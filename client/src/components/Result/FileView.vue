@@ -530,7 +530,8 @@ const handleDownloadFile = async () => {
 }
 
 .file-title{
-    font-weight:600;
+    font-size: 16px;
+    margin-left: 8px;
 }
 
 .button.download{

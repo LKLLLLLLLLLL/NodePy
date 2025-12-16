@@ -4,6 +4,10 @@ import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { nodeMenuItems, type MenuNode } from '@/components/RightClickMenu/menuTypes'
 import { useVueFlow } from '@vue-flow/core'
 import SubMenu from './SubMenu.vue'
+// 图标
+//@ts-ignore
+import SvgIcon from '@jamescoyle/vue-icon'
+import { mdiAlphabeticalVariant, mdiChartScatterPlot, mdiFileOutline, mdiImport, mdiMathCompass, mdiRulerSquare, mdiTable, mdiTimerOutline, mdiSchoolOutline, mdiSourceFork } from '@mdi/js'
 
 const graphStore = useGraphStore()
 const { addNode } = graphStore
@@ -89,6 +93,37 @@ const submenuDirection = computed(() =>
   menuX.value > window.innerWidth - 350 ? 'left' : 'right'
 )
 
+// 根据菜单项的 value 映射到图标路径
+const getIconPath = (value: string) => {
+  switch (value) {
+    case 'input':
+      return mdiImport
+    case 'compute':
+      return mdiMathCompass
+    case 'control':
+      return mdiSourceFork
+    case 'file':
+      return mdiFileOutline
+    case 'stringProcessing':
+    case 'stringProcess':
+      return mdiAlphabeticalVariant
+    case 'tableProcessing':
+    case 'tableProcess':
+      return mdiTable
+    case 'datetimeProcess':
+      return mdiTimerOutline
+    case 'analysis':
+      return mdiRulerSquare
+    case 'visualization':
+    case 'visualize':
+      return mdiChartScatterPlot
+    case 'machineLearning':
+      return mdiSchoolOutline
+    default:
+      return null
+  }
+}
+
 // 菜单样式
 const menuStyle = computed(() => {
   const width = 160
@@ -162,6 +197,7 @@ onBeforeUnmount(() => {
           class="menu-item-content"
           @click="handleItemClick(item)"
         >
+          <svg-icon v-if="getIconPath(item.value)" type="mdi" :path="getIconPath(item.value)"class="menu-icon" />
           <span class="menu-label">{{ item.label }}</span>
           <span v-if="item.children?.length" class="submenu-arrow">
               <svg width="10" height="10" viewBox="0 0 8 8">
@@ -177,6 +213,7 @@ onBeforeUnmount(() => {
           :direction="submenuDirection"
           :on-select="selectNode"
           :anchor-rect="submenuAnchorRect"
+          :parent-category="item.value"
         />
       </li>
     </ul>
@@ -214,10 +251,18 @@ onBeforeUnmount(() => {
   margin: 0;
   cursor: pointer;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 8px;
   border-radius: 8px;
   transition: background-color 0.15s ease;
+}
+
+.menu-icon {
+  display: inline-flex;
+  width: 20px;
+  opacity: 0.7;
+  color: inherit;
 }
 
 .menu-item-content:hover {
@@ -227,12 +272,14 @@ onBeforeUnmount(() => {
 .menu-label {
   font-size: 14px;
   font-weight: 400;
+  flex: 1 1 auto;
+  text-align: left;
 }
 
 .submenu-arrow {
   display: inline-flex;
   align-items: center;
-  margin-left: 8px;
+  margin-left: auto; /* 将箭头推到最右侧 */
   color: inherit; /* 继承文字颜色 */
   width: 9px;
   height: 9px;

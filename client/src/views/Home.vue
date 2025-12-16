@@ -9,6 +9,7 @@ import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
 import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
 import type { ExploreListItem } from '@/utils/api';
+import ExampleDemoFrame from './ExampleView/ExampleDemoFrame.vue'
 
 import ConstNode from '@/components/nodes/input/ConstNode.vue'
 import NumberBinOpNode from '@/components/nodes/compute/NumberBinOpNode.vue'
@@ -85,7 +86,7 @@ onMounted(async () => {
   try {
     const authService = AuthenticatedServiceFactory.getService()
     const res = await authService.getExploreProjectsApiExploreExploreProjectsGet()
-    examples.value = res.projects.slice(0, 3) // Take first 3
+    examples.value = res.projects
   } catch (e) {
     console.error('Failed to fetch examples:', e)
   }
@@ -101,27 +102,6 @@ function jumpToProject() {
   router.push({
     name: 'project'
   })
-}
-
-function openExample(projectId: number) {
-  router.push({
-    name: 'editor-example',
-    params: { projectId }
-  })
-}
-
-// Helper to format date
-function formatDate(timestamp: number | null) {
-  if (!timestamp) return ''
-  return new Date(timestamp).toLocaleDateString('zh-CN')
-}
-
-// Helper for thumb
-function getThumbSrc(thumb: string) {
-  if (thumb.startsWith('data:image')) {
-    return thumb
-  }
-  return `data:image/png;base64,${thumb}`
 }
 
 // 用户是否已登录
@@ -231,22 +211,11 @@ function jumpToGithub() {
           </div>
 
           <div class="examples-grid">
-            <div v-for="example in examples" :key="example.project_id" class="example-card" @click="openExample(example.project_id)">
-              <div class="example-preview">
-                <img v-if="example.thumb" :src="getThumbSrc(example.thumb)" alt="preview" class="example-thumb" />
-                <div v-else class="preview-placeholder">
-                  <span class="mdi mdi-image-filter-hdr"></span>
-                </div>
-              </div>
-              <div class="example-content">
-                <h3 class="example-title">{{ example.project_name }}</h3>
-                <p class="example-desc">{{ '暂无描述' }}</p>
-                <div class="example-tags">
-                  <span class="tag">{{ example.owner_name }}</span>
-                  <span class="tag">{{ formatDate(example.updated_at) }}</span>
-                </div>
-              </div>
-            </div>
+            <ExampleDemoFrame
+                v-for="example in examples"
+                :key="example.project_id"
+                :item="example"
+            ></ExampleDemoFrame>
           </div>
         </div>
 
@@ -639,78 +608,27 @@ function jumpToGithub() {
 
   .examples-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 40px;
-  }
+    grid-template-rows: repeat(2, auto);
+    grid-auto-flow: column;
+    grid-auto-columns: 300px; // 固定列宽，确保一致性
+    gap: 30px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 40px 4px; // 增加内边距
+    justify-content: start; // 从左侧开始
 
-  .example-card {
-    border-radius: 12px;
-    overflow: hidden;
-    background: #fff;
-    border: 1px solid #eee;
-    transition: all 0.3s ease;
-
-    &:hover {
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-      transform: translateY(-3px);
+    // 隐藏滚动条但保持功能 (可选)
+    &::-webkit-scrollbar {
+      height: 8px;
     }
-
-    .example-preview {
-      height: 180px;
-      background: #f0f2f5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-
-      .example-thumb {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .preview-placeholder {
-        color: #ccc;
-        .mdi { font-size: 48px; }
-      }
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
     }
-
-    .example-content {
-      padding: 24px;
-
-      .example-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: #333;
-        margin-bottom: 10px;
-      }
-
-      .example-desc {
-        font-size: 14px;
-        color: #666;
-        line-height: 1.6;
-        margin-bottom: 16px;
-        height: 44px; // 限制高度
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-      }
-
-      .example-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-
-        .tag {
-          font-size: 12px;
-          padding: 4px 10px;
-          background: #f0f7ff;
-          color: $stress-color;
-          border-radius: 4px;
-          font-weight: 500;
-        }
-      }
+    &::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 4px;
+      &:hover { background: #bbb; }
     }
   }
 }
