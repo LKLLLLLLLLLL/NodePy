@@ -48,7 +48,7 @@ class CustomScriptNode(BaseNode):
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         in_ports = []
         for name, type_str in self.input_ports.items():
-            schema_type = Schema.Type[type_str]
+            schema_type = Schema.Type[type_str.upper()]
             in_ports.append(
                 InPort(
                     name=name,
@@ -70,8 +70,8 @@ class CustomScriptNode(BaseNode):
     @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
         output_schemas = {}
-        for name, type_str in self.output_ports:
-            schema_type = Schema.Type[type_str]
+        for name, type_str in self.output_ports.items():
+            schema_type = Schema.Type[type_str.upper()]
             output_schemas[name] = Schema(type=schema_type)
         return output_schemas
 

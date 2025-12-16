@@ -55,7 +55,6 @@
             rafId = null
         }
         if(props.defaultTime) {
-            console.log('@@@@@', props.defaultTime)
             const offsetMs = props.defaultTime
             const tmp = performance.now()
             startAt.value = tmp

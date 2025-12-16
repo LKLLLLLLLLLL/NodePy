@@ -9,7 +9,7 @@
                         输入
                         <hr></hr>
                     </div>
-                    <Handle :id="inputPort.name" type="target" :position="Position.Left" :class="[`${inputPort.type}-handle-color`, {'node-errhandle': inputHasErr[idx]!.value.value}]"/>
+                    <Handle :id="inputPort.name" type="target" :position="Position.Left" :class="[`${inputPort.type}-handle-color`, {'node-errhandle': inputHasErr[idx]!.value.value}]" :key="inputPort.name"/>
                 </div>
                 <div class="name">
                     <div class="param-description port-name-description" :class="{'node-has-paramerr': input_portsHasErr.value}">
@@ -18,7 +18,7 @@
                     </div>
                     <NodepyStringInput
                         v-model="inputPort.name"
-                        @update-value="() => onUpdateInputPortName(idx)"
+                        @update-value="(oldName: string) => onUpdateInputPortName(idx, oldName)"
                         class="nodrag"
                         placeholder="端口名称"
                     />
@@ -51,7 +51,7 @@
                         输出
                         <hr></hr>
                     </div>
-                    <Handle :id="outputPort.name" type="source" :position="Position.Right" :class="[`${outputPort.type}-handle-color`, {'node-errhandle': outPutHasErr[idx]}]"/>
+                    <Handle :id="outputPort.name" type="source" :position="Position.Right" :class="[`${outputPort.type}-handle-color`, {'node-errhandle': outPutHasErr[idx]}]" :key="outputPort.name"/>
                 </div>
                 <div class="name">
                     <div class="param-description port-name-description" :class="{'node-has-paramerr': output_portsHasErr.value}">
@@ -60,7 +60,7 @@
                     </div>
                     <NodepyStringInput
                         v-model="outputPort.name"
-                        @update-value="onUpdateOutputPortName"
+                        @update-value="(oldName: string) => onUpdateOutputPortName(oldName, idx)"
                         class="nodrag"
                         placeholder="端口名称"
                     />
@@ -88,7 +88,7 @@
 
 <script lang="ts" setup>
     import type { NodeProps } from '@vue-flow/core'
-    import { Handle, Position } from '@vue-flow/core'
+    import { Handle, Position, useVueFlow } from '@vue-flow/core'
     import { computed, ref, watch } from 'vue'
     import { handleExecError, handleParamError, handleValidationError, handleOutputError } from '../handleError'
     import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
@@ -103,7 +103,7 @@
     import { useEditorStore } from '@/stores/editorStore'
 
     const editorStore = useEditorStore()
-
+    const {removeEdges, getEdges, addEdges} = useVueFlow('main')
     const props = defineProps<NodeProps<CustomScriptNodeData>>()
     const portType = ["int", "float", "bool", "str", "Datetime"]
     const portTypeChinese = ["整数", "浮点数", "布尔值", "字符串", "时间"]
@@ -123,7 +123,6 @@
             defaultSelectedType: portType.indexOf(type)
         }
     }))
-    // const script = ref(props.data.param.script)
     const outPutHasErr = computed(() => {
         return outputPorts.value.map((port) => handleOutputError(props.id, port.name))
     })
@@ -151,6 +150,7 @@
     const removeInputPort = (idx: number) => {
         if(inputPorts.value.length > 1) {
             const removedKey = inputPorts.value[idx]!.name
+            removeEdges(edges => edges.filter(e => e.target === props.id && e.targetHandle === removedKey))
             inputPorts.value.splice(idx, 1)
             const {[removedKey]: _, ...rest} = props.data.param.input_ports
             props.data.param.input_ports = rest
@@ -160,6 +160,7 @@
     const removeOutputPort = (idx: number) => {
         if(outputPorts.value.length > 1) {
             const removedKey = outputPorts.value[idx]!.name
+            removeEdges(edges => edges.filter(e => e.source === props.id && e.sourceHandle === removedKey))
             outputPorts.value.splice(idx, 1)
             const {[removedKey]: _, ...rest} = props.data.param.output_ports
             props.data.param.output_ports = rest
@@ -191,20 +192,30 @@
         window.addEventListener('ApplyEditorChanges', () => {
             updateScript()
         },{once: true})
-        editorStore.currentScript = JSON.parse(JSON.stringify(props.data.param.script))
+        editorStore.currentScript = JSON.parse(JSON.stringify(props.data.param.script || props.data.hint?.script_template || ''))
         editorStore.createEditorModal()
     }
     const updateScript = () => {
         props.data.param.script = JSON.parse(JSON.stringify(editorStore.currentScript))
     }
-    const onUpdateInputPortName = (idx: number) => {
+    const onUpdateInputPortName = (idx: number, oldName: string) => {
+        if(oldName === inputPorts.value[idx]!.name) return
+        const curEdge = getEdges.value.find(e => e.target === props.id && e.targetHandle === oldName)
+        if(curEdge) {
+            removeEdges(curEdge.id)
+        }
         props.data.param.input_ports = inputPorts.value.reduce((acc, cur) => {
             acc[cur.name] = cur.type
             return acc
         }, {})
         inputHasErr[idx]!.value.handleId = inputPorts.value[idx]!.name
     }
-    const onUpdateOutputPortName = () => {
+    const onUpdateOutputPortName = (oldName: string, idx: number) => {
+        if(oldName === outputPorts.value[idx]!.name) return
+        const curEdge = getEdges.value.find(e => e.source === props.id && e.sourceHandle === oldName)
+        if(curEdge) {
+            removeEdges(curEdge.id)
+        }
         props.data.param.output_ports = outputPorts.value.reduce((acc, cur) => {
             acc[cur.name] = cur.type
             return acc

@@ -62,6 +62,7 @@
     }
 
     const commitEdit = () => {
+        const oldValue = model.value
         if(isEditing.value) {
             isEditing.value = false
             if(props.allowNull && editText.value === '') {
@@ -70,7 +71,7 @@
                 model.value = editText.value
             }
             inputEl.value?.blur()
-            emit('updateValue')
+            emit('updateValue', oldValue)
         }
     }
 </script>
