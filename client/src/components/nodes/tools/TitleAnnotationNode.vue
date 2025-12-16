@@ -2,15 +2,19 @@
     <div class="TitleAnnotationNodeLayout nodes-style" :class="[{'nodes-selected': selected}]">
         <NodeResizer :min-width="200" :min-height="30"/>
         <NodeTitle node-category='annotation' class="title draggable">
-            <input v-model="title"
-                @blur="commit" 
-                @keydown.enter="commit" 
-                class="inputValue" 
-                ref="inputEl" 
-                :readonly="!isEditing" 
-                @dblclick="enableEdit"
-                :class="{nodrag: isEditing}"
-             />
+            <template v-if="isEditing">
+                <input v-model="title"
+                    @blur="commit"
+                    @keydown.enter="commit"
+                    class="inputValue"
+                    ref="inputEl"
+                    :readonly="!isEditing"
+                    :class="{nodrag: isEditing}"
+                />
+            </template>
+            <template v-else>
+                <div class="displayTitle" @dblclick="enableEdit" tabindex="0">{{ title }}</div>
+            </template>
         </NodeTitle>
         <div class="nodrag"></div>
     </div>
@@ -21,12 +25,12 @@
     import type { TitleAnnotationNodeData } from '../../../types/nodeTypes'
     import type { NodeProps } from '@vue-flow/core'
     import { NodeResizer } from '@vue-flow/node-resizer'
-    import {ref} from 'vue'
+    import {ref, nextTick} from 'vue'
     import '@vue-flow/node-resizer/dist/style.css'
-    
+
     const props = defineProps<NodeProps<TitleAnnotationNodeData>>()
     const title = ref(props.data.param.title)
-    const inputEl = ref<HTMLInputElement>()
+    const inputEl = ref<HTMLInputElement | null>(null)
     const isEditing = ref(false)
 
 
@@ -37,9 +41,16 @@
         }
         isEditing.value = false
     }
-    const enableEdit = () => {
+    const enableEdit = async () => {
         isEditing.value = true
+        await nextTick()
         inputEl.value?.focus()
+        // move caret to end
+        const el = inputEl.value
+        if (el) {
+            const len = el.value.length
+            el.setSelectionRange(len, len)
+        }
     }
 
 </script>
@@ -56,7 +67,28 @@
                 border:none;
                 outline:none;
                 color: white;
+                /* 禁止在非编辑（readonly）状态下选中内容 */
+                &[readonly] {
+                    -webkit-user-select: none;
+                    -moz-user-select: none;
+                    -ms-user-select: none;
+                    user-select: none;
+                    caret-color: transparent;
+                }
             }
+        }
+        .displayTitle {
+            width: 100%;
+            color: white;
+            cursor: text;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 2px 0;
         }
         .nodrag {
             width: 100%;
