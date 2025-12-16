@@ -28,7 +28,6 @@
     import { handleValidationError, handleExecError, handleOutputError, handleParamError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
-    import Timer from '../tools/Timer.vue'
     import type { BaseData } from '@/types/nodeTypes'
 
 

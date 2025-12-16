@@ -28,7 +28,6 @@
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
-    import Timer from '../tools/Timer.vue'
     import type { ForRollingWindowEndNodeData } from '@/types/nodeTypes'
 
 

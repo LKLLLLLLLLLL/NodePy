@@ -103,7 +103,7 @@
     import { useEditorStore } from '@/stores/editorStore'
 
     const editorStore = useEditorStore()
-    const {removeEdges, getEdges, addEdges} = useVueFlow('main')
+    const {removeEdges, getEdges} = useVueFlow('main')
     const props = defineProps<NodeProps<CustomScriptNodeData>>()
     const portType = ["int", "float", "bool", "str", "Datetime"]
     const portTypeChinese = ["整数", "浮点数", "布尔值", "字符串", "时间"]

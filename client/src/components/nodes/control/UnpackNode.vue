@@ -16,7 +16,7 @@
                 <NodepyMultiSelectMany
                     :options="colsHint"
                     :default-selected="defaultSelectedCols"
-                    @select-change="(e: any) => updateSimpleMultiSelectMany(data.param, 'cols', colsHint, e)"
+                    @select-change="onSelectChange"
                     @clear-select="clearSelectCols"
                     class="nodrag"
                 />
@@ -43,7 +43,7 @@
 <script lang="ts" setup>
     import {ref, computed, watch} from 'vue'
     import type { NodeProps } from '@vue-flow/core'
-    import { Position, Handle } from '@vue-flow/core'
+    import { Position, Handle, useVueFlow } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
     import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
@@ -51,11 +51,11 @@
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
     import NodepyMultiSelectMany from '../tools/Nodepy-multiSelectMany.vue'
-    import { updateSimpleMultiSelectMany } from '../updateParam'
     import { displayColumnName, isSpecialColumn } from '../tableColumnDisplay'
     import type { UnpackNodeData } from '@/types/nodeTypes'
 
 
+    const {removeEdges} = useVueFlow('main')
     const props = defineProps<NodeProps<UnpackNodeData>>()
     const colsHint = computed(() => {
         if(props.data.hint?.cols_choices?.length === 0) return ['']
@@ -82,7 +82,13 @@
     })
 
 
+    const onSelectChange = (e: number[]) => {
+        const selectedCols = e.map(i => colsHint.value[i])
+        removeEdges(edges => edges.filter(e => e.source === props.id && (!selectedCols.includes(e.sourceHandle))))
+        props.data.param.cols = selectedCols
+    }
     const clearSelectCols = (resolve: any) => {
+        removeEdges(edges => edges.filter(e => e.source === props.id && e.sourceHandle !== 'unpacked_row'))
         props.data.param.cols = []
         defaultSelectedCols.value = []
         resolve()

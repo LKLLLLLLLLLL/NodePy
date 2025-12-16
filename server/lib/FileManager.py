@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from server.celery import celery_app
 from server.config import (
+    EXAMPLE_USER_USERNAME,
     MINIO_ACCESS_KEY,
     MINIO_SECRET_KEY,
     MINIO_SECURE,
@@ -63,7 +64,6 @@ class FileManager:
         # Ensure bucket exists
         if not self.minio_client.bucket_exists(self.bucket):
             self.minio_client.make_bucket(self.bucket)
-
 
     def _cal_user_occupy_sync(self, user_id: int) -> int:
         """ Calculate the total file occupy for a user """
@@ -412,7 +412,11 @@ class FileManager:
         if not db_file:
             raise ValueError("File record not found in database")
         if user_id and db_file.user_id != user_id: # type: ignore
-            raise PermissionError("Permission denied to access this file")
+            # check if the owner is examples user
+            # get username from UserRecord
+            owner = self.db_client.query(UserRecord).filter(UserRecord.id == db_file.user_id).first()
+            if owner is None or owner.username != EXAMPLE_USER_USERNAME:  # type: ignore
+                raise PermissionError("Permission denied to access this file")
         try:
             response = self.minio_client.get_object(
                 bucket_name=self.bucket,
@@ -438,7 +442,14 @@ class FileManager:
         if not db_file:
             raise ValueError("File record not found in database")
         if user_id and db_file.user_id != user_id: # type: ignore
-            raise PermissionError("Permission denied to access this file")
+            # check if the owner is examples user
+            # get username from UserRecord
+            owner_record = await self.async_db_client.execute(
+                select(UserRecord).where(UserRecord.id == db_file.user_id)
+            )
+            owner = owner_record.scalars().first()
+            if owner is None or owner.username != EXAMPLE_USER_USERNAME:  # type: ignore
+                raise PermissionError("Permission denied to access this file")
         try:
             response = await asyncio.to_thread(
                 self.minio_client.get_object,
