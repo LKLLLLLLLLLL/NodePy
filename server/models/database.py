@@ -118,7 +118,7 @@ class FileRecord(Base):
     file_size = Column(BigInteger, nullable=False) # Byte
     last_modify_time = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())   
     is_deleted = Column(Boolean, default=False, nullable=False)
-    
+
     # allow to file entry with same(user_id, project_id, node_id)
     # they will be clean up in periodic task 
 
