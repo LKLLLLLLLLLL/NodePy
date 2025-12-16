@@ -51,7 +51,6 @@ watch(toBePreviewed, async (newFile) => {
         <!-- 显示loading状态 -->
         <div v-if="loading" class="file-loading">
             <Loading></Loading>
-            <span>加载中...</span>
         </div>
 
         <!-- 显示错误信息 -->
@@ -68,14 +67,21 @@ watch(toBePreviewed, async (newFile) => {
 
 <style scoped>
 .file-preview-container {
-    padding-top: 10px;
+    /* padding-top: 10px; */
+    color: #808080;
+    padding-left: 10px;
+    padding-right: 15px;
+    padding-bottom: 10px;
     display: flex;
+    flex: 1;
     flex-direction: column;
     height: 100%;
 }
 
 .file-content {
+    display: flex;
     flex: 1;
+    width: 100%;
     border-radius: 10px;
     overflow: hidden;
     background: transparent;

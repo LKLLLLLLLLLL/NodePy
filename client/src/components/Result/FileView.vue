@@ -510,6 +510,7 @@ const handleDownloadFile = async () => {
 .file-view-container {
     display: flex;
     flex-direction: column;
+    width: 100%;
     height: 100%;
     overflow: hidden;
     background: $background-color;
