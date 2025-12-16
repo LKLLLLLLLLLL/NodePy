@@ -247,7 +247,12 @@ async function handleNodeDoubleClick(event) {
     }
   })  //  reset dbclicked so that only one node can be dbclicked
 
+
   if(graphStore.currentNode) {
+    const type = graphStore.currentNode.type
+    if(type === 'TitleAnnotationNode') return
+    if(type === 'TextAnnotationNode') return
+    if(type === 'NodeContainer') return
     graphStore.currentNode.data.dbclicked = true
   } //  双击状态更新
 

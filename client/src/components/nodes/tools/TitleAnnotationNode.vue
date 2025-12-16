@@ -2,7 +2,15 @@
     <div class="TitleAnnotationNodeLayout nodes-style" :class="[{'nodes-selected': selected}]">
         <NodeResizer :min-width="200" :min-height="30"/>
         <NodeTitle node-category='annotation' class="title draggable">
-            <input v-model="title" @blur="commit" @keydown.enter="commit" class="inputValue" ref="inputEl"/>
+            <input v-model="title"
+                @blur="commit" 
+                @keydown.enter="commit" 
+                class="inputValue" 
+                ref="inputEl" 
+                :readonly="!isEditing" 
+                @dblclick="enableEdit"
+                :class="{nodrag: isEditing}"
+             />
         </NodeTitle>
         <div class="nodrag"></div>
     </div>
@@ -19,11 +27,19 @@
     const props = defineProps<NodeProps<TitleAnnotationNodeData>>()
     const title = ref(props.data.param.title)
     const inputEl = ref<HTMLInputElement>()
+    const isEditing = ref(false)
 
 
     const commit = () => {
-        props.data.param.title = title.value
-        inputEl.value?.blur()
+        if(isEditing.value) {
+            props.data.param.title = title.value
+            inputEl.value?.blur()
+        }
+        isEditing.value = false
+    }
+    const enableEdit = () => {
+        isEditing.value = true
+        inputEl.value?.focus()
     }
 
 </script>
