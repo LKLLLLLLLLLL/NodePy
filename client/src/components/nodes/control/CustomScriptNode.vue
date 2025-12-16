@@ -18,7 +18,7 @@
                     </div>
                     <NodepyStringInput
                         v-model="inputPort.name"
-                        @update-value="onUpdateInputPortName"
+                        @update-value="() => onUpdateInputPortName(idx)"
                         class="nodrag"
                         placeholder="端口名称"
                     />
@@ -197,11 +197,12 @@
     const updateScript = () => {
         props.data.param.script = JSON.parse(JSON.stringify(editorStore.currentScript))
     }
-    const onUpdateInputPortName = () => {
+    const onUpdateInputPortName = (idx: number) => {
         props.data.param.input_ports = inputPorts.value.reduce((acc, cur) => {
             acc[cur.name] = cur.type
             return acc
         }, {})
+        inputHasErr[idx]!.value.handleId = inputPorts.value[idx]!.name
     }
     const onUpdateOutputPortName = () => {
         props.data.param.output_ports = outputPorts.value.reduce((acc, cur) => {

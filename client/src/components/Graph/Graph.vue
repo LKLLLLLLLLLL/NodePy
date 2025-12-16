@@ -102,6 +102,7 @@ import ForEachRowEndNode from '../nodes/control/ForEachRowEndNode.vue'
 import ForRollingWindowBeginNode from '../nodes/control/ForRollingWindowBeginNode.vue'
 import ForRollingWindowEndNode from '../nodes/control/ForRollingWindowEndNode.vue'
 import UnpackNode from '../nodes/control/UnpackNode.vue'
+import PackNode from '../nodes/control/PackNode.vue'
 import GetCellNode from '../nodes/control/GetCellNode.vue'
 import SetCellNode from '../nodes/control/SetCellNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
@@ -392,6 +393,7 @@ const nodeColor = (node: BaseNode) => {
     case 'ForRollingWindowBeginNode':
     case 'ForRollingWindowEndNode':
     case 'UnpackNode':
+    case 'PackNode':
     case 'GetCellNode':
     case 'SetCellNode':
       return nodeCategoryColor.control
@@ -822,6 +824,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-UnpackNode="UnpackNodeProps">
           <UnpackNode v-bind="UnpackNodeProps"/>
+        </template>
+
+        <template #node-PackNode="PackNodeProps">
+          <PackNode v-bind="PackNodeProps"/>
         </template>
 
         <template #node-GetCellNode="GetCellNodeProps">

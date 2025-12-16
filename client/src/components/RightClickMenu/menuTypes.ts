@@ -132,7 +132,11 @@ export const nodeMenuItems: MenuNode[] = [
             {
                 label: '解包节点',
                 value: 'UnpackNode'
-            },            
+            },
+            {
+                label: '打包节点',
+                value: 'PackNode'
+            },
             {
                 label: '单元格获取节点',
                 value: 'GetCellNode'

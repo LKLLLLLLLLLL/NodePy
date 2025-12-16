@@ -1,7 +1,6 @@
 <template>
     <div class="ForRollingWindowEndNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
         <NodeTitle node-category='control'>滑动窗口结束节点</NodeTitle>
-        <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-window port">
                 <div class="input-port-description">

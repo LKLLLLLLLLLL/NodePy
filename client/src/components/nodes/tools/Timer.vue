@@ -12,7 +12,7 @@
     import { onTimerMsg } from '@/utils/task' //@ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon'
     import { mdiCached, mdiCheck, mdiClose, mdiUpdate } from '@mdi/js' // waiting
-    import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+    import { computed, onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
 
     const props = defineProps<{
         nodeId: string,
@@ -54,10 +54,18 @@
             cancelAnimationFrame(rafId)
             rafId = null
         }
+        if(props.defaultTime) {
+            console.log('@@@@@', props.defaultTime)
+            const offsetMs = props.defaultTime
+            const tmp = performance.now()
+            startAt.value = tmp
+            now.value = tmp + offsetMs
+        }
+
     }
     const timerMsgHandler = (msg: {action: 'start'|'stop'|'error'; nodeId: string}) => {
         if(msg.nodeId !== props.nodeId) return
-        msg.action === 'start' ? startCount() : stopCount()
+        msg.action === 'start' ? startCount() : nextTick(() => stopCount())
         timerStatus.value = msg.action === 'start' ? 'running' : msg.action === 'stop' ? 'finished' : 'error'
     }
 
