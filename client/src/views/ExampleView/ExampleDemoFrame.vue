@@ -73,9 +73,13 @@
         <div class="project-info">
             <div class="project-title">{{ item.project_name }}</div>
             <div class="project-meta">
-                <span class="meta-item">修改: {{ formatDate(item.updated_at) }}</span>
-                <span class="meta-item">创建: {{ formatDate(item.created_at) }}</span>
-                <span class="meta-item">作者: {{ item.owner_name }}</span>
+                <div class="meta-item-row">
+                    <span class="meta-item">修改: {{ formatDate(item.updated_at) }}</span>
+                    <span class="meta-item">创建: {{ formatDate(item.created_at) }}</span>
+                </div>
+                <div class="meta-item-row">
+                    <span class="meta-item">作者: {{ item.owner_name }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -159,11 +163,17 @@
 }
 .project-meta{
     display:flex;
-    gap:10px;
+    flex-direction: column;
+    gap:5px;
     font-size:12px;
     color:#6b7f8f;
 }
 .meta-item{opacity:0.95}
+
+.meta-item-row{
+    display:flex;
+    gap:10px;
+}
 
 @media (max-width: 480px){
     .project-card{ max-width: 100%; }

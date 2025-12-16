@@ -9,7 +9,19 @@
 
     import Result from '../Result/Result.vue'
     import SvgIcon from '@jamescoyle/vue-icon'
-    import {mdiMagnifyPlusOutline,mdiMagnifyMinusOutline,mdiCrosshairsGps,mdiEyeOutline,mdiEyeOff,mdiContentSave} from '@mdi/js'
+    import {
+        mdiMagnifyPlusOutline,
+        mdiMagnifyMinusOutline,
+        mdiCrosshairsGps,
+        mdiEyeOutline,
+        mdiEyeOff,
+        mdiContentSave,
+        mdiCommentQuoteOutline,
+        mdiCardTextOutline,
+        mdiTextBoxOutline,
+        mdiFormatQuoteOpen,
+        mdiCommaBoxOutline
+    } from '@mdi/js'
 
     //stores
     const modalStore = useModalStore();
@@ -116,6 +128,14 @@
         })
     }
 
+    function handleTitleAnnotate(){
+        // graphStore.addNode()
+    }
+
+    function handleTextAnnotate(){
+        // graphStore.addNode()
+    }
+
     async function handleForcedSync(){
         await sync(graphStore);
     }
@@ -182,6 +202,20 @@
         </div>
 
         <div class="graph-controls-right">
+            <div class="gc-btn-container">
+                <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleTitleAnnotate();}" aria-label="Title annotate">
+                    <SvgIcon type="mdi" :path="mdiCommaBoxOutline" class="btn-icon" />
+                    <div class="gc-btn-text">注释</div>
+                </button>
+
+                <div class="divider"></div>
+
+                <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleTextAnnotate();}" aria-label="Text annotate">
+                    <SvgIcon type="mdi" :path="mdiTextBoxOutline" class="btn-icon" />
+                    <div class="gc-btn-text">文本注释</div>
+                </button>
+            </div>
+
             <div class="gc-btn-container">
                 <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleForcedSync(); }" aria-label="Sync project">
                     <SvgIcon type="mdi" :path="mdiUploadIcon" class="btn-icon" />

@@ -76,11 +76,11 @@
 
       <!-- 菜单选项 -->
       <div v-if="loginStore.isAuthenticated" class="menu-actions">
-        <button class="action-btn">
+        <!-- <button class="action-btn">
           <span class="icon">⚙️</span> 设置
-        </button>
+        </button> -->
         <button class="action-btn logout" @click="handleLogout">
-          <span class="icon">🚪</span> 登出
+          <span class="icon"><svg-icon type="mdi" :path="mdiLogout" :size="22"></svg-icon></span> 登出
         </button>
         <!-- <button @click="tableStore.createTableModal()">点我测试表格编辑</button>
         <button @click="editorStore.createEditorModal()">点我测试脚本编辑</button> -->
@@ -104,7 +104,7 @@ import PyEditor from '../PyEditor/PyEditor.vue'
 import Logout from '../Logout.vue'
 import { useTableStore } from '@/stores/tableStore'
 import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiAccount } from '@mdi/js'
+import { mdiAccount, mdiLogout } from '@mdi/js'
 
 const loginStore = useLoginStore()
 const modalStore = useModalStore()
@@ -467,6 +467,9 @@ const formatStorageSpace = () => {
 
       .icon {
         font-size: 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
 
       &:hover {

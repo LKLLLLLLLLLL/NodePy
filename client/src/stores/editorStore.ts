@@ -5,8 +5,8 @@ import PyEditorModal from '@/components/PyEditor/PyEditorModal.vue';
 
 export const useEditorStore = defineStore('editor', () => {
 
-    const editWidth = 400;
-    const editHeight = 600;
+    const editWidth = 600;
+    const editHeight = 800;
 
     const default_script: string = ''
 

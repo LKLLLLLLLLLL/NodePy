@@ -38,7 +38,7 @@
         display: flex;
         flex: 1;
         flex-direction: column;
-        padding: 28px;
+        padding: 14px 28px;
         box-sizing: border-box;
     }
     .no-example-container {
@@ -58,6 +58,6 @@
         gap: 20px;
         align-items: start;
         justify-items: center;
-        padding: 20px 6px;
+        padding: 6px;
     }
 </style>
