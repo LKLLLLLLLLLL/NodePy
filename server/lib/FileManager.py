@@ -91,9 +91,12 @@ class FileManager:
         total = result.scalars().all()
         return sum(size for size in total)  # type: ignore
 
-    def _get_col_types(self, content: bytes, format: FILE_FORMATS_TYPE) -> dict[str, ColType]:
+    def _get_col_types(self, content: bytes, format: FILE_FORMATS_TYPE, specifiy_col_types: dict[str, ColType] | None = None) -> dict[str, ColType]:
         import pandas
-        
+
+        if specifiy_col_types is not None:
+            return specifiy_col_types
+
         if format == "csv":
             df = pandas.read_csv(io.StringIO(content.decode('utf-8')))
         elif format == "xlsx":
@@ -169,7 +172,8 @@ class FileManager:
                    format: FILE_FORMATS_TYPE, 
                    node_id: str, 
                    project_id: int, 
-                   user_id: int
+                   user_id: int,
+                   specifiy_col_types: dict[str, ColType] | None = None
     ) -> File:
         """ Write content to a file for a user, return the file path """
         if self.db_client is None:
@@ -185,7 +189,8 @@ class FileManager:
             "xlsx",
             "json",
         ):
-            col_types = self._get_col_types(content, format)
+            col_types = self._get_col_types(content, format, specifiy_col_types)
+            logger.debug(f"@@@ Detected col_types: {col_types}")
         key = uuid4().hex + f".{format}"        
         try:
             # check storage limit
@@ -234,7 +239,7 @@ class FileManager:
             logger.exception(f"Failed to write file: {e}")
             raise IOError(f"Failed to write file: {e}")
         return File(key=key, col_types=col_types, filename=filename, format=format, size=len(content))
-    
+
     async def write_async(
         self,
         filename: str,
@@ -243,6 +248,7 @@ class FileManager:
         node_id: str,
         project_id: int,
         user_id: int,
+        specifiy_col_types: dict[str, ColType] | None = None,
     ) -> File:
         """ Write content to a file for a user, return the file path """
         if self.async_db_client is None:
@@ -258,7 +264,7 @@ class FileManager:
             "xlsx",
             "json",
         ):
-            col_types = self._get_col_types(content, format)
+            col_types = self._get_col_types(content, format, specifiy_col_types)
         key = uuid4().hex + f".{format}"
         stmt = select(FileRecord).where(
             (FileRecord.project_id == project_id) & (FileRecord.node_id == node_id)

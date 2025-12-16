@@ -1,7 +1,8 @@
-from io import StringIO
+import io
 from typing import Dict, Literal, override
 
 import pandas
+from pydantic import PrivateAttr
 
 from server.config import DEFAULT_TIMEZONE
 from server.models.data import Data, File, Table
@@ -81,13 +82,37 @@ class TableFromFileNode(BaseNode):
         file_format = file_data.payload.format
         df: pandas.DataFrame
         if file_format == "csv":
-            df = pandas.read_csv(StringIO(file_content.decode("utf-8")))
-        elif file_format == "json":
-            df = pandas.read_json(StringIO(file_content.decode("utf-8")))
+            df = pandas.read_csv(io.StringIO(file_content.decode("utf-8")))
         elif file_format == "xlsx":
-            df = pandas.read_excel(StringIO(file_content.decode("utf-8")))
+            df = pandas.read_excel(io.BytesIO(file_content))
+        elif file_format == "json":
+            df = pandas.read_json(io.StringIO(file_content.decode("utf-8")))
         else:
             raise ValueError(f"Unsupported file format: {file_format}")
+        # try to convert columns to specified types
+        assert file_data.payload.col_types is not None
+        for col_name, col_type in file_data.payload.col_types.items():
+            if col_name not in df.columns:
+                raise NodeExecutionError(
+                    node_id=self.id,
+                    err_msg=f"Column '{col_name}' not found in the file.",
+                )
+            try:
+                if col_type == ColType.INT:
+                    df[col_name] = pandas.to_numeric(df[col_name], errors='coerce').astype('Int64')
+                elif col_type == ColType.FLOAT:
+                    df[col_name] = pandas.to_numeric(df[col_name], errors='coerce').astype('Float64')
+                elif col_type == ColType.STR:
+                    df[col_name] = df[col_name].astype(str)
+                elif col_type == ColType.BOOL:
+                    df[col_name] = df[col_name].astype(bool)
+                elif col_type == ColType.DATETIME:
+                    df[col_name] = pandas.to_datetime(df[col_name], errors='coerce', utc=True)
+            except Exception as e:
+                raise NodeExecutionError(
+                    node_id=self.id,
+                    err_msg=f"Failed to convert column '{col_name}' to type '{col_type}': {e}",
+                )
         col_types = Table.col_types_from_df(df)
         out_table = Data(payload=Table(df=df, col_types=col_types))
 
@@ -107,6 +132,8 @@ class TableToFileNode(BaseNode):
     """
     filename: str | None = None  # Optional filename for the output file.
     format: Literal["csv", "xlsx", "json"]
+
+    _col_types: Dict[str, ColType] | None = PrivateAttr(default=None)
 
     @override
     def validate_parameters(self) -> None:
@@ -137,18 +164,19 @@ class TableToFileNode(BaseNode):
         assert "table" in input_schemas
         assert input_schemas["table"].tab is not None
         col_types = input_schemas["table"].tab.col_types.copy()
-        if self.format == "csv":
-            # convert datetime columns to str in file schema
-            for col_name, col_type in col_types.items():
-                if col_type == ColType.DATETIME:
-                    col_types[col_name] = ColType.STR
-        elif self.format == "json":
-            # convert datetime columns to int in file schema
-            for col_name, col_type in col_types.items():
-                if col_type == ColType.DATETIME:
-                    col_types[col_name] = ColType.INT
-        elif self.format == "xlsx":
-            pass  # keep original col types
+        # if self.format == "csv":
+        #     # convert datetime columns to str in file schema
+        #     for col_name, col_type in col_types.items():
+        #         if col_type == ColType.DATETIME:
+        #             col_types[col_name] = ColType.STR
+        # elif self.format == "json":
+        #     # convert datetime columns to int in file schema
+        #     for col_name, col_type in col_types.items():
+        #         if col_type == ColType.DATETIME:
+        #             col_types[col_name] = ColType.INT
+        # elif self.format == "xlsx":
+        #     pass  # keep original col types
+        self._col_types = col_types
         return {
             "file": Schema(
                 type=Schema.Type.FILE,
@@ -175,17 +203,19 @@ class TableToFileNode(BaseNode):
             for col_name in df.select_dtypes(include=["datetime64[ns, UTC]", "datetime64[ns]"]).columns: # type: ignore
                 if getattr(df[col_name].dt, "tz", None) is not None:
                     df[col_name] = df[col_name].dt.tz_convert('UTC').dt.tz_localize(None)
-            df.to_excel(buffer, index=False)
+            df.to_excel(buffer, float_format="%.4f",index=False)
         elif self.format == "json":
             df.to_json(buffer, orient="records", index=False)
         else:
             raise AssertionError(f"Unsupported file format: {self.format}")
+        assert self._col_types is not None
         file = file_manager.write_sync(
             self.filename, 
             buffer, self.format,
             user_id=self.context.user_id,
             node_id=self.id,
-            project_id=self.context.project_id
+            project_id=self.context.project_id,
+            specifiy_col_types=self._col_types,
         )
         return {"file": Data(payload=file)}
 
