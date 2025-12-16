@@ -15,7 +15,7 @@
                         输入
                         <hr></hr>
                     </div>
-                    <Handle :id="inputPort.name" type="target" :position="Position.Left" :class="[`${colTypes[idx]}-handle-color`, {'node-errhandle': inputHasErr[idx]!.value.value}]"/>
+                    <Handle :id="inputPort.name" type="target" :position="Position.Left" :class="[`${colTypes[idx]}-handle-color`, {'node-errhandle': inputHasErr[idx]!.value.value}]" :key="inputPort.name"/>
                 </div>
                 <div class="name">
                     <div class="param-description port-name-description" :class="{'node-has-paramerr': colsHasErr.value}">
@@ -24,7 +24,7 @@
                     </div>
                     <NodepyStringInput
                         v-model="inputPort.name"
-                        @update-value="() => onUpdateInputPortName(idx)"
+                        @update-value="(oldName: string) => onUpdateInputPortName(oldName, idx)"
                         class="nodrag"
                         placeholder="端口名称"
                     />
@@ -50,7 +50,7 @@
 <script lang="ts" setup>
     import {ref, computed, watch} from 'vue'
     import type { NodeProps } from '@vue-flow/core'
-    import { Position, Handle } from '@vue-flow/core'
+    import { Position, Handle, useVueFlow } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
     import type { server__models__schema__Schema__Type } from '@/utils/api'
     import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
@@ -64,6 +64,7 @@
     import type { PackNodeData } from '@/types/nodeTypes'
 
 
+    const {removeEdges, getEdges} = useVueFlow('main')
     const props = defineProps<NodeProps<PackNodeData>>()
     const inputPorts = ref(props.data.param.cols.map((name, idx) => {
         return {
@@ -96,6 +97,7 @@
 
     const removeInputPort = (idx: number) => {
         if(inputPorts.value.length > 1) {
+            removeEdges(edges => edges.filter(e => e.target === props.id && e.targetHandle === inputPorts.value[idx]!.name))
             inputPorts.value.splice(idx, 1)
             props.data.param.cols.splice(idx, 1)
             inputHasErr.splice(idx, 1)
@@ -112,7 +114,12 @@
             value: false
         }))
     }
-    const onUpdateInputPortName = (idx: number) => {
+    const onUpdateInputPortName = (oldName: string, idx: number) => {
+        if(oldName === inputPorts.value[idx]!.name) return
+        const curEdge = getEdges.value.find(e => e.target === props.id && e.targetHandle === oldName)
+        if(curEdge) {
+            removeEdges(curEdge.id)
+        }
         props.data.param.cols[idx] = inputPorts.value[idx]!.name
         inputHasErr[idx]!.value.handleId = inputPorts.value[idx]!.name
     }
