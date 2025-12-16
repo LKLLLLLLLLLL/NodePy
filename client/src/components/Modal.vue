@@ -310,7 +310,7 @@
         cursor: move;
         align-items: center;
         padding: 10px 15px;
-        padding-bottom: 0px;
+        padding-bottom: 5px;
     }
     .modal-body, .modal-content{
         // height: calc(100% - 40px - 40px); /* 调整高度计算 */
