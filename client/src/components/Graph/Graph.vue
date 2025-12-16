@@ -413,6 +413,26 @@ const isValidConnection = (connection: any) => {
 }
 
 const handleKeyDown = (e: KeyboardEvent) => {
+  const target = e.target as HTMLElement;
+  
+  // 检查是否在代码编辑器中
+  const isInCodeEditor = 
+    // 检查元素本身或父元素是否有相关类名
+    target.closest('.python-editor-modal') !== null ||
+    target.closest('.pyeditor-modal') !== null ||
+    target.closest('.code-editor') !== null ||
+    // 检查是否是 contenteditable 元素
+    target.isContentEditable ||
+    target.closest('[contenteditable="true"]') !== null;
+  
+  // 如果在代码编辑器中，并且是复制粘贴按键，则跳过处理
+  if (isInCodeEditor && 
+      (e.ctrlKey || e.metaKey) && 
+      (e.key === 'c' || e.key === 'C' || e.key === 'v' || e.key === 'V')) {
+    // 让浏览器处理默认的复制粘贴行为
+    return;
+  }
+  
   if(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return // ignore input and textarea
   if((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
     e.preventDefault()

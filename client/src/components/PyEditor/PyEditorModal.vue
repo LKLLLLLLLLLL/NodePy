@@ -35,6 +35,7 @@
         flex: 1 1 auto;
         flex-direction: column;
         box-sizing: border-box;
+        padding: 10px;
     }
 
     .pyeditor-container{

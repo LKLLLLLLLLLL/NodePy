@@ -256,6 +256,7 @@ const formatStorageSpace = () => {
 </script>
 
 <style scoped lang="scss">
+@use '../../common/global.scss' as *;
 .user-avatar-trigger {
   display: flex;
   align-items: center;
@@ -264,6 +265,7 @@ const formatStorageSpace = () => {
   padding: 4px;
   border-radius: 50%;
   transition: all 0.2s ease;
+  // @include controller-style;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.05);
@@ -288,11 +290,11 @@ const formatStorageSpace = () => {
     color: white;
     // border: 2px solid #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: $stress-color;
     
     &.small {
-      width: 40px;
-      height: 40px;
+      width: 30px;
+      height: 30px;
       font-size: 14px;
     }
 
@@ -308,6 +310,7 @@ const formatStorageSpace = () => {
 .user-info-menu {
   width: 280px;
   padding: 16px;
+  @include controller-style;
 
   .not-logged-in {
     text-align: center;
@@ -322,7 +325,7 @@ const formatStorageSpace = () => {
       color: white;
       // border: 2px solid #fff;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: $stress-color;
       
       &.large {
         width: 56px;
@@ -383,7 +386,7 @@ const formatStorageSpace = () => {
       color: white;
       // border: 2px solid #fff;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: $stress-color;
       
       &.large {
         width: 56px;
@@ -428,12 +431,12 @@ const formatStorageSpace = () => {
       gap: 4px;
 
       .stat-label {
-        font-size: 12px;
+        font-size: 14px;
         color: #999;
       }
 
       .stat-value {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 600;
         color: #333;
         text-align: center;

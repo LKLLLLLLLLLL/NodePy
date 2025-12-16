@@ -1,18 +1,19 @@
 <template>
   <div class="python-editor-modal">
-
     <!-- 编辑器主体 -->
     <div class="editor-wrapper">
       <pre
         ref="editor"
         class="code-editor"
         contenteditable="true"
+        spellcheck="false"
+        @paste="handlePaste"
+        @copy="handleCopy"
+        @cut="handleCut"
         @input="handleInput"
         @keydown="handleKeydown"
-        @paste="handlePaste"
         @scroll="syncScroll"
         @beforeinput="handleBeforeInput"
-        spellcheck="false"
       ></pre>
       <pre
         ref="highlighter"
@@ -20,9 +21,6 @@
         aria-hidden="true"
       ><code class="language-python" ref="codeElement"></code></pre>
     </div>
-
-    <!-- 状态信息 -->
-    <!-- footer removed: line/char count not needed -->
   </div>
 </template>
 
@@ -273,10 +271,12 @@ const shouldDecreaseIndent = (lineContent: string): boolean => {
 
 // 处理Tab键
 const handleTab = (event: KeyboardEvent) => {
-  event.preventDefault();
-
+  // event.preventDefault() 已经在 handleKeydown 中调用了
+  
   const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return;
+  if (!selection || selection.rangeCount === 0) {
+    return; // 如果没有选区，直接返回，让事件继续
+  }
 
   const range = selection.getRangeAt(0);
 
@@ -343,10 +343,12 @@ const removeIndentation = () => {
 
 // 处理回车键（改进版）
 const handleEnter = (event: KeyboardEvent) => {
-  event.preventDefault();
-
+  // event.preventDefault() 已经在 handleKeydown 中调用了
+  
   const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return;
+  if (!selection || selection.rangeCount === 0) {
+    return; // 如果没有选区，直接返回，让事件继续
+  }
 
   const range = selection.getRangeAt(0);
 
@@ -390,40 +392,49 @@ const handleEnter = (event: KeyboardEvent) => {
   syncScroll();
 };
 
-// 处理键盘事件
+// 处理键盘事件 - 完全简化版本
 const handleKeydown = (event: KeyboardEvent) => {
-  if (!editor.value) return;
-
-  // Tab键处理
-  if (event.key === 'Tab') {
-    handleTab(event);
-    return;
-  }
-
-  // 回车键处理 - 自动缩进
-  if (event.key === 'Enter') {
-    handleEnter(event);
-    return;
-  }
-
-  // 保存快捷键: Ctrl/Cmd + S
-  const isSave = (event.key === 's' || event.key === 'S') && (event.ctrlKey || event.metaKey);
-  if (isSave) {
-    event.preventDefault();
-    // 确保最新内容同步
-    handleInput();
-    emit('save');
-    return;
+  // 只处理特定的按键组合，其他全部放行
+  switch (true) {
+    // Tab 键 - 自定义缩进
+    case event.key === 'Tab':
+      event.preventDefault();
+      handleTab(event);
+      break;
+      
+    // Enter 键 - 自定义换行缩进
+    case event.key === 'Enter':
+      event.preventDefault();
+      handleEnter(event);
+      break;
+      
+    // Ctrl+S - 保存
+    case (event.key === 's' || event.key === 'S') && (event.ctrlKey || event.metaKey):
+      event.preventDefault();
+      handleInput();
+      emit('save');
+      break;
+      
+    // Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z, Ctrl+Y - 让浏览器处理
+    default:
+      // 什么都不做，让事件继续传播
+      // 不要调用 event.preventDefault() 也不要 return
+      break;
   }
 };
 
-// 处理粘贴事件，清理格式
-const handlePaste = (event: ClipboardEvent) => {
-  if (!editor.value) {
-    event.preventDefault();
-    return;
-  }
+// 处理复制事件
+const handleCopy = (event: ClipboardEvent) => {
+  // 不要阻止默认行为，让浏览器执行复制
+};
 
+// 处理剪切事件  
+const handleCut = (event: ClipboardEvent) => {
+  // 不要阻止默认行为，让浏览器执行剪切
+};
+
+// 处理粘贴事件（保持不变）
+const handlePaste = (event: ClipboardEvent) => {
   event.preventDefault();
 
   const clipboardData = event.clipboardData;
@@ -473,15 +484,52 @@ watch(code, () => {
 onMounted(() => {
   if (editor.value) {
     editor.value.textContent = code.value;
-    // editor is always editable
     editor.value.contentEditable = 'true';
 
-    // 设置焦点
+    // 调用修复函数
+    fixBrowserCompatibility();
+    
+    // 设置焦点并确保编辑器可编辑
     editor.value.focus();
-
+    editor.value.setAttribute('contenteditable', 'true');
+    
     highlightCode();
+    
+    // 添加调试监听器
+    const debugEvents = ['copy', 'paste', 'cut', 'keydown', 'keyup', 'keypress'];
+    debugEvents.forEach(eventType => {
+      editor.value!.addEventListener(eventType, (e) => {
+      }, { capture: true });
+    });
+    
+    // 确保编辑器元素可以被正确选中
+    setTimeout(() => {
+      const selection = window.getSelection();
+      if (selection) {
+        selection.selectAllChildren(editor.value!);
+        selection.collapseToEnd();
+      }
+    }, 100);
   }
 });
+
+// 修复浏览器兼容性问题
+const fixBrowserCompatibility = () => {
+  if (!editor.value) return;
+  
+  // 解决某些浏览器中 contenteditable 元素无法触发 copy/paste 事件的问题
+  const element = editor.value;
+  
+  // 确保元素有 tabindex 以便获得焦点
+  element.setAttribute('tabindex', '-1');
+  
+  // 在某些浏览器中需要设置特定的样式
+  element.style.webkitUserSelect = 'text';
+  element.style.userSelect = 'text';
+  
+  // 确保元素可以接收键盘输入
+  element.setAttribute('inputmode', 'text');
+};
 
 // 暴露code变量和getCode方法供父组件访问
 defineExpose({
@@ -637,6 +685,21 @@ input:checked + .slider:before {
   outline: none;
   resize: none;
   line-height: 1.5;
+  
+  /* 确保可以选择文本 */
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  
+  /* 确保光标可见 */
+  cursor: text;
+  
+  /* 修复 contenteditable 在移动设备上的问题 */
+  -webkit-user-modify: read-write-plaintext-only;
+  
+  /* 确保元素有最小高度，避免在某些浏览器中无法点击 */
+  min-height: 100px;
 }
 
 .code-highlighter {
@@ -644,10 +707,12 @@ input:checked + .slider:before {
   grid-column: 1 / 2;
   position: relative;
   z-index: 1;
-  pointer-events: none;
+  pointer-events: none !important;
   background-color: transparent;
   color: #24292e;
   line-height: 1.0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .editor-footer {

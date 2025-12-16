@@ -1,3 +1,4 @@
+<!-- FloatingMenu.vue -->
 <template>
   <div class="floating-menu-container">
     <!-- 触发元素插槽 -->
@@ -12,11 +13,11 @@
 
     <!-- 浮动菜单 -->
     <Teleport to="body">
-      <Transition name="fade">
+      <Transition name="menu-fade">
         <div
           v-if="isVisible"
           ref="menuRef"
-          class="floating-menu"
+          class="floating-menu controller-style"
           :style="menuPosition"
           @mouseenter="show"
           @mouseleave="hide"
@@ -67,9 +68,9 @@ const menuPosition = computed<MenuPosition>(() => {
   }
 
   const trigger = triggerRef.value.getBoundingClientRect()
-  const menuWidth = menuRef.value?.offsetWidth || 280
+  const menuWidth = menuRef.value?.offsetWidth || 320
   const menuHeight = menuRef.value?.offsetHeight || 300
-  const padding = 20// 距离屏幕边缘的最小间距
+  const padding = 16 // 距离屏幕边缘的最小间距
 
   let top = '0'
   let left = '0'
@@ -136,16 +137,18 @@ const show = () => {
 const hide = () => {
   hideTimer = setTimeout(() => {
     isVisible.value = false
-  }, 100)
+  }, 150) // 稍微增加延迟，避免误触
 }
 
 // 生命周期
 onMounted(() => {
   window.addEventListener('scroll', hide)
+  window.addEventListener('resize', hide)
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', hide)
+  window.removeEventListener('resize', hide)
   if (hideTimer) {
     clearTimeout(hideTimer)
   }
@@ -153,40 +156,80 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+@use '../../common/global.scss' as *;
+
 .floating-menu-container {
   display: inline-block;
   position: relative;
+  // @include controller-style;
 }
 
 .floating-menu-trigger {
   cursor: pointer;
+  display: inline-block;
 }
 
 .floating-menu {
   position: fixed;
   z-index: 9999;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  padding: 12px;
+  border-radius: 12px;
+  padding: 0;
   min-width: 200px;
   max-width: 400px;
   pointer-events: auto;
+  transform-origin: top center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  @include controller-style;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba($stress-color, 0.02), rgba($stress-color, 0.05));
+    pointer-events: none;
+  }
 }
 
 .floating-menu-content {
+  position: relative;
+  z-index: 1;
   font-size: 14px;
   color: #333;
 }
 
 // 过渡动画
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
+.menu-fade-enter-active {
+  animation: menu-fade-in 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.menu-fade-leave-active {
+  animation: menu-fade-out 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes menu-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes menu-fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-5px);
+  }
 }
 </style>
