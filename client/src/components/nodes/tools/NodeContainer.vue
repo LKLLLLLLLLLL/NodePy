@@ -1,14 +1,14 @@
 <template>
-    <div class="nodeContainerLayout"></div>
+    <div class="NodeContainerLayout" ref="NodeContainerRef"></div>
 </template>
 
 <script lang="ts" setup>
 </script>
 
 <style lang="scss" scoped>
-    .nodeContainerLayout {
-        height: 500px;
-        width: 1000px;
+    .NodeContainerLayout {
+        min-height: 500px;
+        min-width: 1000px;
         background: rgba(148, 193, 252, 0.2);
     }
 </style>

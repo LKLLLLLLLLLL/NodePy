@@ -1176,8 +1176,9 @@ export const useGraphStore = defineStore('graph', () => {
         addNodes(addedCustomScriptNode)
         break
       case 'ForEachRowNode':
+        const ForEachRowNodeId = nextId('NodeContainer')
         const addedForEachRowNode: Nodetypes.BaseNode = {
-          id,
+          id: ForEachRowNodeId,
           position,
           type: 'NodeContainer',
           data: {
@@ -1192,7 +1193,7 @@ export const useGraphStore = defineStore('graph', () => {
             y: containerHeight / 2
           },
           type: 'ForEachRowBeginNode',
-          parentNode: id,
+          parentNode: ForEachRowNodeId,
           data: {
             param: {
               pair_id
@@ -1206,7 +1207,7 @@ export const useGraphStore = defineStore('graph', () => {
             y: containerHeight / 2
           },
           type: 'ForEachRowEndNode',
-          parentNode: id,
+          parentNode: ForEachRowNodeId,
           data: {
             param: {
               pair_id
@@ -1214,10 +1215,18 @@ export const useGraphStore = defineStore('graph', () => {
           }
         }
         addNodes([addedForEachRowNode, addedForEachRowBeginNode, addedForEachRowEndNode])
+        addEdges({
+          source: addedForEachRowBeginNode.id,
+          target: addedForEachRowEndNode.id,
+          sourceHandle: 'row',
+          targetHandle: 'row',
+          type: 'NodePyEdge'
+        })
         break
       case 'ForRollingWindowNode':
+        const ForRollingWindowNodeId = nextId('NodeContainer')
         const addedForRollingWindowNode: Nodetypes.BaseNode = {
-          id,
+          id: ForRollingWindowNodeId,
           position,
           type: 'NodeContainer',
           data: {
@@ -1232,7 +1241,7 @@ export const useGraphStore = defineStore('graph', () => {
             y: containerHeight / 2
           },
           type: 'ForRollingWindowBeginNode',
-          parentNode: id,
+          parentNode: ForRollingWindowNodeId,
           data: {
             param: {
               pair_id,
@@ -1247,7 +1256,7 @@ export const useGraphStore = defineStore('graph', () => {
             y: containerHeight / 2
           },
           type: 'ForRollingWindowEndNode',
-          parentNode: id,
+          parentNode: ForRollingWindowNodeId,
           data: {
             param: {
               pair_id
@@ -1255,6 +1264,13 @@ export const useGraphStore = defineStore('graph', () => {
           }
         }
         addNodes([addedForRollingWindowNode, addedForRollingWindowBeginNode, addedForRollingWindowEndNode])
+        addEdges({
+          source: addedForRollingWindowBeginNode.id,
+          target: addedForRollingWindowEndNode.id,
+          sourceHandle: 'window',
+          targetHandle: 'window',
+          type: 'NodePyEdge'
+        })
         break
       case 'UnpackNode':
         const addedUnpackNode: Nodetypes.UnpackNode ={
