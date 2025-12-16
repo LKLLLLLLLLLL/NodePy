@@ -1,13 +1,19 @@
 <script lang="ts" setup>
-    import { ref, watch, onUnmounted, onMounted, nextTick } from 'vue'
+    import { ref, watch, computed, onUnmounted, onMounted, nextTick } from 'vue'
     import { useVueFlow } from '@vue-flow/core';
     import { useModalStore } from '@/stores/modalStore';
     import { useGraphStore } from '@/stores/graphStore';
     import { useResultStore } from '@/stores/resultStore';
+    import { useLoginStore } from '@/stores/loginStore';
+    import { useProjectStore } from '@/stores/projectStore';
+    import { useRoute } from 'vue-router';
+    import { useRouter } from 'vue-router';
 
     import { sync } from '@/utils/network';
 
     import Result from '../Result/Result.vue'
+    import notify from '../Notification/notify';
+
     import SvgIcon from '@jamescoyle/vue-icon'
     import {
         mdiMagnifyPlusOutline,
@@ -19,13 +25,18 @@
         mdiMusicAccidentalSharp,
         mdiTextBoxOutline,
         mdiCommaBoxOutline,
-        mdiFormatQuoteOpen
+        mdiFormatQuoteOpen,
+        mdiOpenInNew
     } from '@mdi/js'
 
     //stores
-    const modalStore = useModalStore();
-    const graphStore = useGraphStore();
-    const resultStore = useResultStore();
+    const graphStore = useGraphStore()
+    const modalStore = useModalStore()
+    const loginStore = useLoginStore()
+    const resultStore = useResultStore()
+    const projectStore = useProjectStore()
+    const route = useRoute()
+    const router = useRouter()
 
     // 定义各个按钮要使用的 mdi 路径
     const mdiZoomIn: string = mdiMagnifyPlusOutline;
@@ -128,11 +139,26 @@
     }
 
     function handleTitleAnnotate(){
-        // graphStore.addNode()
+        graphStore.addNode('TitleAnnotationNode',{x: 0, y: 0})
     }
 
     function handleTextAnnotate(){
-        // graphStore.addNode()
+        graphStore.addNode('TextAnnotationNode',{x: 0, y: 0})
+    }
+
+    // 判断项目是否为只读模式
+    const isReadOnly = computed(() => {
+        return graphStore.project.editable === false
+    })
+
+    async function handleCopy(){
+        const projectId = await projectStore.copyProject(Number(route.params.projectId))
+        router.push({ name: 'editor-project', params: { projectId: projectId } });
+        notify({
+            message: '跳转成功',
+            type: 'success'
+        })
+        graphStore.project.editable = true
     }
 
     async function handleForcedSync(){
@@ -184,49 +210,64 @@
 </script>
 <template>
     <div class="graph-controls-container">
-        <div class="graph-controls-left">
-            <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleZoomIn();}" aria-label="Zoom in">
-                <SvgIcon type="mdi" :path="mdiZoomIn" class="btn-icon zoom" />
-            </button>
+        <div class="graph-controls-left-container">
+            <div class="graph-controls-left left_1">
+                <div class="gc-btn-container">
+                    <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleZoomIn();}" aria-label="Zoom in">
+                        <SvgIcon type="mdi" :path="mdiZoomIn" class="btn-icon zoom" />
+                    </button>
 
-            <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleZoomOut();}" aria-label="Zoom out">
-                <SvgIcon type="mdi" :path="mdiZoomOut" class="btn-icon zoom" />
-            </button>
+                    <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleZoomOut();}" aria-label="Zoom out">
+                        <SvgIcon type="mdi" :path="mdiZoomOut" class="btn-icon zoom" />
+                    </button>
 
-            <div class="divider"></div>
+                    <div class="divider"></div>
 
-            <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleFitView();}" aria-label="Fit view">
-                <SvgIcon type="mdi" :path="mdiFitView" class="btn-icon" />
-            </button>
+                    <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleFitView();}" aria-label="Fit view">
+                        <SvgIcon type="mdi" :path="mdiFitView" class="btn-icon" />
+                    </button>
+                </div>
+            </div>
+            <div class="graph-controls-left left_2">
+                <div class="gc-btn-container">
+                    <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleTitleAnnotate();}" aria-label="Title annotate">
+                        <SvgIcon type="mdi" :path="mdiFormatQuoteOpen" class="btn-icon quote" />
+                        <div class="gc-btn-text">注释</div>
+                    </button>
+
+                    <div class="divider"></div>
+
+                    <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleTextAnnotate();}" aria-label="Text annotate">
+                        <SvgIcon type="mdi" :path="mdiTextBoxOutline" class="btn-icon" />
+                        <div class="gc-btn-text">文本注释</div>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div class="graph-controls-right">
-            <div class="gc-btn-container">
-                <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleTitleAnnotate();}" aria-label="Title annotate">
-                    <SvgIcon type="mdi" :path="mdiFormatQuoteOpen" class="btn-icon quote" />
-                    <div class="gc-btn-text">注释</div>
-                </button>
-
-                <div class="divider"></div>
-
-                <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleTextAnnotate();}" aria-label="Text annotate">
-                    <SvgIcon type="mdi" :path="mdiTextBoxOutline" class="btn-icon" />
-                    <div class="gc-btn-text">文本注释</div>
-                </button>
+        <div class="graph-controls-right-container">
+            <div class="graph-controls-right right_1">
+                <div class="gc-btn-container">
+                    <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleForcedSync(); }" aria-label="Sync project">
+                        <SvgIcon type="mdi" :path="mdiUploadIcon" class="btn-icon" />
+                        <div class="gc-btn-text">同步</div>
+                    </button>
+                </div>
+                <!-- <div class="divider"></div> -->
+                <div class="gc-btn-container">
+                    <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleShowResult(); }" aria-label="Toggle result">
+                        <SvgIcon type="mdi" :path="showResult ? mdiHide : mdiView" class="btn-icon" />
+                        <div class="gc-btn-text">{{ showResult ? '隐藏结果' : '查看结果' }}</div>
+                    </button>
+                </div>
             </div>
-
-            <div class="gc-btn-container">
-                <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleForcedSync(); }" aria-label="Sync project">
-                    <SvgIcon type="mdi" :path="mdiUploadIcon" class="btn-icon" />
-                    <div class="gc-btn-text">同步</div>
-                </button>
-            </div>
-            <!-- <div class="divider"></div> -->
-            <div class="gc-btn-container">
-                <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleShowResult(); }" aria-label="Toggle result">
-                    <SvgIcon type="mdi" :path="showResult ? mdiHide : mdiView" class="btn-icon" />
-                    <div class="gc-btn-text">{{ showResult ? '隐藏结果' : '查看结果' }}</div>
-                </button>
+            <div class="graph-controls-right right_2" v-if="isReadOnly">
+                <div class="gc-btn-container">
+                    <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleCopy(); }" aria-label="Copy project">
+                        <SvgIcon type="mdi" :path="mdiOpenInNew" class="btn-icon" />
+                        <div class="gc-btn-text">添加到我的项目</div>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -244,8 +285,13 @@
         background-color: transparent;
     }
 
+    .graph-controls-left-container{
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+    }
+
     .graph-controls-left{
-        @include controller-style;
         display: flex;
         padding: 3px 5px;
         flex-direction: row;
@@ -253,12 +299,29 @@
         margin-left: 0px;
     }
 
+    .graph-controls-right-container{
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        margin-left: auto;
+        margin-right: 8px;
+    }
+
     .graph-controls-right{
         display: flex;
         flex-direction: row;
         gap: 10px;
-        margin-left: auto;
-        margin-right: 8px;
+    }
+    
+    .graph-controls-right.right_2 .gc-btn-container{
+        background-color: $stress-color;
+        .gc-btn-text, .btn-icon{
+            color: #fff;
+        }
+        .btn-icon{
+            width: 21px;
+            height: 21px;
+        }
     }
 
     .divider{

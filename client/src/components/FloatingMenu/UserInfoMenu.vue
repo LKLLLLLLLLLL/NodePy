@@ -293,8 +293,8 @@ const formatStorageSpace = () => {
     background: $stress-color;
     
     &.small {
-      width: 30px;
-      height: 30px;
+      width: 34px;
+      height: 34px;
       font-size: 14px;
     }
 

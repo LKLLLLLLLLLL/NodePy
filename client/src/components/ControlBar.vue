@@ -47,11 +47,6 @@ const showProjectName = computed(()=>{
   else return false
 })
 
-// 判断项目是否为只读模式
-const isReadOnly = computed(() => {
-  return graphStore.project.editable === false
-})
-
 // 导航项
 const navItems = [
   { name: 'Home', path: '/home', label: '首页', iconOutline: home_path_outline, iconFilled: home_path_filled },
@@ -64,16 +59,11 @@ const navItems = [
 const isActive = (path: string) => {
   return route.path === path
 }
-// 添加到我的项目
-const handleAddToMyProject = async () => {
-  const projectId = await projectStore.copyProject(Number(route.params.projectId))
-  router.push({ name: 'editor-project', params: { projectId: projectId } });
-  notify({
-    message: '跳转成功',
-    type: 'success'
-  })
-  graphStore.project.editable = true
-}
+
+// 判断项目是否为只读模式
+const isReadOnly = computed(() => {
+    return graphStore.project.editable === false
+})
 
 </script>
 
@@ -112,11 +102,6 @@ const handleAddToMyProject = async () => {
           <!-- 只读提示 -->
           <div v-if="isReadOnly" class="readonly-indicator">
             只读
-          </div>
-          <div class="add-to-my-project">
-            <el-button v-if="isReadOnly" @click="handleAddToMyProject">
-              添加到我的项目
-            </el-button>
           </div>
         </div>
 
@@ -228,15 +213,17 @@ const handleAddToMyProject = async () => {
 
     .readonly-indicator {
       display: flex;
-      background-color: #108EFE;
-      align-items: center;
-      justify-content: center;
+      // background-color: #108EFE;
+      color: #9d9b9b;
+      align-items: flex-end;
+      justify-content: flex-start;
       height: 30px;
       width: 40px;
-      margin-left: 10px;
+      margin-left: 7px;
       border-radius: 4px;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: bold;
+      // font-style: italic;
     }
 
     .add-to-my-project{
