@@ -24,7 +24,7 @@ defineProps<{
   flex: 1;
   overflow: auto;
   background: white;
-  border: 1px solid #e4e7ed;
+  /* border: 1px solid #e4e7ed; */
   border-radius: 10px;
   /* padding: 12px; */
   display: flex;

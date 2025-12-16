@@ -294,7 +294,7 @@ export const useResultStore = defineStore('result',()=>{
         // 每次创建时都重新计算位置
         modalStore.createModal({
             id: 'result',
-            title: '结果查看',
+            title: '输出结果',
             isActive: false,
             isDraggable: false,
             isResizable: true,

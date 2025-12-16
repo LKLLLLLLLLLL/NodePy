@@ -145,10 +145,10 @@
 <template>
     <div class="result-total-container">
         <!-- 标签控制栏 -->
-        <div v-if="isNoResult" class="result-control no-result-control">
+        <!-- <div v-if="isNoResult" class="result-control no-result-control">
             无结果
-        </div>
-        <div v-else-if="tabKeys.length > 0" class="result-control">
+        </div> -->
+        <div v-if="!isNoResult&&tabKeys.length > 0" class="result-control">
             <div class="tab-list" role="tablist">
                 <button
                     v-for="key in tabKeys"
@@ -240,11 +240,11 @@
     }
 
     .result-control {
-        height: 54px;
+        height: 50px;
         display: flex;
         align-items: center;
         padding: 0; /* 取消默认内边距，让标签紧贴左侧 */
-        margin-bottom: 4px; /* 增加一点下边距，与内容区隔开 */
+        padding-left: 2px;
     }
 
     .result-control .tab-list {
@@ -258,7 +258,7 @@
         height: 100%; /* 固定高度 */
         box-sizing: border-box;
         padding: 8px 0px 0px 0px;
-        scrollbar-gutter: stable;
+        // scrollbar-gutter: stable;
     }
 
     .result-control .tab-item {

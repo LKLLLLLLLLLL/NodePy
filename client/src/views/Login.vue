@@ -323,7 +323,7 @@
 
                     <el-form-item class="register-username" label="用户名">
                         <el-input
-                            placeholder="请输入用户名"
+                            placeholder="请输入用户名（1-20位）"
                             v-model="username"
                         >
                         </el-input>
@@ -331,7 +331,7 @@
 
                     <el-form-item class="register-password" label="密码">
                         <el-input
-                            placeholder="请输入密码（至少8位，包含数字、字母和特殊字符）"
+                            placeholder="请输入密码（6-20位）"
                             v-model="password"
                             type="password"
                             show-password

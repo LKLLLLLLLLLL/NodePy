@@ -438,15 +438,15 @@ const handleDownloadFile = async () => {
 </script>
 
 <template>
-    <div class="file-toolbar">
-        <div class="file-title">{{ fileName }}</div>
-        <div class="file-actions">
-            <button v-if="isValidFile" class="button download" @click="handleDownloadFile">
-                <svg-icon type="mdi" :path="mdiDownload" :size="18"></svg-icon>
-            </button>
-        </div>
-    </div>
     <div class="file-view-container">
+        <div class="file-toolbar">
+            <div class="file-title">{{ fileName }}</div>
+            <div class="file-actions">
+                <button v-if="isValidFile" class="button download" @click="handleDownloadFile">
+                    <svg-icon type="mdi" :path="mdiDownload" :size="18"></svg-icon>
+                </button>
+            </div>
+        </div>
         <!-- 加载中 -->
         <div v-if="loading" class="file-loading">
             <Loading></Loading>
@@ -523,6 +523,9 @@ const handleDownloadFile = async () => {
     align-items:center;
     justify-content:space-between;
     padding: 8px 12px;
+    padding-top: 0px;
+    padding-left: 4px;
+    padding-right: 4px;
     gap: 8px;
 }
 
@@ -530,8 +533,10 @@ const handleDownloadFile = async () => {
     font-weight:600;
 }
 
-.file-actions .button.download{
-    padding:6px;
+.button.download{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .file-loading {

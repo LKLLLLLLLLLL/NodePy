@@ -4,7 +4,7 @@
     import { ref, computed } from 'vue';
     //@ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon';
-    import { mdiCloseThick, mdiClose, mdiEye } from '@mdi/js';
+    import { mdiCloseThick, mdiClose, mdiEye, mdiExport } from '@mdi/js';
 
     const props = defineProps<{
         modal: ModalInstance
@@ -29,7 +29,7 @@
             case 'edit-modal':
                 return mdiClose;
             case 'result':
-                return mdiEye;
+                return mdiExport;
             case 'table-modal':
                 return mdiCloseThick;
             case 'upload-file':
@@ -268,7 +268,7 @@
         <div class="resize-handle resize-handle-top-left" @mousedown="startResize($event, 'top-left')"></div>
         <div class = "modal-head" @mousedown="startDrag" >
             <div class = "modal-title-container">
-                <div class="modal-icon-container" v-if="modal.id=='result'"><svg-icon type="mdi" :path="iconPath" :size="22"></svg-icon></div>
+                <div class="modal-icon-container" v-if="modal.id=='result'"><svg-icon type="mdi" :path="iconPath" :size="18"></svg-icon></div>
                 <div class="modal-title">{{ modal.title }}</div>
             </div>
             <div class = "modal-control">
@@ -353,7 +353,7 @@
     }
 
     .modal-title{
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 600;
         color: #333;
     }
