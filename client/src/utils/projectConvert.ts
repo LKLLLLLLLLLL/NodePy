@@ -4,7 +4,7 @@ import type { vueFlowProject } from '@/types/vueFlowProject'
 import { useVueFlow } from '@vue-flow/core'
 
 
-const {setNodes, setEdges} = useVueFlow('main')
+const {setNodes, setEdges, getNodes} = useVueFlow('main')
 
 
 export const getProject = (vp: vueFlowProject): Project => {
@@ -21,12 +21,14 @@ export const getProject = (vp: vueFlowProject): Project => {
             hint: n.data.hint
         }
     })
-    const ui_state = vp.workflow.nodes.map(n => {
+    const ui_state = getNodes.value.map(n => {
         return {
             id: n.id,
             x: n.position.x,
             y: n.position.y,
-            parentNode: n.parentNode
+            parentNode: n.parentNode,
+            width: n.dimensions.width,
+            height: n.dimensions.height
         }
     })
     const edges = vp.workflow.edges.map(e => {
@@ -75,7 +77,9 @@ export const initVueFlowProject = (p: Project, vp: vueFlowProject) => {
                 hint: p.workflow.nodes[i]?.hint,
                 is_virtual_node: p.workflow.nodes[i]?.is_virtual_node
             },
-            parentNode: p.ui_state.nodes[i]?.parentNode
+            parentNode: p.ui_state.nodes[i]?.parentNode,
+            width: p.ui_state.nodes[i]?.width,
+            height: p.ui_state.nodes[i]?.height
         })
     }
     const edges = p.workflow.edges.map(e => {

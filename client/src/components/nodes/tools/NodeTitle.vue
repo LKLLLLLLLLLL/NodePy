@@ -32,6 +32,7 @@
             | 'visualize'
             | 'datetimeProcess'
             | 'machineLearning'
+            | 'annotation'
     }>()
     const file_outline_path = mdiFileOutline
     const import_path = mdiImport

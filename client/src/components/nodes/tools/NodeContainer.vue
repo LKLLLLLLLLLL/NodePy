@@ -16,5 +16,6 @@
 <style lang="scss">
     .vue-flow__node-NodeContainer {
         pointer-events: none !important;
+        z-index: -1 !important;
     }
 </style>

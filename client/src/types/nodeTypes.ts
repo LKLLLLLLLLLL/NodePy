@@ -25,6 +25,7 @@ export const nodeCategoryColor = {
     visualize: '#6366f1',
     datetime: dataTypeColor.Datetime,
     machine: dataTypeColor.Model,
+    annotation: 'rgba(147, 87, 70, 0.4)',
     default: 'gray'
 }
 
@@ -1102,4 +1103,26 @@ export type StandardScalerNodeData = BaseData & {
 }
 export interface StandardScalerNode extends BaseNode<StandardScalerNodeData> {
     type: 'StandardScalerNode'
+}
+
+/* Annotation Nodes */
+export interface TitleAnnotationNodeParam {
+    title: string
+}
+export type TitleAnnotationNodeData = BaseData & {
+    param: TitleAnnotationNodeParam
+}
+export interface TitleAnnotationNode extends BaseNode<TitleAnnotationNodeData> {
+    type: 'TitleAnnotationNode'
+}
+
+
+export interface TextAnnotationNodeParam {
+    text: string
+}
+export type TextAnnotationNodeData = BaseData & {
+    param: TextAnnotationNodeParam
+}
+export interface TextAnnotationNode extends BaseNode<TextAnnotationNodeData> {
+    type: 'TextAnnotationNode'
 }

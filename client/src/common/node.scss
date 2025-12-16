@@ -29,6 +29,8 @@ $analysis-node-color: #ef4444; // 红色 - 分析
 $visualize-node-color: #6366f1; // 靛蓝色 - 可视化
 $datetime-node-color: $datetime-color; // 青色 - 日期时间处理
 $machine-node-color: $model-color;
+$annotation-node-color: #935746; // 棕色 - 注释
+$annotation-node-body-color: rgba(147, 87, 70, 0.4); // 棕色 - 注释节点身体
 
 .nodes-style {
   border-radius: 9px;
@@ -149,6 +151,11 @@ $machine-node-color: $model-color;
 .node-title-machineLearning {
   @include node-title-style;
   background: $machine-node-color;
+}
+
+.node-title-annotation {
+  @include node-title-style;
+  background: $annotation-node-color;
 }
 
 .port {

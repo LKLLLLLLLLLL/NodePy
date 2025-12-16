@@ -1326,6 +1326,20 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedSetCellNode)
         break
+      case 'TitleAnnotationNode':
+        const addedTitleAnnotationNode: Nodetypes.TitleAnnotationNode = {
+          id,
+          position,
+          type: 'TitleAnnotationNode',
+          data: {
+            param: {
+              title: ''
+            },
+            is_virtual_node: true
+          }
+        }
+        addNodes(addedTitleAnnotationNode)
+        break
     
       default:
         console.log(type)
@@ -1346,7 +1360,7 @@ export const useGraphStore = defineStore('graph', () => {
   }
 
   const copySelectedNodes = () => {
-    const selectedNodes = getSelectedNodes.value.filter(n => n.type !== 'NodeContainer' && n.type !== 'ForEachRowBeginNode' && n.type !== 'ForEachRowEndNode' && n.type !== 'ForRollingWindowBeginNode' && n.type !== 'ForRollingWindowEndNode')
+    const selectedNodes = getSelectedNodes.value.filter(n => n.type !== 'NodeContainer' && n.type !== 'ForEachRowBeginNode' && n.type !== 'ForEachRowEndNode' && n.type !== 'ForRollingWindowBeginNode' && n.type !== 'ForRollingWindowEndNode' && n.type !== 'TitleAnnotationNode' && n.type !== 'TextAnnotationNode')
     copiedNodes.value = []
     copiedEdges.value = []
     idMap.value = {}  // clear previous data
