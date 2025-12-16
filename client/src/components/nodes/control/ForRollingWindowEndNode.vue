@@ -1,19 +1,19 @@
 <template>
-    <div class="ForEachRowBeginNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='control'>表格逐行处理开始节点</NodeTitle>
+    <div class="ForRollingWindowEndNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
+        <NodeTitle node-category='control'>滑动窗口结束节点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
-            <div class="input-table port">
+            <div class="input-window port">
                 <div class="input-port-description">
-                    表格输入
+                    当前窗口
                 </div>
-                <Handle id="table" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': tableHasErr.value}]"/>
+                <Handle id="window" type="target" :position="Position.Left" :class="[`${window_type}-handle-color`, {'node-errhandle': windowHasErr.value}]"/>
             </div>
-            <div class="output-row port">
+            <div class="output-table port">
                 <div class="output-port-description">
-                    当前行
+                    表格输出
                 </div>
-                <Handle id="row" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': rowHasErr}]"/>
+                <Handle id="table" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': tableHasErr}]"/>
             </div>
         </div>
         <ErrorMsg :err-msg="errMsg"/>
@@ -26,20 +26,20 @@
     import { Position, Handle } from '@vue-flow/core'
     import { getInputType } from '../getInputType'
     import type { server__models__schema__Schema__Type } from '@/utils/api'
-    import { handleValidationError, handleExecError, handleOutputError, handleParamError } from '../handleError'
+    import { handleValidationError, handleExecError, handleParamError, handleOutputError } from '../handleError'
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
-    import type { BaseData } from '@/types/nodeTypes'
+    import type { ForRollingWindowEndNodeData } from '@/types/nodeTypes'
 
 
-    const props = defineProps<NodeProps<BaseData>>()
-    const table_type = computed(() => getInputType(props.id, 'table'))
-    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['row']?.type || 'default')
-    const rowHasErr = computed(() => handleOutputError(props.id, 'row'))
+    const props = defineProps<NodeProps<ForRollingWindowEndNodeData>>()
+    const window_type = computed(() => getInputType(props.id, 'window'))
+    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['table']?.type || 'default')
+    const tableHasErr = computed(() => handleOutputError(props.id, 'table'))
     const errMsg = ref<string[]>([])
-    const tableHasErr = ref({
-        handleId: 'table',
+    const windowHasErr = ref({
+        handleId: 'window',
         value: false
     })
 
@@ -48,7 +48,7 @@
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
         handleParamError(props.data.error, errMsg)
-        handleValidationError(props.id, props.data.error, errMsg, tableHasErr)
+        handleValidationError(props.id, props.data.error, errMsg, windowHasErr)
     }, {immediate: true})
 
 </script>
@@ -56,12 +56,12 @@
 <style lang="scss" scoped>
     @use '../../../common/global.scss' as *;
     @use '../../../common/node.scss' as *;
-    .ForEachRowBeginNodeLayout {
+    .ForRollingWindowEndNodeLayout {
         height: 100%;
         .data {
             padding-top: $node-padding-top;
             padding-bottom: $node-padding-bottom;
-            .input-table {
+            .input-window {
                 margin-bottom: $node-margin;
             }
         }

@@ -51,6 +51,11 @@ export const useGraphStore = defineStore('graph', () => {
       return
     }
     const id = nextId(type)
+    const containerWidth = 1000
+    const containerHeight = 500
+    const nodeWidth = 210
+    const padding = 30
+    const pair_id = Date.now() + Math.floor(Math.random() * 10)
     switch(type){
       case 'ConstNode':
         const addedConstNode: Nodetypes.ConstNode = {
@@ -1171,11 +1176,6 @@ export const useGraphStore = defineStore('graph', () => {
         addNodes(addedCustomScriptNode)
         break
       case 'ForEachRowNode':
-        const containerWidth = 1000
-        const containerHeight = 500
-        const nodeWidth = 210
-        const padding = 30
-        const pair_id = Date.now() + Math.floor(Math.random() * 10)
         const addedForEachRowNode: Nodetypes.BaseNode = {
           id,
           position,
@@ -1214,7 +1214,48 @@ export const useGraphStore = defineStore('graph', () => {
           }
         }
         addNodes([addedForEachRowNode, addedForEachRowBeginNode, addedForEachRowEndNode])
-        break;
+        break
+      case 'ForRollingWindowNode':
+        const addedForRollingWindowNode: Nodetypes.BaseNode = {
+          id,
+          position,
+          type: 'NodeContainer',
+          data: {
+            param: {},
+            is_virtual_node: true
+          }
+        }
+        const addedForRollingWindowBeginNode: Nodetypes.ForRollingWindowBeginNode = {
+          id: nextId('ForRollingWindowBeginNode'),
+          position: {
+            x: padding,
+            y: containerHeight / 2
+          },
+          type: 'ForRollingWindowBeginNode',
+          parentNode: id,
+          data: {
+            param: {
+              pair_id,
+              window_size: 1
+            }
+          }
+        }
+        const addedForRollingWindowEndNode: Nodetypes.ForRollingWindowEndNode = {
+          id: nextId('ForRollingWindowEndNode'),
+          position: {
+            x: containerWidth - nodeWidth - padding,
+            y: containerHeight / 2
+          },
+          type: 'ForRollingWindowEndNode',
+          parentNode: id,
+          data: {
+            param: {
+              pair_id
+            }
+          }
+        }
+        addNodes([addedForRollingWindowNode, addedForRollingWindowBeginNode, addedForRollingWindowEndNode])
+        break
       case 'UnpackNode':
         const addedUnpackNode: Nodetypes.UnpackNode ={
           id,
@@ -1276,7 +1317,7 @@ export const useGraphStore = defineStore('graph', () => {
   }
 
   const copySelectedNodes = () => {
-    const selectedNodes = getSelectedNodes.value
+    const selectedNodes = getSelectedNodes.value.filter(n => n.type !== 'NodeContainer' && n.type !== 'ForEachRowBeginNode' && n.type !== 'ForEachRowEndNode' && n.type !== 'ForRollingWindowBeginNode' && n.type !== 'ForRollingWindowEndNode')
     copiedNodes.value = []
     copiedEdges.value = []
     idMap.value = {}  // clear previous data

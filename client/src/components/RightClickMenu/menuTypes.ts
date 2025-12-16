@@ -126,6 +126,10 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'ForEachRowNode'
             },
             {
+                label: '表格滑动窗口处理节点',
+                value: 'ForRollingWindowNode'
+            },
+            {
                 label: '解包节点',
                 value: 'UnpackNode'
             },            

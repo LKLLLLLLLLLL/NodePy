@@ -98,6 +98,8 @@ import StandardScalerNode from '../nodes/machineLearning/StandardScalerNode.vue'
 import CustomScriptNode from '../nodes/control/CustomScriptNode.vue'
 import ForEachRowBeginNode from '../nodes/control/ForEachRowBeginNode.vue'
 import ForEachRowEndNode from '../nodes/control/ForEachRowEndNode.vue'
+import ForRollingWindowBeginNode from '../nodes/control/ForRollingWindowBeginNode.vue'
+import ForRollingWindowEndNode from '../nodes/control/ForRollingWindowEndNode.vue'
 import UnpackNode from '../nodes/control/UnpackNode.vue'
 import GetCellNode from '../nodes/control/GetCellNode.vue'
 import SetCellNode from '../nodes/control/SetCellNode.vue'
@@ -384,6 +386,8 @@ const nodeColor = (node: BaseNode) => {
     case 'CustomScriptNode':
     case 'ForEachRowBeginNode':
     case 'ForEachRowEndNode':
+    case 'ForRollingWindowBeginNode':
+    case 'ForRollingWindowEndNode':
     case 'UnpackNode':
     case 'GetCellNode':
     case 'SetCellNode':
@@ -803,6 +807,14 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-ForEachRowEndNode="ForEachRowEndNodeProps">
           <ForEachRowEndNode v-bind="ForEachRowEndNodeProps"/>
+        </template>
+
+        <template #node-ForRollingWindowBeginNode="ForRollingWindowBeginNodeProps">
+          <ForRollingWindowBeginNode v-bind="ForRollingWindowBeginNodeProps"/>
+        </template>
+
+        <template #node-ForRollingWindowEndNode="ForRollingWindowEndNodeProps">
+          <ForRollingWindowEndNode v-bind="ForRollingWindowEndNodeProps"/>
         </template>
 
         <template #node-UnpackNode="UnpackNodeProps">

@@ -918,6 +918,7 @@ export interface ForEachRowEndNode extends BaseNode<ForEachRowEndNodeData> {
 
 export interface ForRollingWindowBeginNodeParam {
     pair_id: number
+    window_size: number
 }
 export type ForRollingWindowBeginNodeData = BaseData & {
     param: ForRollingWindowBeginNodeParam

@@ -42,16 +42,12 @@
         handleId: 'row',
         value: false
     })
-    const pair_idHasErr = ref({
-        id: 'pair_id',
-        value: false
-    })
 
 
     watch(() => JSON.stringify(props.data.error), () => {
         errMsg.value = []
         handleExecError(props.data.error, errMsg)
-        handleParamError(props.data.error, errMsg, pair_idHasErr)
+        handleParamError(props.data.error, errMsg)
         handleValidationError(props.id, props.data.error, errMsg, rowHasErr)
     }, {immediate: true})
 
