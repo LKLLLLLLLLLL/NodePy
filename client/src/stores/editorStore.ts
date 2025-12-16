@@ -5,7 +5,7 @@ import PyEditorModal from '@/components/PyEditor/PyEditorModal.vue';
 
 export const useEditorStore = defineStore('editor', () => {
 
-    const editWidth = 600;
+    const editWidth = 1200;
     const editHeight = 800;
 
     const default_script: string = ''
@@ -22,12 +22,16 @@ export const useEditorStore = defineStore('editor', () => {
             isResizable: true,
             isDraggable: true,
             position: {
-            x: window.innerWidth / 2 - editWidth / 2,
-            y: window.innerHeight / 2 - editHeight / 2
+                x: window.innerWidth / 2 - editWidth / 2,
+                y: window.innerHeight / 2 - editHeight / 2
             },
             size: {
-            width: editWidth,
-            height: editHeight
+                width: editWidth,
+                height: editHeight
+            },
+            minSize:{
+                width: 800,
+                height: 400
             },
             id: 'edit-modal',
         })
