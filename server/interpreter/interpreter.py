@@ -92,10 +92,10 @@ class ControlStructureManager:
         # 1. find out all begin/end pairs
         self.control_structures = {}
         for node_id, node_object in node_objects.items():
-            if node_object.is_pair():
-                pair_info = node_object.get_pair_info()
-                assert pair_info is not None
-                pair_id, pair_type = pair_info
+            if node_object.is_control_struc():
+                control_info = node_object.get_control_info()
+                assert control_info is not None
+                pair_id, pair_type = control_info
                 control_structure: ControlStructureManager.ControlStructure
                 if pair_id in self.control_structures:
                     control_structure = self.control_structures[pair_id]
@@ -415,10 +415,9 @@ class ProjectInterpreter:
 
             output_data: dict[str, Data]
             running_time: float
-            
-            # special handling for control structures
+
             is_control_structure = self._control_structure_manager.is_begin_node(node_id)
-            
+
             # 2. execute normal node
             try:
                 if is_control_structure:
@@ -670,7 +669,7 @@ class ProjectInterpreter:
                     for tar_port, data in output_data.items():
                         res_cache[(node_id, tar_port)] = data
 
-                # collect output in this interation for end node
+                # collect output in this iteration for end node
                 end_in_edges = list(self._graph.in_edges(end_node_id, data=True)) # type: ignore
                 end_node_inputs: dict[str, Data] = {}
                 for src_id, _, edge_data in end_in_edges:

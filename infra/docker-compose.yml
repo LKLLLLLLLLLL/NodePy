@@ -58,6 +58,7 @@ services:
     build:
       context: ..
       dockerfile: infra/docker/worker.Dockerfile
+      target: development
     container_name: nodepy-celery-worker
     volumes:
       # mount server source code for hot-reload in development
@@ -81,6 +82,7 @@ services:
     build:
       context: ..
       dockerfile: infra/docker/server.Dockerfile
+      target: development
     container_name: nodepy-server
     ports:
       - "8000:8000"

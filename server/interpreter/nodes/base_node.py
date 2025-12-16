@@ -150,25 +150,21 @@ class BaseNode(BaseModel):
             raise ValueError(f"Node type '{type}' is not registered.")
         return node_type(type=type, **data, context=context)
     
-    def is_pair(self) -> bool:
+    def is_control_struc(self) -> bool:
         """ check if this node is a pair node """
-        return _NODE_PAIR_REGISTRY.get(self.type, False)
+        from .control.control_struc_base_node import ControlStrucBaseNode
+        return issubclass(type(self), ControlStrucBaseNode)
 
-    def get_pair_info(self) -> tuple[int, Literal["BEGIN", "END"]] | None:
+    def get_control_info(self) -> tuple[int, Literal["BEGIN", "END"]] | None:
         """
         Get pair info if this node is a pair node
         If not a pair node, return None
         Else return (pair_id, "BEGIN" or "END")
         """
-        is_pair = self.is_pair()
-        if not is_pair:
-            return None
-        assert hasattr(self, "pair_id")
-        assert hasattr(self, "_PAIR_TYPE")
-        pair_id = getattr(self, "pair_id")
-        pair_type = getattr(self, "_PAIR_TYPE")
-        assert pair_type in ("BEGIN", "END")
-        return (pair_id, pair_type)
+        from .control.control_struc_base_node import ControlStrucBaseNode
+        if isinstance(self, ControlStrucBaseNode):
+            return self.pair_info
+        return None
 
     def get_port(self):
         """ get all ports definition """
@@ -177,7 +173,7 @@ class BaseNode(BaseModel):
             "input": in_ports,
             "output": out_ports
         }
-    
+
     def infer_schema(self, input: dict[str, Schema]) -> dict[str, Schema]:
         """ static analysis  """
         self._schemas_in = input
@@ -186,7 +182,7 @@ class BaseNode(BaseModel):
         # 2. infer output schema
         self._schemas_out = self.infer_output_schemas(input)
         return self._schemas_out
-    
+
     def execute(self, input: dict[str, Data]) -> dict[str, Data]:
         """ run time execution """
         # 1. check if schema is inferred
@@ -226,9 +222,8 @@ class BaseNode(BaseModel):
             return {}
 
 _NODE_REGISTRY: dict[str, type[BaseNode]] = {}
-_NODE_PAIR_REGISTRY: dict[str, bool] = {}
 
-def register_node(pair: bool = False):
+def register_node():
     def _register_node(cls):
         """ Decorator to register node classes by their type name """
         def _wrap(cls: type[BaseNode]) -> type[BaseNode]:
@@ -237,7 +232,6 @@ def register_node(pair: bool = False):
             if cls.__name__ in _NODE_REGISTRY:
                 raise ValueError(f"Node type '{cls.__name__}' is already registered.")
             _NODE_REGISTRY[cls.__name__] = cls
-            _NODE_PAIR_REGISTRY[cls.__name__] = pair
             return cls
         return _wrap(cls)
     return _register_node

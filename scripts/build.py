@@ -1,5 +1,5 @@
-import subprocess
 import shutil
+import subprocess
 from pathlib import Path
 from typing import List
 
@@ -24,7 +24,7 @@ def _npm_prefix() -> List[str]:
         return [npm_prefix]
     raise RuntimeError("'npm' not found in PATH")
 
-def build() -> None:
+def build(prod: bool) -> None:
     """Build frontend assets and Docker images."""
     project_root = Path(__file__).resolve().parent.parent
 
@@ -37,11 +37,19 @@ def build() -> None:
     cmd = npm + ["run", "build"]
     subprocess.run(cmd, cwd=client_dir, check=True)
 
+    # 2. Check backend code
+    print("🔍 Checking backend code...")
+    cmd = ["task", "check"]
+    subprocess.run(cmd, check=True)
+
     # 2. Build Docker images
     print("🐳 Building Docker images...")
     infra_dir = project_root / "infra"
     compose = _compose_prefix()
-    cmd = compose + ["-f", "docker-compose.yml", "-p", "nodepy", "build"]
+    if prod:
+        cmd = compose + ["-f", "docker-compose.prod.yml", "-p", "nodepy", "build"]
+    else:
+        cmd = compose + ["-f", "docker-compose.yml", "-p", "nodepy", "build"]
     try:
         subprocess.run(cmd, cwd=infra_dir, check=True)
     except subprocess.CalledProcessError as exc:
@@ -57,7 +65,7 @@ def start_dev() -> None:
     Note: frontend dev server is expected to be started separately by frontend
     developers (e.g. `cd client && npm run dev`).
     """
-    build()
+    build(prod=False)
     print("🚀 Starting backend services (detached). Frontend dev should be run manually: cd client && npm run dev")
     infra_dir = Path(__file__).resolve().parent.parent / "infra"
     compose = _compose_prefix()
@@ -67,7 +75,7 @@ def start_dev() -> None:
 
 def start_prod() -> None:
     """Build assets and start production services."""
-    build()
+    build(prod=True)
     print("🚀 Starting production environment...")
     infra_dir = Path(__file__).resolve().parent.parent / "infra"
     compose = _compose_prefix()
@@ -85,7 +93,7 @@ if __name__ == "__main__":
 
     cmd = sys.argv[1]
     if cmd == "build":
-        build()
+        build(prod=False)
     elif cmd == "dev":
         start_dev()
     elif cmd == "prod":

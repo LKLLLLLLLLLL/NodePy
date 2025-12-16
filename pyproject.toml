@@ -26,11 +26,12 @@ dependencies = [
 dev = [
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
+    "ruff>=0.14.9",
     "stats-code>=0.1.5",
     "taskipy>=1.13.0",
 ]
 server = [
-    "fastapi>=0.118.3",
+    "fastapi[standard]>=0.118.3",
     "uvicorn>=0.37.0",
     "websockets>=15.0.1",
     "python-jose>=3.5.0",
@@ -58,3 +59,12 @@ build = "python -m scripts.build build"
 dev = "python -m scripts.build dev"
 prod = "python -m scripts.build prod"
 persist = "python -m scripts.persist_project"
+check = "ruff check"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+include = ["server/**/*.py"]
+exclude = [
+    "*_template.py",
+]

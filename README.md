@@ -49,3 +49,7 @@ npm run gen_api
 ```bash
 docker exec -it nodepy-server uv run task persist <project_name> [example_name]
 ```
+## 检查代码格式
+```bash
+uv run task check
+```

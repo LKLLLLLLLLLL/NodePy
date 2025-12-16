@@ -1,4 +1,4 @@
-from typing import Dict, Generator, override
+from typing import Dict, Generator, Literal, override
 
 import pandas as pd
 from pydantic import PrivateAttr
@@ -19,14 +19,16 @@ from .for_base_node import ForBaseBeginNode, ForBaseEndNode
 This file defines a pair for node for ForEachRow loop control.
 """
 
-@register_node(pair=True)
+@register_node()
 class ForEachRowBeginNode(ForBaseBeginNode):
     """
     Marks the beginning of a row-by-row loop.
     """
 
-    pair_id: int # ID to link with its corresponding end node
-    _PAIR_TYPE = "BEGIN"
+    @property
+    @override
+    def pair_type(self) -> Literal["BEGIN", "END"]:
+        return "BEGIN"
 
     @override
     def validate_parameters(self) -> None:
@@ -84,16 +86,18 @@ class ForEachRowBeginNode(ForBaseBeginNode):
             )
             yield {"row": row_data}
 
-@register_node(pair=True)
+@register_node()
 class ForEachRowEndNode(ForBaseEndNode):
     """
     Marks the end of a loop, collecting results.
     """
 
-    pair_id: int # ID to link with its corresponding begin node
-    _PAIR_TYPE = "END"
-
     _output_rows: list[Data] = PrivateAttr(default=[])
+
+    @property
+    @override
+    def pair_type(self) -> Literal["BEGIN", "END"]:
+        return "END"
 
     @override
     def validate_parameters(self) -> None:

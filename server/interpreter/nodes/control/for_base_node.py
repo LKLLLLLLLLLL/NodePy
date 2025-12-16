@@ -3,13 +3,13 @@ from typing import Dict, Generator
 
 from server.models.data import Data
 
-from ..base_node import BaseNode
+from .control_struc_base_node import ControlStrucBaseNode
 
 """
 Base class for For loop begin nodes.
 """
 
-class ForBaseBeginNode(BaseNode):
+class ForBaseBeginNode(ControlStrucBaseNode):
     """
     Marks the beginning of a for loop.
     """
@@ -21,11 +21,11 @@ class ForBaseBeginNode(BaseNode):
         """
         pass
 
-class ForBaseEndNode(BaseNode):
+class ForBaseEndNode(ControlStrucBaseNode):
     """
     Marks the end of a for loop.
     """
-    
+
     @abstractmethod
     def end_iter_loop(self, loop_outputs: Dict[str, Data]) -> None:
         """

@@ -31,8 +31,6 @@ services:
   minio:
     image: minio/minio:latest
     container_name: nodepy-minio
-    ports:
-      - "9000:9000"
     volumes:
       - minio_data:/data
     environment:

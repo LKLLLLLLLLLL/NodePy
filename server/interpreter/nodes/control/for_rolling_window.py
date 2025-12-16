@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generator, override
+from typing import Any, Dict, Generator, Literal, override
 
 import pandas as pd
 from pydantic import PrivateAttr
@@ -23,17 +23,19 @@ from ..base_node import InPort, OutPort, register_node
 This file defines a pair for node for ForRollingWindow loop control.
 """
 
-@register_node(pair=True)
+@register_node()
 class ForRollingWindowBeginNode(ForBaseBeginNode):
     """
     Marks the beginning of a rolling window loop.
     """
-    
+
     window_size: int
-    
-    pair_id: int
-    _PAIR_TYPE = "BEGIN"
-    
+
+    @property
+    @override
+    def pair_type(self) -> Literal["BEGIN", "END"]:
+        return "BEGIN"
+
     @override
     def validate_parameters(self) -> None:
         if not self.type == "ForRollingWindowBeginNode":
@@ -103,17 +105,19 @@ class ForRollingWindowBeginNode(ForBaseBeginNode):
             yield {"window": window_data}
 
 
-@register_node(pair=True)
+@register_node()
 class ForRollingWindowEndNode(ForBaseEndNode):
     """
     Marks the end of a rolling window loop.
     """
-    
-    pair_id: int
-    _PAIR_TYPE = "END"
 
     _outputs_tables: list[Data] = PrivateAttr(default=[])
-    
+
+    @property
+    @override
+    def pair_type(self) -> Literal["BEGIN", "END"]:
+        return "END"
+
     @override
     def validate_parameters(self) -> None:
         if not self.type == "ForRollingWindowEndNode":

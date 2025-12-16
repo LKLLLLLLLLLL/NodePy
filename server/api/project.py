@@ -113,6 +113,7 @@ async def copy_project(
             )
         )
         db_client.add(new_project)
+        # No need to copy node results and files, if they change, they will be re-executed.(copy on write)
         await db_client.commit()
         await db_client.refresh(new_project)
         return new_project.id  # type: ignore
