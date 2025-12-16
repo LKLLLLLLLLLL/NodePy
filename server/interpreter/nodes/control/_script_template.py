@@ -1,5 +1,7 @@
 # The editor to custom a script node.
 # Do not modify provided codes below.
+# You can use moudles below without import
+"""
 import math
 import typing
 import re
@@ -7,6 +9,7 @@ import json
 import decimal
 import fractions
 import itertools
+"""
 
 def script(**kwargs) -> dict[str, typing.Any]:
     # You can access the input data via kwargs dictionary.

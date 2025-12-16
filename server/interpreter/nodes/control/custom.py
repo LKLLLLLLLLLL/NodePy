@@ -78,7 +78,9 @@ class CustomScriptNode(BaseNode):
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         import RestrictedPython
-        
+        from RestrictedPython.Eval import default_guarded_getitem, default_guarded_getiter
+        from RestrictedPython.Guards import safer_getattr
+
         kwargs = {name: data.payload for name, data in input.items()}
         # Execute the user-defined script
         try:
@@ -87,30 +89,35 @@ class CustomScriptNode(BaseNode):
                 filename='<inline>',
                 mode='exec'
             )
+            safe_builtins = RestrictedPython.safe_builtins.copy()
+            safe_builtins.update({
+                "dict": dict, "list": list, "set": set, "tuple": tuple,
+                "str": str, "int": int, "float": float, "bool": bool,
+                "len": len, "range": range, "enumerate": enumerate, "zip": zip,
+                "min": min, "max": max, "sum": sum, "abs": abs,
+                "all": all, "any": any, "sorted": sorted, "reversed": reversed,
+                "map": map, "filter": filter,
+            })
             safe_globals = {
-                "__builtins__": RestrictedPython.safe_builtins,
-                "_getiter_": iter,
-                "_print_": RestrictedPython.PrintCollector,
-                "math": math,
-                "typing": typing,
-                "re": re,
-                "json": json,
-                "decimal": decimal,
-                "fractions": fractions,
-                "itertools": itertools,
+            "__builtins__": safe_builtins,
+            "_getitem_": default_guarded_getitem,
+            "_getattr_": safer_getattr,
+            "_getiter_": default_guarded_getiter,
+            "_print_": RestrictedPython.PrintCollector,
+            "math": math,
+            "typing": typing,
+            "re": re,
+            "json": json,
+            "decimal": decimal,
+            "fractions": fractions,
+            "itertools": itertools,
             }
             local_env = {}
-            
+
             @timeout(CUSTOM_SCRIPT_MAX_TIME_SEC)
             def wrap_exec(code, globals_dict, locals_dict):
                 exec(code, globals_dict, locals_dict)
-
-            success, _ = wrap_exec(byte_code, safe_globals, local_env)
-            if not success:
-                raise NodeExecutionError(
-                    node_id=self.id,
-                    err_msg="Custom script execution timed out"
-                )
+            wrap_exec(byte_code, safe_globals, local_env)
 
             # Call the script function
             if 'script' not in local_env:
@@ -118,15 +125,18 @@ class CustomScriptNode(BaseNode):
                     node_id=self.id,
                     err_msg="Function 'script' not defined in custom script"
                 )
-            
-            result = local_env['script'](**kwargs)
-            
+
+            @timeout(CUSTOM_SCRIPT_MAX_TIME_SEC)
+            def exec_script():
+                return local_env['script'](**kwargs)
+            result = exec_script()
+
             if not isinstance(result, dict):
                 raise NodeExecutionError(
                     node_id=self.id,
                     err_msg=f"Script function must return a dict, got {type(result)}"
                 )
-                
+
         except Exception as e:
             raise NodeExecutionError(
                 node_id=self.id,
@@ -135,13 +145,13 @@ class CustomScriptNode(BaseNode):
 
         # Collect outputs
         output_data = {}
-        for name, type_str in self.output_ports:
-            if name not in local_env:
+        for name, type_str in self.output_ports.items():
+            if name not in result:
                 raise NodeExecutionError(
                     node_id=self.id,
                     err_msg=f"Output '{name}' not defined in script"
                 )
-            output_payload = local_env[name]
+            output_payload = result[name]
             output_data[name] = Data(payload=output_payload)
 
         return output_data

@@ -873,6 +873,7 @@ dependencies = [
     { name = "requests" },
     { name = "scikit-learn" },
     { name = "sqlalchemy" },
+    { name = "taskipy" },
 ]
 
 [package.dev-dependencies]
@@ -881,7 +882,6 @@ dev = [
     { name = "pytest-cov" },
     { name = "ruff" },
     { name = "stats-code" },
-    { name = "taskipy" },
 ]
 server = [
     { name = "argon2-cffi" },
@@ -923,6 +923,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.5" },
     { name = "scikit-learn", specifier = ">=1.7.2" },
     { name = "sqlalchemy", specifier = ">=2.0.44" },
+    { name = "taskipy", specifier = ">=1.13.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -931,7 +932,6 @@ dev = [
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "ruff", specifier = ">=0.14.9" },
     { name = "stats-code", specifier = ">=0.1.5" },
-    { name = "taskipy", specifier = ">=1.13.0" },
 ]
 server = [
     { name = "argon2-cffi", specifier = ">=21.3.0" },
