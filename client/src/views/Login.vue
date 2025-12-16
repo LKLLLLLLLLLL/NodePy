@@ -11,9 +11,7 @@
     const pageStore = usePageStore();
     const loginStore = useLoginStore()
 
-    //el-form config
-    const label_width = "80px"
-    const label_position = "top"
+    // el-form config (removed unused variables)
 
     //form type
     type State = 'login'|'register';
@@ -26,26 +24,17 @@
     const default_username: string = '';
     const default_confirmpassword: string = '';
     const default_email: string = '';
-    const default_email_username: string = ''
-
     const password = ref<string>(default_password);
     const confirm_password = ref<string>(default_confirmpassword);
     const email = ref<string>(default_email);
     const username = ref<string>(default_username);
-    const email_username = ref<string>(default_email_username)
 
     const accountLabel = computed(()=>{
         if(loginType.value=='email')return '邮箱';
         else return '用户名'
     })
 
-    function loginByGoogle(){
-        // 谷歌登录逻辑
-    }
-
-    function loginByGitHub(){
-        // GitHub登录逻辑
-    }
+    // 第三方登录逻辑（占位）已移除以简化此文件，若需要请在专用 composable 中实现
 
     // 定义允许的标点符号
     const allowedPunctuation = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
@@ -133,12 +122,7 @@
         return true;
     }
 
-    function comparePassword(){
-        if(password.value==confirm_password.value){
-            return true
-        }
-        else return false
-    }
+    // comparePassword 已内联使用于校验逻辑，移除独立实现以精简代码
 
     async function handleLogin(){
         try {
@@ -198,171 +182,135 @@
         else handleRegister()
     }
 
-    function handleReset(){
-        password.value = default_password;
-        confirm_password.value = default_confirmpassword;
-        email.value = default_email;
-        username.value = default_username;
-    }
+    // handleReset 与 handleSwitch 被替换为直接操作 state/ref 或在表单控件中处理
 
-    function handleSwitch(){
-        if(state.value=='login')state.value='register';
-        else state.value='login';
+    // 返回首页（使用路由导航）
+    function goHome(){
+        router.push('/');
     }
 
 </script>
 
 <template>
     <div class="login-background">
-        <div class="login-container" v-if="state=='login'">
-            <div class="login-head">
-                <div class="icon-container">
+        <div class="large-area">
+            <div class="large-top">
+                <div class="large-logo">
                     <img src="../../public/logo-trans.png" alt="logo">
                 </div>
-                <div class="title-container">
-                    <h2 class="nodepy-title">
-                        登录
-                        <!-- <span class="brand-highlight">NodePy</span> -->
-                    </h2>
+                <div class="large-top-right">
+                    <button class="global-register-btn" @click="state = state === 'login' ? 'register' : 'login'">{{ state === 'login' ? '注册' : '返回' }}</button>
                 </div>
             </div>
-            <div class="login-form">
-                <el-form>
-                    <el-form-item class="login-type-selector">
-                        <el-radio-group v-model="loginType">
-                            <el-radio-button value="email">邮箱</el-radio-button>
-                            <el-radio-button value="username">用户名</el-radio-button>
-                        </el-radio-group>
-                    </el-form-item>
-                </el-form>
-                <el-form
-                    :label-width="label_width"
-                    :label-position="label_position">
-                    <el-form-item class="login-account" :label="accountLabel">
-                        <el-input
-                            placeholder="请输入邮箱"
-                            v-if="loginType=='email'"
-                            v-model="email"
-                        >
-                        </el-input>
-                        <el-input
-                            placeholder="请输入用户名"
-                            v-else
-                            v-model="username">
-                        </el-input>
-                    </el-form-item>
 
-                    <el-form-item class="login-password" label="密码">
-                        <el-input
-                            placeholder="请输入密码"
-                            v-model="password"
-                            type="password"
-                            show-password
-                        >
-                        </el-input>
-                    </el-form-item>
-                </el-form>
-                <div class="login-bottom-controler">
-                    <div class="login-control">
-                        <el-button type="primary" @click="handleSubmit" class="confirm-button login">登录</el-button>
-                        <!-- <el-button @click="handleReset">重置</el-button> -->
-                    </div>
-                    <div class="switcher">
-                        <el-button type="text" @click="handleSwitch">注册</el-button>
-                    </div>
-                </div>
-
-                    <!-- 第三方登录按钮 -->
-                    <!-- <div class="third-party-login">
-                        <div class="divider">
-                            Or continue with
+            <div class="auth-card" :class="{ 'register-mode': state === 'register' }">
+                <div class="auth-card-left">
+                    <template v-if="state==='login'">
+                        <h1 class="welcome-title">欢迎！请 登陆 以使用 <span class="nodepy-brand">NodePy</span></h1>
+                        <p class="welcome-sub">NodePy是一个安全且高效的平台，帮助你以可视化方式构建与管理数据流程。</p>
+                        <div class="auth-quote">
+                            <p>开始前，你可以浏览示例或立即创建你的第一个流程。</p>
                         </div>
-                        <div class="oauth-buttons">
-                            <el-button class="oauth-btn google-btn" @click="loginByGoogle">
-                                <svg class="oauth-icon" viewBox="0 0 24 24" width="20" height="20">
-                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                                </svg>
-                                <span>Google</span>
-                            </el-button>
-                            <el-button class="oauth-btn github-btn" @click="loginByGitHub">
-                                <svg class="oauth-icon" viewBox="0 0 24 24" width="20" height="20">
-                                    <path fill="currentColor" d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                                </svg>
-                                <span>GitHub</span>
-                            </el-button>
+                    </template>
+                    <template v-else>
+                        <h1 class="welcome-title">欢迎！注册 以加入 <span class="nodepy-brand">NodePy</span></h1>
+                        <p class="welcome-sub">注册后可保存项目、共享流程并在多设备间同步工作进度。</p>
+                        <div class="auth-quote">
+                            <p>请填写下列信息来创建你的账号，随后你将获得完整的项目存储与协作功能。</p>
                         </div>
-                    </div> -->
-            </div>
-        </div>
-        <div class="register-container" v-else>
-            <div class="register-head">
-                <div class="icon-container">
-                    <img src="../../public/logo-trans.png" alt="logo">
+                    </template>
                 </div>
-                <div class="title-container">
-                    <h2 class="nodepy-title">
-                        注册
-                        <!-- <span class="brand-highlight">NodePy</span> -->
-                    </h2>
-                </div>
-            </div>
-            <div class="register-form">
-                <el-form
-                    :label-width="label_width"
-                    :label-position="label_position">
-                    <el-form-item class="register-email" label="邮箱">
-                        <el-input
-                            placeholder="请输入邮箱"
-                            v-model="email"
-                        >
-                        </el-input>
-                    </el-form-item>
 
-                    <el-form-item class="register-username" label="用户名">
-                        <el-input
-                            placeholder="请输入用户名（1-20位）"
-                            v-model="username"
-                        >
-                        </el-input>
-                    </el-form-item>
+                <div class="auth-card-right">
+                    <div class="auth-box">
+                        <div class="login-container" v-if="state=='login'">
+                            <div class="login-head">
+                                <h2 class="nodepy-title title-container">登录</h2>
+                            </div>
+                            <div class="login-form">
+                                <div class="login-type-row">
+                                    <div class="login-type-capsule" role="tablist" aria-label="登录方式">
+                                        <button
+                                            type="button"
+                                            class="capsule"
+                                            :class="{ active: loginType === 'email' }"
+                                            @click="loginType = 'email'"
+                                            role="tab"
+                                            :aria-selected="loginType === 'email' ? 'true' : 'false'"
+                                        >邮箱</button>
+                                        <button
+                                            type="button"
+                                            class="capsule"
+                                            :class="{ active: loginType === 'username' }"
+                                            @click="loginType = 'username'"
+                                            role="tab"
+                                            :aria-selected="loginType === 'username' ? 'true' : 'false'"
+                                        >用户名</button>
+                                    </div>
+                                </div>
 
-                    <el-form-item class="register-password" label="密码">
-                        <el-input
-                            placeholder="请输入密码（6-20位）"
-                            v-model="password"
-                            type="password"
-                            show-password
-                        >
-                        </el-input>
-                    </el-form-item>
+                                <form class="my-form" @submit.prevent="handleSubmit">
+                                    <div class="form-item">
+                                        <label class="form-label">{{ accountLabel }}</label>
+                                        <input v-if="loginType==='email'" class="my-input" placeholder="请输入邮箱" v-model="email" />
+                                        <input v-else class="my-input" placeholder="请输入用户名" v-model="username" />
+                                    </div>
 
-                    <el-form-item class="register-password-confirm" label="确认密码">
-                        <el-input
-                            placeholder="请再次输入密码"
-                            v-model="confirm_password"
-                            type="password"
-                            show-password
-                        >
-                        </el-input>
-                    </el-form-item>
-                </el-form>
-                <div class="register-bottom-controler">
-                    <div class="register-control">
-                        <el-button type="primary" @click="handleSubmit" class="confirm-button register">创建</el-button>
-                        <!-- <el-button @click="handleReset">重置</el-button> -->
+                                    <div class="form-item">
+                                        <label class="form-label">密码</label>
+                                        <input class="my-input" placeholder="请输入密码" v-model="password" type="password" />
+                                    </div>
+
+                                    <div class="login-bottom-controler">
+                                        <div class="login-control">
+                                            <button type="submit" class="my-btn my-btn-primary confirm-button">登录</button>
+                                        </div>
+                                        <!-- 注册由页面顶部全局按钮切换 -->
+                                    </div>
+                                </form>
+                                <div class="legal-note">使用即代表同意我们的 <a>使用协议</a> &amp; <a>隐私政策</a></div>
+                            </div>
+                        </div>
+
+                        <div class="register-container" v-else>
+                            <div class="register-head">
+                                <h2 class="nodepy-title title-container">注册</h2>
+                            </div>
+                            <div class="register-form">
+                                <form class="my-form" @submit.prevent="handleSubmit">
+                                    <div class="form-item">
+                                        <label class="form-label">邮箱</label>
+                                        <input class="my-input" placeholder="请输入邮箱" v-model="email" />
+                                    </div>
+                                    <div class="form-item">
+                                        <label class="form-label">用户名</label>
+                                        <input class="my-input" placeholder="请输入用户名（1-20位）" v-model="username" />
+                                    </div>
+                                    <div class="form-item">
+                                        <label class="form-label">密码</label>
+                                        <input class="my-input" placeholder="请输入密码（6-20位）" v-model="password" type="password" />
+                                    </div>
+                                    <div class="form-item">
+                                        <label class="form-label">确认密码</label>
+                                        <input class="my-input" placeholder="请再次输入密码" v-model="confirm_password" type="password" />
+                                    </div>
+                                    <div class="register-bottom-controler">
+                                        <div class="register-control">
+                                            <button type="submit" class="my-btn my-btn-primary confirm-button register">创建</button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div class="legal-note">使用即代表同意我们的 <a>使用协议</a> &amp; <a>隐私政策</a></div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="switcher">
-                        <el-button type="text" @click="handleSwitch">返回</el-button>
-                    </div>
                 </div>
             </div>
+
+            <button class="global-register-btn back-home-btn" @click="goHome">返回首页</button>
+            <div class="large-footer"><span class="copyright">© 2025 NodePy. All rights reserved.</span></div>
         </div>
     </div>
-
 </template>
 
 <style lang="scss" scoped>
@@ -376,51 +324,230 @@
         min-height: 100vh;
         padding: 20px;
     }
+    /* reset global login/register container styles so nested cards don't overflow */
     .login-container, .register-container {
-        @include controller-style; /* 使用controller-style混合宏 */
         display: flex;
         flex-direction: column;
-        width: 450px;
-        background-color: $stress-background-color;
-        padding: 30px;
+        width: 100%;
+        background-color: transparent;
+        padding: 0;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
+    }
+
+    /* Large area that holds the whole centered card */
+    .large-area {
+        width: calc(100% - 80px);
+        max-width: 1100px;
+        margin: 40px auto;
+        min-height: calc(100vh - 120px);
+        background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,252,255,0.9));
+        border-radius: 14px;
+        box-shadow: 0 20px 60px rgba(16,142,254,0.06);
+        position: relative;
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .large-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .large-logo img {
+        width: 160px;
+        height: auto;
+    }
+
+    .large-top-right {
+        width: 120px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .global-register-btn {
+        background: transparent;
+        border: 1px solid transparent;
+        color: $stress-color;
+        padding: 6px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .global-register-btn:hover { background: rgba(16,142,254,0.06); }
+
+    .auth-card {
+        margin: 20px auto 0;
+        width: 100%;
+        max-width: 920px;
+        display: grid;
+        grid-template-columns: 1fr minmax(320px, 420px);
+        gap: 28px;
+        align-items: start;
+        flex: 1;
+    }
+
+    /* Center login content vertically when not in register mode */
+    .auth-card:not(.register-mode) {
+        align-items: center;
+    }
+    .auth-card:not(.register-mode) .auth-card-left {
+        justify-content: center; /* vertically center left promo */
+    }
+    .auth-card:not(.register-mode) .auth-card-right {
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* In register-mode keep the same left-promo / right-form layout as login
+       and center content for visual consistency. */
+    .auth-card.register-mode {
+        grid-template-columns: 1fr minmax(320px, 420px);
+        align-items: center;
+    }
+    .auth-card.register-mode .auth-card-left,
+    .auth-card.register-mode .auth-card-right {
+        justify-content: center;
+        align-items: center;
+        display: flex;
+    }
+    /* keep auth-box margin consistent in register-mode */
+    .auth-card.register-mode .auth-box { margin: 24px auto; }
+
+    .auth-card-left {
+        padding: 36px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* 在注册模式下，让左侧的说明内容左对齐（注册说明靠左显示） */
+    .auth-card.register-mode .auth-card-left {
+        align-items: flex-start;
+        text-align: left;
+        padding-left: 28px;
+    }
+
+    /* register intro block inside right auth box */
+    .register-intro { margin-bottom: 12px; }
+    .register-title { margin: 0 0 6px 0; font-size: 18px; color: #102132; }
+    .register-sub { margin: 0; color: #6b7c88; }
+
+    .welcome-title {
+        font-size: 26px;
+        margin: 0;
+        color: #0f2130;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+
+    .welcome-sub {
+        margin: 6px 0 0 0;
+        color: #556770;
+        font-size: 14px;
+        max-width: 440px;
+    }
+
+    .auth-quote p { color: #6b7c88; margin-top: 14px; font-size: 14px; }
+
+    /* NodePy art brand gradient */
+    .nodepy-brand {
+        background: linear-gradient(90deg, #108efe, #7b61ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: 800;
+        font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        padding: 0 6px;
+        border-radius: 6px;
+    }
+
+    .auth-card-right {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: auto;
+    }
+
+    .auth-box {
+        width: 100%;
+        max-width: 420px;
+        padding: 24px;
+        box-sizing: border-box;
+        margin: 24px auto;
+        @include controller-style;
+        background: $stress-background-color;
+        /* Do not scroll internally; allow page-level scrolling instead */
+        overflow: visible;
+        max-height: none;
+    }
+
+    .legal-note {
+        font-size: 12px;
+        color: #97a4ad;
+        text-align: center;
+        margin-top: 12px;
+    }
+
+    .legal-note a { color: $stress-color; text-decoration: underline; cursor: pointer; }
+
+    .large-footer {
+        text-align: center;
+        color: #7b8b94;
+        font-size: 13px;
+        padding: 18px 0 6px;
+    }
+
+    /* 返回首页按钮，固定在大区域左下角；视觉样式与顶部注册按钮一致 */
+    .back-home-btn {
+        position: absolute;
+        left: 24px;
+        bottom: 20px;
+        z-index: 30;
+        padding: 6px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .back-home-btn:hover { transform: translateY(-2px); }
+
+    /* formal copyright text */
+    .large-footer .copyright {
+        display: block;
+        font-size: 13px;
+        color: #7b8b94;
     }
 
     .login-container {
-        height: 500px; // 登录界面高度
+        /* remove fixed height so content can size naturally */
+        min-height: auto;
     }
 
     .register-container {
-        height: 600px; // 注册界面高度
+        min-height: auto;
     }
 
     .login-head, .register-head {
         display: flex;
         flex-direction: column;
-        height: 85px;
+        height: auto; /* let content size naturally to avoid large gaps */
         position: relative;
         z-index: 1;
+        padding-bottom: 6px;
     }
 
-    .icon-container {
-        width: 130px;
-        height: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 10px;
-        img {
-            width: 100%;
-            height: 100%;
-        }
-    }
+    /* .icon-container 已移除（未在模板中使用） */
 
     .title-container {
-        height: 40px;
+        height: auto;
         display: flex;
         align-items: center;
         justify-content: center;
+        padding-bottom: 6px;
     }
 
     .nodepy-title {
@@ -441,7 +568,7 @@
     }
 
     .register-form, .login-form {
-        margin-top: 20px;
+        margin-top: 8px;
         position: relative;
         z-index: 1;
         flex: 1;
@@ -518,6 +645,82 @@
         margin-top: 15px;
     }
 
+    /* Capsule style for login type switch (邮箱 / 用户名) */
+    .login-type-capsule {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        padding: 4px;
+        background: transparent;
+        border-radius: 999px;
+        margin: 12px auto; /* 居中 */
+        justify-content: center;
+    }
+
+    .login-type-row { display:flex; justify-content:center; }
+
+    .login-type-capsule .capsule {
+        height: 34px;
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(20,20,20,0.85);
+        padding: 6px 14px;
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-width: 70px;
+        cursor: pointer;
+        border: none;
+        background-color: rgba(16,142,254,0.03);
+        box-shadow: none;
+        transition: all 0.18s ease;
+    }
+
+    .login-type-capsule .capsule:hover {
+        background-color: rgba(16,142,254,0.06);
+    }
+
+    .login-type-capsule .capsule:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(16,142,254,0.12);
+    }
+
+    .login-type-capsule .capsule.active {
+        color: #ffffff;
+        background-color: $stress-color;
+        box-shadow: 0px 3px 5px rgba(128, 128, 128, 0.15);
+    }
+
+    /* Element Plus 内部类样式移除；Login.vue 使用自定义 `.my-input` */
+
+    /* Make primary confirm button more prominent */
+    .confirm-button {
+        width: 100%;
+        height: 48px;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        border-radius: 10px;
+        background-color: $stress-color;
+        color: #fff;
+        border: none;
+        box-shadow: 0 8px 20px rgba(16,142,254,0.12);
+        transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+    }
+
+    .confirm-button:hover {
+        transform: translateY(-2px);
+        background-color: $hover-stress-color;
+        box-shadow: 0 12px 30px rgba(16,142,254,0.12);
+    }
+
+    /* Make the small text buttons lighter */
+    .switcher .el-button {
+        color: $stress-color;
+    }
+
     .oauth-btn {
         display: flex;
         align-items: center;
@@ -543,19 +746,40 @@
         }
     }
 
+    /* Custom simple input and button styles to replace element-plus */
+    .my-form { display: flex; flex-direction: column; gap: 12px; }
+    .form-item { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 13px; color: #5b6b74; }
+    .my-input {
+        border-radius: 10px;
+        padding: 10px 12px;
+        border: 1px solid #e6eef9;
+        background: #fbfdff;
+        font-size: 14px;
+        color: #12212b;
+    }
+    .my-input:focus { outline: none; box-shadow: 0 8px 24px rgba(16,142,254,0.06); border-color: $stress-color; }
+
+    .my-btn { border-radius: 10px; padding: 10px 14px; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+    .my-btn-primary { background: $stress-color; color: white; box-shadow: 0 8px 20px rgba(16,142,254,0.12); }
+    .my-btn-text { background: transparent; color: $stress-color; border: none; padding: 6px 8px; }
+
+    /* small adjustments to ensure auth-box content doesn't get clipped */
+    .auth-box .login-form, .auth-box .register-form { width: 100%; }
+
     // 响应式设计
     @media (max-width: 500px) {
+        .auth-card {
+            grid-template-columns: 1fr;
+            padding: 0;
+        }
+
+        .auth-card-left { order: 1; padding: 20px; }
+        .auth-card-right { order: 2; padding: 8px; }
+
         .login-container, .register-container {
-            width: 95%;
-            padding: 20px;
-        }
-
-        .login-container {
-            height: 450px;
-        }
-
-        .register-container {
-            height: 550px;
+            width: 100%;
+            padding: 18px;
         }
     }
 </style>
