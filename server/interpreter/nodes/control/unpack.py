@@ -449,7 +449,7 @@ class SetCellNode(BaseNode):
             ),
         ], [
             OutPort(
-                name="updated_table",
+                name="table",
                 description="The table with the updated cell value.",
             )           
         ]
@@ -482,7 +482,7 @@ class SetCellNode(BaseNode):
                 err_msg=f"Type of value ({cell_value_type}) does not match column '{self.col}' type ({col_type}).",
             )
         return {
-            "updated_table": table_schema
+            "table": table_schema
         }
 
     @override
@@ -491,10 +491,11 @@ class SetCellNode(BaseNode):
         assert isinstance(input_table.payload, Table)
         df = input_table.payload.df.copy()
         # determine the row index
+        row_index: int
         if "row" in input:
             row_data = input["row"]
             assert isinstance(row_data.payload, int)
-            row_index = row_data.payload
+            row_index = int(row_data.payload)
         else:
             assert self.row is not None
             row_index = self.row
@@ -514,7 +515,9 @@ class SetCellNode(BaseNode):
         value = input["value"].payload
         assert isinstance(row_index, int)
         assert isinstance(value, (int, float, str, bool, datetime))
-        df.at[row_index, self.col] = value
+        col_idx = df.columns.get_loc(self.col)
+        assert isinstance(col_idx, int)
+        df.iat[row_index, col_idx] = value
         assert self._col_types is not None
         updated_table = Table(
             col_types=self._col_types, 
@@ -522,7 +525,7 @@ class SetCellNode(BaseNode):
         )
         output_data = Data(payload=updated_table)
         return {
-            "updated_table": output_data
+            "table": output_data
         }
 
     @override

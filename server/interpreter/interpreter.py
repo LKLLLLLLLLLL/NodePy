@@ -85,10 +85,19 @@ class ControlStructureManager:
                 return struc.end_node_id
         raise ValueError(f"Begin node id {begin_node_id} not found in any control structure.")
 
-    def analyze(self, graph: nx.MultiDiGraph, node_objects: dict[str, BaseNode]) -> None:
+    def analyze(
+        self,
+        graph: nx.MultiDiGraph,
+        node_objects: dict[str, BaseNode],
+        skip: set[str],
+        callback: Callable[[str, Literal["success", "error"], dict[str, Any] | Exception], bool],
+    ) -> set[str]:
         """
         Analyze the graph to find all control structures.
+        Return the set of node ids that are unreachable due to control structure errors.
         """
+        unreached_nodes = skip.copy()
+
         # 1. find out all begin/end pairs
         self.control_structures = {}
         for node_id, node_object in node_objects.items():
@@ -124,12 +133,34 @@ class ControlStructureManager:
                 else:
                     assert False, f"Unknown pair type {pair_type} for pair id {pair_id}."
 
-        # 2. check if begin node can reach end node
-        for pair_id, struc in self.control_structures.items():
-            if not nx.has_path(graph, struc.begin_node_id, struc.end_node_id):
-                raise ValueError(f"Begin node '{struc.begin_node_id}' cannot reach end node '{struc.end_node_id}' for pair id {pair_id}.")
+        # 2. exclude skipped nodes
+        copy_control_structures = self.control_structures.copy()
+        changed = False
+        while changed:
+            for pair_id, struc in copy_control_structures.items():
+                if struc.begin_node_id in unreached_nodes or struc.end_node_id in unreached_nodes:
+                    del self.control_structures[pair_id]
+                    if struc.begin_node_id is not None:
+                        unreached_nodes.add(struc.begin_node_id)
+                        unreached_nodes.update(nx.descendants(graph, struc.begin_node_id))
+                    if struc.end_node_id is not None:
+                        unreached_nodes.add(struc.end_node_id)
+                        unreached_nodes.update(nx.descendants(graph, struc.end_node_id))
+                    changed = True
+            copy_control_structures = self.control_structures.copy()
 
-        # 3. for each pair, find its body nodes
+        # 3. check if begin node can reach end node
+        copy_control_structures = self.control_structures.copy()
+        for pair_id, struc in copy_control_structures.items():
+            if not nx.has_path(graph, struc.begin_node_id, struc.end_node_id):
+                error = ValueError(f"Begin node {struc.begin_node_id} cannot reach end node {struc.end_node_id} for pair id {pair_id}.")
+                assert struc.begin_node_id is not None
+                callback(struc.begin_node_id, "error", error)
+                unreached_nodes.add(struc.begin_node_id)
+                unreached_nodes.update(nx.descendants(graph, struc.begin_node_id))
+                del self.control_structures[pair_id]
+
+        # 4. for each pair, find its body nodes
         for pair_id, struc in self.control_structures.items():
             begin_node_id = struc.begin_node_id
             end_node_id = struc.end_node_id
@@ -146,7 +177,18 @@ class ControlStructureManager:
             body_nodes.discard(end_node_id)
             struc.body_node_ids = body_nodes
 
-        # 4. check if all control structures are complete
+        # 5. remove struc that contains unreached nodes
+        copy_control_structures = self.control_structures.copy()
+        for pair_id, struc in copy_control_structures.items():
+            if struc.body_node_ids is not None:
+                if len(struc.body_node_ids.intersection(unreached_nodes)) > 0:
+                    assert struc.begin_node_id is not None
+                    callback(struc.begin_node_id, "error", ValueError(f"Control structure with pair id {pair_id} contains unreached body nodes."))
+                    unreached_nodes.add(struc.begin_node_id)
+                    unreached_nodes.update(nx.descendants(graph, struc.begin_node_id))
+                    del self.control_structures[pair_id]
+
+        # 6. check if all control structures are complete
         for pair_id, struc in self.control_structures.items():
             if struc.begin_node_id is None or struc.end_node_id is None:
                 raise ValueError(f"Unmatched begin/end node for pair id {pair_id}.")
@@ -154,7 +196,7 @@ class ControlStructureManager:
                 raise ValueError(f"Body nodes not found for pair id {pair_id}.")
             if struc.type is None:
                 raise ValueError(f"Control structure type not found for pair id {pair_id}.")
-        return
+        return unreached_nodes
 
     def iter_control_structure(self, graph: nx.MultiDiGraph, begin_node_id: str) -> Generator[str, Any, None]:
         """
@@ -361,7 +403,8 @@ class ProjectInterpreter:
 
         # analyze control structures
         self._control_structure_manager = ControlStructureManager()
-        self._control_structure_manager.analyze(self._graph, self._node_objects)
+        unreached = self._control_structure_manager.analyze(self._graph, self._node_objects, self._unreached_node_ids, callback)
+        self._unreached_node_ids.update(unreached)
 
         self._stage = "static_analyzed"
         
@@ -419,49 +462,54 @@ class ProjectInterpreter:
             is_control_structure = self._control_structure_manager.is_begin_node(node_id)
 
             # 2. execute normal node
-            try:
-                if is_control_structure:
-                    res = self._execute_control_structure(
-                        begin_node_id=node_id,
-                        inputs=input_data,
-                        callbefore=callbefore,
-                        callafter=callafter,
-                    )
-                    if res is None:
-                        # execution was stopped in control structure
-                        return
-                    else:
-                        output_data, running_time = res
+            if is_control_structure:
+                res = self._execute_control_structure(
+                    begin_node_id=node_id,
+                    inputs=input_data,
+                    callbefore=callbefore,
+                    callafter=callafter,
+                )
+                if res is None:
+                    # execution was stopped in control structure
+                    return
                 else:
+                    output_data, running_time = res
+                # 3. call callafter for the begin node
+                # call callafter for end node
+                end_node_id = self._control_structure_manager.get_end_node_id(node_id)
+                continue_execution = callafter(end_node_id, "success", output_data, running_time)
+                if not continue_execution:
+                    return
+            else:
+                try:
                     output_data, running_time = self._execute_single_node(
                         node_id, input_data, callbefore
                     )
-            # 3. call callafter
-            except Exception as e:
-                self._unreached_node_ids.update(
-                    [node_id, *nx.descendants(self._graph, node_id)]
-                )
-                continue_execution = callafter(node_id, "error", e, None)
-                if not continue_execution:
+                # 3. call callafter
+                except Exception as e:
                     self._unreached_node_ids.update(
                         [node_id, *nx.descendants(self._graph, node_id)]
                     )
-                    return
+                    continue_execution = callafter(node_id, "error", e, None)
+                    if not continue_execution:
+                        self._unreached_node_ids.update(
+                            [node_id, *nx.descendants(self._graph, node_id)]
+                        )
+                        return
+                    else:
+                        continue
                 else:
-                    continue
-            else:
-                callafter_node_id = node_id if not is_control_structure else self._control_structure_manager.get_end_node_id(node_id)
-                continue_execution = callafter(callafter_node_id, "success", output_data, running_time)
-                if not continue_execution:
-                    return
-                else:
-                    pass
+                    callafter_node_id = node_id if not is_control_structure else self._control_structure_manager.get_end_node_id(node_id)
+                    continue_execution = callafter(callafter_node_id, "success", output_data, running_time)
+                    if not continue_execution:
+                        return
 
             # 4. store output data to self cache
             if is_control_structure:
                 # for control structures, save outputs to the end node only
                 end_node_id = self._control_structure_manager.get_end_node_id(node_id)
                 for tar_port, data in output_data.items():
+                    logger.debug(f"Storing output data for control structure end node {end_node_id} port {tar_port}")
                     if data_cache.get((end_node_id, tar_port)) is not None:
                         raise RuntimeError(f"Node '{end_node_id}' output on port '{tar_port}' already exists in cache.")
                     data_cache[(end_node_id, tar_port)] = data
@@ -472,7 +520,7 @@ class ProjectInterpreter:
                     data_cache[(node_id, tar_port)] = data
 
         self._stage = "finished"
-        
+
         if TRACING_ENABLED:
             assert trace_begin is not None
             end_time = time.perf_counter()
@@ -621,8 +669,16 @@ class ProjectInterpreter:
         begin_node = self._node_objects[begin_node_id]
         end_node = self._node_objects[end_node_id]
         begin_time = time.perf_counter()
+        if begin_node_id in self._unreached_node_ids:
+            return None
         if isinstance(begin_node, ForBaseBeginNode):
             assert isinstance(end_node, ForBaseEndNode), "Begin node and end node types do not match."
+            # send strat message (by callbefore) for begin node and all body nodes
+            callbefore(begin_node_id)
+            running_times = {}
+            for node_id in self._control_structure_manager.iter_control_structure(self._graph, begin_node_id):
+                callbefore(node_id)
+                running_times[node_id] = 0.0
             for input_datas in begin_node.iter_loop(inputs):
                 res_cache: dict[tuple[str, str], Data] = {} # local cache for exec result in this iteration: (node_id, port) -> Data
 
@@ -632,6 +688,8 @@ class ProjectInterpreter:
 
                 # execute body nodes
                 for node_id in self._control_structure_manager.iter_control_structure(self._graph, begin_node_id):
+                    if node_id in self._unreached_node_ids:
+                        return None
                     in_edges = list(self._graph.in_edges(node_id, data=True)) # type: ignore
 
                     # 1. get input data
@@ -644,8 +702,8 @@ class ProjectInterpreter:
                     # 2. execute node
                     try:
                         output_data, running_time = self._execute_single_node(
-                            node_id, input_data, callbefore
-                        )
+                            node_id, input_data, lambda nid: None
+                        ) # callbefore is a no-op for body nodes
                     # 3. call callafter
                     except Exception as e:
                         self._unreached_node_ids.update(
@@ -660,16 +718,15 @@ class ProjectInterpreter:
                         else:
                             continue
                     else:
-                        continue_execution = callafter(node_id, "success", output_data, running_time)
-                        if not continue_execution:
-                            return None
-                        else:
-                            pass
+                        # for body nodes, do not call callafter
+                        running_times[node_id] += running_time
                     # 4. store output data to local cache
                     for tar_port, data in output_data.items():
                         res_cache[(node_id, tar_port)] = data
 
                 # collect output in this iteration for end node
+                if end_node_id in self._unreached_node_ids:
+                    return None
                 end_in_edges = list(self._graph.in_edges(end_node_id, data=True)) # type: ignore
                 end_node_inputs: dict[str, Data] = {}
                 for src_id, _, edge_data in end_in_edges:
@@ -680,6 +737,10 @@ class ProjectInterpreter:
             # combine outputs
             outputs = end_node.finalize_loop()
             running_time = (time.perf_counter() - begin_time) * 1000  # in ms
-            return outputs, running_time
+            # call callback for begin node and body nodes
+            callafter(begin_node_id, "success", {}, running_time)
+            for node_id in self._control_structure_manager.iter_control_structure(self._graph, begin_node_id):
+                callafter(node_id, "success", {}, running_times[node_id])
+            return outputs, running_time # execute method will call callafter for end node
         else:
             assert False, f"Unknown control structure begin node type {begin_node.type}."

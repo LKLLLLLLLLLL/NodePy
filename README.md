@@ -45,7 +45,7 @@ npm run dev
 cd client
 npm run gen_api
 ```
-## 将某个项目持久话为example项目
+## 将某个项目持久化为example项目
 ```bash
 docker exec -it nodepy-server uv run task persist <project_name> [example_name]
 ```
