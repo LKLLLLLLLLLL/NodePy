@@ -16,11 +16,10 @@
         mdiEyeOutline,
         mdiEyeOff,
         mdiContentSave,
-        mdiCommentQuoteOutline,
-        mdiCardTextOutline,
+        mdiMusicAccidentalSharp,
         mdiTextBoxOutline,
-        mdiFormatQuoteOpen,
-        mdiCommaBoxOutline
+        mdiCommaBoxOutline,
+        mdiFormatQuoteOpen
     } from '@mdi/js'
 
     //stores
@@ -204,7 +203,7 @@
         <div class="graph-controls-right">
             <div class="gc-btn-container">
                 <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleTitleAnnotate();}" aria-label="Title annotate">
-                    <SvgIcon type="mdi" :path="mdiCommaBoxOutline" class="btn-icon" />
+                    <SvgIcon type="mdi" :path="mdiFormatQuoteOpen" class="btn-icon quote" />
                     <div class="gc-btn-text">注释</div>
                 </button>
 
@@ -293,6 +292,11 @@
     }
 
     .zoom { // zoom icon looks smaller, so enlarge it a bit
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    .quote {
         width: 26px !important;
         height: 26px !important;
     }
