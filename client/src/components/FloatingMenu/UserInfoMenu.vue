@@ -3,10 +3,15 @@
     <!-- 触发元素：头像 -->
     <template #trigger>
       <div class="user-avatar-trigger">
-        <!-- 显示用户名首字母 -->
-        <div v-if="!avatarUrl" class="initials-avatar small">
+        <!-- 未登录时显示 mdi 图标 -->
+        <div v-if="!loginStore.isAuthenticated" class="initials-avatar small">
+          <svg-icon type="mdi" :path="mdiAccount" :size="22"></svg-icon>
+        </div>
+        <!-- 登录但无头像时显示首字符 -->
+        <div v-else-if="!avatarUrl" class="initials-avatar small">
           {{ userInitials }}
         </div>
+        <!-- 登录且有头像时显示头像 -->
         <img
           v-else
           :src="avatarUrl"
@@ -20,9 +25,9 @@
       <!-- 未登录提示 -->
       <div v-if="!loginStore.isAuthenticated" class="not-logged-in">
         <div class="not-logged-in-icon">
-          <!-- 显示用户名首字母 -->
+          <!-- 使用 mdi 图标 -->
           <div class="initials-avatar large">
-            {{ userInitials }}
+            <svg-icon type="mdi" :path="mdiAccount" :size="36"></svg-icon>
           </div>
         </div>
         <div class="not-logged-in-text">请先登录</div>
@@ -31,10 +36,11 @@
       
       <!-- 用户头部 -->
       <div v-else class="user-header">
-        <!-- 显示用户名首字母 -->
+        <!-- 无头像时显示首字符 -->
         <div v-if="!avatarUrl" class="initials-avatar large">
           {{ userInitials }}
         </div>
+        <!-- 有头像时显示头像 -->
         <img
           v-else
           :src="avatarUrl"
@@ -97,6 +103,8 @@ import EditableTableModal from '../EditableTable/EditableTableModal.vue'
 import PyEditor from '../PyEditor/PyEditor.vue'
 import Logout from '../Logout.vue'
 import { useTableStore } from '@/stores/tableStore'
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiAccount } from '@mdi/js'
 
 const loginStore = useLoginStore()
 const modalStore = useModalStore()
@@ -121,7 +129,7 @@ function handleLogin() {
   })
 }
 
-function handleLogout() {
+async function handleLogout() {
   modalStore.createModal({
     component: Logout,
     title: '退出登录',
@@ -138,6 +146,7 @@ function handleLogout() {
     },
     id: 'logout',
   })
+  await userStore.refreshUserInfo();
 }
 
 // 判断是否有头像功能（未来可能添加）
@@ -304,11 +313,31 @@ const formatStorageSpace = () => {
     text-align: center;
     padding: 20px 0;
 
+    .initials-avatar {
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      // border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      
+      &.large {
+        width: 56px;
+        height: 56px;
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+    }
+
     .not-logged-in-icon {
-      font-size: 48px;
+      // font-size: 48px;
       margin-bottom: 12px;
       display: flex;
       justify-content: center;
+      align-items: center;
     }
 
     .not-logged-in-text {

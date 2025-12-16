@@ -47,43 +47,47 @@
         // GitHub登录逻辑
     }
 
+    // 定义允许的标点符号
+    const allowedPunctuation = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
+    // 辅助函数：转义正则表达式特殊字符
+    function escapeRegExp(string: string): string {
+        return string.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+    }
+
     // 密码限制函数
     function restrictPassword(): boolean {
         const pwd = password.value;
-        // // 检查密码长度（至少8位）
-        // if (pwd.length < 8) {
-        //     return false;
-        // }
-        // // 检查是否包含数字
-        // if (!/\d/.test(pwd)) {
-        //     return false;
-        // }
-        // // 检查是否包含字母
-        // if (!/[a-zA-Z]/.test(pwd)) {
-        //     return false;
-        // }
-        // // 检查是否包含特殊字符
-        // if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) {
-        //     return false;
-        // }
+        // 检查密码长度（6-20位）
+        if (pwd.length < 6 || pwd.length > 20) {
+            return false;
+        }
+        // 检查是否包含中文字符
+        if (/[\u4e00-\u9fa5]/.test(pwd)) {
+            return false;
+        }
+        // 构建允许的字符正则表达式（字母、数字和允许的标点符号）
+        const escapedPunctuation = escapeRegExp(allowedPunctuation);
+        const allowedChars = new RegExp(`^[a-zA-Z0-9${escapedPunctuation}]*$`);
+        if (!allowedChars.test(pwd)) {
+            return false;
+        }
         return true;
     }
 
     // 用户名限制函数
     function restrictUsername(): boolean {
         const usr = username.value;
-        // // 检查用户名长度（3-20个字符）
-        // if (usr.length < 3 || usr.length > 20) {
-        //     return false;
-        // }
-        // // 检查是否只包含字母、数字、下划线
-        // if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(usr)) {
-        //     return false;
-        // }
-        // // 不能以数字开头
-        // if (/^\d/.test(usr)) {
-        //     return false;
-        // }
+        // 检查用户名长度（1-20个字符）
+        if (usr.length < 1 || usr.length > 20) {
+            return false;
+        }
+        // 构建允许的字符正则表达式（中文、字母、数字和允许的标点符号）
+        const escapedPunctuation = escapeRegExp(allowedPunctuation);
+        const allowedChars = new RegExp(`^[\\u4e00-\\u9fa5a-zA-Z0-9${escapedPunctuation}]*$`);
+        if (!allowedChars.test(usr)) {
+            return false;
+        }
         return true;
     }
 
@@ -91,30 +95,22 @@
     function testAllInfo(): boolean {
         // 检查用户名
         if (!restrictUsername()) {
-            if (username.value.length < 3 || username.value.length > 20) {
-                notify({ message: '用户名长度应在3-20个字符之间', type: 'error' });
-            } else if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(username.value)) {
-                notify({ message: '用户名只能包含字母、数字、下划线和中文', type: 'error' });
-            } else if (/^\d/.test(username.value)) {
-                notify({ message: '用户名不能以数字开头', type: 'error' });
+            if (username.value.length < 1 || username.value.length > 20) {
+                notify({ message: '用户名长度应在1-20个字符之间', type: 'error' });
             } else {
-                notify({ message: '用户名不符合要求', type: 'error' });
+                notify({ message: '用户名只能包含中文、字母、数字和标准英文标点符号', type: 'error' });
             }
             return false;
         }
 
         // 检查密码
         if (!restrictPassword()) {
-            if (password.value.length < 8) {
-                notify({ message: '密码长度至少8位', type: 'error' });
-            } else if (!/\d/.test(password.value)) {
-                notify({ message: '密码必须包含数字', type: 'error' });
-            } else if (!/[a-zA-Z]/.test(password.value)) {
-                notify({ message: '密码必须包含字母', type: 'error' });
-            } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) {
-                notify({ message: '密码必须包含特殊字符', type: 'error' });
+            if (password.value.length < 6 || password.value.length > 20) {
+                notify({ message: '密码长度应在6-20个字符之间', type: 'error' });
+            } else if (/[\u4e00-\u9fa5]/.test(password.value)) {
+                notify({ message: '密码不能包含中文字符', type: 'error' });
             } else {
-                notify({ message: '密码不符合要求', type: 'error' });
+                notify({ message: '密码只能包含字母、数字和标准英文标点符号', type: 'error' });
             }
             return false;
         }
