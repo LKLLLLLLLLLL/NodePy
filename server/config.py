@@ -1,6 +1,7 @@
 import os
 from datetime import timezone
 from pathlib import Path
+from string import ascii_letters, digits, punctuation
 
 """
 This file set some global configurations for the NodePy.
@@ -82,6 +83,14 @@ USER_DEFAULT_STORAGE_MB = 5 * 1024  # 5 GB
 # Cleanup configuration
 CLEAN_ORPHAN_FILE_INTERVAL_SEC = 60 * 60.0  # 1 hour
 
+# Username and password requirements
+USERNAME_MIN_LENGTH = 1
+USERNAME_MAX_LENGTH = 20
+USERNAME_ALLOWED_CHARS = set(ascii_letters + digits + punctuation)
+USERNAME_ALLOWED_UTF8 = True  # Whether to allow UTF characters in username
+PASSWORD_MIN_LENGTH = 6
+PASSWORD_MAX_LENGTH = 20
+PASSWORD_ALLOWED_CHARS = set(ascii_letters + digits + punctuation)
 
 """
 Debugging and logging settings

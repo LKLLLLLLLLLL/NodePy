@@ -19,6 +19,15 @@ from server.config import (
 from server.config import (
     AUTH_SECRET_KEY as SECRET_KEY,
 )
+from server.config import (
+    PASSWORD_ALLOWED_CHARS,
+    PASSWORD_MAX_LENGTH,
+    PASSWORD_MIN_LENGTH,
+    USERNAME_ALLOWED_CHARS,
+    USERNAME_ALLOWED_UTF8,
+    USERNAME_MAX_LENGTH,
+    USERNAME_MIN_LENGTH,
+)
 from server.models.database import UserRecord, get_async_session
 
 pwd_context = CryptContext(
@@ -87,6 +96,31 @@ class AuthUtils:
             return payload
         except JWTError:
             raise ValueError("Could not validate credentials")
+
+    @staticmethod
+    def is_valid_username(username: str) -> bool:
+        """Check if the username meets the required criteria"""
+        if not (USERNAME_MIN_LENGTH <= len(username) <= USERNAME_MAX_LENGTH):
+            return False
+        for char in username:
+            if USERNAME_ALLOWED_UTF8:
+                # check only if it's not ASCII
+                if ord(char) < 128 and char not in USERNAME_ALLOWED_CHARS:
+                    return False
+            else:
+                if char not in USERNAME_ALLOWED_CHARS:
+                    return False
+        return True
+
+    @staticmethod
+    def is_valid_password(password: str) -> bool:
+        """Check if the password meets the required criteria"""
+        if not (PASSWORD_MIN_LENGTH <= len(password) <= PASSWORD_MAX_LENGTH):
+            return False
+        for char in password:
+            if char not in PASSWORD_ALLOWED_CHARS:
+                return False
+        return True
 
 
 security = HTTPBearer()

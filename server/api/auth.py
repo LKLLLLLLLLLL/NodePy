@@ -33,6 +33,7 @@ class TokenResponse(BaseModel):
     responses={
         201: {"description": "User created successfully"},
         400: {"description": "Username or email already registered"},
+        422: {"description": "Invalid username or password"},
         500: {"description": "Internal server error"},
     }
 )
@@ -54,6 +55,12 @@ async def signup(
                 status_code=400,
                 detail="Username or email already registered",
             )
+
+        # check if username and passname fit the requirements
+        if not AuthUtils.is_valid_username(req.username):
+            raise HTTPException(422, detail="Invalid username")
+        if not AuthUtils.is_valid_password(req.password):
+            raise HTTPException(422, detail="Invalid password")
 
         # create a new user
         hashed_pwd = AuthUtils.hash_password(req.password)

@@ -358,7 +358,7 @@ export class DefaultService {
             mediaType: 'application/json',
             errors: {
                 400: `Username or email already registered`,
-                422: `Validation Error`,
+                422: `Invalid username or password`,
                 500: `Internal server error`,
             },
         });
