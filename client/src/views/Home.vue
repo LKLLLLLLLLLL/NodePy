@@ -1,103 +1,95 @@
 <script lang="ts" setup>
 import { useLoginStore } from '@/stores/loginStore';
 import { usePageStore } from '@/stores/pageStore';
-import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
+import { onMounted, computed, ref, markRaw } from 'vue';
 import { useRouter } from 'vue-router';
+import { VueFlow } from '@vue-flow/core'
+import { Background } from '@vue-flow/background'
+import '@vue-flow/core/dist/style.css'
+import '@vue-flow/core/dist/theme-default.css'
+import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
+import type { ExploreListItem } from '@/utils/api';
+
+import ConstNode from '@/components/nodes/input/ConstNode.vue'
+import NumberBinOpNode from '@/components/nodes/compute/NumberBinOpNode.vue'
 
 const pageStore = usePageStore()
 const loginStore = useLoginStore()
 const router = useRouter()
 
-// 当前页面索引
-const currentPage = ref(0)
+const nodeTypes = {
+  ConstNode: markRaw(ConstNode),
+  NumberBinOpNode: markRaw(NumberBinOpNode)
+}
 
-// 页面总数
-const totalPages = 3
-
-// 特性列表
-const features = ref([
+const nodes = ref([
   {
-    icon: 'mdi-nodejs',
-    title: '节点式编程',
-    description: '通过可视化界面拖拽节点，轻松构建复杂的数据处理工作流',
-    color: '#4CAF50'
+    id: '1',
+    type: 'ConstNode',
+    position: { x: 50, y: 50 },
+    data: { param: { value: 10, data_type: 'int' }, dbclicked: false, runningtime: 0 }
   },
   {
-    icon: 'mdi-chart-bell-curve',
-    title: '金融数据分析',
-    description: '专业的金融数据处理、分析和可视化功能，满足专业分析需求',
-    color: '#2196F3'
+    id: '2',
+    type: 'ConstNode',
+    position: { x: 50, y: 250 },
+    data: { param: { value: 20, data_type: 'int' }, dbclicked: false, runningtime: 0 }
   },
   {
-    icon: 'mdi-puzzle',
-    title: '丰富的节点库',
-    description: '涵盖数据导入、清洗、转换、分析和可视化等丰富节点类型',
-    color: '#FF9800'
-  },
-  {
-    icon: 'mdi-code-tags',
-    title: 'Python 底层',
-    description: '基于Python的强大数据处理能力，支持自定义扩展和脚本',
-    color: '#9C27B0'
-  },
-  {
-    icon: 'mdi-graph',
-    title: '可视化性能',
-    description: '极佳的可视化表现，数据结果直观呈现，操作流畅',
-    color: '#F44336'
-  },
-  {
-    icon: 'mdi-account-group',
-    title: '易于上手',
-    description: '适合新手数据分析，也满足开发者的高级功能设计需求',
-    color: '#00BCD4'
+    id: '3',
+    type: 'NumberBinOpNode',
+    position: { x: 400, y: 150 },
+    data: { param: { op: 'ADD' }, dbclicked: false, runningtime: 0 }
   }
 ])
 
-// 动画状态
-const animatedFeatures = ref(Array(features.value.length).fill(false))
+const edges = ref([
+  { id: 'e1-3', source: '1', target: '3', sourceHandle: 'const', targetHandle: 'x', animated: true },
+  { id: 'e2-3', source: '2', target: '3', sourceHandle: 'const', targetHandle: 'y', animated: true }
+])
 
-// 保存目标页面，用于动画过渡
-const targetPage = ref(0)
+// 特性列表
+const features = [
+  {
+    icon: 'mdi-graph',
+    title: '严格类型系统',
+    description: '支持 Int, Float, Bool, String, Table, File, Datetime 七大类型，确保数据流转的准确性。',
+    nodeType: 'input' // 对应 node.scss 中的颜色分类
+  },
+  {
+    icon: 'mdi-table-large',
+    title: 'Pandas 表格处理',
+    description: '内置强大的表格处理能力，支持过滤、去重、缺失值处理、列运算等复杂操作。',
+    nodeType: 'tableProcess'
+  },
+  {
+    icon: 'mdi-chart-scatter-plot',
+    title: '专业可视化',
+    description: '支持散点图、折线图、柱状图、面积图、K线图等多种专业金融图表绘制。',
+    nodeType: 'visualize'
+  },
+  {
+    icon: 'mdi-function-variant',
+    title: 'Python 驱动',
+    description: '底层完全由 Python 驱动，兼容 Python 生态，计算结果精准可靠。',
+    nodeType: 'compute'
+  }
+]
 
-// 页面切换方向
-const transitionDirection = ref<'up' | 'down'>('down')
+// 实例项目列表
+const examples = ref<ExploreListItem[]>([])
 
-onMounted(() => {
+onMounted(async () => {
   loginStore.checkAuthStatus()
   pageStore.setCurrentPage('Home')
-  
-  // 触发特性卡片动画
-  setTimeout(() => {
-    features.value.forEach((_, index) => {
-      setTimeout(() => {
-        animatedFeatures.value[index] = true
-      }, index * 100)
-    })
-  }, 500)
-  
-  // 添加鼠标滚轮事件监听器，设置passive选项为false以允许preventDefault
-  window.addEventListener('wheel', handleWheel, { passive: false })
-})
-
-// 组件卸载前移除事件监听器
-onBeforeUnmount(() => {
-  window.removeEventListener('wheel', handleWheel)
-})
-
-function handleWheel(event: WheelEvent) {
-  // 防止默认滚动行为
-  event.preventDefault()
-  
-  // 根据滚动方向切换页面
-  if (event.deltaY > 0) {
-    // 向下滚动，切换到下一页
-    nextPage()
-  } else {
-    // 向上滚动，切换到上一页
-    prevPage()
+  try {
+    const authService = AuthenticatedServiceFactory.getService()
+    const res = await authService.getExploreProjectsApiExploreExploreProjectsGet()
+    examples.value = res.projects.slice(0, 3) // Take first 3
+  } catch (e) {
+    console.error('Failed to fetch examples:', e)
   }
-}
+})
 
 function jumpToLogin() {
   router.push({
@@ -105,55 +97,39 @@ function jumpToLogin() {
   })
 }
 
-function jumpToDemo() {
-  // 这里可以跳转到演示页面
-  console.log('跳转到演示')
+function jumpToProject() {
+  router.push({
+    name: 'project'
+  })
 }
 
-function jumpToTutorial() {
-  // 这里可以跳转到教程页面
-  console.log('跳转到教程')
+function openExample(projectId: number) {
+  router.push({
+    name: 'editor-example',
+    params: { projectId }
+  })
+}
+
+// Helper to format date
+function formatDate(timestamp: number | null) {
+  if (!timestamp) return ''
+  return new Date(timestamp).toLocaleDateString('zh-CN')
+}
+
+// Helper for thumb
+function getThumbSrc(thumb: string) {
+  if (thumb.startsWith('data:image')) {
+    return thumb
+  }
+  return `data:image/png;base64,${thumb}`
 }
 
 // 用户是否已登录
 const isLoggedIn = computed(() => loginStore.loggedIn)
 
-// 切换到下一页
-function nextPage() {
-  if (currentPage.value < totalPages - 1) {
-    transitionDirection.value = 'down'
-    targetPage.value = currentPage.value + 1
-    setTimeout(() => {
-      currentPage.value = targetPage.value
-    }, 300) // 与CSS动画持续时间保持一致
-  }
-}
-
-// 切换到上一页
-function prevPage() {
-  if (currentPage.value > 0) {
-    transitionDirection.value = 'up'
-    targetPage.value = currentPage.value - 1
-    setTimeout(() => {
-      currentPage.value = targetPage.value
-    }, 300) // 与CSS动画持续时间保持一致
-  }
-}
-
 // 跳转到GitHub
 function jumpToGithub() {
-  window.open('https://github.com', '_blank')
-}
-
-// 跳转到特定页面
-function goToPage(pageIndex: number) {
-  if (pageIndex >= 0 && pageIndex < totalPages) {
-    transitionDirection.value = pageIndex > currentPage.value ? 'down' : 'up'
-    targetPage.value = pageIndex
-    setTimeout(() => {
-      currentPage.value = targetPage.value
-    }, 300) // 与CSS动画持续时间保持一致
-  }
+  window.open('https://github.com/LKLLLLLLLLLL/NodePy', '_blank')
 }
 </script>
 
@@ -164,294 +140,167 @@ function goToPage(pageIndex: number) {
       <div class="bg-circle circle-1"></div>
       <div class="bg-circle circle-2"></div>
       <div class="bg-circle circle-3"></div>
-      <div class="bg-circle circle-4"></div>
     </div>
-    
+
     <!-- 主内容区 -->
     <div class="home-content">
-      <!-- 顶部导航 -->
-      <div class="home-header">
-        <div class="logo-container">
-          <!-- <span class="logo-icon">
-            <svg width="40" height="40" viewBox="0 0 24 24">
-              <path fill="#2196F3" d="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L5,8.09V15.91L12,19.85L19,15.91V8.09L12,4.15M12,6.23L16.9,9.06L12,11.89L7.1,9.06L12,6.23Z" />
-            </svg>
-          </span>
-          <div class="logo-text">
-            <h1>NodePy</h1>
-            <span class="logo-tagline">节点式金融数据分析平台</span>
-          </div>
-        </div>
-        
-        <div class="header-actions" v-if="!isLoggedIn">
-          <el-button type="primary" @click="jumpToLogin" class="login-btn">
-            <span class="mdi mdi-login"></span>
-            登录/注册
-          </el-button>
-        </div>
-        <div class="header-actions" v-else>
-          <el-button type="primary" @click="router.push({name: 'workspace'})" class="dashboard-btn">
-            <span class="mdi mdi-view-dashboard"></span>
-            进入工作台
-          </el-button> -->
-        </div>
-      </div>
-      
-      <!-- 页面切换容器 -->
-      <div class="page-container">
-        <!-- 页面内容 -->
-        <div class="page-content">
-          <!-- 第一页：主标语和介绍 -->
-          <div 
-            v-show="currentPage === 0 || targetPage === 0" 
-            class="page page-1"
-            :class="{
-              'slide-down': currentPage === 0 && targetPage !== 0 && transitionDirection === 'down',
-              'slide-up': currentPage === 0 && targetPage !== 0 && transitionDirection === 'up',
-              'slide-from-top': targetPage === 0 && currentPage !== 0 && transitionDirection === 'up',
-              'slide-from-bottom': targetPage === 0 && currentPage !== 0 && transitionDirection === 'down'
-            }"
-          >
-            <div class="hero-section">
-              <div class="hero-content">
-                <h1 class="hero-title">
-                  可视化金融数据分析，
-                  <span class="highlight">从未如此简单</span>
-                </h1>
-                <p class="hero-subtitle">
-                  NodePy是一个基于节点的金融数据分析平台，通过可视化界面创建和执行复杂的数据处理和分析工作流。基于Python的强大功能，为金融分析提供专业支持。
-                </p>
-                
-                <div class="hero-actions">
-                  <el-button type="primary" size="large" @click="isLoggedIn ? router.push({name: 'workspace'}) : jumpToLogin" class="cta-button">
-                    <span class="mdi mdi-rocket-launch"></span>
-                    立即使用
-                  </el-button>
-                  <el-button size="large" @click="jumpToDemo" class="secondary-button">
-                    <span class="mdi mdi-play-circle-outline"></span>
-                    查看案例
-                  </el-button>
-                </div>
-                
-                <div class="stats-container">
-                  <div class="stat-item">
-                    <div class="stat-number">50+</div>
-                    <div class="stat-label">预制节点</div>
-                  </div>
-                  <div class="stat-divider"></div>
-                  <div class="stat-item">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">Python兼容</div>
-                  </div>
-                  <div class="stat-divider"></div>
-                  <div class="stat-item">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">编程基础要求</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="hero-visual">
-                <div class="node-visualization">
-                  <div class="node node-1">
-                    <span class="node-icon mdi mdi-database"></span>
-                    <span class="node-label">数据源</span>
-                  </div>
-                  <div class="node node-2">
-                    <span class="node-icon mdi mdi-filter"></span>
-                    <span class="node-label">数据清洗</span>
-                  </div>
-                  <div class="node node-3">
-                    <span class="node-icon mdi mdi-calculator"></span>
-                    <span class="node-label">计算分析</span>
-                  </div>
-                  <div class="node node-4">
-                    <span class="node-icon mdi mdi-chart-line"></span>
-                    <span class="node-label">可视化</span>
-                  </div>
-                  <div class="node node-5">
-                    <span class="node-icon mdi mdi-file-export"></span>
-                    <span class="node-label">导出结果</span>
-                  </div>
-                  
-                  <!-- 连接线 -->
-                  <div class="connection connection-1"></div>
-                  <div class="connection connection-2"></div>
-                  <div class="connection connection-3"></div>
-                  <div class="connection connection-4"></div>
-                </div>
-              </div>
+
+      <!-- 页面内容 -->
+      <div class="scroll-content">
+        <!-- 第一部分：Hero Section (编辑器与节点展示) -->
+        <div class="section hero-section">
+          <div class="hero-content">
+            <h1 class="hero-title">
+              可视化金融数据分析<br>
+              <span class="highlight">构建你的量化工作流</span>
+            </h1>
+            <p class="hero-subtitle">
+              NodePy 让数据分析像搭积木一样简单。无需编写复杂代码，通过拖拽节点即可完成从数据获取、清洗、计算到可视化的全过程。
+            </p>
+
+            <div class="hero-actions">
+              <el-button type="primary" size="large" @click="isLoggedIn ? jumpToProject() : jumpToLogin()" class="cta-button">
+                <span class="mdi mdi-rocket-launch"></span>
+                立即开始
+              </el-button>
+              <el-button size="large" @click="jumpToGithub" class="secondary-button">
+                <span class="mdi mdi-github"></span>
+                GitHub
+              </el-button>
             </div>
           </div>
-          
-          <!-- 第二页：特性展示 -->
-          <div 
-            v-show="currentPage === 1 || targetPage === 1" 
-            class="page page-2"
-            :class="{
-              'slide-down': currentPage === 1 && targetPage !== 1 && transitionDirection === 'down',
-              'slide-up': currentPage === 1 && targetPage !== 1 && transitionDirection === 'up',
-              'slide-from-top': targetPage === 1 && currentPage !== 1 && transitionDirection === 'up',
-              'slide-from-bottom': targetPage === 1 && currentPage !== 1 && transitionDirection === 'down'
-            }"
-          >
-            <div class="features-section">
-              <div class="section-header">
-                <h2 class="section-title">为什么选择 NodePy</h2>
-                <p class="section-subtitle">我们为您提供专业、高效、易用的金融数据分析解决方案</p>
+
+          <div class="hero-visual">
+            <!-- 模拟的编辑器界面 -->
+            <div class="editor-mockup">
+              <div class="mockup-header">
+                <div class="dots">
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="title">MyFirstProject.nodepy</div>
               </div>
-              
-              <div class="features-grid">
-                <div 
-                  v-for="(feature, index) in features" 
-                  :key="index"
-                  class="feature-card"
-                  :class="{ animated: animatedFeatures[index] }"
-                  :style="{ '--card-color': feature.color }"
+              <div class="mockup-body">
+                <VueFlow
+                  v-model="nodes"
+                  :edges="edges"
+                  :node-types="nodeTypes"
+                  :default-viewport="{ zoom: 1.0 }"
+                  :min-zoom="0.5"
+                  :max-zoom="2"
+                  fit-view-on-init
+                  class="demo-flow"
+                  id="main"
                 >
-                  <div class="feature-icon">
-                    <span class="mdi" :class="feature.icon"></span>
-                  </div>
-                  <h3 class="feature-title">{{ feature.title }}</h3>
-                  <p class="feature-description">{{ feature.description }}</p>
-                </div>
+                  <Background pattern-color="#aaa" :gap="20" />
+                </VueFlow>
               </div>
             </div>
           </div>
-          
-          <!-- 第三页：CTA区域和原页脚内容 -->
-          <div 
-            v-show="currentPage === 2 || targetPage === 2" 
-            class="page page-3"
-            :class="{
-              'slide-down': currentPage === 2 && targetPage !== 2 && transitionDirection === 'down',
-              'slide-up': currentPage === 2 && targetPage !== 2 && transitionDirection === 'up',
-              'slide-from-top': targetPage === 2 && currentPage !== 2 && transitionDirection === 'up',
-              'slide-from-bottom': targetPage === 2 && currentPage !== 2 && transitionDirection === 'down'
-            }"
-          >
-            <div class="cta-section">
-              <div class="cta-content">
-                <h2 class="cta-title">立即开始您的金融数据分析之旅</h2>
-                <p class="cta-subtitle">无需编写复杂代码，拖拽节点即可完成专业级金融分析</p>
-                <div class="cta-buttons">
-                  <el-button type="primary" size="large" @click="isLoggedIn ? router.push({name: 'workspace'}) : jumpToLogin" class="cta-button-large">
-                    <span class="mdi mdi-arrow-right-circle"></span>
-                    {{ isLoggedIn ? '进入工作台' : '免费注册' }}
-                  </el-button>
-                  <el-button size="large" @click="jumpToGithub" class="secondary-button">
-                    <span class="mdi mdi-github"></span>
-                    获取更多
-                  </el-button>
+        </div>
+
+        <!-- 第二部分：核心优势 (Features) -->
+        <div class="section features-section">
+          <div class="section-header">
+            <h2 class="section-title">核心优势</h2>
+            <p class="section-subtitle">专为金融数据分析设计的节点式编程环境</p>
+          </div>
+
+          <div class="features-grid">
+            <div
+              v-for="(feature, index) in features"
+              :key="index"
+              class="feature-card"
+              :class="`type-${feature.nodeType}`"
+            >
+              <div class="feature-icon-wrapper">
+                <div class="feature-icon">
+                  <span class="mdi" :class="feature.icon"></span>
                 </div>
               </div>
+              <h3 class="feature-title">{{ feature.title }}</h3>
+              <p class="feature-description">{{ feature.description }}</p>
             </div>
-            
-            <!-- 原页脚内容（无样式） -->
-            <div class="footer-content-wrapper">
-              <div class="footer-content">
-                <div class="footer-logo">
-                  <div class="logo-container">
-                    <span class="logo-icon">
-                      <svg width="30" height="30" viewBox="0 0 24 24">
-                        <path fill="#2196F3" d="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L5,8.09V15.91L12,19.85L19,15.91V8.09L12,4.15M12,6.23L16.9,9.06L12,11.89L7.1,9.06L12,6.23Z" />
-                      </svg>
-                    </span>
-                    <div class="logo-text">
-                      <h3>NodePy</h3>
-                    </div>
-                  </div>
-                  <p class="footer-tagline">节点式金融数据分析平台</p>
+          </div>
+        </div>
+
+        <!-- 第三部分：实例项目 (Examples) -->
+        <div class="section examples-section">
+          <div class="section-header">
+            <h2 class="section-title">实例项目</h2>
+            <p class="section-subtitle">从简单的图表绘制到复杂的策略回测，NodePy 都能轻松搞定</p>
+          </div>
+
+          <div class="examples-grid">
+            <div v-for="example in examples" :key="example.project_id" class="example-card" @click="openExample(example.project_id)">
+              <div class="example-preview">
+                <img v-if="example.thumb" :src="getThumbSrc(example.thumb)" alt="preview" class="example-thumb" />
+                <div v-else class="preview-placeholder">
+                  <span class="mdi mdi-image-filter-hdr"></span>
                 </div>
               </div>
-              
-              <div class="footer-bottom">
-                <p>© 2025 NodePy. copyrights reserved.</p>
-                <div class="footer-social">
-                  <span class="mdi mdi-github"></span>
+              <div class="example-content">
+                <h3 class="example-title">{{ example.project_name }}</h3>
+                <p class="example-desc">{{ '暂无描述' }}</p>
+                <div class="example-tags">
+                  <span class="tag">{{ example.owner_name }}</span>
+                  <span class="tag">{{ formatDate(example.updated_at) }}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      <!-- 页面指示器 -->
-      <div class="page-indicators">
-        <span 
-          v-for="(_, index) in Array(totalPages)" 
-          :key="index"
-          class="indicator"
-          :class="{ active: currentPage === index }"
-          @click="goToPage(index)"
-        ></span>
+
+        <!-- 页脚 -->
+        <div class="section footer-section">
+          <div class="cta-box">
+            <h2>准备好开始了吗？</h2>
+            <p>立即注册，开启您的可视化金融分析之旅</p>
+            <el-button type="primary" size="large" @click="isLoggedIn ? jumpToProject() : jumpToLogin()" class="cta-btn">
+              {{ isLoggedIn ? '进入工作台' : '免费注册' }}
+            </el-button>
+          </div>
+
+          <div class="footer-bottom">
+            <div class="footer-logo">
+              <h3>NodePy</h3>
+              <p>© 2025 NodePy Team. All rights reserved.</p>
+            </div>
+            <div class="footer-links">
+              <a href="https://github.com/LKLLLLLLLLLL/NodePy" target="_blank">
+                <span class="mdi mdi-github"></span> GitHub
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-@use 'sass:color';
+@use '@/common/global.scss' as *;
+@use '@/common/node.scss' as *;
+@use 'sass:color' as color;
 
-// 添加页面切换动画
-.slide-down {
-  animation: slideDown 0.3s ease forwards;
-}
+// 覆盖 node.scss 中的一些样式以适应展示
+.nodes-style {
+  position: absolute;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transform-origin: center center;
+  transition: transform 0.3s ease;
 
-.slide-up {
-  animation: slideUp 0.3s ease forwards;
-}
-
-.slide-from-top {
-  animation: slideFromTop 0.3s ease forwards;
-}
-
-.slide-from-bottom {
-  animation: slideFromBottom 0.3s ease forwards;
-}
-
-@keyframes slideDown {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(100%);
-    opacity: 0;
+  &:hover {
+    transform: scale(1.05);
+    z-index: 10;
   }
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-}
-
-@keyframes slideFromTop {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideFromBottom {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+.node-body {
+  padding: 10px;
+  min-height: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .home-container {
@@ -462,7 +311,7 @@ function goToPage(pageIndex: number) {
   width: 100%;
   min-height: 0;
   overflow-x: hidden;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+  background-color: $background-color;
 }
 
 .background-elements {
@@ -471,62 +320,37 @@ function goToPage(pageIndex: number) {
   height: 100%;
   z-index: 0;
   overflow: hidden;
-  
+  pointer-events: none;
+
   .bg-circle {
     position: absolute;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.05) 100%);
-    filter: blur(20px);
+    filter: blur(60px);
+    opacity: 0.6;
   }
-  
+
   .circle-1 {
-    width: 300px;
-    height: 300px;
+    width: 400px;
+    height: 400px;
     top: -100px;
     right: -100px;
-    animation: float 20s infinite ease-in-out;
+    background: rgba($stress-color, 0.15);
   }
-  
+
   .circle-2 {
-    width: 200px;
-    height: 200px;
+    width: 300px;
+    height: 300px;
     bottom: 100px;
     left: -50px;
-    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
-    animation: float 25s infinite ease-in-out reverse;
+    background: rgba($compute-node-color, 0.15);
   }
-  
-  .circle-3 {
-    width: 150px;
-    height: 150px;
-    top: 200px;
-    left: 10%;
-    background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
-    animation: float 15s infinite ease-in-out;
-  }
-  
-  .circle-4 {
-    width: 250px;
-    height: 250px;
-    bottom: -100px;
-    right: 10%;
-    background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 152, 0, 0.05) 100%);
-    animation: float 18s infinite ease-in-out reverse;
-  }
-}
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) translateX(0);
-  }
-  25% {
-    transform: translateY(-20px) translateX(10px);
-  }
-  50% {
-    transform: translateY(-40px) translateX(0);
-  }
-  75% {
-    transform: translateY(-20px) translateX(-10px);
+  .circle-3 {
+    width: 200px;
+    height: 200px;
+    top: 30%;
+    left: 20%;
+    background: rgba($visualize-node-color, 0.1);
   }
 }
 
@@ -537,562 +361,434 @@ function goToPage(pageIndex: number) {
   min-height: 0;
   z-index: 1;
   position: relative;
+  overflow-y: auto;
 }
 
 .home-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px; /* 恢复header的padding */
-  margin-bottom: 20px; /* 恢复header的margin */
-  
+  padding: 20px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+
   .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    
-    .logo-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
     .logo-text {
       h1 {
         margin: 0;
-        font-size: 28px; /* 恢复字体大小 */
-        font-weight: 700;
-        color: #2c3e50;
-        background: linear-gradient(135deg, #2196F3, #21CBF3);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        font-size: 26px;
+        font-weight: 800;
+        color: #333;
+        letter-spacing: -0.5px;
       }
-      
       .logo-tagline {
-        font-size: 14px; /* 恢复tagline字体大小 */
-        color: #7f8c8d;
+        font-size: 13px;
+        color: #666;
+        font-weight: 500;
       }
     }
   }
-  
-  .header-actions {
-    .el-button {
-      border-radius: 8px;
-      padding: 10px 20px; /* 恢复按钮padding */
-      font-weight: 600;
-      transition: all 0.3s ease;
-      
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-    }
-    
-    .login-btn {
-      background: linear-gradient(135deg, #2196F3, #21CBF3);
-      border: none;
-      color: white;
-    }
-    
-    .dashboard-btn {
-      background: white;
-      border: 1px solid #ddd;
-      color: #2196F3;
-    }
+
+  .login-btn {
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 24px;
   }
 }
 
-.page-container {
-  flex: 1;
-  display: flex;
-  position: relative;
-  min-height: 0;
-  margin-bottom: 40px; /* 增加底部margin */
-  padding: 0 30px; /* 增加水平padding */
-}
-
-.page-content {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  min-height: 0;
-  position: relative; /* 添加相对定位 */
-}
-
-.page {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  position: absolute; /* 使用绝对定位 */
+.section {
   width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  transition: transform 0.3s ease; /* 添加过渡效果 */
+  padding: 80px 20px;
+  box-sizing: border-box;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 50px 20px;
+  }
 }
 
-// /* 添加隐藏类以更好地控制显示 */
-// .page:not(.slide-down):not(.slide-up):not(.slide-from-top):not(.slide-from-bottom) {
-//   display: none;
-// }
+.section-header {
+  text-align: center;
+  margin-bottom: 60px;
 
+  .section-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 16px;
+  }
+
+  .section-subtitle {
+    font-size: 18px;
+    color: #666;
+  }
+}
+
+// Hero Section
 .hero-section {
-  flex: 1;
   display: flex;
   align-items: center;
-  padding: 60px 30px; /* 增加padding */
-  
+  justify-content: space-between;
+  min-height: 70vh;
+  gap: 60px;
+
+  @media (max-width: 992px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 40px;
+  }
+
   .hero-content {
-    max-width: 600px;
-    
+    flex: 1;
+    max-width: 550px;
+
     .hero-title {
-      font-size: 42px; /* 增大标题字体大小 */
-      font-weight: 800;
+      font-size: 48px;
+      font-weight: 900;
       line-height: 1.2;
-      color: #2c3e50;
-      margin-bottom: 20px; /* 增加margin */
-      
+      color: #1a1a1a;
+      margin-bottom: 24px;
+
       .highlight {
-        background: linear-gradient(135deg, #2196F3, #21CBF3);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: $stress-color;
       }
     }
-    
+
     .hero-subtitle {
-      font-size: 18px; /* 增大副标题字体大小 */
+      font-size: 18px;
       line-height: 1.6;
-      color: #5a6c7d;
-      margin-bottom: 30px; /* 增加margin */
+      color: #555;
+      margin-bottom: 40px;
     }
-    
+
     .hero-actions {
       display: flex;
-      gap: 15px; /* 增加按钮间距 */
-      margin-bottom: 40px; /* 增加margin */
-      flex-wrap: wrap;
-      
+      gap: 16px;
+
+      @media (max-width: 992px) {
+        justify-content: center;
+      }
+
       .el-button {
         border-radius: 8px;
-        padding: 12px 24px; /* 调整按钮padding */
-        font-size: 16px; /* 增大字体大小 */
         font-weight: 600;
-        transition: all 0.3s ease;
-        
-        &:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-        }
+        padding: 12px 28px;
       }
-      
+
       .cta-button {
-        background: linear-gradient(135deg, #2196F3, #21CBF3);
-        border: none;
-        color: white;
-      }
-      
-      .secondary-button {
-        background: white;
-        border: 1px solid #ddd;
-        color: #2196F3;
-      }
-    }
-    
-    .stats-container {
-      display: flex;
-      align-items: center;
-      gap: 25px; /* 增加间距 */
-      
-      .stat-item {
-        text-align: center;
-        
-        .stat-number {
-          font-size: 32px; /* 增大数字字体大小 */
-          font-weight: 700;
-          color: #2196F3;
-          margin-bottom: 6px;
+        background-color: $stress-color;
+        border-color: $stress-color;
+        box-shadow: 0 4px 14px rgba($stress-color, 0.3);
+
+        &:hover {
+          transform: translateY(-2px);
         }
-        
-        .stat-label {
-          font-size: 14px; /* 增大标签字体大小 */
-          color: #7f8c8d;
-        }
-      }
-      
-      .stat-divider {
-        width: 1px;
-        height: 40px; /* 增大分割线高度 */
-        background: #ddd;
       }
     }
   }
-  
+
   .hero-visual {
-    flex: 1;
+    flex: 1.2;
     display: flex;
-    align-items: center;
     justify-content: center;
-    padding: 30px; /* 增加padding */
-    
-    .node-visualization {
-      position: relative;
+    perspective: 1000px;
+
+    .editor-mockup {
       width: 100%;
-      max-width: 500px;
-      height: 300px; /* 增加高度 */
-    }
-    
-    .node {
-      position: absolute;
-      width: 80px; /* 增加节点宽度 */
-      height: 80px; /* 增加节点高度 */
+      max-width: 700px;
+      height: 450px;
       background: white;
-      border-radius: 16px;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      border: 1px solid rgba(0,0,0,0.05);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
-      z-index: 2;
-      
+      overflow: hidden;
+      transform: rotateY(-5deg) rotateX(2deg);
+      transition: transform 0.5s ease;
+      position: relative;
+
       &:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        transform: rotateY(0) rotateX(0);
       }
-      
-      .node-icon {
-        font-size: 24px; /* 增大图标大小 */
-        margin-bottom: 8px; /* 增加margin */
+
+      .mockup-header {
+        height: 36px;
+        background: #f5f5f5;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+
+        .dots {
+          display: flex;
+          gap: 6px;
+          span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            &:nth-child(1) { background: #ff5f56; }
+            &:nth-child(2) { background: #ffbd2e; }
+            &:nth-child(3) { background: #27c93f; }
+          }
+        }
+
+        .title {
+          flex: 1;
+          text-align: center;
+          font-size: 12px;
+          color: #999;
+        }
       }
-      
-      .node-label {
-        font-size: 12px; /* 增大标签字体大小 */
-        font-weight: 600;
-        color: #2c3e50;
+
+      .mockup-body {
+        flex: 1;
+        background-color: #fafafa;
+        position: relative;
+        overflow: hidden;
       }
-    }
-    
-    .node-1 {
-      top: 20%;
-      left: 10%;
-      color: #2196F3;
-    }
-    
-    .node-2 {
-      top: 20%;
-      right: 10%;
-      color: #4CAF50;
-    }
-    
-    .node-3 {
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #FF9800;
-    }
-    
-    .node-4 {
-      bottom: 20%;
-      left: 10%;
-      color: #2196F3;
-    }
-    
-    .node-5 {
-      bottom: 20%;
-      right: 10%;
-      color: #4CAF50;
-    }
-    
-    .connection {
-      position: absolute;
-      background: linear-gradient(135deg, #2196F3, #4CAF50);
-      z-index: 1;
-    }
-    
-    .connection-1 {
-      top: 25%;
-      left: 20%;
-      width: 60%;
-      height: 4px;
-      border-radius: 2px;
-    }
-    
-    .connection-2 {
-      top: 25%;
-      right: 20%;
-      width: 4px;
-      height: 25%;
-      border-radius: 2px;
-    }
-    
-    .connection-3 {
-      top: 50%;
-      left: 20%;
-      width: 60%;
-      height: 4px;
-      border-radius: 2px;
-    }
-    
-    .connection-4 {
-      bottom: 25%;
-      left: 20%;
-      width: 4px;
-      height: 25%;
-      border-radius: 2px;
     }
   }
 }
 
+// Features Section
 .features-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-//   padding: 40px 0; /* 增加padding */
-    padding-top: 40px;
-  
-  .section-header {
-    text-align: center;
-    margin-bottom: 40px; /* 增加margin */
-    
-    .section-title {
-      font-size: 32px; /* 增大标题字体大小 */
-      font-weight: 800;
-      color: #2c3e50;
-      margin-bottom: 15px; /* 增加margin */
-    }
-    
-    .section-subtitle {
-      font-size: 18px; /* 增大副标题字体大小 */
-      color: #5a6c7d;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-  }
-  
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 调整网格列宽 */
-    gap: 30px; /* 增加间距 */
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 30px; /* 增加水平padding确保内容不被遮挡 */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 30px;
   }
-  
+
   .feature-card {
     background: white;
-    border-radius: 16px;
-    padding: 25px; /* 增加padding */
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
     transition: all 0.3s ease;
-    border-top: 4px solid  #2196F3;
-    opacity: 0;
-    transform: translateY(20px);
-    
-    &.animated {
-      opacity: 1;
-      transform: translateY(0);
+    border: 1px solid transparent;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     }
-    
-    .feature-icon {
-      width: 60px; /* 增加图标容器大小 */
-      height: 60px; /* 增加图标容器大小 */
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px; /* 增加margin */
-      
-      .mdi {
-        font-size: 28px; /* 增大图标大小 */
-        color: white;
+
+    .feature-icon-wrapper {
+      margin-bottom: 20px;
+      .feature-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
+
+        .mdi {
+          font-size: 24px;
+          color: white;
+        }
       }
     }
-    
+
+    // 根据类型设置颜色
+    &.type-input {
+      .feature-icon { background: $input-node-color; }
+      &:hover { border-color: rgba($input-node-color, 0.3); }
+    }
+    &.type-tableProcess {
+      .feature-icon { background: $table-node-color; }
+      &:hover { border-color: rgba($table-node-color, 0.3); }
+    }
+    &.type-visualize {
+      .feature-icon { background: $visualize-node-color; }
+      &:hover { border-color: rgba($visualize-node-color, 0.3); }
+    }
+    &.type-compute {
+      .feature-icon { background: $compute-node-color; }
+      &:hover { border-color: rgba($compute-node-color, 0.3); }
+    }
+
     .feature-title {
-      font-size: 20px; /* 增大标题字体大小 */
+      font-size: 18px;
       font-weight: 700;
-      color: #2c3e50;
-      margin-bottom: 12px; /* 增加margin */
+      color: #333;
+      margin-bottom: 10px;
     }
-    
+
     .feature-description {
-      font-size: 16px; /* 增大描述字体大小 */
-      line-height: 1.5;
-      color: #5a6c7d;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #666;
     }
   }
 }
 
-.cta-section {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  background: linear-gradient(135deg, #2196F3, #21CBF3);
-  border-radius: 24px;
-  padding: 50px 40px; /* 增加padding */
-  text-align: center;
-  margin-bottom: 40px; /* 增加margin */
-  box-shadow: 0 10px 40px rgba(33, 150, 243, 0.3);
-  
-  .cta-content {
-    max-width: 600px;
+// Examples Section
+.examples-section {
+  background: white; // 区分背景
+  width: 100%;
+  max-width: 100%; // 全宽背景
+
+  .section-header, .examples-grid {
+    max-width: 1200px;
     margin: 0 auto;
-    width: 100%;
-    
-    .cta-title {
-      font-size: 32px; /* 增大标题字体大小 */
-      font-weight: 700;
-      color: white;
-      margin-bottom: 15px; /* 增加margin */
-    }
-    
-    .cta-subtitle {
-      font-size: 18px; /* 增大副标题字体大小 */
-      color: rgba(255, 255, 255, 0.9);
-      margin-bottom: 30px; /* 增加margin */
-    }
-    
-    .cta-buttons {
-      display: flex;
-      gap: 15px; /* 增加按钮间距 */
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    
-    .cta-button-large, .secondary-button {
-      display: flex;
-      align-items: center;
-      gap: 8px; /* 增加图标和文字间距 */
-      padding: 15px 35px; /* 增加按钮padding */
-      font-size: 18px; /* 增大字体大小 */
-      font-weight: 600;
-      border-radius: 12px;
-      margin: 0 auto;
-      transition: all 0.3s ease;
-      
-      &:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      }
-    }
-    
-    .cta-button-large {
-      background: white;
-      color: #2196F3;
-      border: none;
-    }
-    
-    .secondary-button {
-      background: transparent;
-      color: white;
-      border: 2px solid white;
-    }
   }
-}
 
-/* 移除footer样式，只保留内容结构 */
-.footer-content-wrapper {
-  padding: 30px 0;
-  
-  .footer-content {
-    max-width: 1200px;
-    margin: 0 auto 20px;
-    padding: 0 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    
-    @media (min-width: 768px) {
-      flex-direction: row;
-      justify-content: space-between;
-    }
+  .examples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 40px;
   }
-  
-  .footer-logo {
-    .logo-container {
+
+  .example-card {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #eee;
+    transition: all 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      transform: translateY(-3px);
+    }
+
+    .example-preview {
+      height: 180px;
+      background: #f0f2f5;
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      
-      h3 {
-        margin: 0;
-        font-size: 24px;
-        color: #2c3e50;
+      justify-content: center;
+      overflow: hidden;
+
+      .example-thumb {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .preview-placeholder {
+        color: #ccc;
+        .mdi { font-size: 48px; }
       }
     }
-    
-    .footer-tagline {
-      color: #7f8c8d;
-      font-size: 14px;
-    }
-  }
-  
-  .footer-bottom {
-    max-width: 1200px;
-    margin: 25px auto 0;
-    padding: 15px 30px 0;
-    border-top: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    
-    @media (min-width: 768px) {
-      flex-direction: row;
-      justify-content: space-between;
-    }
-    
-    p {
-      color: #7f8c8d;
-      font-size: 14px;
-      margin: 0;
-    }
-    
-    .footer-social {
-      display: flex;
-      gap: 20px;
-      
-      .mdi {
-        font-size: 20px;
-        color: #7f8c8d;
-        cursor: pointer;
-        transition: color 0.3s;
+
+    .example-content {
+      padding: 24px;
+
+      .example-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .example-desc {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 16px;
+        height: 44px; // 限制高度
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+
+      .example-tags {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        
-        &:hover {
-          color: #2196F3;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        .tag {
+          font-size: 12px;
+          padding: 4px 10px;
+          background: #f0f7ff;
+          color: $stress-color;
+          border-radius: 4px;
+          font-weight: 500;
         }
       }
     }
   }
 }
 
-.page-indicators {
-  display: flex;
-  justify-content: center;
-  gap: 15px; /* 增加间距 */
-  margin-bottom: 30px; /* 增加margin */
-  
-  .indicator {
-    width: 12px; /* 增大指示器大小 */
-    height: 12px; /* 增大指示器大小 */
-    border-radius: 50%;
-    background: #ccc;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    
-    &.active {
-      background: #2196F3;
-      transform: scale(1.2);
+// Footer Section
+.footer-section {
+  padding-bottom: 40px;
+
+  .cta-box {
+    background: linear-gradient(135deg, $stress-color, color.adjust($stress-color, $lightness: 10%));
+    border-radius: 20px;
+    padding: 60px;
+    text-align: center;
+    color: white;
+    margin-bottom: 60px;
+    box-shadow: 0 20px 40px rgba($stress-color, 0.2);
+
+    h2 {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    p {
+      font-size: 18px;
+      opacity: 0.9;
+      margin-bottom: 32px;
+    }
+
+    .cta-btn {
+      background: white;
+      color: $stress-color;
+      border: none;
+      font-weight: 700;
+      padding: 12px 36px;
+      height: auto;
+      font-size: 16px;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid #eee;
+
+    .footer-logo {
+      h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 4px;
+      }
+      p {
+        font-size: 12px;
+        color: #999;
+      }
+    }
+
+    .footer-links {
+      a {
+        color: #666;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        transition: color 0.2s;
+
+        &:hover {
+          color: $stress-color;
+        }
+      }
     }
   }
 }

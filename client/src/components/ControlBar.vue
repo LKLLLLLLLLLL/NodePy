@@ -51,7 +51,7 @@ const showProjectName = computed(()=>{
 const navItems = [
   { name: 'Home', path: '/home', label: '首页', iconOutline: home_path_outline, iconFilled: home_path_filled },
   { name: 'Example', path: '/example', label: '探索', iconOutline: explore_path_outline, iconFilled: explore_path_filled },
-  { name: 'Project', path: '/project', label: '工作室', iconOutline: project_path_outline, iconFilled: project_path_filled },
+  { name: 'Project', path: '/project', label: '工作台', iconOutline: project_path_outline, iconFilled: project_path_filled },
   { name: 'File', path: '/file', label: '文件库', iconOutline: file_path_outline, iconFilled: file_path_filled },
 ]
 
