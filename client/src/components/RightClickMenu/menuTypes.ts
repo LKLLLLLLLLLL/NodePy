@@ -138,33 +138,33 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'PackNode'
             },
             {
-                label: '单元格提取',
+                label: '提取单元格',
                 value: 'GetCellNode'
             },
             {
-                label: '单元格更新',
+                label: '更新单元格',
                 value: 'SetCellNode'
             },
         ]
     },
     {
-        label: '文件节点',
+        label: '文件',
         value: 'file',
         children: [
             {
-                label: '文件上传节点',
+                label: '文件上传',
                 value: 'UploadNode'
             },
             {
-                label: '文件表格节点',
+                label: '文件转表格',
                 value: 'TableFromFileNode'
             },
             {
-                label: '表格文件节点',
+                label: '表格转文件',
                 value: 'TableToFileNode'
             },
             {
-                label: '文件文本节点',
+                label: '提取文本',
                 value: 'TextFromFileNode'
             },
         ]
@@ -220,127 +220,127 @@ export const nodeMenuItems: MenuNode[] = [
         ]
     },
     {
-        label: '表格处理节点',
+        label: '表格处理',
         value: 'tableProcessing',
         children: [
             {
-                label: '常量列添加节点',
+                label: '添加常量列',
                 value: 'InsertConstColNode'
             },
             {
-                label: '范围数据列添加节点',
+                label: '添加范围列',
                 value: 'InsertRangeColNode'
             },
             {
-                label: '随机数据列添加节点',
+                label: '添加随机列',
                 value: 'InsertRandomColNode'
             },
             {
-                label: '表格过滤节点',
-                value: 'FilterNode'
-            },
-            {
-                label: '表格去重节点',
-                value: 'DropDuplicatesNode'
-            },
-            {
-                label: '表格缺失值删除节点',
-                value: 'DropNaNValueNode'
-            },
-            {
-                label: '表格缺失值填充节点',
-                value: 'FillNaNValueNode'
-            },
-            {
-                label: '表格排序节点',
-                value: 'SortNode'
-            },
-            {
-                label: '表格分组节点',
-                value: 'GroupNode'
-            },
-            {
-                label: '表格合并节点',
-                value: 'MergeNode'
-            },
-            {
-                label: '表格切片节点',
-                value: 'TableSliceNode'
-            },
-            {
-                label: '表格列选择节点',
+                label: '筛选列',
                 value: 'SelectColNode'
             },
             {
-                label: '表格连接节点',
+                label: '过滤行',
+                value: 'FilterNode'
+            },
+            {
+                label: '排序',
+                value: 'SortNode'
+            },
+            {
+                label: '分组',
+                value: 'GroupNode'
+            },
+            {
+                label: '去重',
+                value: 'DropDuplicatesNode'
+            },
+            {
+                label: '删除缺失值',
+                value: 'DropNaNValueNode'
+            },
+            {
+                label: '填充缺失值',
+                value: 'FillNaNValueNode'
+            },
+            {
+                label: '合并行',
+                value: 'MergeNode'
+            },
+            {
+                label: '表格切片',
+                value: 'TableSliceNode'
+            },
+            {
+                label: '连接',
                 value: 'JoinNode'
             },
             {
-                label: '表格列重命名节点',
+                label: '重命名列',
                 value: 'RenameColNode'
             },
             {
-                label: '表格列移动节点',
+                label: '移动行',
                 value: 'ShiftNode'
             },
         ]
     },
     {
-        label: '时间处理节点',
+        label: '日期处理',
         value: 'datetimeProcess',
         children: [
             {
-                label: '时间数值运算节点',
+                label: '日期偏移',
                 value: 'DatetimeComputeNode'
             },
             {
-                label: '时间差值节点',
+                label: '日期差值',
                 value: 'DatetimeDiffNode'
             },
             {
-                label: '数值时间转换节点',
+                label: '转为日期',
                 value: 'ToDatetimeNode'
             },
             {
-                label: '字符串时间转换节点',
+                label: '日期解析',
                 value: 'StrToDatetimeNode'
             },
             {
-                label: '时间格式化节点',
+                label: '日期格式化',
                 value: 'DatetimePrintNode'
             },
             {
-                label: '时间戳转换节点',
+                label: '转为时间戳',
                 value: 'DatetimeToTimestampNode'
             },
         ]
     },
     {
-        label: '分析节点',
+        label: '分析',
         value: 'analysis',
         children: [
             {
-                label: '统计节点',
+                label: '统计信息',
                 value: 'StatsNode'
             },
             {
-                label: '差分节点',
+                label: '差分',
                 value: 'DiffNode'
             },
             {
-                label: '滑动窗口节点',
+                label: '滑动窗口',
                 value: 'RollingNode'
             },
             {
-                label: '重采样节点',
+                label: '日期重采样',
                 value: 'ResampleNode'
             },
             {
-                label: '百分比变化计算节点',
+                label: '数据变化率',
                 value: 'PctChangeNode'
             },
             {
-                label: '累计计算节点',
+                label: '累积计算',
                 value: 'CumulativeNode'
             },
         ]
@@ -372,47 +372,47 @@ export const nodeMenuItems: MenuNode[] = [
         ]
     },
     {
-        label: '机器学习节点',
+        label: '机器学习',
         value: 'machineLearning',
         children: [
             {
-                label: '线性回归节点',
+                label: '线性回归',
                 value: 'LinearRegressionNode'
             },
             {
-                label: '滞后特征节点',
-                value: 'LagFeatureNode'
-            },
-            {
-                label: '随机森林回归节点',
+                label: '随机森林回归',
                 value: 'RandomForestRegressionNode'
             },
             {
-                label: '逻辑回归节点',
-                value: 'LogisticRegressionNode'
-            },
-            {
-                label: '支持向量分类节点',
-                value: 'SVCNode'
-            },
-            {
-                label: 'K均值节点',
-                value: 'KMeansClusteringNode'
-            },
-            {
-                label: '特征标准化节点',
-                value: 'StandardScalerNode'
-            },
-            {
-                label: '分类评分节点',
-                value: 'ClassificationScoreNode'
-            },
-            {
-                label: '回归评分节点',
+                label: '回归模型评分',
                 value: 'RegressionScoreNode'
             },
             {
-                label: '预测节点',
+                label: '逻辑回归分类',
+                value: 'LogisticRegressionNode'
+            },
+            {
+                label: '支持向量机分类',
+                value: 'SVCNode'
+            },
+            {
+                label: '分类模型评分',
+                value: 'ClassificationScoreNode'
+            },
+            {
+                label: 'K-Means聚类',
+                value: 'KMeansClusteringNode'
+            },
+            {
+                label: '特征标准化',
+                value: 'StandardScalerNode'
+            },
+            {
+                label: '时序滞后特征',
+                value: 'LagFeatureNode'
+            },
+            {
+                label: '预测',
                 value: 'PredictNode'
             },
         ]

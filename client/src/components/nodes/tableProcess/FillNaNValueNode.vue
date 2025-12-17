@@ -1,6 +1,6 @@
 <template>
     <div class="FillNaNValueNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">表格缺失值填充节点</NodeTitle>
+        <NodeTitle node-category="tableProcess">填充缺失值</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="subset_cols">
                 <div class="param-description" :class="{'node-has-paramerr': subset_colsHasErr.value}">
-                    检查的列名
+                    选中列
                 </div>
                 <NodepyMultiSelectMany
                     :options="subset_colsHint"

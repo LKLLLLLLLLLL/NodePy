@@ -1,6 +1,6 @@
 <template>
     <div class="InsertRandomColNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">随机数据列添加节点</NodeTitle>
+        <NodeTitle node-category="tableProcess">添加随机列</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -23,13 +23,13 @@
             </div>
             <div class="col_name">
                 <div class="param-description" :class="{'node-has-paramerr': col_nameHasErr.value}">
-                    新增的列名
+                    新增列
                 </div>
                 <NodepyStringInput v-model="col_name" @update-value="onUpdateCol_name" class="nodrag" placeholder="新增的列名"/>
             </div>
             <div class="col_type">
                 <div class="param-description" :class="{'node-has-paramerr': col_typeHasErr.value}">
-                    列的数据类型
+                    数据类型
                 </div>
                 <NodepySelectFew
                     :options="col_typeUi"

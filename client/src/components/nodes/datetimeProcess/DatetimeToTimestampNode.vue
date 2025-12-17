@@ -1,17 +1,17 @@
 <template>
     <div class="DatetimeToTimestampNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='datetimeProcess'>时间戳转换节点</NodeTitle>
+        <NodeTitle node-category='datetimeProcess'>转为时间戳</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-datetime port">
                 <div class="input-port-description">
-                    时间输入
+                    日期输入
                 </div>
                 <Handle id="datetime" type="target" :position="Position.Left" :class="[`${datetime_type}-handle-color`, {'node-errhandle': datetimeHasErr.value}]"/>
             </div>
             <div class="unit">
                 <div class="param-description" :class="{'node-has-paramerr': unitHasErr.value}">
-                    单位
+                    时间戳单位
                 </div>
                 <NodepySelectMany
                     :options="unitChinese"

@@ -1,6 +1,6 @@
 <template>
     <div class="TableSliceNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='tableProcess'>表格切片节点</NodeTitle>
+        <NodeTitle node-category='tableProcess'>表格切片</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="input-begin port">
                 <div class="input-port-description" :class="{'node-has-paramerr': beginHasErr.value}">
-                     起始行索引
+                     起始行
                 </div>
                 <!-- <Handle id="begin" type="target" :position="Position.Left" :class="[`${inputBegin_type}-handle-color`, {'node-errhandle': inputBeginHasErr.value}]"/> -->
             </div>
@@ -26,7 +26,7 @@
             </div>
             <div class="input-end port">
                 <div class="input-port-description" :class="{'node-has-paramerr': endHasErr.value}">
-                    结束行索引
+                    结束行
                 </div>
                 <!-- <Handle id="end" type="target" :position="Position.Left" :class="[`${inputEnd_type}-handle-color`, {'node-errhandle': inputEndHasErr.value}]"/> -->
             </div>

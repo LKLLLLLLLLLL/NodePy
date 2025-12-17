@@ -1,6 +1,6 @@
 <template>
     <div class="SelectColNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">表格列选择节点</NodeTitle>
+        <NodeTitle node-category="tableProcess">筛选列</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="selected_cols">
                 <div class="param-description" :class="{'node-has-paramerr': selected_colsHasErr.value}">
-                    选择的列名
+                    保留列
                 </div>
                 <NodepyMultiSelectMany
                     :options="selected_colsHint"
@@ -23,13 +23,13 @@
             </div>
             <div class="output-selected_table port">
                 <div class="output-port-description">
-                    选择后的表格
+                    选择
                 </div>
                 <Handle id="selected_table" type="source" :position="Position.Right" :class="[`${selected_tableSchema_type}-handle-color`, {'node-errhandle': selected_tableHasErr}]"/>
             </div>
             <div class="output-dropped_table port">
                 <div class="output-port-description">
-                    未选择的表格
+                    未选择
                 </div>
                 <Handle id="dropped_table" type="source" :position="Position.Right" :class="[`${dropped_tableSchema_type}-handle-color`, {'node-errhandle': dropped_tableHasErr}]"/>
             </div>

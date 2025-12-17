@@ -1,6 +1,6 @@
 <template>
     <div class="StatsNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="analysis">统计节点</NodeTitle>
+        <NodeTitle node-category="analysis">统计信息</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="col">
                 <div class="param-description" :class="{'node-has-paramerr': colHasErr.value}">
-                    统计列名
+                    统计列
                 </div>
                 <NodepySelectMany
                     :options="colHint"

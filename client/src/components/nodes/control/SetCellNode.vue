@@ -1,6 +1,6 @@
 <template>
     <div class="SetCellNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="control">单元格更新</NodeTitle>
+        <NodeTitle node-category="control">更新单元格</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">

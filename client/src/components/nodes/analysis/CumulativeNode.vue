@@ -1,6 +1,6 @@
 <template>
     <div class="CumulativeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="analysis">累计计算节点</NodeTitle>
+        <NodeTitle node-category="analysis">累积计算</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="col">
                 <div class="param-description" :class="{'node-has-paramerr': colHasErr.value}">
-                    计算列名
+                    计算列
                 </div>
                 <NodepySelectMany
                     :options="colHint"
@@ -23,13 +23,13 @@
             </div>
             <div class="result_col">
                 <div class="param-description" :class="{'node-has-paramerr': result_colHasErr.value}">
-                    结果列名
+                    结果列
                 </div>
                 <NodepyStringInput v-model="result_col" @update-value="onUpdateResult_col" class="nodrag" placeholder="结果列名"/>
             </div>
             <div class="method">
                 <div class="param-description" :class="{'node-has-paramerr': methodHasErr.value}">
-                    方法
+                    算法
                 </div>
                 <NodepySelectMany
                     :options="methodChinese"
@@ -73,7 +73,7 @@
     const defaultSelectedCol = computed(() => colHint.value.indexOf(col.value))
     const result_col = ref(props.data.param.result_col || '')
     const method = ["cumsum", "cumprod", "cummax", "cummin"]
-    const methodChinese = ['累计总和', '累计乘积', '累计最大值', '累计最小值']
+    const methodChinese = ['总和', '乘积', '最大值', '最小值']
     const defaultSelectedMethod = method.indexOf(props.data.param.method)
     const table_type = computed(() => getInputType(props.id, 'table'))
     const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['table']?.type || 'default')

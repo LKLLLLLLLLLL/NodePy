@@ -1,23 +1,23 @@
 <template>
     <div class="JoinNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">表格连接节点</NodeTitle>
+        <NodeTitle node-category="tableProcess">连接</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-left_table port">
                 <div class="input-port-description">
-                    左表格输入
+                    左表格
                 </div>
                 <Handle id="left_table" type="target" :position="Position.Left" :class="[`${left_table_type}-handle-color`, {'node-errhandle': left_tableHasErr.value}]"/>
             </div>
             <div class="input-right_table port">
                 <div class="input-port-description">
-                    右表格输入
+                    右表格
                 </div>
                 <Handle id="right_table" type="target" :position="Position.Left" :class="[`${right_table_type}-handle-color`, {'node-errhandle': right_tableHasErr.value}]"/>
             </div>
             <div class="left_on">
                 <div class="param-description" :class="{'node-has-paramerr': left_onHasErr.value}">
-                    左表的键
+                    左键
                 </div>
                 <NodepySelectMany
                     :options="left_onHint"
@@ -29,7 +29,7 @@
             </div>
             <div class="right_on">
                 <div class="param-description" :class="{'node-has-paramerr': right_onHasErr.value}">
-                    右表的键
+                    右键
                 </div>
                 <NodepySelectMany
                     :options="right_onHint"

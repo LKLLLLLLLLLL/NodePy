@@ -1,6 +1,6 @@
 <template>
     <div class="FilterNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">表格过滤节点</NodeTitle>
+        <NodeTitle node-category="tableProcess">过滤行</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="cond_col">
                 <div class="param-description" :class="{'node-has-paramerr': cond_colHasErr.value}">
-                    过滤参照列名
+                    参照列
                 </div>
                 <NodepySelectMany
                     :options="cond_colHint"
@@ -23,13 +23,13 @@
             </div>
             <div class="output-true_table port">
                 <div class="output-port-description">
-                    True表格输出
+                    True 输出
                 </div>
                 <Handle id="true_table" type="source" :position="Position.Right" :class="[`${true_table_schema_type}-handle-color`, {'node-errhandle': true_tableHasErr}]"/>
             </div>
             <div class="output-false_table port">
                 <div class="output-port-description">
-                    False表格输出
+                    False 输出
                 </div>
                 <Handle id="false_table" type="source" :position="Position.Right" :class="[`${false_table_schema_type}-handle-color`, {'node-errhandle': false_tableHasErr}]"/>
             </div>

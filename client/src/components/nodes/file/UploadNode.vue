@@ -1,13 +1,13 @@
 <template>
     <div class="UploadNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="file">文件上传节点</NodeTitle>
+        <NodeTitle node-category="file">文件上传</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="file">
-                <div class="param-description" :class="{'node-has-paramerr': fileHasErr.value}">上传文件</div>
+                <div class="param-description" :class="{'node-has-paramerr': fileHasErr.value}">文件</div>
                 <div class="file-upload-component nodrag" @click.stop="addFile">
                     <div class="file-name" :class="{'has-no-file': !data.param.file}">
-                        {{data.param.file ? data.param.file.filename : '点击上传文件'}}
+                        {{data.param.file ? data.param.file.filename : '点击上传'}}
                     </div>
                     <svg-icon type="mdi" :path="mdiAddFile" @click="addFile" class="file-icon"></svg-icon>
                 </div>

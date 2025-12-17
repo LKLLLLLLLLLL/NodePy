@@ -1,6 +1,6 @@
 <template>
     <div class="SortNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">表格排序节点</NodeTitle>
+        <NodeTitle node-category="tableProcess">排序</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="sort_col">
                 <div class="param-description" :class="{'node-has-paramerr': sort_colHasErr.value}">
-                    排序列名
+                    排序列
                 </div>
                 <NodepySelectMany
                     :options="sort_colHint"

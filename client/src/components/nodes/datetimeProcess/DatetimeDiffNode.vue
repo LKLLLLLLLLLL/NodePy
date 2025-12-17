@@ -1,23 +1,23 @@
 <template>
     <div class="DatetimeDiffNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='datetimeProcess'>时间差值节点</NodeTitle>
+        <NodeTitle node-category='datetimeProcess'>日期差值</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-datetime_x port">
                 <div class="input-port-description">
-                    时间x输入
+                    日期x
                 </div>
                 <Handle id="datetime_x" type="target" :position="Position.Left" :class="[`${datetime_x_type}-handle-color`, {'node-errhandle': datetime_xHasErr.value}]"/>
             </div>
             <div class="input-datetime_y port">
                 <div class="input-port-description">
-                    时间y输入
+                    日期y
                 </div>
                 <Handle id="datetime_y" type="target" :position="Position.Left" :class="[`${datetime_y_type}-handle-color`, {'node-errhandle': datetime_yHasErr.value}]"/>
             </div>
             <div class="unit">
                 <div class="param-description" :class="{'node-has-paramerr': unitHasErr.value}">
-                    单位
+                    差值单位
                 </div>
                 <NodepySelectMany
                     :options="unitChinese"

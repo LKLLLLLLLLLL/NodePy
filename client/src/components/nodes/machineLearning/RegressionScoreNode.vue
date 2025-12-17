@@ -1,6 +1,6 @@
 <template>
     <div class="RegressionScoreNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="machineLearning">回归评分节点</NodeTitle>
+        <NodeTitle node-category="machineLearning">回归模型评分</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">

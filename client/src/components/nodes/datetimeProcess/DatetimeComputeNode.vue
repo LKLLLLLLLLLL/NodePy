@@ -1,23 +1,23 @@
 <template>
     <div class="DatetimeComputeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='datetimeProcess'>时间数值运算节点</NodeTitle>
+        <NodeTitle node-category='datetimeProcess'>日期偏移</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-datetime port">
                 <div class="input-port-description">
-                    时间输入
+                    日期
                 </div>
                 <Handle id="datetime" type="target" :position="Position.Left" :class="[`${datetime_type}-handle-color`, {'node-errhandle': datetimeHasErr.value}]"/>
             </div>
             <div class="input-value port">
                 <div class="input-port-description">
-                    数值输入
+                    数值
                 </div>
                 <Handle id="value" type="target" :position="Position.Left" :class="[`${value_type}-handle-color`, {'node-errhandle': valueHasErr.value}]"/>
             </div>
             <div class="op">
                 <div class="param-description" :class="{'node-has-paramerr': opHasErr.value}">
-                    运算类型
+                    运算
                 </div>
                 <NodepySelectFew
                     :options="opChinese"
@@ -28,7 +28,7 @@
             </div>
             <div class="unit">
                 <div class="param-description" :class="{'node-has-paramerr': unitHasErr.value}">
-                    单位
+                    数值单位
                 </div>
                 <NodepySelectMany
                     :options="unitChinese"

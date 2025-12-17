@@ -1,6 +1,6 @@
 <template>
     <div class="StrToDatetimeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='datetimeProcess'>字符串时间转换节点</NodeTitle>
+        <NodeTitle node-category='datetimeProcess'>日期解析</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-value port">
@@ -11,7 +11,7 @@
             </div>
             <div class="output-datetime port">
                 <div class="output-port-description">
-                    时间输出
+                    日期输出
                 </div>
                 <Handle id="datetime" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': datetimeHasErr}]"/>
             </div>

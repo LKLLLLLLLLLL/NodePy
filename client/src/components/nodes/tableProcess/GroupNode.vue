@@ -1,6 +1,6 @@
 <template>
     <div class="GroupNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">表格分组节点</NodeTitle>
+        <NodeTitle node-category="tableProcess">分组</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="group_cols">
                 <div class="param-description" :class="{'node-has-paramerr': group_colsHasErr.value}">
-                    分组列名
+                    分组列
                 </div>
                 <NodepyMultiSelectMany
                     :options="group_colsHint"
@@ -23,7 +23,7 @@
             </div>
             <div class="agg_cols">
                 <div class="param-description" :class="{'node-has-paramerr': agg_colsHasErr.value}">
-                    聚合列名
+                    聚合列
                 </div>
                 <NodepyMultiSelectMany
                     :options="agg_colsHint"

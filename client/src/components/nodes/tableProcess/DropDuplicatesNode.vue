@@ -1,6 +1,6 @@
 <template>
     <div class="DropDuplicatesNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">表格去重节点</NodeTitle>
+        <NodeTitle node-category="tableProcess">去重</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="subset_cols">
                 <div class="param-description" :class="{'node-has-paramerr': subset_colsHasErr.value}">
-                    检查的列名
+                    去重列
                 </div>
                 <NodepyMultiSelectMany
                     :options="subset_colsHint"
@@ -23,7 +23,7 @@
             </div>
             <div class="output-deduplicated_table port">
                 <div class="output-port-description">
-                    去重后表格输出
+                    表格输出
                 </div>
                 <Handle id="deduplicated_table" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': deduplicated_tableHasErr}]"/>
             </div>

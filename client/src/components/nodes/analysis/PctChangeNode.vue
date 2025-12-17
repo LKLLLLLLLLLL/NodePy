@@ -1,6 +1,6 @@
 <template>
     <div class="PctChangeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="analysis">百分比变化计算节点</NodeTitle>
+        <NodeTitle node-category="analysis">数据变化率</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="col">
                 <div class="param-description" :class="{'node-has-paramerr': colHasErr.value}">
-                    计算列名
+                    计算列
                 </div>
                 <NodepySelectMany
                     :options="colHint"
@@ -23,7 +23,7 @@
             </div>
             <div class="result_col">
                 <div class="param-description" :class="{'node-has-paramerr': result_colHasErr.value}">
-                    结果列名
+                    结果列
                 </div>
                 <NodepyStringInput v-model="result_col" @update-value="onUpdateResult_col" class="nodrag" placeholder="结果列名"/>
             </div>

@@ -1,6 +1,6 @@
 <template>
     <div class="TableFromFileNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="file">文件表格节点</NodeTitle>
+        <NodeTitle node-category="file">文件转表格</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-file port">

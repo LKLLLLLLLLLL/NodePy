@@ -1,6 +1,6 @@
 <template>
     <div class="InsertConstColNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">常量列添加节点</NodeTitle>
+        <NodeTitle node-category="tableProcess">添加常量列</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,19 +11,19 @@
             </div>
             <div class="input-const_value port">
                 <div class="input-port-description">
-                    常量值
+                    常量
                 </div>
                 <Handle id="const_value" type="target" :position="Position.Left" :class="[`${const_value_type}-handle-color`, {'node-errhandle': const_valueHasErr.value}]"/>
             </div>
             <div class="col_name">
                 <div class="param-description" :class="{'node-has-paramerr': col_nameHasErr.value}">
-                    新增的列名
+                    新增列
                 </div>
                 <NodepyStringInput v-model="col_name" @update-value="onUpdateCol_name" class="nodrag" placeholder="新增的列名"/>
             </div>
             <div class="col_type">
                 <div class="param-description" :class="{'node-has-paramerr': col_typeHasErr.value}">
-                    列的数据类型
+                    数据类型
                 </div>
                 <NodepySelectMany
                     :options="col_typeUi"

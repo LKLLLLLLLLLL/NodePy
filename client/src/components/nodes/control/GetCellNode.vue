@@ -1,6 +1,6 @@
 <template>
     <div class="GetCellNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="control">单元格提取</NodeTitle>
+        <NodeTitle node-category="control">提取单元格</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">

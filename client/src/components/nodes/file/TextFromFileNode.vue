@@ -1,6 +1,6 @@
 <template>
     <div class="TextFromFileNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="file">文件文本节点</NodeTitle>
+        <NodeTitle node-category="file">提取文本</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-file port">

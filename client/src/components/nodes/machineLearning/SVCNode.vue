@@ -1,6 +1,6 @@
 <template>
     <div class="SVCNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="machineLearning">支持向量分类节点</NodeTitle>
+        <NodeTitle node-category="machineLearning">支持向量机分类</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="feature_cols">
                 <div class="param-description" :class="{'node-has-paramerr': feature_colsHasErr.value}">
-                    特征列名
+                    特征列
                 </div>
                 <NodepyMultiSelectMany
                     :options="feature_colsHint"
@@ -23,7 +23,7 @@
             </div>
             <div class="target_col">
                 <div class="param-description" :class="{'node-has-paramerr': target_colHasErr.value}">
-                    目标列名
+                    目标列
                 </div>
                 <NodepySelectMany
                     :options="target_colHint"
@@ -35,7 +35,7 @@
             </div>
             <div class="kernel">
                 <div class="param-description" :class="{'node-has-paramerr': kernelHasErr.value}">
-                    核函数类型
+                    核函数
                 </div>
                 <NodepySelectMany
                     :options="kernel"

@@ -1,6 +1,6 @@
 <template>
     <div class="DropNaNValueNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">表格缺失值删除节点</NodeTitle>
+        <NodeTitle node-category="tableProcess">删除缺失值</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="subset_cols">
                 <div class="param-description" :class="{'node-has-paramerr': subset_colsHasErr.value}">
-                    检查的列名
+                    选中列
                 </div>
                 <NodepyMultiSelectMany
                     :options="subset_colsHint"
@@ -23,7 +23,7 @@
             </div>
             <div class="output-cleaned_table port">
                 <div class="output-port-description">
-                    删除后表格输出
+                    表格输出
                 </div>
                 <Handle id="cleaned_table" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': cleaned_tableHasErr}]"/>
             </div>

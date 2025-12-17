@@ -1,6 +1,6 @@
 <template>
     <div class="ClassificationScoreNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="machineLearning">分类评分节点</NodeTitle>
+        <NodeTitle node-category="machineLearning">分类模型评分</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">

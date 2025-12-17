@@ -1,17 +1,17 @@
 <template>
     <div class="MergeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='tableProcess'>表格合并节点</NodeTitle>
+        <NodeTitle node-category='tableProcess'>合并行</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table_1 port">
                 <div class="input-port-description">
-                    表格1输入
+                    表格1
                 </div>
                 <Handle id="table_1" type="target" :position="Position.Left" :class="[`${table_1_type}-handle-color`, {'node-errhandle': table_1HasErr.value}]"/>
             </div>
             <div class="input-table_2 port">
                 <div class="input-port-description">
-                    表格2输入
+                    表格2
                 </div>
                 <Handle id="table_2" type="target" :position="Position.Left" :class="[`${table_2_type}-handle-color`, {'node-errhandle': table_2HasErr.value}]"/>
             </div>

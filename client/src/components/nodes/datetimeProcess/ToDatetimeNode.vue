@@ -1,6 +1,6 @@
 <template>
     <div class="ToDatetimeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='datetimeProcess'>数值时间转换节点</NodeTitle>
+        <NodeTitle node-category='datetimeProcess'>转为日期</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-value port">
@@ -11,7 +11,7 @@
             </div>
             <div class="unit">
                 <div class="param-description" :class="{'node-has-paramerr': unitHasErr.value}">
-                    单位
+                    数值单位
                 </div>
                 <NodepySelectMany
                     :options="unitChinese"
@@ -22,7 +22,7 @@
             </div>
             <div class="output-datetime port">
                 <div class="output-port-description">
-                    时间输出
+                    日期输出
                 </div>
                 <Handle id="datetime" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': datetimeHasErr}]"/>
             </div>

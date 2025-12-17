@@ -1,6 +1,6 @@
 <template>
     <div class="RenameColNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="tableProcess">表格列重命名节点</NodeTitle>
+        <NodeTitle node-category="tableProcess">重命名列</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="rename_cols">
                 <div class="param-description" :class="{'node-has-paramerr': rename_mapHasErr.value}">
-                    修改的列名
+                    修改列
                 </div>
                 <NodepyMultiSelectMany
                     :options="rename_colsHint"

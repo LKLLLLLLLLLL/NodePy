@@ -1,6 +1,6 @@
 <template>
     <div class="LagFeatureNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='machineLearning'>滞后特征节点</NodeTitle>
+        <NodeTitle node-category='machineLearning'>时序滞后特征</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -25,7 +25,7 @@
             </div>
             <div class="lag_cols">
                 <div class="param-description" :class="{'node-has-paramerr': lag_colsHasErr.value}">
-                    特征列名
+                    特征列
                 </div>
                 <NodepyMultiSelectMany
                     :options="lag_colsHint"
@@ -42,7 +42,7 @@
                     width="20px"
                     height="20px"
                 >
-                    是否生成预测列
+                    生成预测列
                 </NodepyBoolValue>
             </div>
             <div class="input-horizon port" v-show="data.param.generate_target">
@@ -61,7 +61,7 @@
             </div>
             <div class="target_col" v-show="data.param.generate_target">
                 <div class="param-description" :class="{'node-has-paramerr': target_colHasErr.value}">
-                    预测列名
+                    预测列
                 </div>
                 <NodepySelectMany
                     :options="target_colHint"
@@ -78,7 +78,7 @@
                     width="20px"
                     height="20px"
                 >
-                    是否删除NaN行
+                    删除NaN行
                 </NodepyBoolValue>
             </div>
             <div class="output-table port">

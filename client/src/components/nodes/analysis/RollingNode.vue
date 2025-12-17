@@ -1,6 +1,6 @@
 <template>
     <div class="RollingNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="analysis">滑动窗口节点</NodeTitle>
+        <NodeTitle node-category="analysis">滑动窗口</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -25,7 +25,7 @@
             </div>
             <div class="input-min_periods port">
                 <div class="input-port-description" :class="{'node-has-paramerr': min_periodsHasErr.value}">
-                    最小周期
+                    最小窗口
                 </div>
                 <!-- <Handle id="min_periods" type="target" :position="Position.Left" :class="[`${inputMin_periods_type}-handle-color`, {'node-errhandle': inputMin_periodsHasErr.value}]"/> -->
             </div>
@@ -39,7 +39,7 @@
             </div>
             <div class="col">
                 <div class="param-description" :class="{'node-has-paramerr': colHasErr.value}">
-                    计算列名
+                    计算列
                 </div>
                 <NodepySelectMany
                     :options="colHint"
@@ -51,13 +51,13 @@
             </div>
             <div class="result_col">
                 <div class="param-description" :class="{'node-has-paramerr': result_colHasErr.value}">
-                    结果列名
+                    结果列
                 </div>
                 <NodepyStringInput v-model="result_col" @update-value="onUpdateResult_col" class="nodrag" placeholder="结果列名"/>
             </div>
             <div class="method">
                 <div class="param-description" :class="{'node-has-paramerr': methodHasErr.value}">
-                    方法
+                    算法
                 </div>
                 <NodepySelectMany
                     :options="methodChinese"

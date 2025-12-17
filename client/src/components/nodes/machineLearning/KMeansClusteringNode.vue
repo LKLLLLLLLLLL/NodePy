@@ -1,6 +1,6 @@
 <template>
     <div class="KMeansClusteringNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="machineLearning">K均值节点</NodeTitle>
+        <NodeTitle node-category="machineLearning">K-Means聚类</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="feature_cols">
                 <div class="param-description" :class="{'node-has-paramerr': feature_colsHasErr.value}">
-                    特征列名
+                    特征列
                 </div>
                 <NodepyMultiSelectMany
                     :options="feature_colsHint"

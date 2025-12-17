@@ -1,6 +1,6 @@
 <template>
     <div class="ResampleNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="analysis">重采样节点</NodeTitle>
+        <NodeTitle node-category="analysis">日期重采样</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="col">
                 <div class="param-description" :class="{'node-has-paramerr': colHasErr.value}">
-                    重采样列名
+                    重采样列
                 </div>
                 <NodepySelectMany
                     :options="colHint"
@@ -34,7 +34,7 @@
             </div>
             <div class="method">
                 <div class="param-description" :class="{'node-has-paramerr': methodHasErr.value}">
-                    方法
+                    算法
                 </div>
                 <NodepySelectMany
                     :options="methodChinese"
@@ -45,7 +45,7 @@
             </div>
             <div class="result_col">
                 <div class="param-description" :class="{'node-has-paramerr': result_colHasErr.value}">
-                    结果列名
+                    结果列
                 </div>
                 <NodepyStringInput v-model="result_col" @update-value="onUpdateResult_col" class="nodrag" placeholder="结果列名"/>
             </div>
