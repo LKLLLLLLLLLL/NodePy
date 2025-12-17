@@ -1,6 +1,6 @@
 <template>
     <div class="TableNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="input">表格节点</NodeTitle>
+        <NodeTitle node-category="input">表格</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="tableParam">
@@ -13,7 +13,7 @@
             </div>
             <div class="output-table port">
                 <div class="output-port-description">
-                    表格输出
+                    输出
                 </div>
                 <Handle id="table" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': tableHasErr}]"/>
             </div>

@@ -1,6 +1,6 @@
 <template>
     <div class="KlineNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='input'>K线数据节点</NodeTitle>
+        <NodeTitle node-category='input'>K线数据</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-start_time port">
@@ -70,7 +70,7 @@
             </div>
             <div class="output-kline_data port">
                 <div class="output-port-description">
-                    K线数据表格输出
+                    输出
                 </div>
                 <Handle id="kline_data" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': kline_dataHasErr}]"/>
             </div>

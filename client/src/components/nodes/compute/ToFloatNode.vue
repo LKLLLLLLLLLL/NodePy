@@ -1,11 +1,11 @@
 <template>
     <div class="ToFloatNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="compute">浮点数转换节点</NodeTitle>
+        <NodeTitle node-category="compute">转为浮点</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
                 <div class="input-port-description">
-                    数据输入
+                    输入
                 </div>
                 <Handle
                     id="input"
@@ -16,7 +16,7 @@
             </div>
             <div class="output-output port">
                 <div class="output-port-description">
-                    浮点数输出
+                    浮点输出
                 </div>
                 <Handle
                     id="output"

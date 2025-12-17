@@ -1,6 +1,6 @@
 <template>
     <div class="ForRollingWindowBeginNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='control'>滑动窗口开始节点</NodeTitle>
+        <NodeTitle node-category='control'>滑动窗口循环起始</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">

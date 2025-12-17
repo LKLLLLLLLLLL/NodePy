@@ -1,6 +1,6 @@
 <template>
     <div class="StripNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='stringProcess'>首尾字符清洗节点</NodeTitle>
+        <NodeTitle node-category='stringProcess'>首尾字符去除</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
@@ -11,7 +11,7 @@
             </div>
             <div class="input-strip_chars port">
                 <div class="input-port-description" :class="{'node-has-paramerr': strip_charsHasErr.value}">
-                    清洗字符集合输入
+                    去除字符集
                 </div>
                 <Handle id="strip_chars" type="target" :position="Position.Left" :class="[`${inputStrip_chars_type}-handle-color`, {'node-errhandle': inputStrip_charsHasErr.value}]"/>
             </div>
@@ -21,7 +21,7 @@
                     @update-value="onUpdateStrip_chars"
                     :disabled="strip_charsDisabled"
                     class="nodrag"
-                    placeholder="清洗字符集合"
+                    placeholder="去除字符集合"
                 />
             </div>
             <div class="output-output port">

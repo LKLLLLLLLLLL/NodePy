@@ -1,17 +1,17 @@
 <template>
     <div class="ConcatNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='stringProcess'>字符串拼接节点</NodeTitle>
+        <NodeTitle node-category='stringProcess'>字符串拼接</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input1 port">
                 <div class="input-port-description">
-                    字符串输入1
+                    字符串1
                 </div>
                 <Handle id="input1" type="target" :position="Position.Left" :class="[`${input1_type}-handle-color`, {'node-errhandle': input1HasErr.value}]"/>
             </div>
             <div class="input-input2 port">
                 <div class="input-port-description">
-                    字符串输入2
+                    字符串2
                 </div>
                 <Handle id="input2" type="target" :position="Position.Left" :class="[`${input2_type}-handle-color`, {'node-errhandle': input2HasErr.value}]"/>
             </div>

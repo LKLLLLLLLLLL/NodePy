@@ -1,6 +1,6 @@
 <template>
     <div class="RegexExtractNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='stringProcess'>正则表达式提取节点</NodeTitle>
+        <NodeTitle node-category='stringProcess'>正则表达式提取</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-string port">
@@ -11,7 +11,7 @@
             </div>
             <div class="pattern">
                 <div class="param-description" :class="{'node-has-paramerr': patternHasErr.value}">
-                    正则表达式模式
+                    正则表达式
                 </div>
                 <NodepyStringInput v-model="pattern" @update-value="onUpdatePattern" class="nodrag" placeholder="正则表达式模式"/>
             </div>

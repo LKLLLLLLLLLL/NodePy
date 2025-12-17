@@ -1,6 +1,6 @@
 <template>
     <div class="WordcloudNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="visualize">词云节点</NodeTitle>
+        <NodeTitle node-category="visualize">词云</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
@@ -8,7 +8,7 @@
                 <Handle id="input" type="target" :position="Position.Left" :class="[`${input_type}-handle-color`, {'node-errhandle': inputHasErr.value}]"/>
             </div>
             <div class="word_col">
-                <div class="param-description" :class="{'node-has-paramerr': word_colHasErr.value}">词语列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': word_colHasErr.value}">词语列</div>
                 <NodepySelectMany
                 :options="word_col_hint"
                 :default-selected="word_col_default_selected"
@@ -18,7 +18,7 @@
                 />
             </div>
             <div class="frequency_col" v-if="data.param.plot_type !== 'count' && data.param.plot_type !== 'hist'">
-                <div class="param-description" :class="{'node-has-paramerr': frequency_colHasErr.value}">频率列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': frequency_colHasErr.value}">频率列</div>
                 <NodepySelectMany
                 :options="frequency_col_hint"
                 :default-selected="frequency_col_default_selected"

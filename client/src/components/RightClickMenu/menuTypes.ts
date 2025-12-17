@@ -6,143 +6,143 @@ export interface MenuNode {
 
 export const nodeMenuItems: MenuNode[] = [
     {
-        label: '输入节点',
+        label: '输入',
         value: 'input',
         children: [
             {
-                label: '布尔节点',
+                label: '布尔',
                 value: 'BoolNode'
             },
             {
-                label: '常数节点',
+                label: '常量',
                 value: 'ConstNode'
             },
             {
-                label: '字符串节点',
+                label: '字符串',
                 value: 'StringNode'
             },
             {
-                label: '表格节点',
+                label: '表格',
                 value: 'TableNode'
             },
             {
-                label: '随机表格生成节点',
+                label: '随机表格',
                 value: 'RandomNode'
             },
             {
-                label: '范围表格生成节点',
+                label: '范围表格',
                 value: 'RangeNode'
             },
             {
-                label: '时间输入节点',
+                label: '时间输入',
                 value: 'DateTimeNode'
             },
             {
-                label: 'K线数据节点',
+                label: 'K线数据',
                 value: 'KlineNode'
             },
         ]
     },
     {
-        label: '运算节点',
+        label: '计算',
         value: 'compute',
         children: [
             {
-                label: '数字二元运算节点',
+                label: '数值二元运算',
                 value: 'NumberBinOpNode'
             },
             {
-                label: '数字一元运算节点',
+                label: '数值一元运算',
                 value: 'NumberUnaryOpNode'
             },
             {
-                label: '比较节点',
+                label: '比较',
                 value: 'PrimitiveCompareNode'
             },
             {
-                label: '布尔二元运算节点',
+                label: '布尔二元运算',
                 value: 'BoolBinOpNode'
             },
             {
-                label: '布尔非运算节点',
+                label: '布尔非',
                 value: 'BoolUnaryOpNode'
             },
             {
-                label: '列数字二元运算节点',
+                label: '列二元运算',
                 value: 'ColWithNumberBinOpNode'
             },
             {
-                label: '列数字一元运算节点',
+                label: '列一元运算',
                 value: 'NumberColUnaryOpNode'
             },
             {
-                label: '列布尔二元运算节点',
+                label: '列布尔运算',
                 value: 'ColWithBoolBinOpNode'
             },
             {
-                label: '列布尔非运算节点',
+                label: '列布尔非运算',
                 value: 'BoolColUnaryOpNode'
             },
             {
-                label: '列间数字运算节点',
+                label: '列间运算',
                 value: 'NumberColWithColBinOpNode'
             },
             {
-                label: '列间布尔运算节点',
+                label: '列间布尔运算',
                 value: 'BoolColWithColBinOpNode'
             },
             {
-                label: '列间比较节点',
+                label: '列间比较',
                 value: 'ColCompareNode'
             },
             {
-                label: '字符串转换节点',
+                label: '转为字符串',
                 value: 'ToStringNode'
             },
             {
-                label: '整数转换节点',
+                label: '转为整数',
                 value: 'ToIntNode'
             },
             {
-                label: '浮点数转换节点',
+                label: '转为浮点',
                 value: 'ToFloatNode'
             },
             {
-                label: '布尔转换节点',
+                label: '转为布尔',
                 value: 'ToBoolNode'
             },
         ]
     },
     {
-        label: '控制节点',
+        label: '控制',
         value: 'control',
         children: [
             {
-                label: '自定义脚本节点',
+                label: '自定义脚本',
                 value: 'CustomScriptNode'
             },
             {
-                label: '表格逐行处理节点',
+                label: '表格逐行循环',
                 value: 'ForEachRowNode'
             },
             {
-                label: '表格滑动窗口处理节点',
+                label: '滑动窗口循环',
                 value: 'ForRollingWindowNode'
             },
             {
-                label: '解包节点',
+                label: '解包',
                 value: 'UnpackNode'
             },
             {
-                label: '打包节点',
+                label: '打包',
                 value: 'PackNode'
             },
             {
-                label: '单元格获取节点',
+                label: '单元格提取',
                 value: 'GetCellNode'
             },
             {
-                label: '单元格设置节点',
+                label: '单元格更新',
                 value: 'SetCellNode'
             },
         ]
@@ -174,47 +174,47 @@ export const nodeMenuItems: MenuNode[] = [
         value: 'stringProcessing',
         children: [
             {
-                label: '字符串切片节点',
+                label: '字符串切片',
                 value: 'SliceNode'
             },
             {
-                label: '字符串替换节点',
+                label: '字符串替换',
                 value: 'ReplaceNode'
             },
             {
-                label: '大小写转换节点',
+                label: '大小写转换',
                 value: 'LowerOrUpperNode'
             },
             {
-                label: '正则表达式提取节点',
+                label: '正则表达式提取',
                 value: 'RegexExtractNode'
             },
             {
-                label: '分词节点',
+                label: '分词',
                 value: 'TokenizeNode'
             },
             {
-                label: '首尾字符清洗节点',
+                label: '首尾字符去除',
                 value: 'StripNode'
             },
             {
-                label: '批量首尾字符清洗节点',
+                label: '批量首尾字符去除',
                 value: 'BatchStripNode'
             },
             {
-                label: '字符串拼接节点',
+                label: '字符串拼接',
                 value: 'ConcatNode'
             },
             {
-                label: '批量字符串拼接节点',
+                label: '批量字符串拼接',
                 value: 'BatchConcatNode'
             },
             {
-                label: '正则表达式匹配节点',
+                label: '正则表达式匹配',
                 value: 'RegexMatchNode'
             },
             {
-                label: '批量正则表达式匹配节点',
+                label: '批量正则表达式匹配',
                 value: 'BatchRegexMatchNode'
             },
         ]
@@ -346,27 +346,27 @@ export const nodeMenuItems: MenuNode[] = [
         ]
     },
     {
-        label: '可视化节点',
+        label: '可视化',
         value: 'visualization',
         children: [
             {
-                label: '快速绘图节点',
+                label: '快速绘图',
                 value: 'QuickPlotNode'
             },
             {
-                label: '双轴绘图节点',
+                label: '双轴绘图',
                 value: 'DualAxisPlotNode'
             },
             {
-                label: '统计绘图节点',
+                label: '统计绘图',
                 value: 'StatisticalPlotNode'
             },
             {
-                label: '词云节点',
+                label: '词云',
                 value: 'WordcloudNode'
             },
             {
-                label: 'K线图节点',
+                label: 'K线图',
                 value: 'KlinePlotNode'
             },
         ]

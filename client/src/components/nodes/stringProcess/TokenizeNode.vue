@@ -1,6 +1,6 @@
 <template>
     <div class="TokenizeNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='stringProcess'>分词节点</NodeTitle>
+        <NodeTitle node-category='stringProcess'>分词</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-text port">
@@ -28,7 +28,7 @@
             </div>
             <div class="result_col">
                 <div class="param-description" :class="{'node-has-paramerr': result_colHasErr.value}">
-                    结果列名
+                    结果列
                 </div>
                 <NodepyStringInput :allow-null="true" v-model="result_col" @update-value="onUpdateResult_col" class="nodrag" placeholder="结果列名"/>
             </div>

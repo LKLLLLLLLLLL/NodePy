@@ -1,6 +1,6 @@
 <template>
     <div class="KlinePlotNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="visualize">K线图节点</NodeTitle>
+        <NodeTitle node-category="visualize">K线图</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
@@ -12,7 +12,7 @@
                 <NodepyStringInput :allow-null="true" v-model="title" @update-value="() => updateSimpleStringNumberBoolValue(data.param, 'title', title)" class="nodrag" placeholder="图像标题"/>
             </div>
             <div class="x_col">
-                <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列</div>
                 <NodepySelectMany
                 :options="x_col_hint"
                 :default-selected="x_col_default_selected"
@@ -22,7 +22,7 @@
                 />
             </div>
             <div class="open_col">
-                <div class="param-description" :class="{'node-has-paramerr': open_colHasErr.value}">开盘价列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': open_colHasErr.value}">开盘价列</div>
                 <NodepySelectMany
                 :options="open_col_hint"
                 :default-selected="open_col_default_selected"
@@ -32,7 +32,7 @@
                 />
             </div>
             <div class="high_col">
-                <div class="param-description" :class="{'node-has-paramerr': high_colHasErr.value}">最高价列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': high_colHasErr.value}">最高价列</div>
                 <NodepySelectMany
                 :options="high_col_hint"
                 :default-selected="high_col_default_selected"
@@ -42,7 +42,7 @@
                 />
             </div>
             <div class="low_col">
-                <div class="param-description" :class="{'node-has-paramerr': low_colHasErr.value}">最低价列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': low_colHasErr.value}">最低价列</div>
                 <NodepySelectMany
                 :options="low_col_hint"
                 :default-selected="low_col_default_selected"
@@ -52,7 +52,7 @@
                 />
             </div>
             <div class="close_col">
-                <div class="param-description" :class="{'node-has-paramerr': close_colHasErr.value}">收盘价列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': close_colHasErr.value}">收盘价列</div>
                 <NodepySelectMany
                 :options="close_col_hint"
                 :default-selected="close_col_default_selected"
@@ -62,7 +62,7 @@
                 />
             </div>
             <div class="volume_col">
-                <div class="param-description" :class="{'node-has-paramerr': volume_colHasErr.value}">成交量列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': volume_colHasErr.value}">成交量列</div>
                 <NodepySelectMany
                 :options="volume_col_hint"
                 :default-selected="volume_col_default_selected"

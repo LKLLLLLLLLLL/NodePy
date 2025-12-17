@@ -1,23 +1,23 @@
 <template>
     <div class="PrimitiveCompareNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="compute">比较节点</NodeTitle>
+        <NodeTitle node-category="compute">比较</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-x port">
                 <div class="input-port-description">
-                    x输入
+                    x
                 </div>
                 <Handle id="x" type="target" :position="Position.Left" :class="[`${x_type}-handle-color`, {'node-errhandle': xHasErr.value}]"/>
             </div>
             <div class="input-y port">
                 <div class="input-port-description">
-                    y输入
+                    y
                 </div>
                 <Handle id="y" type="target" :position="Position.Left" :class="[`${y_type}-handle-color`, {'node-errhandle': yHasErr.value}]"/>
             </div>
             <div class="op">
                 <div class="param-description" :class="{'node-has-paramerr': opHasErr.value}">
-                    运算类型
+                    运算
                 </div>
                 <NodepySelectMany
                     :options="opChinese"
@@ -28,7 +28,7 @@
             </div>
             <div class="output-result port">
                 <div class="output-port-description">
-                    结果输出
+                    输出
                 </div>
                 <Handle id="result" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': resultHasErr}]"/>
             </div>

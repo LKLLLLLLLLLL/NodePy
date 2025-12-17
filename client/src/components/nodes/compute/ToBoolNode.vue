@@ -1,11 +1,11 @@
 <template>
     <div class="ToBoolNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="compute">布尔转换节点</NodeTitle>
+        <NodeTitle node-category="compute">转为布尔</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
                 <div class="input-port-description">
-                    数据输入
+                    输入
                 </div>
                 <Handle
                     id="input"

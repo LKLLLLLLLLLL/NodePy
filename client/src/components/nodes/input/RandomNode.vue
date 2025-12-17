@@ -1,6 +1,6 @@
 <template>
     <div class="RandomNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="input">随机表格生成节点</NodeTitle>
+        <NodeTitle node-category="input">随机表格</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-row_count port">
@@ -34,7 +34,7 @@
             </div>
             <div class="col_type">
                 <div class="param-description" :class="{'node-has-paramerr': col_typeHasErr.value}">
-                    列的数据类型
+                    列数据类型
                 </div>
                 <NodepySelectMany
                     :options="col_typeChinese"
@@ -45,7 +45,7 @@
             </div>
             <div class="output-table port">
                 <div class="output-port-description">
-                    输出的表格
+                    输出
                 </div>
                 <Handle id="table" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': tableHasErr}]"/>
             </div>

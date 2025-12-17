@@ -1,6 +1,6 @@
 <template>
     <div class="CustomScriptNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='control'>自定义脚本节点</NodeTitle>
+        <NodeTitle node-category='control'>自定义脚本</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <template v-for="(inputPort, idx) in inputPorts" :key="inputPort.id">
@@ -36,7 +36,7 @@
             <div class="addInputPort">
                 <NodepyButton :handle-click="addInputPort">
                     <NodepyPlus/>
-                    添加输入端口
+                    添加输入
                 </NodepyButton>
             </div>
             <div class="script">
@@ -78,7 +78,7 @@
             <div class="addOutputPort">
                 <NodepyButton :handle-click="addOutputPort">
                     <NodepyPlus/>
-                    添加输出端口
+                    添加输出
                 </NodepyButton>
             </div>
         </div>

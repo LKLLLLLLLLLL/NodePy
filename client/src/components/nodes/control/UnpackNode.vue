@@ -1,11 +1,11 @@
 <template>
     <div class="UnpackNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='control'>解包节点</NodeTitle>
+        <NodeTitle node-category='control'>解包</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-row port">
                 <div class="input-port-description">
-                    单行表格
+                    表格行
                 </div>
                 <Handle id="row" type="target" :position="Position.Left" :class="[`${row_type}-handle-color`, {'node-errhandle': rowHasErr.value}]"/>
             </div>
@@ -23,7 +23,7 @@
             </div>
             <div class="output-unpacked_row port">
                 <div class="output-port-description">
-                    解包行
+                    剩余列
                 </div>
                 <Handle id="unpacked_row" type="source" :position="Position.Right" :class="[`${unpacked_rowSchema_type}-handle-color`, {'node-errhandle': unpacked_rowHasErr}]"/>
             </div>

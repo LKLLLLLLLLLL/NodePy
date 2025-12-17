@@ -1,11 +1,11 @@
 <template>
     <div class="PackNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='control'>打包节点</NodeTitle>
+        <NodeTitle node-category='control'>打包</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-base_row port">
                 <div class="input-port-description">
-                    基础单行表格
+                    原表格行
                 </div>
                 <Handle id="base_row" type="target" :position="Position.Left" :class="[`${base_row_type}-handle-color`, {'node-errhandle': base_rowHasErr.value}]"/>
             </div>
@@ -33,12 +33,12 @@
             <div class="addInputPort">
                 <NodepyButton :handle-click="addInputPort">
                     <NodepyPlus/>
-                    添加输入端口
+                    添加输入
                 </NodepyButton>
             </div>
             <div class="output-packed_row port">
                 <div class="output-port-description">
-                    打包行
+                    结果行
                 </div>
                 <Handle id="packed_row" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': packed_rowHasErr}]"/>
             </div>

@@ -1,6 +1,6 @@
 <template>
     <div class="QuickPlotNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="visualize">快速绘图节点</NodeTitle>
+        <NodeTitle node-category="visualize">快速绘图</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
@@ -12,7 +12,7 @@
                 <NodepyStringInput :allow-null="true" v-model="title" @update-value="onUpdateTitle" class="nodrag" placeholder="图像标题"/>
             </div>
             <div class="x_col">
-                <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列</div>
                 <NodepySelectMany
                 :options="x_col_hint"
                 :default-selected="x_col_default_selected"
@@ -25,7 +25,7 @@
                 <div class="y_col">
                     <hr style="margin-bottom: 4px;"></hr>
                     <div class="param-description y_col-description" :class="{'node-has-paramerr': y_colHasErr.value}">
-                        <span class="y-col-label">y轴列名 {{ idx + 1 }}</span>
+                        <span class="y-col-label">y轴列 {{ idx + 1 }}</span>
                         <NodepyCross v-if="y_cols.length > 1" :handle-click="() => removeY_col(idx)" class="y-col-close"/>
                     </div>
                     <NodepySelectMany
@@ -37,7 +37,7 @@
                     />
                 </div>
                 <div class="plot_type">
-                    <div class="param-description" :class="{'node-has-paramerr': plot_typeHasErr.value}">图形类型</div>
+                    <div class="param-description" :class="{'node-has-paramerr': plot_typeHasErr.value}">图像类型</div>
                     <NodepySelectMany
                         :options="plot_type_options_chinese"
                         :default-selected="y_col.defaultSelectedPlot_type"

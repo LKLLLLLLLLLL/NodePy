@@ -1,6 +1,6 @@
 <template>
     <div class="ReplaceNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='stringProcess'>字符串替换节点</NodeTitle>
+        <NodeTitle node-category='stringProcess'>字符串替换</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
@@ -11,7 +11,7 @@
             </div>
             <div class="input-old port">
                 <div class="input-port-description" :class="{'node-has-paramerr': oldHasErr.value}">
-                    旧字符串输入
+                    旧字符串
                 </div>
                 <Handle id="old" type="target" :position="Position.Left" :class="[`${inputOld_type}-handle-color`, {'node-errhandle': inputOldHasErr.value}]"/>
             </div>
@@ -26,7 +26,7 @@
             </div>
             <div class="input-new port">
                 <div class="input-port-description" :class="{'node-has-paramerr': newHasErr.value}">
-                    新字符串输入
+                    新字符串
                 </div>
                 <Handle id="new" type="target" :position="Position.Left" :class="[`${inputNew_type}-handle-color`, {'node-errhandle': inputNewHasErr.value}]"/>
             </div>

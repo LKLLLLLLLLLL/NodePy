@@ -1,6 +1,6 @@
 <template>
     <div class="ForEachRowEndNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='control'>表格逐行处理结束节点</NodeTitle>
+        <NodeTitle node-category='control'>表格逐行循环结束</NodeTitle>
         <div class="data">
             <div class="input-row port">
                 <div class="input-port-description">

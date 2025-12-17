@@ -1,6 +1,6 @@
 <template>
     <div class="LowerOrUpperNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='stringProcess'>大小写转换节点</NodeTitle>
+        <NodeTitle node-category='stringProcess'>大小写转换</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
@@ -11,7 +11,7 @@
             </div>
             <div class="to_case">
                 <div class="param-description" :class="{'node-has-paramerr': to_caseHasErr.value}">
-                    转换类型
+                    转换方式
                 </div>
                 <NodepySelectFew
                     :options="to_caseChinese"

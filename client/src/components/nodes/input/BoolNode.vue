@@ -1,6 +1,6 @@
 <template>
     <div class="BoolNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="input">布尔节点</NodeTitle>
+        <NodeTitle node-category="input">布尔</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="value">
@@ -10,7 +10,7 @@
                     width="20px"
                     height="20px"
                 >
-                布尔
+                值
                 </NodepyBoolValue>
             </div>
             <div class="output-const port">

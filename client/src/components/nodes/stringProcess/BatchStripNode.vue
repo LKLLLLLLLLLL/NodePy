@@ -1,6 +1,6 @@
 <template>
     <div class="BatchStripNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='stringProcess'>批量首尾字符清洗节点</NodeTitle>
+        <NodeTitle node-category='stringProcess'>批量首尾字符去除</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
@@ -11,7 +11,7 @@
             </div>
             <div class="input-strip_chars port">
                 <div class="input-port-description" :class="{'node-has-paramerr': strip_charsHasErr.value}">
-                    清洗字符集合输入
+                    去除字符集
                 </div>
                 <Handle id="strip_chars" type="target" :position="Position.Left" :class="[`${inputStrip_chars_type}-handle-color`, {'node-errhandle': inputStrip_charsHasErr.value}]"/>
             </div>
@@ -21,12 +21,12 @@
                     @update-value="onUpdateStrip_chars"
                     :disabled="strip_charsDisabled"
                     class="nodrag"
-                    placeholder="清洗字符集合"
+                    placeholder="去除字符集合"
                 />
             </div>
             <div class="col">
                 <div class="param-description" :class="{'node-has-paramerr': colHasErr.value}">
-                    操作列名
+                    操作列
                 </div>
                 <NodepySelectMany
                     :options="colHint"
@@ -38,13 +38,13 @@
             </div>
             <div class="result_col">
                 <div class="param-description" :class="{'node-has-paramerr': result_colHasErr.value}">
-                    结果列名
+                    结果列
                 </div>
-                <NodepyStringInput v-model="result_col" @update-value="onUpdateResult_col" class="nodrag" placeholder="结果列名"/>
+                <NodepyStringInput v-model="result_col" @update-value="onUpdateResult_col" class="nodrag" placeholder="结果列"/>
             </div>
             <div class="output-output port">
                 <div class="output-port-description">
-                    结果表格输出
+                    结果表格
                 </div>
                 <Handle id="output" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': outputHasErr}]"/>
             </div>

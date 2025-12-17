@@ -1,6 +1,6 @@
 <template>
     <div class="ForEachRowBeginNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='control'>表格逐行处理开始节点</NodeTitle>
+        <NodeTitle node-category='control'>表格逐行循环起始</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">

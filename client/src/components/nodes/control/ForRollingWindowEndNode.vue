@@ -1,6 +1,6 @@
 <template>
     <div class="ForRollingWindowEndNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='control'>滑动窗口结束节点</NodeTitle>
+        <NodeTitle node-category='control'>滑动窗口循环结束</NodeTitle>
         <div class="data">
             <div class="input-window port">
                 <div class="input-port-description">

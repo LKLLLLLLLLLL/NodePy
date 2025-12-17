@@ -1,6 +1,6 @@
 <template>
     <div class="BatchRegexMatchNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='stringProcess'>批量正则表达式匹配节点</NodeTitle>
+        <NodeTitle node-category='stringProcess'>批量正则表达式匹配</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
@@ -11,13 +11,13 @@
             </div>
             <div class="pattern">
                 <div class="param-description" :class="{'node-has-paramerr': patternHasErr.value}">
-                    正则表达式模式
+                    正则表达式
                 </div>
-                <NodepyStringInput v-model="pattern" @update-value="onUpdatePattern" class="nodrag" placeholder="正则表达式模式"/>
+                <NodepyStringInput v-model="pattern" @update-value="onUpdatePattern" class="nodrag" placeholder="正则表达式"/>
             </div>
             <div class="col">
                 <div class="param-description" :class="{'node-has-paramerr': colHasErr.value}">
-                    操作列名
+                    操作列
                 </div>
                 <NodepySelectMany
                     :options="colHint"
@@ -29,13 +29,13 @@
             </div>
             <div class="result_col">
                 <div class="param-description" :class="{'node-has-paramerr': result_colHasErr.value}">
-                    结果列名
+                    结果列
                 </div>
                 <NodepyStringInput v-model="result_col" @update-value="onUpdateResult_col" class="nodrag" placeholder="结果列名"/>
             </div>
             <div class="output-output port">
                 <div class="output-port-description">
-                    结果表格输出
+                    结果表格
                 </div>
                 <Handle id="output" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': outputHasErr}]"/>
             </div>

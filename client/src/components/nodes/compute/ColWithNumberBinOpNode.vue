@@ -1,23 +1,23 @@
 <template>
     <div class="ColWithNumberBinOpNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="compute">列数字二元运算节点</NodeTitle>
+        <NodeTitle node-category="compute">列二元运算</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
                 <div class="input-port-description">
-                    表格输入T
+                    表格T
                 </div>
                 <Handle id="table" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': inputTableHasErr.value}]"/>
             </div>
             <div class="input-num port">
                 <div class="input-port-description">
-                    数值输入n
+                    数值n
                 </div>
                 <Handle id="num" type="target" :position="Position.Left" :class="[`${num_type}-handle-color`, {'node-errhandle': numHasErr.value}]"/>
             </div>
             <div class="op">
                 <div class="param-description" :class="{'node-has-paramerr': opHasErr.value}">
-                    运算类型
+                    运算
                 </div>
                 <NodepySelectMany
                     :options="opUi"
@@ -28,7 +28,7 @@
             </div>
             <div class="col">
                 <div class="param-description" :class="{'node-has-paramerr': colHasErr.value}">
-                    操作列名
+                    操作列
                 </div>
                 <NodepySelectMany
                     :options="colHint"
@@ -40,13 +40,13 @@
             </div>
             <div class="result_col">
                 <div class="param-description" :class="{'node-has-paramerr': result_colHasErr.value}">
-                    结果列名
+                    结果列
                 </div>
                 <NodepyStringInput v-model="result_col" @update-value="onUpdateResult_col" class="nodrag" placeholder="结果列名"/>
             </div>
             <div class="output-table port">
                 <div class="output-port-description">
-                    结果表格输出
+                    输出
                 </div>
                 <Handle id="table" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': outputTableHasErr}]"/>
             </div>

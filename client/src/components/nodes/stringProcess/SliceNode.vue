@@ -1,6 +1,6 @@
 <template>
     <div class="SliceNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category='stringProcess'>字符串切片节点</NodeTitle>
+        <NodeTitle node-category='stringProcess'>字符串切片</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
@@ -11,7 +11,7 @@
             </div>
             <div class="input-start port">
                 <div class="input-port-description" :class="{'node-has-paramerr': startHasErr.value}">
-                    起始索引输入
+                    起始索引
                 </div>
                 <Handle id="start" type="target" :position="Position.Left" :class="[`${inputStart_type}-handle-color`, {'node-errhandle': inputStartHasErr.value}]"/>
             </div>
@@ -26,7 +26,7 @@
             </div>
             <div class="input-end port">
                 <div class="input-port-description" :class="{'node-has-paramerr': endHasErr.value}">
-                    结束索引输入
+                    结束索引
                 </div>
                 <Handle id="end" type="target" :position="Position.Left" :class="[`${inputEnd_type}-handle-color`, {'node-errhandle': inputEndHasErr.value}]"/>
             </div>

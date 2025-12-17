@@ -1,6 +1,6 @@
 <template>
     <div class="StringNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="input">字符串节点</NodeTitle>
+        <NodeTitle node-category="input">字符串</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="value">
@@ -17,7 +17,7 @@
             </div>
             <div class="output-string port">
                 <div class="output-port-description">
-                    字符串输出
+                    输出
                 </div>
                 <Handle id="string" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': stringHasErr}]"/>
             </div>

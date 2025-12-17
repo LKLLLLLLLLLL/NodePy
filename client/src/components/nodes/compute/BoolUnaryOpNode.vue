@@ -1,17 +1,17 @@
 <template>
     <div class="BoolUnaryOpNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="compute">布尔非运算节点</NodeTitle>
+        <NodeTitle node-category="compute">布尔非</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-x port">
                 <div class="input-port-description">
-                    x输入
+                    x
                 </div>
                 <Handle id="x" type="target" :position="Position.Left" :class="[`${x_type}-handle-color`, {'node-errhandle': xHasErr.value}]"/>
             </div>
             <div class="output-result port">
                 <div class="output-port-description">
-                    结果输出
+                    输出
                 </div>
                 <Handle id="result" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': resultHasErr}]"/>
             </div>

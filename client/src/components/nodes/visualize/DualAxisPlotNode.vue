@@ -1,6 +1,6 @@
 <template>
     <div class="DualAxisPlotNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="visualize">双轴绘图节点</NodeTitle>
+        <NodeTitle node-category="visualize">双轴绘图</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-input port">
@@ -12,7 +12,7 @@
                 <NodepyStringInput :allow-null="true" v-model="title" @update-value="() => updateSimpleStringNumberBoolValue(data.param, 'title', title)" class="nodrag" placeholder="图像标题"/>
             </div>
             <div class="x_col">
-                <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列</div>
                 <NodepySelectMany
                 :options="x_col_hint"
                 :default-selected="x_col_default_selected"
@@ -22,7 +22,7 @@
                 />
             </div>
             <div class="left_y_col">
-                <div class="param-description" :class="{'node-has-paramerr': left_y_colHasErr.value}">左y轴列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': left_y_colHasErr.value}">左y轴列</div>
                 <NodepySelectMany
                 :options="left_y_col_hint"
                 :default-selected="left_y_col_default_selected"
@@ -33,7 +33,7 @@
             </div>
             <div class="left_plot_type">
                 <div class="param-description" :class="{'node-has-paramerr': left_plot_typeHasErr.value}">
-                    图形类型
+                    图像类型
                 </div>
                 <NodepySelectFew
                     :options="plot_type_options_chinese"
@@ -43,7 +43,7 @@
                 />
             </div>
             <div class="right_y_col">
-                <div class="param-description" :class="{'node-has-paramerr': right_y_colHasErr.value}">右y轴列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': right_y_colHasErr.value}">右y轴列</div>
                 <NodepySelectMany
                 :options="right_y_col_hint"
                 :default-selected="right_y_col_default_selected"
@@ -54,7 +54,7 @@
             </div>
             <div class="right_plot_type">
                 <div class="param-description" :class="{'node-has-paramerr': right_plot_typeHasErr.value}">
-                    图形类型
+                    图像类型
                 </div>
                 <NodepySelectFew
                     :options="plot_type_options_chinese"

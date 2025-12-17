@@ -1,6 +1,6 @@
 <template>
     <div class="GetCellNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="control">单元格获取节点</NodeTitle>
+        <NodeTitle node-category="control">单元格提取</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -11,7 +11,7 @@
             </div>
             <div class="input-row port">
                 <div class="input-port-description" :class="{'node-has-paramerr': rowHasErr.value}">
-                    行索引
+                    行号
                 </div>
                 <Handle id="row" type="target" :position="Position.Left" :class="[`${row_type}-handle-color`, {'node-errhandle': inputRowHasErr.value}]"/>
             </div>
@@ -25,7 +25,7 @@
             </div>
             <div class="col">
                 <div class="param-description" :class="{'node-has-paramerr': colHasErr.value}">
-                    列名
+                    列
                 </div>
                 <NodepySelectMany
                     :options="colHint"

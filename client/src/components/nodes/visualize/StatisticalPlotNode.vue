@@ -1,6 +1,6 @@
 <template>
     <div class="StatisticalPlotNodeLayout nodes-style" :class="[{'nodes-selected': selected}, {'nodes-dbclicked': data.dbclicked}]">
-        <NodeTitle node-category="visualize">统计绘图节点</NodeTitle>
+        <NodeTitle node-category="visualize">统计绘图</NodeTitle>
         <Timer :node-id="id" :default-time="data.runningtime"/>
         <div class="data">
             <div class="input-table port">
@@ -8,7 +8,7 @@
                 <Handle id="input" type="target" :position="Position.Left" :class="[`${table_type}-handle-color`, {'node-errhandle': tableHasErr.value}]"/>
             </div>
             <div class="x_col">
-                <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': x_colHasErr.value}">x轴列</div>
                 <NodepySelectMany
                 :options="x_col_hint"
                 :default-selected="x_col_default_selected"
@@ -18,7 +18,7 @@
                 />
             </div>
             <div class="y_col" v-if="data.param.plot_type !== 'count' && data.param.plot_type !== 'hist'">
-                <div class="param-description" :class="{'node-has-paramerr': y_colHasErr.value}">y轴列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': y_colHasErr.value}">y轴列</div>
                 <NodepySelectMany
                 :options="y_col_hint"
                 :default-selected="y_col_default_selected"
@@ -28,7 +28,7 @@
                 />
             </div>
             <div class="hue_col">
-                <div class="param-description" :class="{'node-has-paramerr': hue_colHasErr.value}">色彩分组列名</div>
+                <div class="param-description" :class="{'node-has-paramerr': hue_colHasErr.value}">分组列</div>
                 <NodepySelectMany
                 :options="hue_col_hint"
                 :default-selected="hue_col_default_selected"
@@ -38,7 +38,7 @@
                 />
             </div>
             <div class="plot_type">
-                <div class="param-description" :class="{'node-has-paramerr': plot_typeHasErr.value}">图形类型</div>
+                <div class="param-description" :class="{'node-has-paramerr': plot_typeHasErr.value}">图像类型</div>
                 <NodepySelectMany
                     :options="plot_type_options_chinese"
                     :default-selected="defaultSelected"

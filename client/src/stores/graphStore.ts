@@ -1360,7 +1360,7 @@ export const useGraphStore = defineStore('graph', () => {
   }
 
   const copySelectedNodes = () => {
-    const selectedNodes = getSelectedNodes.value.filter(n => n.type !== 'NodeContainer' && n.type !== 'ForEachRowBeginNode' && n.type !== 'ForEachRowEndNode' && n.type !== 'ForRollingWindowBeginNode' && n.type !== 'ForRollingWindowEndNode' && n.type !== 'TitleAnnotationNode' && n.type !== 'TextAnnotationNode')
+    const selectedNodes = getSelectedNodes.value.filter(n => n.type !== 'NodeContainer' && n.type !== 'ForEachRowBeginNode' && n.type !== 'ForEachRowEndNode' && n.type !== 'ForRollingWindowBeginNode' && n.type !== 'ForRollingWindowEndNode')
     copiedNodes.value = []
     copiedEdges.value = []
     idMap.value = {}  // clear previous data
