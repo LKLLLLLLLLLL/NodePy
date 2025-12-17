@@ -353,6 +353,13 @@ function jumpToProject() {
   })
 }
 
+// 跳转到案例
+function jumpToExample() {
+  router.push({
+    name: 'example'
+  })
+}
+
 // 用户是否已登录
 const isLoggedIn = computed(() => loginStore.loggedIn)
 
@@ -491,9 +498,14 @@ function jumpToGithub() {
           <div class="cta-box">
             <h2>准备好开始了吗？</h2>
             <p>立即注册，开启您的可视化金融分析之旅</p>
-            <button  @click="isLoggedIn ? jumpToProject() : jumpToLogin()" class="cta-btn">
-              {{ isLoggedIn ? '进入工作台' : '免费注册' }}
-            </button>
+            <div class="footer-button-container">
+              <button  @click="jumpToExample()" class="cta-btn">
+                探索案例
+              </button>
+              <button  @click="isLoggedIn ? jumpToProject() : jumpToLogin()" class="cta-btn">
+                {{ isLoggedIn ? '进入工作台' : '免费注册' }}
+              </button>
+            </div>
           </div>
 
           <div class="footer-bottom">
@@ -922,7 +934,7 @@ function jumpToGithub() {
 // Examples Section
 .examples-section {
   min-height: 70vh;
-  background: white; // 区分背景
+  // background: white; // 区分背景
   width: 100%;
   max-width: 100%; // 全宽背景
 
@@ -988,6 +1000,7 @@ function jumpToGithub() {
       background: white;
       color: $stress-color;
       border: none;
+      width: 200px;
       font-weight: 700;
       padding: 12px 36px;
       height: auto;
@@ -997,6 +1010,11 @@ function jumpToGithub() {
         // transform: scale(1.05);
         @include cancel-button-hover-style;
       }
+    }
+    .footer-button-container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
     }
   }
 
