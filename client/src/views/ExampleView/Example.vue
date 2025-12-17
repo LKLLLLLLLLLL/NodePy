@@ -25,7 +25,7 @@
             <div class="no-example-info">暂无示例项目</div>
         </div>
         <div v-else class="examples-grid">
-            <ExampleDemoFrame 
+            <ExampleDemoFrame
                 v-for="example in examples.projects"
                 :key="example.project_id"
                 :item="example"

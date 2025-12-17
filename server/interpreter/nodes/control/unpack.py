@@ -2,6 +2,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, override
 
+import pandas as pd
 from pandas import DataFrame
 from pydantic import PrivateAttr
 
@@ -284,6 +285,8 @@ class GetCellNode(BaseNode):
     row: int | None = None
     col: str
 
+    _infered_value_type: ColType | None = PrivateAttr(default=None)
+
     @override
     def validate_parameters(self) -> None:
         if not self.type == "GetCellNode":
@@ -344,6 +347,7 @@ class GetCellNode(BaseNode):
                 err_input="row",
                 err_msg="Row index must be provided either as input or parameter.",
             )
+        self._infered_value_type = col_type
         return {
             "value": Schema.from_coltype(col_type)
         }
@@ -375,6 +379,17 @@ class GetCellNode(BaseNode):
                 err_msg=f"Column '{self.col}' does not exist in the input table.",
             )
         cell_value = df.iloc[row_index][self.col]
+        assert self._infered_value_type is not None
+        if self._infered_value_type == ColType.INT:
+            cell_value = int(cell_value)
+        elif self._infered_value_type == ColType.FLOAT:
+            cell_value = float(cell_value)
+        elif self._infered_value_type == ColType.STR:
+            cell_value = str(cell_value)
+        elif self._infered_value_type == ColType.BOOL:
+            cell_value = bool(cell_value)
+        elif self._infered_value_type == ColType.DATETIME:
+            cell_value = pd.to_datetime(cell_value)
         output_data = Data(payload=cell_value)
         return {
             "value": output_data

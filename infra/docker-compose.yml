@@ -26,6 +26,7 @@ services:
     volumes:
       # bind-mount redis data into project folder (like postgres) for easy access in dev
       - ../data/redis:/data
+    command: redis-server --maxmemory 2gb --maxmemory-policy volatile-lru
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s

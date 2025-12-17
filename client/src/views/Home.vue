@@ -614,7 +614,7 @@ function jumpToGithub() {
     gap: 30px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 40px 4px; // 增加内边距
+    padding: 60px;
     justify-content: start; // 从左侧开始
 
     // 隐藏滚动条但保持功能 (可选)

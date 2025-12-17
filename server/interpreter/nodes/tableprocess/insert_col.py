@@ -107,7 +107,8 @@ class InsertConstColNode(BaseNode):
 
         # create a Series with the constant value
         num_rows = len(input_table.df)
-        const_series = pandas.Series([const_value] * num_rows)
+        const_list = list(const_value for _ in range(num_rows))
+        const_series = pandas.Series(const_list)
 
         # append the new column to the table
         assert self.col_name is not None

@@ -6,7 +6,7 @@ import pandas
 from pandas import DataFrame
 from pydantic import PrivateAttr
 
-from server.config import DEFAULT_TIMEZONE
+from server.config import DEFAULT_TIMEZONE, MAX_GENERATED_TABLE_ROWS
 from server.models.data import Data, Table
 from server.models.exception import (
     NodeExecutionError,
@@ -295,10 +295,10 @@ class RandomNode(BaseNode):
         assert row_count_data is not None
         assert isinstance(row_count_data.payload, int)
 
-        if row_count_data.payload > 100000:
+        if row_count_data.payload > MAX_GENERATED_TABLE_ROWS:
             raise NodeExecutionError(
                 node_id=self.id,
-                err_msg="row_count too large, maximum allowed is 100000."
+                err_msg=f"row_count too large, maximum allowed is {MAX_GENERATED_TABLE_ROWS}."
             )
         
         if min_value_data is not None and max_value_data is not None:
@@ -511,7 +511,7 @@ class RangeNode(BaseNode):
         assert start is not None
         assert end is not None
         
-        # limit the number of rows to 100000
+        # limit the number of rows to MAX_GENERATED_TABLE_ROWS
         total_steps: int = 0
         if step is None:
             if self.col_type == "float" or self.col_type == "int":
@@ -533,10 +533,10 @@ class RangeNode(BaseNode):
             assert isinstance(end, datetime)
             assert isinstance(step, timedelta)
             total_steps = int(abs((end - start).total_seconds() / step.total_seconds()))
-        if total_steps > 100000:
+        if total_steps > MAX_GENERATED_TABLE_ROWS:
             raise NodeExecutionError(
                 node_id=self.id,
-                err_msg="The generated range is too large, maximum allowed number of rows is 100000."
+                err_msg=f"The generated range is too large, maximum allowed number of rows is {MAX_GENERATED_TABLE_ROWS}."
             )
         
         data_rows = []

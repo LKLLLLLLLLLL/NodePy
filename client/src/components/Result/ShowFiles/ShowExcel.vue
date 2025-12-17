@@ -36,24 +36,24 @@ const tableData = computed<TableDataShape>(() => {
   if (!selectedSheet.value) {
     return { columns: [], colsMap: {}, rowCount: 0 }
   }
-  
+
   const sheet = selectedSheet.value
   if (!sheet.data || sheet.data.length === 0) {
     return { columns: [], colsMap: {}, rowCount: 0 }
   }
-  
+
   // 第一行为列标题
   const columns = sheet.data[0] || []
   // 数据从第二行开始
   const dataRows = sheet.data.slice(1) || []
   const rowCount = dataRows.length
-  
+
   // 构建列映射，提高访问效率
   const colsMap: Record<string, any[]> = {}
   columns.forEach((col, colIndex) => {
     colsMap[col] = dataRows.map(row => row[colIndex])
   })
-  
+
   return { columns, colsMap, rowCount }
 })
 
@@ -246,8 +246,8 @@ const selectSheet = (index: number) => {
     <div v-if="selectedSheet" class="excel-sheet">
       <div v-if="selectedSheet.data && selectedSheet.data.length > 0" class="excel-table-wrapper">
         <div class="excel-table-container">
-          <div 
-            class="table-wrapper" 
+          <div
+            class="table-wrapper"
             ref="tableWrapperRef"
           >
             <table class="result-table" :style="tableStyle">
@@ -258,10 +258,10 @@ const selectSheet = (index: number) => {
                       <span class="column-name">行号</span>
                     </div>
                   </th>
-                  <th 
-                    v-for="(header, colIndex) in tableData.columns" 
-                    :key="colIndex" 
-                    class='data-column' 
+                  <th
+                    v-for="(header, colIndex) in tableData.columns"
+                    :key="colIndex"
+                    class='data-column'
                     :style="cellStyle"
                   >
                     <div class='column-header'>
@@ -277,10 +277,10 @@ const selectSheet = (index: number) => {
                 </tr>
 
                 <!-- visible rows -->
-                <tr 
-                  v-for="i in visibleIndices" 
-                  :key="i" 
-                  class='data-row' 
+                <tr
+                  v-for="i in visibleIndices"
+                  :key="i"
+                  class='data-row'
                   :style="{ height: rowHeight + 'px' }"
                 >
                   <td class='index-column'>
@@ -288,10 +288,10 @@ const selectSheet = (index: number) => {
                       <span class="index-value">{{ i + 1 }}</span>
                     </div>
                   </td>
-                  <td 
-                    v-for="(header, colIndex) in tableData.columns" 
-                    :key="colIndex" 
-                    class='data-column' 
+                  <td
+                    v-for="(header, colIndex) in tableData.columns"
+                    :key="colIndex"
+                    class='data-column'
                     :style="cellStyle"
                   >
                     <span v-if="isBooleanValue((tableData.colsMap[header] || [])[i])" :class="(tableData.colsMap[header] || [])[i] ? 'boolean-true' : 'boolean-false'">
@@ -314,17 +314,17 @@ const selectSheet = (index: number) => {
         工作表为空
       </div>
     </div>
-    
+
     <!-- 无工作表提示 -->
     <div v-else class="excel-empty">
       没有可用的工作表
     </div>
-    
+
     <!-- 标签页选择器 -->
-    <div v-if="sheets.length > 1" class="tab-selector">
+    <div v-if="sheets.length >= 1" class="tab-selector">
       <div class="tab-list">
-        <div 
-          v-for="(sheet, index) in sheets" 
+        <div
+          v-for="(sheet, index) in sheets"
           :key="index"
           :class="{ 'tab-item': true, 'active': index === selectedSheetIndex }"
           @click="selectSheet(index)"

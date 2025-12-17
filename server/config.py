@@ -92,6 +92,9 @@ PASSWORD_MIN_LENGTH = 6
 PASSWORD_MAX_LENGTH = 20
 PASSWORD_ALLOWED_CHARS = set(ascii_letters + digits + punctuation)
 
+# Limitations for generated tables
+MAX_GENERATED_TABLE_ROWS = 1000000  # Maximum rows allowed for generated tables
+
 """
 Debugging and logging settings
 """
