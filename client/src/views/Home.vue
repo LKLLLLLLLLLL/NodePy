@@ -221,6 +221,16 @@ const currentExampleIndex = ref(0)
 // 自动轮播定时器
 const carouselTimer = ref<NodeJS.Timeout | null>(null)
 
+
+const currentName = computed(()=>{
+  switch(currentExampleIndex.value) {
+    case 0: return "DataFetch.nodepy"
+    case 1: return "DataProcess.nodepy"
+    case 2: return "MachineLearning.nodepy"
+    case 3: return "DataVisulization.nodepy"
+    default: return "DataFetch.nodepy"
+  }
+})
 // 计算当前应该显示的节点和边
 const currentNodes = computed(() => {
   switch(currentExampleIndex.value) {
@@ -393,7 +403,7 @@ function jumpToGithub() {
                 <div class="dots">
                   <span></span><span></span><span></span>
                 </div>
-                <div class="title">MyProject.nodepy</div>
+                <div class="title">{{currentName}}</div>
               </div>
               <div class="mockup-body">
                 <VueFlow
@@ -417,7 +427,6 @@ function jumpToGithub() {
                     <NodePyConnectionLine v-bind="ConnectionLineProps"/>
                   </template>
                 </VueFlow>
-                
                 <!-- 轮播指示器 -->
                 <div class="carousel-indicators">
                   <span 
@@ -487,12 +496,9 @@ function jumpToGithub() {
           <div class="footer-bottom">
             <div class="footer-logo">
               <h3>NodePy</h3>
-              <p>© 2025 NodePy Team. All rights reserved.</p>
             </div>
-            <div class="footer-links">
-              <a href="https://github.com/LKLLLLLLLLLL/NodePy" target="_blank">
-                <span class="mdi mdi-github"></span> GitHub
-              </a>
+            <div class="footer-copyright">
+              <p>© 2025 NodePy Team. All rights reserved.</p>
             </div>
           </div>
         </div>
@@ -689,7 +695,7 @@ function jumpToGithub() {
 
     .hero-actions {
       display: flex;
-      gap: 16px;
+      justify-content: space-between;
 
       @media (max-width: 992px) {
         justify-content: center;
@@ -703,7 +709,8 @@ function jumpToGithub() {
 
       .secondary-button{
         @include cancel-button-style;
-        width: 100px;
+        width: 200px;
+        height: 48px;
         &:hover{
           @include cancel-button-hover-style;
         }
@@ -711,7 +718,8 @@ function jumpToGithub() {
 
       .cta-button {
         @include confirm-button-style;
-        width: 100px;
+        width: 200px;
+        height: 48px;
         background-color: $stress-color;
         border-color: $stress-color;
 
@@ -770,6 +778,7 @@ function jumpToGithub() {
           flex: 1;
           text-align: center;
           font-size: 12px;
+          font-weight: bold;
           color: #999;
         }
       }
@@ -969,7 +978,7 @@ function jumpToGithub() {
     justify-content: space-between;
     align-items: center;
     padding-top: 30px;
-    border-top: 1px solid #eee;
+    // border-top: 1px solid #eee;
 
     .footer-logo {
       h3 {
@@ -984,19 +993,10 @@ function jumpToGithub() {
       }
     }
 
-    .footer-links {
-      a {
-        color: #666;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 14px;
-        transition: color 0.2s;
-
-        &:hover {
-          color: $stress-color;
-        }
+    .footer-copyright{
+      p {
+        font-size: 12px;
+        color: #999;
       }
     }
   }

@@ -190,10 +190,10 @@
             // 使用原生URL跳转方法
             window.location.href = `/project/${newProjectId}`;
 
-            notify({
-                message: '项目复制成功',
-                type: 'success'
-            })
+            // notify({
+            //     message: '项目复制成功',
+            //     type: 'success'
+            // })
         }
     }
 

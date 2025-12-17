@@ -95,9 +95,10 @@
         background-color: #ff4d4f;
         color: white;
         border: none;
+        @include delete-button-style;
     }
 
     .logout-btn:hover {
-        background-color: $error-message-color;
+        @include delete-button-hover-style;
     }
 </style>

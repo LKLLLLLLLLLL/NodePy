@@ -13,8 +13,8 @@
         file: FileItem;
     }>()
 
-    const previewWidth = 600;
-    const previewHeight = 800;
+    const previewWidth = 1200;
+    const previewHeight = 1600;
     const uploadWidth = 400;
     const uploadHeight = 600;
 
@@ -71,7 +71,7 @@
         fileStore.changeCurrentFile(file);
         modalStore.createModal({
             id: 'file-preview',
-            title: '文件预览',
+            title: '预览',
             isActive: true,
             isResizable: true,
             isDraggable: true,

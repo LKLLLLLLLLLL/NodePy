@@ -349,6 +349,8 @@ const selectSheet = (index: number) => {
   box-sizing: border-box;
 }
 
+// ... existing code ...
+
 .tab-selector {
   margin-top: 10px;
   border-top: 1px solid #e0e0e0;
@@ -358,50 +360,48 @@ const selectSheet = (index: number) => {
 
 .tab-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  padding-bottom: 5px;
+  gap: 10px; /* 增加标签间距 */
+  padding: 8px 0px 5px 0px;
+  overflow-x: auto;
 }
 
 .tab-item {
-  padding: 8px 16px;
+  height: 34px;
+  font-size: 13px;
+  font-weight: bold;
+  color: rgba(20,20,20,0.9);
+  padding: 6px 12px;
+  transition: all 0.18s ease;
+  min-width: 90px;
+  max-width: 220px;
+  text-align: center;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: #606266;
-  border: 1px solid transparent;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-  background-color: #f5f7fa;
-  transition: all 0.3s ease;
-  position: relative;
-  margin-top: -1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: none;
 }
 
 .tab-item:hover {
-  background-color: #e1e6ee;
-  color: #303133;
+  background-color: rgba(0, 0, 0, 0.06);
 }
 
 .tab-item.active {
-  background-color: #ffffff;
-  color: #409eff;
-  border-color: #dcdfe6;
-  border-top: 1px solid #ffffff;
-  font-weight: 600;
-  margin-top: 0;
-  z-index: 2;
+  color: #ffffff;
+  background-color: $stress-color;
+  box-shadow: 0px 3px 5px rgba(128, 128, 128, 0.2);
 }
 
 .tab-item.active::after {
-  content: '';
-  position: absolute;
-  top: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: #409eff;
+  display: none; /* 移除旧的下划线样式 */
 }
+
+// ... existing code ...
 
 .excel-sheet {
   flex: 1;

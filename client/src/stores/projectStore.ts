@@ -324,12 +324,12 @@ export const useProjectStore = defineStore('project', () => {
             const projectName = graphStore.project.project_name;
             const response = await authService.copyProjectApiProjectCopyProjectIdPost(id);
             projectIdToNameMap.value.set(response,projectName)
-            if(response){
-                notify({
-                    message: '项目' + projectName + '添加成功',
-                    type: 'success'
-                });
-            }
+            // if(response){
+            //     notify({
+            //         message: '项目' + projectName + '添加成功',
+            //         type: 'success'
+            //     });
+            // }
             initializeProjects()
             return response;
         }
