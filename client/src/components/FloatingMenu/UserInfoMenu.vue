@@ -73,17 +73,25 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { Avatar } from '@element-plus/icons-vue'
 import { useLoginStore } from '@/stores/loginStore'
 import { useModalStore } from '@/stores/modalStore'
 import { useUserStore } from '@/stores/userStore'
+import { useEditorStore } from '@/stores/editorStore'
+import notify from '@/components/Notification/notify'
 import FloatingMenu from './FloatingMenu.vue'
+import EditableTableModal from '../EditableTable/EditableTableModal.vue'
+import PyEditor from '../PyEditor/PyEditor.vue'
 import Logout from '../Logout.vue'
-import SvgIcon from '@jamescoyle/vue-icon'
-import { mdiAccount } from '@mdi/js'
+import { useTableStore } from '@/stores/tableStore'
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiAccount, mdiLogout } from '@mdi/js'
 
 const loginStore = useLoginStore()
 const modalStore = useModalStore()
-const userStore: any = useUserStore()
+const userStore = useUserStore()
+const tableStore = useTableStore()
+const editorStore = useEditorStore()
 
 const router = useRouter()
 
@@ -122,17 +130,71 @@ async function handleLogout() {
   })
 }
 
+// 判断是否有头像功能（未来可能添加）
+const hasAvatar = computed(() => {
+  // 目前不支持头像功能，返回false
+  // 未来可以基于用户信息或其他条件来判断
+  return false
+})
+
 // 判断是否有头像URL
 const avatarUrl = computed(() => {
+  // 检查用户信息中是否有头像URL
   return userStore.currentUserInfo?.avatar_url || ''
 })
 
 // 获取用户名首字母（支持中文和其他语言）
 const userInitials = computed(() => {
   const username = userStore.currentUserInfo?.username || 'G'
+  // 获取第一个字符，支持中文和其他语言
   const firstChar = username.charAt(0)
   return firstChar.toUpperCase()
 })
+
+// 过滤掉不需要显示的字段（包括存储空间字段，因为我们要合并显示它们）
+const filteredUserInfo = computed(() => {
+  const userInfo = userStore.currentUserInfo
+  if (!userInfo) return {}
+
+  // 过滤掉已经在其他地方显示的字段和一些不需要显示的字段
+  const excludeKeys = ['username', 'email', 'id', 'file_space_used', 'file_space_total']
+  const filtered: Record<string, any> = {}
+
+  Object.keys(userInfo).forEach(key => {
+    if (!excludeKeys.includes(key)) {
+      filtered[key] = userInfo[key]
+    }
+  })
+
+  return filtered
+})
+
+// 格式化键名显示
+const formatKey = (key: string) => {
+  const keyMap: Record<string, string> = {
+    'projects_count': '项目数量',
+    'file_space_used': '已使用存储',
+    'file_space_total': '总存储空间',
+    'created_at': '注册时间'
+  }
+  return keyMap[key] || key
+}
+
+// 格式化值显示
+const formatValue = (key: string, value: any) => {
+  // 格式化存储空间显示
+  if (key.includes('space')) {
+    return formatStorage(value)
+  }
+
+  // 格式化时间显示
+  if (key === 'created_at' && typeof value === 'string') {
+    return new Date(value).toLocaleDateString()
+  }
+
+  // 默认显示
+  return value ?? 'N/A'
+}
 
 // 格式化存储空间显示
 const formatStorage = (bytes: number | undefined) => {
@@ -147,11 +209,51 @@ const formatStorage = (bytes: number | undefined) => {
     unitIndex++
   }
 
+  // 如果是整数，不显示小数点
   if (size % 1 === 0) {
     return `${size} ${units[unitIndex]}`
   } else {
+    // 保留两位小数
     return `${size.toFixed(2)} ${units[unitIndex]}`
   }
+}
+
+// 格式化存储空间显示（合并显示已用空间/总空间和百分比）
+const formatStorageSpace = () => {
+  const userInfo = userStore.currentUserInfo
+  if (!userInfo) return 'N/A'
+
+  const used = userInfo.file_space_used
+  const total = userInfo.file_space_total
+
+  if (used === undefined || total === undefined) return 'N/A'
+
+  // 计算百分比
+  const percentage = total > 0 ? Math.round((used / total) * 100) : 0
+
+  // 格式化存储空间显示
+  return `${formatStorage(used)} / ${formatStorage(total)}`
+}
+
+// 计算存储空间使用百分比
+const getStoragePercentage = () => {
+  const userInfo = userStore.currentUserInfo
+  if (!userInfo) return 0
+
+  const used = userInfo.file_space_used
+  const total = userInfo.file_space_total
+
+  if (used === undefined || total === undefined || total === 0) return 0
+
+  return Math.min(Math.round((used / total) * 100), 100)
+}
+
+// 格式化加入日期
+const formatJoinDate = (dateString: string) => {
+  const date = new Date(dateString)
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  return `${year}年${month}月`
 }
 </script>
 
@@ -245,7 +347,7 @@ const formatStorage = (bytes: number | undefined) => {
   .user-header {
     display: flex;
     gap: 14px;
-    margin-bottom: 6px;
+    margin-bottom: 12px;
     padding-bottom: 16px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 

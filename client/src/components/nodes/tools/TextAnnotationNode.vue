@@ -154,6 +154,7 @@
         height: auto;
         min-height: 90px;
         padding: 4px;
+        font-weight: bold;
         .inputValue {
             display: block;
             width: 100%;
@@ -162,7 +163,7 @@
             padding: 2px;
             border:none;
             outline:none;
-            color: white;
+            color: rgb(0, 0, 0);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: pre-wrap;
@@ -181,7 +182,7 @@
             width: 100%;
             height: auto;
             min-height: 90px;
-            color: white;
+            color: rgb(0, 0, 0);
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
