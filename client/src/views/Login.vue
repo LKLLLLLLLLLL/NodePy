@@ -268,7 +268,7 @@
                                         <!-- 注册由页面顶部全局按钮切换 -->
                                     </div>
                                 </form>
-                                <div class="legal-note">使用即代表同意我们的 <a>使用协议</a> &amp; <a>隐私政策</a></div>
+                                <!-- <div class="legal-note">使用即代表同意我们的 <a>使用协议</a> &amp; <a>隐私政策</a></div> -->
                             </div>
                         </div>
 
@@ -300,14 +300,12 @@
                                         </div>
                                     </div>
                                 </form>
-                                <div class="legal-note">使用即代表同意我们的 <a>使用协议</a> &amp; <a>隐私政策</a></div>
+                                <!-- <div class="legal-note">使用即代表同意我们的 <a>使用协议</a> &amp; <a>隐私政策</a></div> -->
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <button class="global-register-btn back-home-btn" @click="goHome">返回首页</button>
             <div class="large-footer"><span class="copyright">© 2025 NodePy. All rights reserved.</span></div>
         </div>
     </div>
@@ -343,7 +341,7 @@
         min-height: calc(100vh - 120px);
         background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,252,255,0.9));
         border-radius: 14px;
-        box-shadow: 0 20px 60px rgba(16,142,254,0.06);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
         position: relative;
         padding: 28px;
         display: flex;
@@ -673,18 +671,18 @@
         min-width: 70px;
         cursor: pointer;
         border: none;
-        background-color: rgba(16,142,254,0.03);
+        background-color: rgba(0, 0, 0, 0.03);
         box-shadow: none;
         transition: all 0.18s ease;
     }
 
     .login-type-capsule .capsule:hover {
-        background-color: rgba(16,142,254,0.06);
+        background-color: rgba(0, 0, 0, 0.06);
     }
 
     .login-type-capsule .capsule:focus {
         outline: none;
-        box-shadow: 0 0 0 3px rgba(16,142,254,0.12);
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
     }
 
     .login-type-capsule .capsule.active {
@@ -756,7 +754,7 @@
         font-size: 14px;
         color: #12212b;
     }
-    .my-input:focus { outline: none; box-shadow: 0 8px 24px rgba(16,142,254,0.06); border-color: $stress-color; }
+    .my-input:focus { outline: none; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); border-color: $stress-color; }
 
     .my-btn { border-radius: 10px; padding: 10px 14px; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
     .my-btn-primary { background: $stress-color; color: white; box-shadow: 0 8px 20px rgba(16,142,254,0.12); }
