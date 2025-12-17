@@ -25,7 +25,7 @@ export const useGraphStore = defineStore('graph', () => {
   const is_syncing = ref(false)
   const syncing_err_msg = ref('')
   const maxNodeId = ref<Record<string, number>>({}) // record max id in history for each node type
-  const copiedNodes = ref<Array<{type: string, position: {x: number, y: number}, param: any, id: string}>>([])
+  const copiedNodes = ref<Array<{type: string, position: {x: number, y: number}, param: any, id: string, is_virtual_node?: boolean}>>([])
   const copiedEdges = ref<Array<{source: string, target: string, sourceHandle?: string | null, targetHandle?: string | null, type: string}>>([])
   const copiedNodesBounds = ref<{minX: number, minY: number, maxX: number, maxY: number} | null>(null)
   const idMap = ref<Record<string, string>>({}) //  record old node id to new id
@@ -1340,19 +1340,34 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedTitleAnnotationNode)
         break
+      case 'TextAnnotationNode':
+        const addedTextAnnotationNode: Nodetypes.TextAnnotationNode = {
+          id,
+          position,
+          type: 'TextAnnotationNode',
+          data: {
+            param: {
+              text: ''
+            },
+            is_virtual_node: true
+          }
+        }
+        addNodes(addedTextAnnotationNode)
+        break
     
       default:
         console.log(type)
     }
   }
 
-  const addCopiedNode = (type: string, position: {x: number, y: number}, param: any) => {
+  const addCopiedNode = (type: string, position: {x: number, y: number}, param: any, is_virtual_node?: boolean) => {
     const addedNode: Nodetypes.BaseNode = {
       id: nextId(type),
       position,
       type,
       data: {
-        param: param
+        param,
+        is_virtual_node
       }
     }
     addNodes(addedNode)
@@ -1369,7 +1384,8 @@ export const useGraphStore = defineStore('graph', () => {
         id: n.id,
         type: n.type,
         position: {...n.position},
-        param: JSON.parse(JSON.stringify(n.data.param)) // deep copy
+        param: JSON.parse(JSON.stringify(n.data.param)), // deep copy
+        is_virtual_node: n.data.is_virtual_node
       }))
       let minX = selectedNodes[0]!.position.x
       let minY = selectedNodes[0]!.position.y
@@ -1408,7 +1424,8 @@ export const useGraphStore = defineStore('graph', () => {
             x: position.x + relativeX,
             y: position.y + relativeY,
           },
-          JSON.parse(JSON.stringify(nodeInfo.param)) // deep copy to avoid param binding
+          JSON.parse(JSON.stringify(nodeInfo.param)), // deep copy to avoid param binding
+          nodeInfo.is_virtual_node
         )
         if(newNode) {
           idMap.value[nodeInfo.id] = newNode.id

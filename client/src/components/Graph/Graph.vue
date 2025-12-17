@@ -106,6 +106,7 @@ import PackNode from '../nodes/control/PackNode.vue'
 import GetCellNode from '../nodes/control/GetCellNode.vue'
 import SetCellNode from '../nodes/control/SetCellNode.vue'
 import TitleAnnotationNode from '../nodes/tools/TitleAnnotationNode.vue'
+import TextAnnotationNode from '../nodes/tools/TextAnnotationNode.vue'
 import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
@@ -404,6 +405,7 @@ const nodeColor = (node: BaseNode) => {
     case 'SetCellNode':
       return nodeCategoryColor.control
     case 'TitleAnnotationNode':
+    case 'TextAnnotationNode':
       return nodeCategoryColor.annotation
     case 'NodeContainer':
       return 'rgba(148, 193, 252, 0.2)'
@@ -870,6 +872,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-TitleAnnotationNode="TitleAnnotationNodeProps">
           <TitleAnnotationNode v-bind="TitleAnnotationNodeProps"/>
+        </template>
+
+        <template #node-TextAnnotationNode="TextAnnotationNodeProps">
+          <TextAnnotationNode v-bind="TextAnnotationNodeProps"/>
         </template>
 
       </VueFlow>

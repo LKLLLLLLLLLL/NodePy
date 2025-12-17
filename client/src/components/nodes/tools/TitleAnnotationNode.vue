@@ -1,7 +1,7 @@
 <template>
     <div class="TitleAnnotationNodeLayout nodes-style" :class="[{'nodes-selected': selected}]" @contextmenu="onContextMenu">
         <NodeResizer :min-width="200" :min-height="30"/>
-        <NodeTitle node-category='annotation' class="title draggable">
+        <NodeTitle node-category='annotation' class="title">
             <template v-if="isEditing">
                 <input v-model="title"
                     @blur="commit"
@@ -78,9 +78,11 @@
         .title {
             .inputValue {
                 width: 100%;
+                height: 100%;
                 border:none;
                 outline:none;
                 color: white;
+                padding: 2px 0;
                 /* 禁止在非编辑（readonly）状态下选中内容 */
                 &[readonly] {
                     -webkit-user-select: none;
@@ -93,8 +95,8 @@
         }
         .displayTitle {
             width: 100%;
+            height: 100%;
             color: white;
-            cursor: text;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
