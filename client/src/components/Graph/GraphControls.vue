@@ -152,13 +152,17 @@
     })
 
     async function handleCopy(){
-        const projectId = await projectStore.copyProject(Number(route.params.projectId))
-        router.push({ name: 'editor-project', params: { projectId: projectId } });
-        notify({
-            message: '跳转成功',
-            type: 'success'
-        })
-        graphStore.project.editable = true
+        const newProjectId = await projectStore.copyProject(Number(route.params.projectId))
+        
+        if (newProjectId) {
+            // 使用原生URL跳转方法
+            window.location.href = `/project/${newProjectId}`;
+            
+            notify({
+                message: '项目复制成功',
+                type: 'success'
+            })
+        }
     }
 
     async function handleForcedSync(){
@@ -265,7 +269,7 @@
                 <div class="gc-btn-container">
                     <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleCopy(); }" aria-label="Copy project">
                         <SvgIcon type="mdi" :path="mdiOpenInNew" class="btn-icon" />
-                        <div class="gc-btn-text">添加到我的项目</div>
+                        <div class="gc-btn-text">在工作台中打开</div>
                     </button>
                 </div>
             </div>
@@ -321,6 +325,9 @@
         .btn-icon{
             width: 21px;
             height: 21px;
+        }
+        &:hover{
+            @include confirm-button-hover-style;
         }
     }
 

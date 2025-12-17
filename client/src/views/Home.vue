@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { useLoginStore } from '@/stores/loginStore';
 import { usePageStore } from '@/stores/pageStore';
-import { onMounted, computed, ref, markRaw, watch, onUnmounted } from 'vue';
+import { onMounted, computed, ref, markRaw, watch, onUnmounted, nextTick } from 'vue';
 import NodePyEdge from '@/components/NodePyEdge.vue';
 import NodePyConnectionLine from '@/components/NodePyConnectionLine.vue';
 import { useRouter } from 'vue-router';
 import { VueFlow } from '@vue-flow/core'
+import { useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
@@ -15,6 +16,20 @@ import ExampleDemoFrame from './ExampleView/ExampleDemoFrame.vue'
 
 import ConstNode from '@/components/nodes/input/ConstNode.vue'
 import NumberBinOpNode from '@/components/nodes/compute/NumberBinOpNode.vue'
+import DateTimeNode from '@/components/nodes/input/DateTimeNode.vue'
+import DatetimeComputeNode from '@/components/nodes/datetimeProcess/DatetimeComputeNode.vue'
+import KlineNode from '@/components/nodes/input/KlineNode.vue'
+import QuickPlotNode from '@/components/nodes/visualize/QuickPlotNode.vue'
+import StatsNode from '@/components/nodes/analysis/StatsNode.vue'
+import ToFloatNode from '@/components/nodes/compute/ToFloatNode.vue'
+import ToIntNode from '@/components/nodes/compute/ToIntNode.vue'
+import LinearRegressionNode from '@/components/nodes/machineLearning/LinearRegressionNode.vue'
+import RegressionScoreNode from '@/components/nodes/machineLearning/RegressionScoreNode.vue'
+import FilterNode from '@/components/nodes/tableProcess/FilterNode.vue'
+import UploadNode from '@/components/nodes/file/UploadNode.vue'
+import TableFromFileNode from '@/components/nodes/file/TableFromFileNode.vue'
+import DualAxisPlotNode from '@/components/nodes/visualize/DualAxisPlotNode.vue'
+import MergeNode from '@/components/nodes/tableProcess/MergeNode.vue'
 
 const pageStore = usePageStore()
 const loginStore = useLoginStore()
@@ -22,85 +37,182 @@ const router = useRouter()
 
 const nodeTypes = {
   ConstNode: markRaw(ConstNode),
-  NumberBinOpNode: markRaw(NumberBinOpNode)
+  NumberBinOpNode: markRaw(NumberBinOpNode),
+  DateTimeNode: markRaw(DateTimeNode),
+  DatetimeComputeNode: markRaw(DatetimeComputeNode),
+  KlineNode: markRaw(KlineNode),
+  QuickPlotNode: markRaw(QuickPlotNode),
+  StatsNode: markRaw(StatsNode),
+  ToFloatNode: markRaw(ToFloatNode),
+  ToIntNode: markRaw(ToIntNode),
+  LinearRegressionNode: markRaw(LinearRegressionNode),
+  RegressionScoreNode: markRaw(RegressionScoreNode),
+  FilterNode: markRaw(FilterNode),
+  UploadNode: markRaw(UploadNode),
+  TableFromFileNode: markRaw(TableFromFileNode),
+  DualAxisPlotNode: markRaw(DualAxisPlotNode),
+  MergeNode: markRaw(MergeNode)
 }
 
 const nodes1 = ref([
   {
-    id: '1',
-    type: 'ConstNode',
-    position: { x: 50, y: 50 },
-    data: { param: { value: 10, data_type: 'int' }, dbclicked: false, runningtime: 0 }
+    id: 'DateTimeNode_1',
+    type: 'DateTimeNode',
+    position: { x: 20, y: 30 },
+    data: { param: { value: '', isNow: true }, dbclicked: false, runningtime: 0.0893150000820242 }
   },
   {
-    id: '2',
+    id: 'DateTimeNode_2',
+    type: 'DateTimeNode',
+    position: { x: 350, y: 400 },
+    data: { param: { value: '', isNow: false }, dbclicked: false, runningtime: 0.04911700000320707 }
+  },
+  {
+    id: 'ConstNode_1',
     type: 'ConstNode',
     position: { x: 20, y: 200 },
-    data: { param: { value: 20, data_type: 'int' }, dbclicked: false, runningtime: 0 }
+    data: { param: { value: 0, data_type: 'int' }, dbclicked: false, runningtime: 0.07266500006153365 }
   },
   {
-    id: '3',
-    type: 'NumberBinOpNode',
-    position: { x: 400, y: 150 },
-    data: { param: { op: 'ADD' }, dbclicked: false, runningtime: 0 }
+    id: 'DatetimeComputeNode_1',
+    type: 'DatetimeComputeNode',
+    position: { x: 350, y: 100 },
+    data: { param: {}, dbclicked: false, runningtime: 0.15581699994982046 }
+  },
+  {
+    id: 'KlineNode_1',
+    type: 'KlineNode',
+    position: { x: 680, y: 150 },
+    data: { param: { data_type: 'stock', symbol: '', start_time: null, end_time: null, interval: '1m' }, dbclicked: false, runningtime: 710.2902609999546 }
   }
 ])
 
 const nodes2 = ref([
   {
-    id: '1',
-    type: 'ConstNode',
-    position: { x: 50, y: 50 },
-    data: { param: { value: 10, data_type: 'int' }, dbclicked: false, runningtime: 0 }
+    id: 'StatsNode_1',
+    type: 'StatsNode',
+    position: { x: 20, y: 50 },
+    data: { param: {}, dbclicked: false, runningtime: 0.2 }
   },
   {
-    id: '2',
+    id: 'ConstNode_3',
     type: 'ConstNode',
-    position: { x: 60, y: 150 },
-    data: { param: { value: 20, data_type: 'int' }, dbclicked: false, runningtime: 0 }
+    position: { x: 290, y: 300 },
+    data: { param: { value: 10, data_type: 'int' }, dbclicked: false, runningtime: 0.05348499962565256 }
   },
   {
-    id: '3',
+    id: 'NumberBinOpNode_1',
     type: 'NumberBinOpNode',
-    position: { x: 400, y: 150 },
-    data: { param: { op: 'ADD' }, dbclicked: false, runningtime: 0 }
+    position: { x: 560, y: 201 },
+    data: { param: { op: 'DIV' }, dbclicked: false, runningtime: 0.0}
+  },
+  {
+    id: 'ToFloatNode_1',
+    type: 'ToFloatNode',
+    position: { x: 290, y: 170 },
+    data: { param: {}, dbclicked: false, runningtime: 0.0 }
+  },
+  {
+    id: 'ToIntNode_1',
+    type: 'ToIntNode',
+    position: { x: 830, y: 321 },
+    data: { param: {}, dbclicked: false, runningtime: 0.0 }
   }
 ])
 
 const nodes3 = ref([
   {
-    id: '1',
-    type: 'ConstNode',
+    id: 'LinearRegressionNode_1',
+    type: 'LinearRegressionNode',
+    position: { x: 825, y: 300 },
+    data: { param: {feature_cols: ['Open', 'Close'],target_col: "Volume"}, dbclicked: false, runningtime: 53.1 }
+  },
+  {
+    id: 'UploadNode_1',
+    type: 'UploadNode',
+    position: { x: 0, y: 50 },
+    data: { param: {}, dbclicked: false, runningtime: 0.05667999994329875 }
+  },
+  {
+    id: 'RegressionScoreNode_1',
+    type: 'RegressionScoreNode',
+    position: { x: 1100, y: 138 },
+    data: { param: {}, dbclicked: false, runningtime: 17.8 }
+  },
+  {
+    id: 'FilterNode_1',
+    type: 'FilterNode',
+    position: { x: 550, y: 50 },
+    data: { param: {}, dbclicked: false, runningtime: 0.5 }
+  },
+  {
+    id: 'TableFromFileNode_1',
+    type: 'TableFromFileNode',
+    position: { x: 275, y: 75 },
+    data: { param: {}, dbclicked: false, runningtime: 19.82704400052171 }
+  }
+])
+
+const nodes4 = ref([
+  {
+    id: 'DualAxisPlotNode_1',
+    type: 'DualAxisPlotNode',
+    position: { x: 950, y: 500 },
+    data: { param: {}, dbclicked: false, runningtime: 471.34476699920924 }
+  },
+  {
+    id: 'KlineNode_1',
+    type: 'KlineNode',
     position: { x: 50, y: 50 },
-    data: { param: { value: 10, data_type: 'int' }, dbclicked: false, runningtime: 0 }
+    data: { param: { data_type: 'stock', symbol: 'AAPL', start_time: '2023-01-01', end_time: '2023-12-31', interval: '1d' }, dbclicked: false, runningtime: 329.65625900033046 }
   },
   {
-    id: '2',
-    type: 'ConstNode',
-    position: { x: 50, y: 250 },
-    data: { param: { value: 20, data_type: 'int' }, dbclicked: false, runningtime: 0 }
+    id: 'KlineNode_2',
+    type: 'KlineNode',
+    position: { x: 50, y: 500 },
+    data: { param: { data_type: 'stock', symbol: 'GOOGL', start_time: '2023-01-01', end_time: '2023-12-31', interval: '1d' }, dbclicked: false, runningtime: 176.7138300001534 }
   },
   {
-    id: '3',
-    type: 'NumberBinOpNode',
-    position: { x: 400, y: 150 },
-    data: { param: { op: 'ADD' }, dbclicked: false, runningtime: 0 }
+    id: 'MergeNode_1',
+    type: 'MergeNode',
+    position: { x: 500, y: 400 },
+    data: { param: { join_type: 'inner', left_on: [], right_on: [] }, dbclicked: false, runningtime: 1.6944159997365205 }
+  },
+  {
+    id: 'QuickPlotNode_1',
+    type: 'QuickPlotNode',
+    position: { x: 500, y: 600},
+    data: { param: {plot_type: ['line'],title: null,x_col: "Open Time",y_col: ['Open']}, dbclicked: false, runningtime: 435.82994200005487 }
   }
 ])
 
 const edges1 = ref([
-  { id: 'e1-3', source: '1', target: '3', sourceHandle: 'const', targetHandle: 'x', animated: true , type: 'NodePyEdge'},
-  { id: 'e2-3', source: '2', target: '3', sourceHandle: 'const', targetHandle: 'y', animated: true , type: 'NodePyEdge'}
+  { id: 'vueflow__edge-DateTimeNode_1datetime-DatetimeComputeNode_1datetime', source: 'DateTimeNode_1', target: 'DatetimeComputeNode_1', sourceHandle: 'datetime', targetHandle: 'datetime', animated: true , type: 'NodePyEdge'},
+  { id: 'vueflow__edge-ConstNode_1const-DatetimeComputeNode_1value', source: 'ConstNode_1', target: 'DatetimeComputeNode_1', sourceHandle: 'const', targetHandle: 'value', animated: true , type: 'NodePyEdge'},
+  { id: 'vueflow__edge-DatetimeComputeNode_1result-KlineNode_1start_time', source: 'DatetimeComputeNode_1', target: 'KlineNode_1', sourceHandle: 'result', targetHandle: 'start_time', animated: true , type: 'NodePyEdge'},
+  { id: 'vueflow__edge-DateTimeNode_2datetime-KlineNode_1end_time', source: 'DateTimeNode_2', target: 'KlineNode_1', sourceHandle: 'datetime', targetHandle: 'end_time', animated: true , type: 'NodePyEdge'}
 ])
 
 const edges2 = ref([
-  { id: 'e1-3', source: '1', target: '3', sourceHandle: 'const', targetHandle: 'x', animated: true , type: 'NodePyEdge'},
-  { id: 'e2-3', source: '2', target: '3', sourceHandle: 'const', targetHandle: 'y', animated: true , type: 'NodePyEdge'}
+  { id: 'vueflow__edge-ConstNode_3const-NumberBinOpNode_1y', source: 'ConstNode_3', target: 'NumberBinOpNode_1', sourceHandle: 'const', targetHandle: 'y', animated: true, type: 'NodePyEdge' },
+  { id: 'vueflow__edge-StatsNode_1count-ToFloatNode_1input', source: 'StatsNode_1', target: 'ToFloatNode_1', sourceHandle: 'count', targetHandle: 'input', animated: true, type: 'NodePyEdge' },
+  { id: 'vueflow__edge-ToFloatNode_1output-NumberBinOpNode_1x', source: 'ToFloatNode_1', target: 'NumberBinOpNode_1', sourceHandle: 'output', targetHandle: 'x', animated: true, type: 'NodePyEdge' },
+  { id: 'vueflow__edge-NumberBinOpNode_1result-ToIntNode_1input', source: 'NumberBinOpNode_1', target: 'ToIntNode_1', sourceHandle: 'result', targetHandle: 'input', animated: true, type: 'NodePyEdge' }
 ])
 
 const edges3 = ref([
-  { id: 'e1-3', source: '1', target: '3', sourceHandle: 'const', targetHandle: 'x', animated: true , type: 'NodePyEdge'},
-  { id: 'e2-3', source: '2', target: '3', sourceHandle: 'const', targetHandle: 'y', animated: true , type: 'NodePyEdge'}
+  { id: 'vueflow__edge-LinearRegressionNode_1model-RegressionScoreNode_1model', source: 'LinearRegressionNode_1', target: 'RegressionScoreNode_1', sourceHandle: 'model', targetHandle: 'model', animated: true, type: 'NodePyEdge' },
+  { id: 'vueflow__edge-FilterNode_1true_table-RegressionScoreNode_1table', source: 'FilterNode_1', target: 'RegressionScoreNode_1', sourceHandle: 'true_table', targetHandle: 'table', animated: true, type: 'NodePyEdge' },
+  { id: 'vueflow__edge-FilterNode_1false_table-LinearRegressionNode_1table', source: 'FilterNode_1', target: 'LinearRegressionNode_1', sourceHandle: 'false_table', targetHandle: 'table', animated: true, type: 'NodePyEdge' },
+  { id: 'vueflow__edge-UploadNode_1file-TableFromFileNode_1file', source: 'UploadNode_1', target: 'TableFromFileNode_1', sourceHandle: 'file', targetHandle: 'file', animated: true, type: 'NodePyEdge' },
+  { id: 'vueflow__edge-TableFromFileNode_1table-FilterNode_1table', source: 'TableFromFileNode_1', target: 'FilterNode_1', sourceHandle: 'table', targetHandle: 'table', animated: true, type: 'NodePyEdge' }
+])
+
+const edges4 = ref([
+  { id: 'vueflow__edge-KlineNode_1kline_data-MergeNode_1table_1', source: 'KlineNode_1', target: 'MergeNode_1', sourceHandle: 'kline_data', targetHandle: 'table_1', animated: true, type: 'NodePyEdge' },
+  { id: 'vueflow__edge-KlineNode_2kline_data-MergeNode_1table_2', source: 'KlineNode_2', target: 'MergeNode_1', sourceHandle: 'kline_data', targetHandle: 'table_2', animated: true, type: 'NodePyEdge' },
+  { id: 'vueflow__edge-MergeNode_1merged_table-DualAxisPlotNode_1input', source: 'MergeNode_1', target: 'DualAxisPlotNode_1', sourceHandle: 'merged_table', targetHandle: 'input', animated: true, type: 'NodePyEdge' },
+  { id: 'vueflow__edge-KlineNode_2kline_data-QuickPlotNode_1input', source: 'KlineNode_2', target: 'QuickPlotNode_1', sourceHandle: 'kline_data', targetHandle: 'input', animated: true, type: 'NodePyEdge' }
 ])
 
 // 当前选中的示例索引
@@ -115,6 +227,7 @@ const currentNodes = computed(() => {
     case 0: return nodes1.value
     case 1: return nodes2.value
     case 2: return nodes3.value
+    case 3: return nodes4.value
     default: return nodes1.value
   }
 })
@@ -124,6 +237,7 @@ const currentEdges = computed(() => {
     case 0: return edges1.value
     case 1: return edges2.value
     case 2: return edges3.value
+    case 3: return edges4.value
     default: return edges1.value
   }
 })
@@ -166,7 +280,7 @@ const startCarousel = () => {
   }
   
   carouselTimer.value = setInterval(() => {
-    currentExampleIndex.value = (currentExampleIndex.value + 1) % 3
+    currentExampleIndex.value = (currentExampleIndex.value + 1) % 4
   }, 3000) // 每3秒切换一次
 }
 
@@ -196,6 +310,17 @@ onMounted(async () => {
   
   // 启动自动轮播
   startCarousel()
+})
+
+const { onNodeClick, findNode, onConnect, onNodesInitialized, fitView, onNodeDragStop, addEdges, getNodes, onPaneClick, screenToFlowCoordinate } = useVueFlow('main')
+
+onNodesInitialized(() => {
+  nextTick(() => {
+    fitView({
+      padding: 0.1,
+      maxZoom: 0.65,
+    })
+  })
 })
 
 // 组件卸载时清理定时器
@@ -268,14 +393,14 @@ function jumpToGithub() {
                 <div class="dots">
                   <span></span><span></span><span></span>
                 </div>
-                <div class="title">MyFirstProject.nodepy</div>
+                <div class="title">MyProject.nodepy</div>
               </div>
               <div class="mockup-body">
                 <VueFlow
                   :nodes="currentNodes"
                   :edges="currentEdges"
                   :node-types="nodeTypes"
-                  :default-viewport="{ zoom: 1.0 }"
+                  :default-viewport="{ zoom: 0.5 }"
                   :min-zoom="0.5"
                   :max-zoom="2"
                   fit-view-on-init
@@ -296,7 +421,7 @@ function jumpToGithub() {
                 <!-- 轮播指示器 -->
                 <div class="carousel-indicators">
                   <span 
-                    v-for="(_, index) in 3" 
+                    v-for="(_, index) in 4" 
                     :key="index"
                     class="indicator-dot"
                     :class="{ active: currentExampleIndex === index }"
@@ -498,9 +623,9 @@ function jumpToGithub() {
 
 .section {
   width: 100%;
-  padding: 80px 20px;
+  padding: 80px 20px 20px 40px;
   box-sizing: border-box;
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
 
   @media (max-width: 768px) {
@@ -599,14 +724,14 @@ function jumpToGithub() {
   }
 
   .hero-visual {
-    flex: 1.2;
+    flex: 1.9;
     display: flex;
     justify-content: center;
 
     .editor-mockup {
       width: 100%;
-      max-width: 700px;
-      height: 450px;
+      max-width: 900px;
+      height: 620px;
       background: white;
       border-radius: 12px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.12);
@@ -766,7 +891,7 @@ function jumpToGithub() {
   max-width: 100%; // 全宽背景
 
   .section-header, .examples-grid {
-    max-width: 1200px;
+    max-width: 1500px;
     margin: 0 auto;
   }
 
