@@ -171,8 +171,8 @@ const createWhiteBackgroundMiniMap = (originalMiniMap: HTMLElement): HTMLElement
           // 计算缩放比例以适应90%的容器
           const containerWidth = clone.clientWidth
           const containerHeight = clone.clientHeight
-          const scaleX = (containerWidth * 0.8) / contentWidth // 80%宽度用于内容
-          const scaleY = (containerHeight * 0.8) / contentHeight // 80%高度用于内容
+          const scaleX = (containerWidth * 1.9) / contentWidth // 90%宽度用于内容
+          const scaleY = (containerHeight * 1.9) / contentHeight // 90%高度用于内容
           const scale = Math.min(scaleX, scaleY, 1) // 取最小值，不超过1
 
           // 应用变换使内容居中
@@ -202,8 +202,8 @@ const captureMiniMapDirect = async (miniMapElement: HTMLElement): Promise<string
     tempContainer.style.position = 'fixed'
     tempContainer.style.left = '-9999px'
     tempContainer.style.top = '-9999px'
-    tempContainer.style.width = '800px'
-    tempContainer.style.height = '450px'
+    tempContainer.style.width = '880px'
+    tempContainer.style.height = '495px'
     tempContainer.style.backgroundColor = '#f6f9fb'
     tempContainer.style.display = 'flex'
     tempContainer.style.alignItems = 'center'
@@ -211,9 +211,12 @@ const captureMiniMapDirect = async (miniMapElement: HTMLElement): Promise<string
     tempContainer.style.overflow = 'hidden'
 
     const clone = miniMapElement.cloneNode(true) as HTMLElement
-    clone.style.width = '90%'
-    clone.style.height = '90%'
-    clone.style.margin = '0'
+    clone.style.width = '125%'
+    clone.style.height = '125%'
+    // clone.style.margin = '0'
+    clone.style.marginLeft = '-125px'
+    // clone.style.marginTop = '-125px'
+    clone.style.marginBottom = '75px'
     clone.style.padding = '0'
 
     tempContainer.appendChild(clone)
@@ -302,7 +305,7 @@ export const captureMiniMap = async (vueFlowRef: any): Promise<string | null> =>
   try {
     // 等待DOM更新完成，确保新增节点已经渲染
     await waitForDOMUpdate();
-    
+
     // 获取小地图元素
     const miniMapElement = vueFlowRef.querySelector('.vue-flow__minimap') as HTMLElement
     if (!miniMapElement) {
