@@ -206,17 +206,17 @@
             <div class="auth-card" :class="{ 'register-mode': state === 'register' }">
                 <div class="auth-card-left">
                     <template v-if="state==='login'">
-                        <h1 class="welcome-title">欢迎！请 登陆 以使用 <span class="nodepy-brand">NodePy</span></h1>
-                        <p class="welcome-sub">NodePy是一个安全且高效的平台，帮助你以可视化方式构建与管理数据流程。</p>
+                        <h1 class="welcome-title">欢迎！请登录以使用 <span class="nodepy-brand">NodePy</span></h1>
+                        <!-- <p class="welcome-sub">NodePy是一个安全且高效的平台，帮助你以可视化方式构建与管理数据流程。</p> -->
                         <div class="auth-quote">
-                            <p>开始前，你可以浏览示例或立即创建你的第一个流程。</p>
+                            <p>登录后，你可以浏览示例或立即创建你的第一个流程。</p>
                         </div>
                     </template>
                     <template v-else>
-                        <h1 class="welcome-title">欢迎！注册 以加入 <span class="nodepy-brand">NodePy</span></h1>
-                        <p class="welcome-sub">注册后可保存项目、共享流程并在多设备间同步工作进度。</p>
+                        <h1 class="welcome-title">欢迎！注册以加入 <span class="nodepy-brand">NodePy</span></h1>
+                        <!-- <p class="welcome-sub">注册后可保存项目、共享流程。</p> -->
                         <div class="auth-quote">
-                            <p>请填写下列信息来创建你的账号，随后你将获得完整的项目存储与协作功能。</p>
+                            <p>请填写下列信息来创建你的账号，随后你将获得完整的项目存储与共享功能。</p>
                         </div>
                     </template>
                 </div>
@@ -336,7 +336,7 @@
     /* Large area that holds the whole centered card */
     .large-area {
         width: calc(100% - 80px);
-        max-width: 1400px;
+        // max-width: 1400px;
         margin: 40px auto;
         min-height: calc(100vh - 120px);
         background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,252,255,0.9));
@@ -381,7 +381,7 @@
     .auth-card {
         margin: 20px auto 0;
         width: 100%;
-        max-width: 920px;
+        max-width: 1000px;
         display: grid;
         grid-template-columns: 1fr minmax(320px, 420px);
         gap: 28px;
@@ -454,7 +454,7 @@
 
     /* NodePy art brand gradient */
     .nodepy-brand {
-        background: linear-gradient(90deg, #108efe, #7b61ff);
+        background: $stress-color;
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;

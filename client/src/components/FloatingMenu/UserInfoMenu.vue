@@ -24,16 +24,10 @@
     <div class="user-info-menu">
       <!-- 未登录提示 -->
       <div v-if="!loginStore.isAuthenticated" class="not-logged-in">
-        <div class="not-logged-in-icon">
-          <!-- 使用 mdi 图标 -->
-          <div class="initials-avatar large">
-            <svg-icon type="mdi" :path="mdiAccount" :size="36"></svg-icon>
-          </div>
-        </div>
         <div class="not-logged-in-text">请先登录</div>
-        <el-button @click="handleLogin">立即登录</el-button>
+        <button class="login-btn" @click="handleLogin">立即登录</button>
       </div>
-      
+
       <!-- 用户头部 -->
       <div v-else class="user-header">
         <!-- 无头像时显示首字符 -->
@@ -54,20 +48,14 @@
 
       <!-- 用户统计 -->
       <div v-if="loginStore.isAuthenticated" class="user-stats">
-        <!-- 动态显示所有用户信息字段 -->
-        <div 
-          v-for="(value, key) in filteredUserInfo" 
-          :key="key" 
-          class="stat-item"
-        >
-          <span class="stat-label">{{ formatKey(key) }}:</span>
-          <span class="stat-value">{{ formatValue(key, value) }}</span>
+        <div v-if="userStore.currentUserInfo?.projects_count !== undefined" class="stat-item">
+          <span class="stat-label">项目数量</span>
+          <span class="stat-value">{{ userStore.currentUserInfo.projects_count }}</span>
         </div>
-        
-        <!-- 合并显示存储空间信息 -->
+
         <div v-if="userStore.currentUserInfo?.file_space_used !== undefined && userStore.currentUserInfo?.file_space_total !== undefined" class="stat-item">
-          <span class="stat-label">存储空间:</span>
-          <span class="stat-value">{{ formatStorageSpace() }}</span>
+          <span class="stat-label">存储空间</span>
+          <span class="stat-value">{{ formatStorage(userStore.currentUserInfo.file_space_used) }} / {{ formatStorage(userStore.currentUserInfo.file_space_total) }}</span>
         </div>
       </div>
 
@@ -76,14 +64,7 @@
 
       <!-- 菜单选项 -->
       <div v-if="loginStore.isAuthenticated" class="menu-actions">
-        <!-- <button class="action-btn">
-          <span class="icon">⚙️</span> 设置
-        </button> -->
-        <button class="action-btn logout" @click="handleLogout">
-          <span class="icon"><svg-icon type="mdi" :path="mdiLogout" :size="22"></svg-icon></span> 登出
-        </button>
-        <!-- <button @click="tableStore.createTableModal()">点我测试表格编辑</button>
-        <button @click="editorStore.createEditorModal()">点我测试脚本编辑</button> -->
+        <button class="logout-btn" @click="handleLogout">退出登录</button>
       </div>
     </div>
   </FloatingMenu>
@@ -92,25 +73,17 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Avatar } from '@element-plus/icons-vue'
 import { useLoginStore } from '@/stores/loginStore'
 import { useModalStore } from '@/stores/modalStore'
 import { useUserStore } from '@/stores/userStore'
-import { useEditorStore } from '@/stores/editorStore'
-import notify from '@/components/Notification/notify'
 import FloatingMenu from './FloatingMenu.vue'
-import EditableTableModal from '../EditableTable/EditableTableModal.vue'
-import PyEditor from '../PyEditor/PyEditor.vue'
 import Logout from '../Logout.vue'
-import { useTableStore } from '@/stores/tableStore'
-import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiAccount, mdiLogout } from '@mdi/js'
+import SvgIcon from '@jamescoyle/vue-icon'
+import { mdiAccount } from '@mdi/js'
 
 const loginStore = useLoginStore()
 const modalStore = useModalStore()
-const userStore = useUserStore()
-const tableStore = useTableStore()
-const editorStore = useEditorStore()
+const userStore: any = useUserStore()
 
 const router = useRouter()
 
@@ -125,7 +98,7 @@ onMounted(async () => {
 
 function handleLogin() {
   router.replace({
-    name: 'login' 
+    name: 'login'
   })
 }
 
@@ -149,109 +122,36 @@ async function handleLogout() {
   })
 }
 
-// 判断是否有头像功能（未来可能添加）
-const hasAvatar = computed(() => {
-  // 目前不支持头像功能，返回false
-  // 未来可以基于用户信息或其他条件来判断
-  return false
-})
-
 // 判断是否有头像URL
 const avatarUrl = computed(() => {
-  // 检查用户信息中是否有头像URL
   return userStore.currentUserInfo?.avatar_url || ''
 })
 
 // 获取用户名首字母（支持中文和其他语言）
 const userInitials = computed(() => {
   const username = userStore.currentUserInfo?.username || 'G'
-  // 获取第一个字符，支持中文和其他语言
   const firstChar = username.charAt(0)
   return firstChar.toUpperCase()
 })
 
-// 过滤掉不需要显示的字段（包括存储空间字段，因为我们要合并显示它们）
-const filteredUserInfo = computed(() => {
-  const userInfo = userStore.currentUserInfo
-  if (!userInfo) return {}
-  
-  // 过滤掉已经在其他地方显示的字段和一些不需要显示的字段
-  const excludeKeys = ['username', 'email', 'id', 'file_space_used', 'file_space_total']
-  const filtered: Record<string, any> = {}
-  
-  Object.keys(userInfo).forEach(key => {
-    if (!excludeKeys.includes(key)) {
-      filtered[key] = userInfo[key]
-    }
-  })
-  
-  return filtered
-})
-
-// 格式化键名显示
-const formatKey = (key: string) => {
-  const keyMap: Record<string, string> = {
-    'projects_count': '项目数量',
-    'file_space_used': '已使用存储',
-    'file_space_total': '总存储空间',
-    'created_at': '注册时间'
-  }
-  return keyMap[key] || key
-}
-
-// 格式化值显示
-const formatValue = (key: string, value: any) => {
-  // 格式化存储空间显示
-  if (key.includes('space')) {
-    return formatStorage(value)
-  }
-  
-  // 格式化时间显示
-  if (key === 'created_at' && typeof value === 'string') {
-    return new Date(value).toLocaleDateString()
-  }
-  
-  // 默认显示
-  return value ?? 'N/A'
-}
-
 // 格式化存储空间显示
 const formatStorage = (bytes: number | undefined) => {
   if (bytes === undefined || bytes === null) return '0 B'
-  
+
   const units = ['B', 'KB', 'MB', 'GB', 'TB']
   let size = bytes
   let unitIndex = 0
-  
+
   while (size >= 1024 && unitIndex < units.length - 1) {
     size /= 1024
     unitIndex++
   }
-  
-  // 如果是整数，不显示小数点
+
   if (size % 1 === 0) {
     return `${size} ${units[unitIndex]}`
   } else {
-    // 保留两位小数
     return `${size.toFixed(2)} ${units[unitIndex]}`
   }
-}
-
-// 格式化存储空间显示（合并显示已用空间/总空间和百分比）
-const formatStorageSpace = () => {
-  const userInfo = userStore.currentUserInfo
-  if (!userInfo) return 'N/A'
-  
-  const used = userInfo.file_space_used
-  const total = userInfo.file_space_total
-  
-  if (used === undefined || total === undefined) return 'N/A'
-  
-  // 计算百分比
-  const percentage = total > 0 ? Math.round((used / total) * 100) : 0
-  
-  // 格式化存储空间显示
-  return `${formatStorage(used)} / ${formatStorage(total)}`
 }
 </script>
 
@@ -264,12 +164,10 @@ const formatStorageSpace = () => {
   cursor: pointer;
   padding: 4px;
   border-radius: 50%;
-  transition: all 0.2s ease;
-  // @include controller-style;
+  transition: background-color 0.12s ease;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    transform: scale(1.05);
+    background-color: rgba(0, 0, 0, 0.04);
   }
 
   .avatar-img {
@@ -278,7 +176,7 @@ const formatStorageSpace = () => {
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   .initials-avatar {
@@ -286,16 +184,15 @@ const formatStorageSpace = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+    font-weight: 600;
     color: white;
-    // border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     background: $stress-color;
-    
+
     &.small {
-      width: 34px;
-      height: 34px;
-      font-size: 14px;
+      width: 36px;
+      height: 36px;
+      font-size: 15px;
     }
 
     &.large {
@@ -308,66 +205,49 @@ const formatStorageSpace = () => {
 }
 
 .user-info-menu {
-  width: 280px;
-  padding: 16px;
+  width: 300px;
+  padding: 20px;
   @include controller-style;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(31, 45, 61, 0.12);
 
   .not-logged-in {
     text-align: center;
     padding: 20px 0;
 
-    .initials-avatar {
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
-      // border: 2px solid #fff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      background: $stress-color;
-      
-      &.large {
-        width: 56px;
-        height: 56px;
-        font-size: 20px;
-        flex-shrink: 0;
-      }
-    }
-
-    .not-logged-in-icon {
-      // font-size: 48px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
     .not-logged-in-text {
-      font-size: 16px;
-      color: #666;
-      margin-bottom: 16px;
+      font-size: 15px;
+      color: rgba(0, 0, 0, 0.65);
+      margin-bottom: 20px;
+      font-weight: 500;
     }
 
     .login-btn {
-      background-color: #409eff;
+      background-color: $stress-color;
+      width: 100%;
       color: white;
       border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
+      padding: 10px 24px;
+      border-radius: 10px;
       cursor: pointer;
       font-size: 14px;
+      font-weight: 600;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
       &:hover {
-        background-color: #66b1ff;
+        // transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       }
     }
   }
 
   .user-header {
     display: flex;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 14px;
+    margin-bottom: 6px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
     .user-avatar {
       width: 56px;
@@ -375,6 +255,7 @@ const formatStorageSpace = () => {
       border-radius: 50%;
       object-fit: cover;
       flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .initials-avatar {
@@ -382,12 +263,11 @@ const formatStorageSpace = () => {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
+      font-weight: 600;
       color: white;
-      // border: 2px solid #fff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       background: $stress-color;
-      
+
       &.large {
         width: 56px;
         height: 56px;
@@ -400,93 +280,79 @@ const formatStorageSpace = () => {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 4px;
+      gap: 5px;
+      min-width: 0;
+      flex: 1;
 
       .username {
         font-weight: 600;
-        font-size: 15px;
-        color: #333;
+        font-size: 16px;
+        color: rgba(0, 0, 0, 0.87);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .email {
-        font-size: 13px;
-        color: #666;
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.55);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }
 
   .user-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    // gap: 12px;s
     margin-bottom: 16px;
-    padding: 12px;
-    background-color: #f5f7fa;
-    border-radius: 6px;
 
     .stat-item {
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
-      gap: 4px;
+      padding: 10px 0;
 
       .stat-label {
         font-size: 14px;
-        color: #999;
+        color: rgba(0, 0, 0, 0.6);
+        font-weight: 500;
       }
 
       .stat-value {
         font-size: 14px;
         font-weight: 600;
-        color: #333;
-        text-align: center;
+        color: rgba(0, 0, 0, 0.87);
       }
     }
   }
 
   .divider {
     height: 1px;
-    background-color: #e8e8e8;
-    margin: 12px 0;
+    background-color: rgba(0, 0, 0, 0.06);
+    margin: 16px 0;
   }
 
   .menu-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    .action-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
+    .logout-btn {
+      width: 100%;
+      background-color: #ff4d4f;
+      color: white;
       border: none;
-      background-color: transparent;
-      color: #333;
-      font-size: 14px;
+      padding: 10px;
+      border-radius: 10px;
       cursor: pointer;
-      border-radius: 4px;
-      transition: all 0.2s ease;
-
-      .icon {
-        font-size: 16px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
       &:hover {
-        background-color: #f0f0f0;
-        color: #4a90e2;
-      }
-
-      &.logout {
-        color: #e74c3c;
-
-        &:hover {
-          background-color: #ffe0e0;
-          color: #c0392b;
-        }
+        background-color: #ff7875;
+        // transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       }
     }
   }

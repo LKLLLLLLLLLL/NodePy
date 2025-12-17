@@ -198,7 +198,6 @@ class PackNode(BaseNode):
 
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
-        from loguru import logger
         if "base_row" in input_schemas:
             # append new columns to the base row
             baserow = deepcopy(input_schemas["base_row"])
@@ -208,6 +207,7 @@ class PackNode(BaseNode):
                 col_type = input_schemas[col].to_coltype()
                 baserow = baserow.append_col(col, col_type)
             output_schema = baserow
+            assert baserow.tab is not None
             self._col_types = baserow.tab.col_types
             return {
                 "packed_row": output_schema

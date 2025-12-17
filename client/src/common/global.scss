@@ -41,7 +41,7 @@ $mix-background-color: rgba($computed-r, $computed-g, $computed-b, $target-a);
 }
 
 .success-message{
-    color: rgba(0, 142, 0, 0.6);
+    color: rgba(0, 142, 69, 0.6);
 }
 
 @mixin info-message {
@@ -109,8 +109,8 @@ $mix-background-color: rgba($computed-r, $computed-g, $computed-b, $target-a);
 }
 
 @mixin input-focus-style{
-  outline: none; 
-  box-shadow: 0 8px 24px rgba(16,142,254,0.06);
+  outline: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
   border-color: $stress-color;
 }
 

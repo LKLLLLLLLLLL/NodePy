@@ -36,7 +36,7 @@ onMounted(() => {})
 }
 .toast .content{flex:1;padding-right:8px;text-align: center;}
 .toast .close{background:transparent;border:none;color:inherit;font-size:18px;cursor:pointer}
-.toast.success{background:#67C23A;color:#fff}
+.toast.success{background:#3ac263;color:#fff}
 .toast.error{background:#F56C6C;color:#fff}
 .toast.info{background:#ffffff;color:#222;border:1px solid rgba(0,0,0,0.06)}
 .toast.warning{background:#E6A23C;color:#fff}

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
     import { computed, ref, onMounted, onUnmounted } from 'vue';
     import { useFileStore } from '@/stores/fileStore';
-    import { FileItem } from '@/utils/api';
+    import { FileItem } from '@/utils/api'; // @ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon';
     import {
         mdiFileDelimited,
