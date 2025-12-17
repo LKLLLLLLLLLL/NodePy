@@ -112,6 +112,7 @@ import { initVueFlowProject } from '@/utils/projectConvert'
 import type { BaseNode } from '@/types/nodeTypes'
 import { nodeCategoryColor } from '@/types/nodeTypes'
 import { useRoute } from 'vue-router'
+import { setGroupIdsByBFS, deleteGroupIdWhenDeleteEdge, handleSpecialNodeDelete } from '../nodes/handleGroup'
 
 
 const resultStore = useResultStore()
@@ -119,7 +120,7 @@ const modalStore = useModalStore()
 const graphStore = useGraphStore()
 
 const {params: {projectId}} = useRoute()
-const { onNodeClick, findNode, onConnect, onNodesInitialized, fitView, onNodeDragStop, addEdges, getNodes, onPaneClick, screenToFlowCoordinate } = useVueFlow('main')
+const { onNodeClick, findNode, onConnect, onNodesInitialized, fitView, onNodeDragStop, addEdges, getNodes, onPaneClick, screenToFlowCoordinate, onEdgesChange, onNodesChange } = useVueFlow('main')
 const shouldWatch = ref(false)
 const nodeFirstInit = ref(true)
 const listenNodePosition = ref(true)
@@ -202,6 +203,39 @@ onConnect((connection) => {
     type: "NodePyEdge"
   }
   addEdges(addedEdge)
+})
+
+// updateGroupId when edge addition or delete
+watch(() => edges.value.length, (newValue, oldValue) => {
+  if(!shouldWatch.value) return
+  setTimeout(() => {
+    setGroupIdsByBFS()
+  }, 0);
+})
+// removeGroupId when edge delete
+onEdgesChange((changes) => {
+  changes.forEach(change => {
+    if(change.type === 'remove') {
+      deleteGroupIdWhenDeleteEdge(change)
+    }
+  })
+})
+// removeNodeContainer and the paired node when delete a for node
+onNodesChange((changes) => {
+    const SPECIAL_NODE_TYPES = [
+      'ForEachRowBeginNode',
+      'ForEachRowEndNode', 
+      'ForRollingWindowBeginNode',
+      'ForRollingWindowEndNode'
+    ];
+    const removeChanges = changes.filter(change => change.type === 'remove')
+    removeChanges.forEach(change => {
+      //@ts-ignore
+      const removedNode = graphStore.project.workflow.nodes.find(n => n.id === change.id)
+      if(removedNode && SPECIAL_NODE_TYPES.includes(removedNode.type)) {
+        handleSpecialNodeDelete(removedNode)
+      }
+    })
 })
 
 // 监听当前节点的数据变化

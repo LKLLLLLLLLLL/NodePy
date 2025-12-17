@@ -25,7 +25,14 @@ export const useGraphStore = defineStore('graph', () => {
   const is_syncing = ref(false)
   const syncing_err_msg = ref('')
   const maxNodeId = ref<Record<string, number>>({}) // record max id in history for each node type
-  const copiedNodes = ref<Array<{type: string, position: {x: number, y: number}, param: any, id: string, is_virtual_node?: boolean}>>([])
+  const copiedNodes = ref<Array<{type: string, 
+    position: {x: number, y: number}, 
+    param: any, 
+    id: string, 
+    is_virtual_node?: boolean,
+    width: number,
+    height: number
+  }>>([])
   const copiedEdges = ref<Array<{source: string, target: string, sourceHandle?: string | null, targetHandle?: string | null, type: string}>>([])
   const copiedNodesBounds = ref<{minX: number, minY: number, maxX: number, maxY: number} | null>(null)
   const idMap = ref<Record<string, string>>({}) //  record old node id to new id
@@ -1371,7 +1378,7 @@ export const useGraphStore = defineStore('graph', () => {
     }
   }
 
-  const addCopiedNode = (type: string, position: {x: number, y: number}, param: any, is_virtual_node?: boolean) => {
+  const addCopiedNode = (type: string, position: {x: number, y: number}, param: any, is_virtual_node: boolean|undefined, width: number, height: number) => {
     const addedNode: Nodetypes.BaseNode = {
       id: nextId(type),
       position,
@@ -1379,7 +1386,9 @@ export const useGraphStore = defineStore('graph', () => {
       data: {
         param,
         is_virtual_node
-      }
+      },
+      width,
+      height
     }
     addNodes(addedNode)
     return addedNode
@@ -1396,7 +1405,9 @@ export const useGraphStore = defineStore('graph', () => {
         type: n.type,
         position: {...n.position},
         param: JSON.parse(JSON.stringify(n.data.param)), // deep copy
-        is_virtual_node: n.data.is_virtual_node
+        is_virtual_node: n.data.is_virtual_node,
+        width: n.dimensions.width,
+        height: n.dimensions.height
       }))
       let minX = selectedNodes[0]!.position.x
       let minY = selectedNodes[0]!.position.y
@@ -1436,7 +1447,9 @@ export const useGraphStore = defineStore('graph', () => {
             y: position.y + relativeY,
           },
           JSON.parse(JSON.stringify(nodeInfo.param)), // deep copy to avoid param binding
-          nodeInfo.is_virtual_node
+          nodeInfo.is_virtual_node,
+          nodeInfo.width,
+          nodeInfo.height
         )
         if(newNode) {
           idMap.value[nodeInfo.id] = newNode.id
