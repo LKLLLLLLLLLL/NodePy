@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Dict, override
 
+import pandas as pd
 from pydantic import PrivateAttr
 
 from server.config import DEFAULT_TIMEZONE
@@ -105,6 +106,7 @@ class KlineNode(BaseNode):
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         output_col_types = {
+            "Symbol": ColType.STR,
             "Open Time": ColType.DATETIME,
             "Open": ColType.FLOAT,
             "High": ColType.FLOAT,
@@ -168,8 +170,8 @@ class KlineNode(BaseNode):
                 node_id=self.id,
                 err_msg=f"Failed to fetch Kline data: {str(e)}",
             )
+        output = Data(payload=table)
+        output = output.append_col("Symbol", pd.Series([self.symbol for _ in range(len(table.df))]), pos=0)
         return {
-            "kline_data": Data(
-                payload=table
-            )
+            "kline_data": output
         }

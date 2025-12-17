@@ -52,6 +52,8 @@ worker = [
     "httpx>=0.28.1",
     "yfinance>=0.2.66",
     "mplfinance>=0.12.10b0",
+    "snownlp>=0.12.3",
+    "vadersentiment>=3.3.2",
 ]
 
 [tool.taskipy.tasks]

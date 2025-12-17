@@ -7,6 +7,8 @@ from math import isinf, isnan
 from typing import Any, ClassVar, Literal, Union, cast
 
 import joblib
+import numpy as np
+import pandas as pd
 from pandas import DataFrame, Series, isna
 from pydantic import BaseModel, model_validator
 from sklearn.base import BaseEstimator
@@ -91,7 +93,7 @@ class Table(BaseModel):
         self.col_types[self.INDEX_COL] = ColType.INT
         return Table(df=new_df, col_types=self.col_types)
 
-    def _append_col(self, new_col: str, col: Series) -> 'Table':
+    def _append_col(self, new_col: str, col: Series, pos: int | None = None) -> 'Table':
         if new_col in self.col_types:
             raise ValueError(f"Cannot add column '{new_col}': already exists.")
         if not check_no_illegal_cols([new_col]):
@@ -99,9 +101,16 @@ class Table(BaseModel):
         if len(self.df) != len(col):
             raise ValueError(f"Cannot add column '{new_col}': length mismatch {len(self.df)} vs {len(col)}.")
         new_df = self.df.copy()
-        new_df[new_col] = col.values
+        if pos is None:
+            new_df[new_col] = col.values
+        else:
+            new_df.insert(pos, new_col, col.values) # type: ignore
         new_col_types = self.col_types.copy()
-        new_col_types[new_col] = ColType.from_ptype(col.dtype)
+        if pos is None:
+            new_col_types[new_col] = ColType.from_ptype(col.dtype)
+        else:
+            new_col_types = {new_col: ColType.from_ptype(col.dtype)}
+            new_col_types.update(self.col_types)
         return Table(df=new_df, col_types=new_col_types)
 
     def fast_hash(self) -> str:
@@ -242,6 +251,24 @@ class Model(BaseModel):
 class Data(BaseModel):
     payload: Union[Table, str, int, bool, float, File, datetime, Model]
 
+    @model_validator(mode="before")
+    def convert_ptypes(cls, data: Any) -> Any:
+        if 'payload' not in data:
+            return data
+        payload = data['payload']
+        # convert pandas types to native python types
+        if type(payload) == np.float64: # noqa
+            data['payload'] = float(payload)
+        elif type(payload) == np.int64: # noqa
+            data['payload'] = int(payload)
+        elif type(payload) == np.bool_: # noqa
+            data['payload'] = bool(payload)
+        elif isinstance(payload, pd.Timestamp):
+            data['payload'] = payload.to_pydatetime()
+        elif isinstance(payload, np.str_):
+            data['payload'] = str(payload)
+        return data
+
     def extract_schema(self) -> Schema:
         if isinstance(self.payload, Table):
             return Schema(
@@ -265,10 +292,10 @@ class Data(BaseModel):
         else:
             raise TypeError(f"Unsupported data payload type: {type(self.payload)}")
 
-    def append_col(self, new_col: str, ser: Series) -> 'Data':
+    def append_col(self, new_col: str, ser: Series, pos: int | None = None) -> 'Data':
         if not isinstance(self.payload, Table):
             raise ValueError("Can only append column to Table data.")
-        new_table = self.payload._append_col(new_col, ser)
+        new_table = self.payload._append_col(new_col, ser, pos)
         return Data(payload=new_table)
 
     def __eq__(self, value: object) -> bool:
