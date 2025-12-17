@@ -89,7 +89,7 @@ import { mdiAccount, mdiLogout } from '@mdi/js'
 
 const loginStore = useLoginStore()
 const modalStore = useModalStore()
-const userStore = useUserStore()
+const userStore: any = useUserStore()
 const tableStore = useTableStore()
 const editorStore = useEditorStore()
 
