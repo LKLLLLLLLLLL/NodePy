@@ -237,7 +237,8 @@ const formatStorage = (bytes: number | undefined) => {
 
       &:hover {
         // transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        @include confirm-button-hover-style;
       }
     }
   }
@@ -350,9 +351,10 @@ const formatStorage = (bytes: number | undefined) => {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
       &:hover {
-        background-color: #ff7875;
-        // transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        // background-color: #ff7875;
+        // // transform: translateY(-1px);
+        // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        @include delete-button-hover-style;
       }
     }
   }

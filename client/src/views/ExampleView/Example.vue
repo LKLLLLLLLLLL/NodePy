@@ -2,8 +2,13 @@
     import { useRouter } from 'vue-router'
     import { ref, computed, onMounted } from 'vue';
     import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
+    import { useLoginStore } from '@/stores/loginStore'
+    import Mask from '@/views/Mask.vue'
     import ExampleDemoFrame from './ExampleDemoFrame.vue';
     import type { ExploreList, ExploreListItem } from '@/utils/api';
+
+    const loginStore = useLoginStore();
+    const router = useRouter()
 
     const default_examples: ExploreList = {
         projects: []
@@ -12,15 +17,22 @@
     const examples = ref<ExploreList>(default_examples)
 
     onMounted(async ()=>{
-        examples.value = await authService.getExploreProjectsApiExploreExploreProjectsGet()
-        console.log(examples.value)
+        loginStore.checkAuthStatus();
+        if(loginStore.loggedIn){
+            examples.value = await authService.getExploreProjectsApiExploreExploreProjectsGet();
+        }
+        else{
+            router.replace({
+                name: 'login'
+            })
+        }
     })
 
     const default_name: string = 'default_name'
 
 </script>
 <template>
-    <div class="example-container">
+    <div class="example-container" v-if="loginStore.loggedIn">
         <div v-if="examples.projects.length === 0" class="no-example-container">
             <div class="no-example-info">暂无示例项目</div>
         </div>
@@ -32,6 +44,7 @@
             ></ExampleDemoFrame>
         </div>
     </div>
+    <Mask v-else></Mask>
 </template>
 <style lang="scss" scoped>
     .example-container{
