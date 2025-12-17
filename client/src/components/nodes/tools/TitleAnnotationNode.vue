@@ -1,5 +1,5 @@
 <template>
-    <div class="TitleAnnotationNodeLayout nodes-style" :class="[{'nodes-selected': selected}]">
+    <div class="TitleAnnotationNodeLayout nodes-style" :class="[{'nodes-selected': selected}]" @contextmenu="onContextMenu">
         <NodeResizer :min-width="200" :min-height="30"/>
         <NodeTitle node-category='annotation' class="title draggable">
             <template v-if="isEditing">
@@ -28,12 +28,26 @@
     import {ref, nextTick} from 'vue'
     import '@vue-flow/node-resizer/dist/style.css'
 
+
     const props = defineProps<NodeProps<TitleAnnotationNodeData>>()
     const title = ref(props.data.param.title)
     const inputEl = ref<HTMLInputElement | null>(null)
     const isEditing = ref(false)
 
 
+    // 定义右键事件处理函数
+    const onContextMenu = (event: MouseEvent) => {
+        // 阻止默认右键菜单
+        event.preventDefault()
+        // 创建自定义事件，传递给父级处理
+        const customEvent = new CustomEvent('node-contextmenu', {
+            detail: {
+                event,
+                node: props
+            }
+        })
+        window.dispatchEvent(customEvent)
+    }
     const commit = () => {
         if(isEditing.value) {
             props.data.param.title = title.value

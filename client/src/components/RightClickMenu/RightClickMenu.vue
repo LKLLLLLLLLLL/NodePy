@@ -28,13 +28,19 @@ const setMenuItemRef = (el: unknown, idx: number) => {
 
 const { onPaneContextMenu, screenToFlowCoordinate } = useVueFlow('main')
 
-// 绑定右键事件
+// 绑定面板右键事件
 onPaneContextMenu((e: MouseEvent) => {
   showContextMenu(e)
 })
 
+// 绑定节点右键事件
+const onNodeContextMenu = (e: CustomEvent) => {
+  const { event, node } = e.detail
+  showContextMenu(event, node)
+}
+
 // 显示右键菜单
-const showContextMenu = (event: MouseEvent) => {
+const showContextMenu = (event: MouseEvent, node?: any) => {
   event.preventDefault()
   menuX.value = event.clientX
   menuY.value = event.clientY
@@ -168,10 +174,14 @@ const onGlobalClick = (e: MouseEvent) => {
 
 onMounted(() => {
   document.addEventListener('click', onGlobalClick)
+  // 添加节点右键事件监听器
+  window.addEventListener('node-contextmenu', onNodeContextMenu as EventListener)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', onGlobalClick)
+  // 移除节点右键事件监听器
+  window.removeEventListener('node-contextmenu', onNodeContextMenu as EventListener)
 })
 </script>
 
