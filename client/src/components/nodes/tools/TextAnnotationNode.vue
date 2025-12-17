@@ -43,7 +43,6 @@
 
             watch(() => props.modelValue, (v) => {
                 if (v !== local.value) local.value = v
-                console.log('modelValue changed:', v)
             })
 
             const setDomFromLocal = () => {
@@ -79,16 +78,21 @@
                 updateLocalFromDom()
             }
 
+            const onKeydown = (e: KeyboardEvent) => {
+                if (e.key === 'Enter') {
+                    // Prevent block-level insertion (div/br) to avoid extra newlines
+                    e.preventDefault()
+                    document.execCommand('insertText', false, '\n')
+                    updateLocalFromDom()
+                }
+            }
+
             const onPaste = (e: ClipboardEvent) => {
                 e.preventDefault()
                 const text = e.clipboardData?.getData('text/plain') || ''
                 document.execCommand('insertText', false, text)
                 updateLocalFromDom()
             }
-
-            watch(local, () => {
-                setDomFromLocal()
-            })
 
             onMounted(() => {
                 setDomFromLocal()
@@ -102,6 +106,7 @@
                 class: attrs.class,
                 style: Object.assign({ overflow: 'hidden', whiteSpace: 'pre-wrap' }, attrs.style || {}),
                 onInput,
+                onKeydown,
                 onPaste
             })
         }
@@ -146,11 +151,13 @@
     @use '../../../common/node.scss' as *;
     .TextAnnotationNodeLayout {
         width: 100%;
-        height: 100%;
+        height: auto;
         min-height: 90px;
+        padding: 4px;
         .inputValue {
+            display: block;
             width: 100%;
-            height: 100%;
+            height: auto;
             min-height: 90px;
             padding: 2px;
             border:none;
@@ -160,6 +167,7 @@
             text-overflow: ellipsis;
             white-space: pre-wrap;
             word-wrap: break-word;
+            box-sizing: border-box;
             /* 禁止在非编辑（readonly）状态下选中内容 */
             &[readonly] {
                 -webkit-user-select: none;
@@ -171,8 +179,8 @@
         }
         .displayText {
             width: 100%;
-            height: 100%;
-            min-Height: 90px;
+            height: auto;
+            min-height: 90px;
             color: white;
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -183,6 +191,7 @@
             white-space: pre-wrap;
             word-wrap: break-word;
             padding: 2px;
+            box-sizing: border-box;
         }
         background: $annotation-node-body-color;
     }

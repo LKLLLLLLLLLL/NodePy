@@ -116,7 +116,9 @@
         })
     })
 
-    const {zoomIn,zoomOut,fitView} = useVueFlow('main');
+    const {zoomIn,zoomOut,fitView, onPaneClick, screenToFlowCoordinate} = useVueFlow('main');
+    let pendingAnnotateOff: (() => void) | null = null
+    const armedAnnotateType = ref<'text' | 'title' | null>(null)
 
     function handleZoomIn(){
         zoomIn({
@@ -138,12 +140,42 @@
         })
     }
 
+    const clearPendingAnnotate = () => {
+        if (pendingAnnotateOff) {
+            try { pendingAnnotateOff() } catch (e) {}
+            pendingAnnotateOff = null
+        }
+        armedAnnotateType.value = null
+    }
+
+    const armAnnotatePlacement = (type: 'text' | 'title') => {
+        // toggle: clicking the same button again cancels
+        if (armedAnnotateType.value === type) {
+            clearPendingAnnotate()
+            return
+        }
+        // clear previous pending listener
+        clearPendingAnnotate()
+        armedAnnotateType.value = type
+        const disposer = onPaneClick((event: MouseEvent) => {
+            const flowPos = screenToFlowCoordinate({ x: event.clientX, y: event.clientY })
+            const nodeType = type === 'text' ? 'TextAnnotationNode' : 'TitleAnnotationNode'
+            graphStore.addNode(nodeType, { x: flowPos.x, y: flowPos.y })
+            clearPendingAnnotate()
+        })
+        if (typeof disposer === 'function') {
+            pendingAnnotateOff = disposer
+        } else if (disposer && typeof (disposer as any).off === 'function') {
+            pendingAnnotateOff = (disposer as any).off
+        }
+    }
+
     function handleTitleAnnotate(){
-        graphStore.addNode('TitleAnnotationNode',{x: 0, y: 0})
+        armAnnotatePlacement('title')
     }
 
     function handleTextAnnotate(){
-        graphStore.addNode('TextAnnotationNode',{x: 0, y: 0})
+        armAnnotatePlacement('text')
     }
 
     // 判断项目是否为只读模式
@@ -153,11 +185,11 @@
 
     async function handleCopy(){
         const newProjectId = await projectStore.copyProject(Number(route.params.projectId))
-        
+
         if (newProjectId) {
             // 使用原生URL跳转方法
             window.location.href = `/project/${newProjectId}`;
-            
+
             notify({
                 message: '项目复制成功',
                 type: 'success'
@@ -234,14 +266,14 @@
             </div>
             <div v-if="!isReadOnly" class="graph-controls-left left_2">
                 <div class="gc-btn-container">
-                    <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleTitleAnnotate();}" aria-label="Title annotate">
+                    <button class="gc-btn" :class="{ armed: armedAnnotateType === 'title' }" type="button" @click="(e) => { animateButton(e); handleTitleAnnotate();}" aria-label="Title annotate">
                         <SvgIcon type="mdi" :path="mdiFormatQuoteOpen" class="btn-icon quote" />
                         <div class="gc-btn-text">注释</div>
                     </button>
 
                     <div class="divider"></div>
 
-                    <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleTextAnnotate();}" aria-label="Text annotate">
+                    <button class="gc-btn" :class="{ armed: armedAnnotateType === 'text' }" type="button" @click="(e) => { animateButton(e); handleTextAnnotate();}" aria-label="Text annotate">
                         <SvgIcon type="mdi" :path="mdiTextBoxOutline" class="btn-icon" />
                         <div class="gc-btn-text">文本注释</div>
                     </button>
@@ -316,7 +348,7 @@
         flex-direction: row;
         gap: 10px;
     }
-    
+
     .graph-controls-right.right_2 .gc-btn-container{
         background-color: $stress-color;
         .gc-btn-text, .btn-icon{
@@ -358,6 +390,9 @@
             font-size: 16px;
             color: rgba(0, 0, 0, 0.75);
             user-select: none;
+        }
+        &.armed{
+            background-color: rgba(0, 0, 0, 0.08);
         }
     }
 
