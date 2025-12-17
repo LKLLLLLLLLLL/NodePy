@@ -76,13 +76,21 @@
         width: 100%;
         height: 100%;
         .title {
+            display: flex;
+            align-items: center; /* 垂直居中内容 */
+            /* 让输入框水平伸展 */
             .inputValue {
+                flex: 1;
                 width: 100%;
-                height: 100%;
-                border:none;
-                outline:none;
+                height: auto; /* 不强制占满高度，改为自动以便居中 */
+                box-sizing: border-box;
+                border: none;
+                outline: none;
                 color: white;
-                padding: 2px 0;
+                padding: 2px 8px; /* 与 displayTitle 保持一致的左右内边距 */
+                background: transparent;
+                line-height: 1.2;
+                font-size: inherit;
                 /* 禁止在非编辑（readonly）状态下选中内容 */
                 &[readonly] {
                     -webkit-user-select: none;
@@ -94,8 +102,9 @@
             }
         }
         .displayTitle {
+            flex: 1;
             width: 100%;
-            height: 100%;
+            height: auto;
             color: white;
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -104,7 +113,13 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            padding: 2px 0;
+            padding: 2px 8px; /* 与 input 的左右内边距一致 */
+            display: block;
+            min-height: 1.2em; /* 保证在无文本时也有可点击的高度 */
+            /* 当没有文本时显示一个不可见的空格，确保元素有尺寸并可被点击 */
+            &:empty::before {
+                content: '\00a0';
+            }
         }
         .nodrag {
             width: 100%;

@@ -1,8 +1,8 @@
 <template>
     <div class="TextAnnotationNodeLayout nodes-style" :class="[{'nodes-selected': selected}]" @contextmenu="onContextMenu">
-        <NodeResizer :min-width="200" :min-height="30"/>
+        <NodeResizer :min-width="200" :min-height="90"/>
         <template v-if="isEditing">
-            <textarea v-model="text" 
+            <AutosizeTextarea v-model="text"
                 @blur="commit"
                 class="inputValue"
                 ref="inputEl"
@@ -20,14 +20,92 @@
     import type { TextAnnotationNodeData } from '../../../types/nodeTypes'
     import type { NodeProps } from '@vue-flow/core'
     import { NodeResizer } from '@vue-flow/node-resizer'
-    import {ref, nextTick} from 'vue'
+    import {ref, nextTick, watch, defineComponent, h, onMounted} from 'vue'
     import '@vue-flow/node-resizer/dist/style.css'
 
 
     const props = defineProps<NodeProps<TextAnnotationNodeData>>()
     const text = ref(props.data.param.text)
-    const inputEl = ref<HTMLInputElement | null>(null)
+    const inputEl = ref<any>(null)
     const isEditing = ref(false)
+
+    // 内联的 AutosizeTextarea（使用 contenteditable），暴露 focus/blur/el/focusEnd
+    const AutosizeTextarea = defineComponent({
+        name: 'AutosizeTextarea',
+        props: {
+            modelValue: { type: String, default: '' },
+            readonly: { type: Boolean, default: false }
+        },
+        emits: ['update:modelValue'],
+        setup(props, { emit, attrs, expose }) {
+            const el = ref<HTMLElement | null>(null)
+            const local = ref(props.modelValue)
+
+            watch(() => props.modelValue, (v) => {
+                if (v !== local.value) local.value = v
+                console.log('modelValue changed:', v)
+            })
+
+            const setDomFromLocal = () => {
+                if (!el.value) return
+                if ((el.value as HTMLElement).innerText !== local.value) {
+                    el.value.innerText = local.value || ''
+                }
+            }
+
+            const updateLocalFromDom = () => {
+                if (!el.value) return
+                const v = (el.value as HTMLElement).innerText || ''
+                if (v !== local.value) {
+                    local.value = v
+                    emit('update:modelValue', v)
+                }
+            }
+
+            const focusEnd = () => {
+                if (!el.value) return
+                el.value.focus()
+                const range = document.createRange()
+                range.selectNodeContents(el.value)
+                range.collapse(false)
+                const sel = window.getSelection()
+                if (sel) {
+                    sel.removeAllRanges()
+                    sel.addRange(range)
+                }
+            }
+
+            const onInput = (e: Event) => {
+                updateLocalFromDom()
+            }
+
+            const onPaste = (e: ClipboardEvent) => {
+                e.preventDefault()
+                const text = e.clipboardData?.getData('text/plain') || ''
+                document.execCommand('insertText', false, text)
+                updateLocalFromDom()
+            }
+
+            watch(local, () => {
+                setDomFromLocal()
+            })
+
+            onMounted(() => {
+                setDomFromLocal()
+            })
+
+            expose({ el, focus: () => el.value?.focus(), blur: () => el.value?.blur(), focusEnd })
+
+            return () => h('div', {
+                ref: el,
+                contenteditable: String(!props.readonly),
+                class: attrs.class,
+                style: Object.assign({ overflow: 'hidden', whiteSpace: 'pre-wrap' }, attrs.style || {}),
+                onInput,
+                onPaste
+            })
+        }
+    })
 
 
     // 定义右键事件处理函数
@@ -53,15 +131,14 @@
     const enableEdit = async () => {
         isEditing.value = true
         await nextTick()
-        inputEl.value?.focus()
-        // move caret to end
-        const el = inputEl.value
-        if (el) {
-            const len = el.value.length
-            el.setSelectionRange(len, len)
+        // focus and move caret to end using exposed helper
+        if (inputEl.value?.focusEnd) {
+            inputEl.value.focusEnd()
+        } else {
+            inputEl.value?.focus()
         }
     }
-    
+
 </script>
 
 <style lang="scss" scoped>
@@ -69,11 +146,12 @@
     @use '../../../common/node.scss' as *;
     .TextAnnotationNodeLayout {
         width: 100%;
-        height: auto;
+        height: 100%;
         min-height: 90px;
         .inputValue {
             width: 100%;
             height: 100%;
+            min-height: 90px;
             padding: 2px;
             border:none;
             outline:none;
@@ -94,6 +172,7 @@
         .displayText {
             width: 100%;
             height: 100%;
+            min-Height: 90px;
             color: white;
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -112,10 +191,8 @@
 <style lang="scss">
     .vue-flow__node-TextAnnotationNode {
         z-index: -1 !important;
-        width: 200px;
-        height: 500px;
-        min-height: 300px;
-        min-width: 90px;
+        min-height: 90px;
+        min-width: 200px;
     }
     .vue-flow__resize-control {
         background: transparent !important;
