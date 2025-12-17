@@ -190,10 +190,6 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'RegexExtractNode'
             },
             {
-                label: '分词',
-                value: 'TokenizeNode'
-            },
-            {
                 label: '首尾字符去除',
                 value: 'StripNode'
             },
@@ -216,6 +212,14 @@ export const nodeMenuItems: MenuNode[] = [
             {
                 label: '批量正则表达式匹配',
                 value: 'BatchRegexMatchNode'
+            },
+            {
+                label: '分词',
+                value: 'TokenizeNode'
+            },
+            {
+                label: '情感分析',
+                value: 'SentimentAnalysisNode'
             },
         ]
     },

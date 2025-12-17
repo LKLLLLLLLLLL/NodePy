@@ -530,6 +530,11 @@ export interface TokenizeNode extends BaseNode<TokenizeNodeData> {
 }
 
 
+export interface SentimentAnalysisNode extends BaseNode {
+    type: 'SentimentAnalysisNode'
+}
+
+
 /*********************  TableProcess Nodes  **************************/
 export interface InsertConstColNodeParam {
     col_name: string,

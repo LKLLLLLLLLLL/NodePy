@@ -656,6 +656,17 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedTokenizeNode)
         break
+      case 'SentimentAnalysisNode':
+        const addedSentimentAnalysisNode: Nodetypes.SentimentAnalysisNode = {
+          id,
+          position,
+          type: 'SentimentAnalysisNode',
+          data: {
+            param: {}
+          }
+        }
+        addNodes(addedSentimentAnalysisNode)
+        break
       case 'InsertConstColNode':
         const addedInsertConstColNode: Nodetypes.InsertConstColNode = {
           id,

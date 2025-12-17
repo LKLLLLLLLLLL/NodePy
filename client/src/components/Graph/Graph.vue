@@ -55,6 +55,7 @@ import RegexMatchNode from '../nodes/stringProcess/RegexMatchNode.vue'
 import BatchRegexMatchNode from '../nodes/stringProcess/BatchRegexMatchNode.vue'
 import RegexExtractNode from '../nodes/stringProcess/RegexExtractNode.vue'
 import TokenizeNode from '../nodes/stringProcess/TokenizeNode.vue'
+import SentimentAnalysisNode from '../nodes/stringProcess/SentimentAnalysisNode.vue'
 import InsertConstColNode from '../nodes/tableProcess/InsertConstColNode.vue'
 import InsertRangeColNode from '../nodes/tableProcess/InsertRangeColNode.vue'
 import InsertRandomColNode from '../nodes/tableProcess/InsertRandomColNode.vue'
@@ -347,6 +348,7 @@ const nodeColor = (node: BaseNode) => {
     case 'BatchRegexMatchNode':
     case 'RegexExtractNode':
     case 'TokenizeNode':
+    case 'SentimentAnalysisNode':
       return nodeCategoryColor.str
     case 'InsertConstColNode':
     case 'InsertRangeColNode':
@@ -668,6 +670,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-TokenizeNode="TokenizeNodeProps">
           <TokenizeNode v-bind="TokenizeNodeProps"/>
+        </template>
+
+        <template #node-SentimentAnalysisNode="SentimentAnalysisNodeProps">
+          <SentimentAnalysisNode v-bind="SentimentAnalysisNodeProps"/>
         </template>
 
         <template #node-InsertConstColNode="InsertConstColNodeProps">
