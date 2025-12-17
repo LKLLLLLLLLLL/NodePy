@@ -198,11 +198,14 @@
                 </div>
             </div>
             <!-- 无结果提示 -->
-            <!-- <div class="no-result-prompt" v-else>
-                <div class="prompt-content">
+            <div class="no-result-prompt" v-else>
+                <div v-if="!graphStore.currentNode?.data.groupId===undefined">
+                    <p>当前节点为循环内部节点，无法查看结果，请双击循环结束节点查看循环结果或双击其他节点</p>
+                </div>
+                <div v-else class="prompt-content">
                     <p>当前节点无结果，请检查节点输入或双击其他节点</p>
                 </div>
-            </div> -->
+            </div>
             <!-- <div class="if-info" v-if="resultStore.currentInfo!=resultStore.default_info">
                 <NodeInfo :data="resultStore.currentInfo">
                 </NodeInfo>

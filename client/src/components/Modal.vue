@@ -272,6 +272,7 @@
         <div class = "modal-head" @mousedown="startDrag" >
             <div class = "modal-title-container">
                 <div class="modal-icon-container" v-if="modal.id=='result'"><svg-icon type="mdi" :path="iconPath" :size="18"></svg-icon></div>
+                <div class="modal-icon-container" v-else></div>
                 <div class="modal-title">{{ modal.title }}</div>
             </div>
             <div class = "modal-control">

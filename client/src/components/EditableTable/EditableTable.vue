@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUpdated } from 'vue';
 import { useTableStore } from '@/stores/tableStore';
+//@ts-ignore
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiPlus, mdiClose } from '@mdi/js';
 
 const props = defineProps<{
     data: any,
@@ -22,7 +25,7 @@ const editingCell = ref<{ row: number; col: number } | null>(null);
 const editValue = ref<string>('');
 
 // 行号列宽
-const rowHeaderWidth = 60;
+const rowHeaderWidth = 80;
 // 列名行高
 const colHeaderHeight = 40;
 
@@ -338,26 +341,17 @@ onMounted(() => {
 
 <template>
     <div class="editable-table">
-        <!-- 列操作栏 -->
-        <div class="table-toolbar">
-            <div class="toolbar-left">
-                <button @click="tableStore.addRow()" title="添加行">+ 行</button>
-                <button @click="addColumnAtPosition(-1)" title="添加列">+ 列</button>
-                <button @click="tableStore.undo" :disabled="!tableStore.canUndo" title="撤销">↶ 撤销</button>
-                <button @click="tableStore.redo" :disabled="!tableStore.canRedo" title="重做">↷ 重做</button>
-            </div>
-            <div class="toolbar-right">
-                尺寸: {{ tableStore.numRows }} × {{ tableStore.numCols }}
-            </div>
-        </div>
-        
         <!-- 表格容器 -->
         <div class="table-container">
             <div class="table-wrapper">
                 <!-- 列标题行 -->
                 <div class="table-row header-row">
                     <!-- 左上角空白单元格 -->
-                    <div class="table-cell corner-cell"></div>
+                    <div class="table-cell corner-cell">
+                        <div class="column-header">
+                            <span class="column-name">行号</span>
+                        </div>
+                    </div>
                     
                     <!-- 列标题 -->
                     <div 
@@ -370,20 +364,26 @@ onMounted(() => {
                         @contextmenu.prevent="modifyColumn(colIndex)"
                     >
                         <div class="column-header-content">
-                            <span class="column-name">{{ colName }}</span>
-                            <span class="column-type">{{ tableStore.currentTableData.col_types[colName] || 'str' }}</span>
+                            <div class="column-header-text">
+                                <span class="column-name">{{ colName }}</span>
+                                <span class="column-type">{{ tableStore.currentTableData.col_types[colName] || 'str' }}</span>
+                            </div>
                             <button 
                                 class="delete-column-btn"
                                 @click.stop="tableStore.deleteColumn(colIndex)"
                                 :disabled="tableStore.numCols <= 1"
                                 title="删除列"
-                            >×</button>
+                            >
+                                <svg-icon :path="mdiClose" :size="22" type="mdi"></svg-icon>
+                            </button>
                         </div>
                     </div>
                     
                     <!-- 添加列按钮 -->
                     <div class="table-cell add-column-cell">
-                        <button @click="addColumnAtPosition(-1)" title="添加列">+</button>
+                        <button @click="addColumnAtPosition(-1)" title="添加列">
+                            <svg-icon :path="mdiPlus" :size="22" type="mdi"></svg-icon>
+                        </button>
                     </div>
                 </div>
                 
@@ -402,7 +402,9 @@ onMounted(() => {
                             @click="tableStore.deleteRow(rowIndex)"
                             :disabled="tableStore.numRows <= 1"
                             title="删除行"
-                        >×</button>
+                        >
+                            <svg-icon :path="mdiClose" :size="22" type="mdi"></svg-icon>
+                        </button>
                     </div>
                     
                     <!-- 数据单元格 -->
@@ -459,14 +461,16 @@ onMounted(() => {
                 <!-- 添加行按钮 -->
                 <div class="table-row add-row">
                     <div class="table-cell row-header add-row-cell">
-                        <button @click="tableStore.addRow()" title="添加行">+</button>
+                        <button @click="tableStore.addRow()" title="添加行">
+                            <svg-icon :path="mdiPlus" :size="22" type="mdi"></svg-icon>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- 状态栏 -->
-        <div class="table-statusbar">
+        <!-- <div class="table-statusbar">
             <div v-if="tableStore.selectedCell" class="status-selection">
                 选中: 行 {{ tableStore.selectedCell.row + 1 }}, 列 {{ tableStore.selectedCell.col + 1 }}
                 ({{ tableStore.currentTableData.col_names[tableStore.selectedCell.col] }})
@@ -474,7 +478,7 @@ onMounted(() => {
             <div v-else class="status-default">
                 双击单元格编辑，双击列名修改列名和类型，右键列名也可修改
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 
@@ -483,61 +487,15 @@ onMounted(() => {
 
 .editable-table {
     display: flex;
+    flex: 1;
     flex-direction: column;
     height: 100%;
     width: 100%;
-    overflow: hidden;
+    overflow: auto;
     background: $background-color;
     border-radius: 10px;
-    padding: 16px;
+    // padding: 16px;
     box-sizing: border-box;
-}
-
-.table-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    background: $stress-background-color;
-    border-radius: 4px;
-    margin-bottom: 12px;
-    @include controller-style;
-    
-    .toolbar-left {
-        display: flex;
-        gap: 8px;
-        
-        button {
-            padding: 6px 12px;
-            border: 1px solid #dcdfe6;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            color: #606266;
-            transition: all 0.2s;
-            
-            &:hover {
-                background: #f5f7fa;
-                border-color: #c0c4cc;
-                color: #303133;
-            }
-            
-            &:active {
-                background: #e9ebee;
-            }
-            
-            &:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-        }
-    }
-    
-    .toolbar-right {
-        font-size: 12px;
-        color: #666;
-    }
 }
 
 .table-container {
@@ -546,6 +504,7 @@ onMounted(() => {
     border: 1px solid #ebeef5;
     border-radius: 4px;
     background: #fff;
+    // @include controller-style;
 }
 
 .table-wrapper {
@@ -560,12 +519,12 @@ onMounted(() => {
         position: sticky;
         top: 0;
         z-index: 10;
-        background: #f5f7fa;
+        // background-color: rgb(235, 241, 245);
     }
     
     &.data-row {
         &:hover {
-            background: #f9f9f9;
+            background: #f5f7fa;
         }
         
         &.selected-row {
@@ -575,8 +534,9 @@ onMounted(() => {
 }
 
 .table-cell {
-    border: 1px solid #ebeef5;
-    min-height: 36px;
+    border-right: 1px solid #ebeef5;
+    border-bottom: 1px solid #ebeef5;
+    min-height: 38px;
     box-sizing: border-box;
     padding: 6px 8px;
     overflow: hidden;
@@ -584,23 +544,40 @@ onMounted(() => {
     align-items: center;
     
     &.corner-cell {
-        width: 60px;
-        background: #f5f7fa;
-        border-right: 2px solid #dcdfe6;
-        border-bottom: 2px solid #dcdfe6;
+        width: 80px;
+        min-width: 80px;
+        background-color: rgb(233, 236, 240);
+        // border-right: 2px solid #dcdfe6;
+        // border-bottom: 2px solid #dcdfe6;
         font-weight: 500;
         justify-content: center;
+        position: sticky;
+        left: 0;
+        z-index: 5;
+        
+        .column-header {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+            
+            .column-name {
+                font-weight: 600;
+                color: #303133;
+            }
+        }
     }
     
     &.header-cell {
         font-weight: 600;
         text-align: center;
-        background: #f5f7fa;
-        border-bottom: 2px solid #dcdfe6;
+        background-color: rgb(235, 241, 245);
+        // border-bottom: 2px solid #dcdfe6;
         user-select: none;
         cursor: pointer;
         position: relative;
         
+        // ... existing code ...
         .column-header-content {
             display: flex;
             align-items: center;
@@ -608,32 +585,38 @@ onMounted(() => {
             gap: 4px;
             width: 100%;
             
+            .column-header-text {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                align-items: center;
+                flex: 1;
+                overflow: hidden;
+            }
+            
             .column-name {
                 flex: 1;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 color: #303133;
+                font-weight: 600;
             }
             
             .column-type {
-                font-size: 10px;
+                font-size: 11px;
                 color: #909399;
-                background: #e9ecef;
-                padding: 2px 4px;
-                border-radius: 2px;
-                flex-shrink: 0;
+                font-weight: normal;
             }
             
             .delete-column-btn {
-                opacity: 0;
-                padding: 0 4px;
+                // opacity: 0;
+                padding: 0;
                 font-size: 16px;
                 border: none;
                 background: transparent;
                 color: #909399;
                 cursor: pointer;
-                flex-shrink: 0;
                 width: 20px;
                 height: 20px;
                 display: flex;
@@ -642,23 +625,20 @@ onMounted(() => {
                 border-radius: 50%;
                 transition: all 0.2s;
                 
-                &:hover {
-                    color: #f56c6c;
-                    background: #fef0f0;
+                svg {
+                    width: 16px;
+                    height: 16px;
                 }
+                
+                // &:hover {
+                //     // color: #f56c6c;
+                //     // background: #fef0f0;
+                // }
                 
                 &:disabled {
                     opacity: 0.2;
                     cursor: not-allowed;
                 }
-            }
-        }
-        
-        &:hover {
-            background: #e9ecef;
-            
-            .delete-column-btn {
-                opacity: 1;
             }
         }
     }
@@ -667,19 +647,23 @@ onMounted(() => {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        background: #f5f7fa;
-        border-right: 2px solid #dcdfe6;
+        background-color: rgb(233, 236, 240);
+        // border-right: 2px solid #dcdfe6;
         user-select: none;
         flex-shrink: 0;
         font-weight: 500;
         color: #606266;
+        position: sticky;
+        left: 0;
+        z-index: 5;
         
         .row-number {
             font-weight: 500;
+            margin-left: 25px;
         }
         
         .delete-row-btn {
-            opacity: 0;
+            // opacity: 0;
             padding: 0;
             font-size: 16px;
             border: none;
@@ -694,10 +678,15 @@ onMounted(() => {
             border-radius: 50%;
             transition: all 0.2s;
             
-            &:hover {
-                color: #f56c6c;
-                background: #fef0f0;
+            svg {
+                width: 16px;
+                height: 16px;
             }
+            
+            // &:hover {
+            //     color: #f56c6c;
+            //     background: #fef0f0;
+            // }
             
             &:disabled {
                 opacity: 0.2;
@@ -711,6 +700,7 @@ onMounted(() => {
     }
     
     &.data-cell {
+        // border-bottom: 1px solid #808080;
         position: relative;
         cursor: pointer;
         word-break: break-word;
@@ -762,27 +752,39 @@ onMounted(() => {
         button {
             width: 24px;
             height: 24px;
-            border: 1px solid #dcdfe6;
-            background: white;
-            border-radius: 50%;
+            // border: 1px solid #dcdfe6;
+            // background: white;
+            border-radius: 10px;
             font-size: 16px;
             cursor: pointer;
             color: #909399;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            
+            svg {
+                width: 16px;
+                height: 16px;
+            }
             
             &:hover {
                 background: #ecf5ff;
                 border-color: #b3d8ff;
-                color: #409eff;
+                // color: #409eff;
             }
+            // &:hover{
+            //     @include confirm-button-hover-style;
+            // }
         }
     }
 }
 
 .add-row {
     .add-row-cell {
-        width: 60px;
-        border-right: 2px solid #dcdfe6;
+        width: 80px;
+        // border-right: 2px solid #dcdfe6;
     }
 }
 

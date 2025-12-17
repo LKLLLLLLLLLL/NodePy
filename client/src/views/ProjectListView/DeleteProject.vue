@@ -27,7 +27,7 @@
 <template>
     <div class="delete-project-container">
         <div class="delete-warning-container">
-            <div class="warning-info">确定删除项目 {{ projectStore.projectIdToNameMap.get(projectStore.toBeDeleted.id) }} 吗? <br></br>此操作不可逆。</div>
+            <div class="warning-info">&nbsp;&nbsp;&nbsp;&nbsp;确定删除项目 {{ projectStore.projectIdToNameMap.get(projectStore.toBeDeleted.id) }} 吗? <br></br>此操作不可逆。</div>
             <!-- <div class="warning-tip"></div> -->
         </div>
         <div class="button-container">
@@ -49,7 +49,7 @@
     .delete-warning-container{
         display: flex;
         flex-direction: column;
-        padding-top: 20px;
+        padding-top: 10px;
         margin-bottom: 20px;
         height: 80px;
         gap: 10px;
@@ -69,7 +69,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 5px;
+        // gap: 5px;
     }
 
     .delete-warning {

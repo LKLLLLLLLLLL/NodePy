@@ -70,7 +70,7 @@ const getColumnTypeDescription = (colType: ColType) => {
             <Loading></Loading>
         </div>
 
-        <!-- 无效数据提示 -->
+        <!-- 错误提示 -->
         <div v-else-if="!isModelView" class='model-error'>
             无效的模型数据
         </div>
@@ -91,21 +91,31 @@ const getColumnTypeDescription = (colType: ColType) => {
             <!-- 输入列信息 -->
             <div class="model-columns-section">
                 <h3>输入列信息</h3>
-                <table v-if="modelData.metadata.input_cols && Object.keys(modelData.metadata.input_cols).length > 0" class="columns-table">
-                    <thead>
-                        <tr>
-                            <th>列名</th>
-                            <th>类型</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(colType, colName) in modelData.metadata.input_cols" :key="colName">
-                            <td>{{ colName }}</td>
-                            <td>{{ getColumnTypeDescription(colType) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div v-else class="no-columns">
+                <div class="table-wrapper">
+                    <table v-if="modelData.metadata.input_cols && Object.keys(modelData.metadata.input_cols).length > 0" class="result-table">
+                        <thead>
+                            <tr>
+                                <th class="data-column">
+                                    <div class="column-header">
+                                        <span class="column-name">列名</span>
+                                    </div>
+                                </th>
+                                <th class="data-column">
+                                    <div class="column-header">
+                                        <span class="column-name">类型</span>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(colType, colName) in modelData.metadata.input_cols" :key="colName" class="data-row">
+                                <td class="data-column">{{ colName }}</td>
+                                <td class="data-column">{{ getColumnTypeDescription(colType) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div v-if="!modelData.metadata.input_cols || Object.keys(modelData.metadata.input_cols).length === 0" class="no-columns">
                     无输入列信息
                 </div>
             </div>
@@ -115,21 +125,31 @@ const getColumnTypeDescription = (colType: ColType) => {
             <!-- 输出列信息 -->
             <div class="model-columns-section">
                 <h3>输出列信息</h3>
-                <table v-if="modelData.metadata.output_cols && Object.keys(modelData.metadata.output_cols).length > 0" class="columns-table">
-                    <thead>
-                        <tr>
-                            <th>列名</th>
-                            <th>类型</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(colType, colName) in modelData.metadata.output_cols" :key="colName">
-                            <td>{{ colName }}</td>
-                            <td>{{ getColumnTypeDescription(colType) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div v-else class="no-columns">
+                <div class="table-wrapper">
+                    <table v-if="modelData.metadata.output_cols && Object.keys(modelData.metadata.output_cols).length > 0" class="result-table">
+                        <thead>
+                            <tr>
+                                <th class="data-column">
+                                    <div class="column-header">
+                                        <span class="column-name">列名</span>
+                                    </div>
+                                </th>
+                                <th class="data-column">
+                                    <div class="column-header">
+                                        <span class="column-name">类型</span>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(colType, colName) in modelData.metadata.output_cols" :key="colName" class="data-row">
+                                <td class="data-column">{{ colName }}</td>
+                                <td class="data-column">{{ getColumnTypeDescription(colType) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div v-if="!modelData.metadata.output_cols || Object.keys(modelData.metadata.output_cols).length === 0" class="no-columns">
                     无输出列信息
                 </div>
             </div>
@@ -145,45 +165,41 @@ const getColumnTypeDescription = (colType: ColType) => {
     flex-direction: column;
     height: 100%;
     width: 100%;
-    padding: 16px;
-    box-sizing: border-box;
+    overflow: hidden;
     background: $background-color;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     border-radius: 10px;
+    box-sizing: border-box;
 }
 
 .model-loading {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
     gap: 12px;
     color: #909399;
     font-size: 14px;
 }
 
 .model-error {
+    flex: 1;
     display: flex;
-    justify-content: center;
     align-items: center;
-    height: 100%;
-    font-size: 16px;
-    color: #666;
-}
-
-.model-error {
+    justify-content: center;
     color: $error-message-color;
     background: $stress-background-color;
     border-radius: 10px;
-    margin: 16px;
+    font-size: 14px;
     padding: 16px;
+    margin: 16px;
     @include controller-style;
 }
 
 .model-content-wrapper {
     display: flex;
     flex-direction: column;
+    flex: 1;
     background: $stress-background-color;
     border-radius: 10px;
     padding: 16px;
@@ -232,18 +248,24 @@ const getColumnTypeDescription = (colType: ColType) => {
         font-weight: 600;
     }
 
-    .columns-table {
+    .table-wrapper {
+        overflow: auto;
+        border: 1px solid #ebeef5;
+        border-radius: 4px;
+        margin: 12px 0;
+    }
+
+    .result-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 13px;
         background: #fff;
-        border: 1px solid #ebeef5;
-        border-radius: 4px;
-        overflow: hidden;
-        margin: 12px 0;
 
         thead {
-            background: #f5f7fa;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-color: rgb(235, 241, 245);
         }
 
         th {
@@ -257,18 +279,36 @@ const getColumnTypeDescription = (colType: ColType) => {
         td {
             padding: 10px 8px;
             text-align: center;
-            background: #fafafa;
             border-bottom: 1px solid #ebeef5;
             color: #606266;
+        }
+
+        .data-column {
+            word-break: break-word;
+            white-space: normal;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .column-header {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .column-name {
+            font-weight: 600;
+            color: #303133;
+        }
+
+        .data-row:hover {
+            background-color: #f5f7fa;
         }
 
         /* 移除最后一行的下边框 */
         tr:last-child td {
             border-bottom: none;
-        }
-
-        tr:hover {
-            background-color: #f5f7fa;
         }
     }
 

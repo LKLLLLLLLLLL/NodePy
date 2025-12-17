@@ -2,7 +2,7 @@
 import EditableTable from './EditableTable.vue';
 import { useTableStore } from '@/stores/tableStore';
 import { useModalStore } from '@/stores/modalStore';
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 
 const tableStore = useTableStore();
 const modalStore = useModalStore();
@@ -49,31 +49,38 @@ function cancel() {
     tableStore.cancelChanges();
 }
 
+/**
+ * 处理键盘事件
+ */
+function handleKeyDown(event: KeyboardEvent) {
+    // 检查是否按下了 Ctrl+S
+    if (event.ctrlKey && event.key === 's') {
+        event.preventDefault(); // 阻止浏览器默认保存页面的行为
+        submit(); // 执行提交操作
+    }
+    
+    // 检查是否按下了 Escape 键
+    if (event.key === 'Escape') {
+        cancel(); // 取消编辑
+    }
+}
+
+// 添加键盘事件监听
+onMounted(() => {
+    document.addEventListener('keydown', handleKeyDown);
+});
+
+// 移除键盘事件监听
+onUnmounted(() => {
+    document.removeEventListener('keydown', handleKeyDown);
+});
+
 </script>
 
 <template>
     <div class="editable-table-modal">
-        <!-- 顶部工具栏 -->
-        <div class="modal-toolbar">
-            <div class="toolbar-section">
-                <h3>表格编辑器</h3>
-                <div class="table-info">
-                    当前尺寸: {{ tableStore.numRows }} 行 × {{ tableStore.numCols }} 列
-                </div>
-            </div>
-            
-            <div class="toolbar-section">
-                <button @click="tableStore.undo" :disabled="!tableStore.canUndo" class="toolbar-btn">
-                    ↶ 撤销 (Ctrl+Z)
-                </button>
-                <button @click="tableStore.redo" :disabled="!tableStore.canRedo" class="toolbar-btn">
-                    ↷ 重做 (Ctrl+Y)
-                </button>
-            </div>
-        </div>
-        
         <!-- 表格尺寸控制 -->
-        <div class="size-controls">
+        <!-- <div class="size-controls">
             <div class="control-group">
                 <label>行数:</label>
                 <input 
@@ -99,10 +106,10 @@ function cancel() {
             <button @click="applyStructureChange" class="apply-btn">
                 应用尺寸
             </button>
-        </div>
+        </div> -->
         
         <!-- 编辑说明 -->
-        <div class="instructions">
+        <!-- <div class="instructions">
             <div class="instruction-item">
                 <strong>编辑说明:</strong>
             </div>
@@ -126,7 +133,7 @@ function cancel() {
                 <span class="bullet">•</span>
                 使用 Tab/Enter 键快速导航
             </div>
-        </div>
+        </div> -->
         
         <!-- 可编辑表格 -->
         <div class="table-container">
@@ -138,10 +145,10 @@ function cancel() {
         </div>
         
         <!-- 底部操作按钮 -->
-        <div class="modal-footer">
+        <!-- <div class="modal-footer">
             <div class="footer-left">
                 <span class="hint">
-                    提示: 修改会实时保存到节点参数
+                    提示: 修改会在确定后保存到节点参数
                 </span>
             </div>
             
@@ -153,209 +160,178 @@ function cancel() {
                     确定
                 </button>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 
 <style lang="scss" scoped>
+@use "../../common/global.scss" as *;
+
 .editable-table-modal {
     display: flex;
     flex-direction: column;
+    overflow: auto;
     height: 100%;
-    background: #f8f9fa;
+    width: 100%;
+    background: $background-color;
     padding: 16px;
+    box-sizing: border-box;
 }
 
-.modal-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #dee2e6;
+// .size-controls {
+//     display: flex;
+//     align-items: center;
+//     gap: 12px;
+//     margin-bottom: 16px;
+//     padding: 12px;
+//     background: $stress-background-color;
+//     border-radius: 6px;
+//     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+//     @include controller-style;
     
-    .toolbar-section {
-        display: flex;
-        align-items: center;
-        gap: 16px;
+//     .control-group {
+//         display: flex;
+//         align-items: center;
+//         gap: 8px;
         
-        h3 {
-            margin: 0;
-            color: #343a40;
-        }
+//         label {
+//             font-size: 14px;
+//             font-weight: 500;
+//             color: #495057;
+//         }
         
-        .table-info {
-            font-size: 14px;
-            color: #6c757d;
-            background: #e9ecef;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-    }
-    
-    .toolbar-btn {
-        padding: 6px 12px;
-        border: 1px solid #ced4da;
-        background: white;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 13px;
-        
-        &:hover:not(:disabled) {
-            background: #e9ecef;
-        }
-        
-        &:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-    }
-}
-
-.size-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding: 12px;
-    background: white;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    
-    .control-group {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        
-        label {
-            font-size: 14px;
-            font-weight: 500;
-            color: #495057;
-        }
-        
-        .size-input {
-            width: 80px;
-            padding: 6px 8px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 14px;
+//         .size-input {
+//             width: 80px;
+//             padding: 6px 8px;
+//             border: 1px solid #ced4da;
+//             border-radius: 4px;
+//             font-size: 14px;
             
-            &:focus {
-                outline: none;
-                border-color: #80bdff;
-                box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-            }
-        }
-    }
+//             &:focus {
+//                 outline: none;
+//                 border-color: #80bdff;
+//                 box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+//             }
+//         }
+//     }
     
-    .apply-btn, .add-column-btn {
-        padding: 6px 12px;
-        border: 1px solid #007bff;
-        background: #007bff;
-        color: white;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
+//     .apply-btn {
+//         padding: 6px 12px;
+//         border: 1px solid $stress-color;
+//         background: $stress-color;
+//         color: white;
+//         border-radius: 4px;
+//         cursor: pointer;
+//         font-size: 14px;
+//         @include confirm-button-style;
         
-        &:hover:not(:disabled) {
-            background: #0069d9;
-            border-color: #0062cc;
-        }
+//         &:hover:not(:disabled) {
+//             background: $hover-stress-color;
+//             border-color: $hover-stress-color;
+//         }
         
-        &:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-    }
-    
-    .add-column-btn {
-        background: #28a745;
-        border-color: #28a745;
-        
-        &:hover:not(:disabled) {
-            background: #218838;
-            border-color: #1e7e34;
-        }
-    }
-}
+//         &:disabled {
+//             opacity: 0.5;
+//             cursor: not-allowed;
+//         }
+//     }
+// }
 
-.instructions {
-    margin-bottom: 16px;
-    padding: 12px;
-    background: white;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+// .instructions {
+//     margin-bottom: 16px;
+//     padding: 12px;
+//     background: $stress-background-color;
+//     border-radius: 6px;
+//     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+//     @include controller-style;
     
-    .instruction-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 4px;
-        font-size: 13px;
-        color: #495057;
+//     .instruction-item {
+//         display: flex;
+//         align-items: center;
+//         margin-bottom: 4px;
+//         font-size: 13px;
+//         color: #495057;
         
-        &:last-child {
-            margin-bottom: 0;
-        }
+//         &:last-child {
+//             margin-bottom: 0;
+//         }
         
-        .bullet {
-            margin-right: 8px;
-            color: #007bff;
-        }
-    }
-}
+//         .bullet {
+//             margin-right: 8px;
+//             color: $stress-color;
+//         }
+//     }
+// }
 
 .table-container {
+    display: flex;
+    flex-direction: column;
     flex: 1;
-    overflow: hidden;
+    overflow: auto;
     border: 1px solid #dee2e6;
-    border-radius: 6px;
+    border-radius: 10px;
     background: white;
+    // padding-bottom: 10px;
+    // padding-left: 10px;
+    // padding-right: 10px;
+    @include controller-style;
 }
 
-.modal-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 16px;
+// .modal-footer {
+//     display: flex;
+//     justify-content: space-between;
+//     align-items: center;
+//     margin-top: 16px;
     
-    .footer-left {
-        .hint {
-            font-size: 13px;
-            color: #6c757d;
-        }
-    }
+//     .footer-left {
+//         .hint {
+//             font-size: 13px;
+//             color: #6c757d;
+//         }
+//     }
     
-    .footer-right {
-        display: flex;
-        gap: 8px;
+//     .footer-right {
+//         display: flex;
+//         gap: 8px;
         
-        .cancel-btn, .submit-btn {
-            padding: 8px 16px;
-            border: 1px solid #6c757d;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
+//         .cancel-btn, .submit-btn {
+//             padding: 8px 16px;
+//             border-radius: 4px;
+//             cursor: pointer;
+//             font-size: 14px;
+//             @include confirm-button-style;
             
-            &:hover:not(:disabled) {
-                opacity: 0.8;
-            }
+//             &:hover:not(:disabled) {
+//                 opacity: 0.8;
+//             }
             
-            &:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-        }
+//             &:disabled {
+//                 opacity: 0.5;
+//                 cursor: not-allowed;
+//             }
+//         }
         
-        .cancel-btn {
-            background: white;
-            color: #6c757d;
-        }
+//         .cancel-btn {
+//             background: #f8f9fa;
+//             color: #6c757d;
+//             border: 1px solid #e9ecef;
+//             @include cancel-button-style;
+            
+//             &:hover {
+//                 @include cancel-button-hover-style;
+//             }
+//         }
         
-        .submit-btn {
-            background: #007bff;
-            border-color: #007bff;
-            color: white;
-        }
-    }
-}
+//         .submit-btn {
+//             background: $stress-color;
+//             border-color: $stress-color;
+//             color: white;
+//             @include confirm-button-style;
+            
+//             &:hover {
+//                 @include confirm-button-hover-style;
+//             }
+//         }
+//     }
+// }
 </style>

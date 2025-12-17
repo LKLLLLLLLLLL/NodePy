@@ -79,7 +79,7 @@
         display: flex;
         flex-direction: column;
         width: 100%;
-        gap: 15px;
+        gap: 10px;
     }
 
     .confirm-button{

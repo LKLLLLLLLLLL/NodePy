@@ -322,9 +322,9 @@
 
         <!-- 正常显示 -->
         <div v-else>
-            <div class='value-header'>
+            <!-- <div class='value-header'>
                 <span class='value-type'>{{ valueType }}</span>
-            </div>
+            </div> -->
             <div class='value-content-wrapper'>
                 <div class='value-content' :class="{ 'boolean-true': isBoolean && value === true, 'boolean-false': isBoolean && value === false }">
                     <!-- 对于超长字符串，根据状态决定显示截断版本还是完整版本 -->

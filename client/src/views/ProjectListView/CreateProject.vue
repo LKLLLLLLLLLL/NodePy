@@ -66,7 +66,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 5px;
+        // gap: 5px;
     }
     
     .name-input {

@@ -68,7 +68,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 5px;
+        // gap: 5px;
     }
 
     .btn {
@@ -76,7 +76,6 @@
         font-size: 16px;
         font-weight: bold;
         border-radius: 10px;
-        height: 34px;
         box-shadow: 5px 5px 50px rgba(128, 128, 128, 0.12);
         transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
     }
