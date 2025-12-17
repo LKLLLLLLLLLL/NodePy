@@ -14,6 +14,9 @@ import AuthenticatedServiceFactory from '@/utils/AuthenticatedServiceFactory';
 import type { ExploreListItem } from '@/utils/api';
 import ExampleDemoFrame from './ExampleView/ExampleDemoFrame.vue'
 
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiRocketLaunchOutline, mdiGithub} from '@mdi/js';
+
 import ConstNode from '@/components/nodes/input/ConstNode.vue'
 import NumberBinOpNode from '@/components/nodes/compute/NumberBinOpNode.vue'
 import DateTimeNode from '@/components/nodes/input/DateTimeNode.vue'
@@ -386,12 +389,12 @@ function jumpToGithub() {
 
             <div class="hero-actions">
               <button  @click="isLoggedIn ? jumpToProject() : jumpToLogin()" class="cta-button">
-                <span class="mdi mdi-rocket-launch"></span>
-                立即开始
+                <div class="button-icon-container"><svg-icon :path="mdiRocketLaunchOutline" :size="24" type="mdi"></svg-icon></div>
+                <div class="button-text-container">立即开始</div>
               </button>
               <button  @click="jumpToGithub" class="secondary-button">
-                <span class="mdi mdi-github"></span>
-                GitHub
+                <div class="button-icon-container"><svg-icon :path="mdiGithub" :size="24" type="mdi"></svg-icon></div>
+                <div class="button-text-container">GitHub</div>
               </button>
             </div>
           </div>
@@ -427,17 +430,17 @@ function jumpToGithub() {
                     <NodePyConnectionLine v-bind="ConnectionLineProps"/>
                   </template>
                 </VueFlow>
-                <!-- 轮播指示器 -->
-                <div class="carousel-indicators">
-                  <span 
-                    v-for="(_, index) in 4" 
-                    :key="index"
-                    class="indicator-dot"
-                    :class="{ active: currentExampleIndex === index }"
-                    @click="switchExample(index)"
-                  ></span>
-                </div>
               </div>
+            </div>
+            <!-- 轮播指示器 -->
+            <div class="carousel-indicators">
+              <span 
+                v-for="(_, index) in 4" 
+                :key="index"
+                class="indicator-dot"
+                :class="{ active: currentExampleIndex === index }"
+                @click="switchExample(index)"
+              ></span>
             </div>
           </div>
         </div>
@@ -707,10 +710,23 @@ function jumpToGithub() {
         padding: 12px 28px;
       }
 
+      .button-icon-container{
+        margin-top: 7px;
+      }
+
+      .button-text-container{
+        font-size: 18px;
+      }
+
       .secondary-button{
         @include cancel-button-style;
-        width: 200px;
+        width: 210px;
         height: 48px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+
         &:hover{
           @include cancel-button-hover-style;
         }
@@ -718,8 +734,12 @@ function jumpToGithub() {
 
       .cta-button {
         @include confirm-button-style;
-        width: 200px;
+        width: 210px;
         height: 48px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
         background-color: $stress-color;
         border-color: $stress-color;
 
@@ -734,7 +754,40 @@ function jumpToGithub() {
   .hero-visual {
     flex: 1.9;
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
+
+    // 轮播指示器样式
+    .carousel-indicators {
+      // height: 40px;
+      // position: absolute;
+      // bottom: 15px;
+      // left: 50%;
+      // transform: translateX(-50%);
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+      
+      .indicator-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #cbd5e1; // 蓝色系浅色
+        cursor: pointer;
+        transition: all 0.3s ease;
+        
+        &.active {
+          background-color: $stress-color; // 使用项目主色调
+          // transform: scale(1.2);
+        }
+        
+        &:hover:not(.active) {
+          background-color: #94a3b8; // 悬停时加深颜色
+        }
+      }
+    }
 
     .editor-mockup {
       width: 100%;
@@ -775,6 +828,7 @@ function jumpToGithub() {
         }
 
         .title {
+          padding-right: 40px;
           flex: 1;
           text-align: center;
           font-size: 12px;
@@ -788,35 +842,6 @@ function jumpToGithub() {
         background-color: #fafafa;
         position: relative;
         overflow: hidden;
-        
-        // 轮播指示器样式
-        .carousel-indicators {
-          position: absolute;
-          bottom: 15px;
-          left: 50%;
-          transform: translateX(-50%);
-          display: flex;
-          gap: 10px;
-          z-index: 10;
-          
-          .indicator-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: #cbd5e1; // 蓝色系浅色
-            cursor: pointer;
-            transition: all 0.3s ease;
-            
-            &.active {
-              background-color: $stress-color; // 使用项目主色调
-              transform: scale(1.2);
-            }
-            
-            &:hover:not(.active) {
-              background-color: #94a3b8; // 悬停时加深颜色
-            }
-          }
-        }
       }
     }
   }
@@ -824,6 +849,7 @@ function jumpToGithub() {
 
 // Features Section
 .features-section {
+  min-height: 70vh;
   .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -895,6 +921,7 @@ function jumpToGithub() {
 
 // Examples Section
 .examples-section {
+  min-height: 70vh;
   background: white; // 区分背景
   width: 100%;
   max-width: 100%; // 全宽背景
