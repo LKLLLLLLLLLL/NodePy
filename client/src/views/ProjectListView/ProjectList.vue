@@ -88,13 +88,13 @@
     })
 
     function openAddProjectModal(){
-        const modalWidth = 300;
-        const modalHeight = 250;
+        const modalWidth = 350;
+        const modalHeight = 270;
         modalStore.createModal({
             id: 'create-project',
             title: '创建项目',
             isActive: true,
-            isDraggable: true,
+            isDraggable: false,
             isResizable: false,
             isModal: true,
             component: CreateProject,

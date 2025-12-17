@@ -228,7 +228,7 @@
                     </button>
                 </div>
             </div>
-            <div class="graph-controls-left left_2">
+            <div v-if="!isReadOnly" class="graph-controls-left left_2">
                 <div class="gc-btn-container">
                     <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleTitleAnnotate();}" aria-label="Title annotate">
                         <SvgIcon type="mdi" :path="mdiFormatQuoteOpen" class="btn-icon quote" />
@@ -247,7 +247,7 @@
 
         <div class="graph-controls-right-container">
             <div class="graph-controls-right right_1">
-                <div class="gc-btn-container">
+                <div v-if="!isReadOnly" class="gc-btn-container">
                     <button class="gc-btn" type="button" @click="(e) => { animateButton(e); handleForcedSync(); }" aria-label="Sync project">
                         <SvgIcon type="mdi" :path="mdiUploadIcon" class="btn-icon" />
                         <div class="gc-btn-text">同步</div>

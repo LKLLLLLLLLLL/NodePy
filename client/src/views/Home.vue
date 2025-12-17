@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useLoginStore } from '@/stores/loginStore';
 import { usePageStore } from '@/stores/pageStore';
-import { onMounted, computed, ref, markRaw } from 'vue';
+import { onMounted, computed, ref, markRaw, watch, onUnmounted } from 'vue';
 import NodePyEdge from '@/components/NodePyEdge.vue';
 import NodePyConnectionLine from '@/components/NodePyConnectionLine.vue';
 import { useRouter } from 'vue-router';
@@ -25,7 +25,49 @@ const nodeTypes = {
   NumberBinOpNode: markRaw(NumberBinOpNode)
 }
 
-const nodes = ref([
+const nodes1 = ref([
+  {
+    id: '1',
+    type: 'ConstNode',
+    position: { x: 50, y: 50 },
+    data: { param: { value: 10, data_type: 'int' }, dbclicked: false, runningtime: 0 }
+  },
+  {
+    id: '2',
+    type: 'ConstNode',
+    position: { x: 20, y: 200 },
+    data: { param: { value: 20, data_type: 'int' }, dbclicked: false, runningtime: 0 }
+  },
+  {
+    id: '3',
+    type: 'NumberBinOpNode',
+    position: { x: 400, y: 150 },
+    data: { param: { op: 'ADD' }, dbclicked: false, runningtime: 0 }
+  }
+])
+
+const nodes2 = ref([
+  {
+    id: '1',
+    type: 'ConstNode',
+    position: { x: 50, y: 50 },
+    data: { param: { value: 10, data_type: 'int' }, dbclicked: false, runningtime: 0 }
+  },
+  {
+    id: '2',
+    type: 'ConstNode',
+    position: { x: 60, y: 150 },
+    data: { param: { value: 20, data_type: 'int' }, dbclicked: false, runningtime: 0 }
+  },
+  {
+    id: '3',
+    type: 'NumberBinOpNode',
+    position: { x: 400, y: 150 },
+    data: { param: { op: 'ADD' }, dbclicked: false, runningtime: 0 }
+  }
+])
+
+const nodes3 = ref([
   {
     id: '1',
     type: 'ConstNode',
@@ -46,10 +88,45 @@ const nodes = ref([
   }
 ])
 
-const edges = ref([
+const edges1 = ref([
   { id: 'e1-3', source: '1', target: '3', sourceHandle: 'const', targetHandle: 'x', animated: true , type: 'NodePyEdge'},
   { id: 'e2-3', source: '2', target: '3', sourceHandle: 'const', targetHandle: 'y', animated: true , type: 'NodePyEdge'}
 ])
+
+const edges2 = ref([
+  { id: 'e1-3', source: '1', target: '3', sourceHandle: 'const', targetHandle: 'x', animated: true , type: 'NodePyEdge'},
+  { id: 'e2-3', source: '2', target: '3', sourceHandle: 'const', targetHandle: 'y', animated: true , type: 'NodePyEdge'}
+])
+
+const edges3 = ref([
+  { id: 'e1-3', source: '1', target: '3', sourceHandle: 'const', targetHandle: 'x', animated: true , type: 'NodePyEdge'},
+  { id: 'e2-3', source: '2', target: '3', sourceHandle: 'const', targetHandle: 'y', animated: true , type: 'NodePyEdge'}
+])
+
+// 当前选中的示例索引
+const currentExampleIndex = ref(0)
+
+// 自动轮播定时器
+const carouselTimer = ref<NodeJS.Timeout | null>(null)
+
+// 计算当前应该显示的节点和边
+const currentNodes = computed(() => {
+  switch(currentExampleIndex.value) {
+    case 0: return nodes1.value
+    case 1: return nodes2.value
+    case 2: return nodes3.value
+    default: return nodes1.value
+  }
+})
+
+const currentEdges = computed(() => {
+  switch(currentExampleIndex.value) {
+    case 0: return edges1.value
+    case 1: return edges2.value
+    case 2: return edges3.value
+    default: return edges1.value
+  }
+})
 
 // 特性列表
 const features = [
@@ -82,6 +159,30 @@ const features = [
 // 实例项目列表
 const examples = ref<ExploreListItem[]>([])
 
+// 开始自动轮播
+const startCarousel = () => {
+  if (carouselTimer.value) {
+    clearInterval(carouselTimer.value)
+  }
+  
+  carouselTimer.value = setInterval(() => {
+    currentExampleIndex.value = (currentExampleIndex.value + 1) % 3
+  }, 3000) // 每3秒切换一次
+}
+
+// 停止自动轮播
+const stopCarousel = () => {
+  if (carouselTimer.value) {
+    clearInterval(carouselTimer.value)
+    carouselTimer.value = null
+  }
+}
+
+// 手动切换示例
+const switchExample = (index: number) => {
+  currentExampleIndex.value = index
+}
+
 onMounted(async () => {
   loginStore.checkAuthStatus()
   pageStore.setCurrentPage('Home')
@@ -92,6 +193,14 @@ onMounted(async () => {
   } catch (e) {
     console.error('Failed to fetch examples:', e)
   }
+  
+  // 启动自动轮播
+  startCarousel()
+})
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  stopCarousel()
 })
 
 function jumpToLogin() {
@@ -141,14 +250,14 @@ function jumpToGithub() {
             </p>
 
             <div class="hero-actions">
-              <el-button type="primary" size="large" @click="isLoggedIn ? jumpToProject() : jumpToLogin()" class="cta-button">
+              <button  @click="isLoggedIn ? jumpToProject() : jumpToLogin()" class="cta-button">
                 <span class="mdi mdi-rocket-launch"></span>
                 立即开始
-              </el-button>
-              <el-button size="large" @click="jumpToGithub" class="secondary-button">
+              </button>
+              <button  @click="jumpToGithub" class="secondary-button">
                 <span class="mdi mdi-github"></span>
                 GitHub
-              </el-button>
+              </button>
             </div>
           </div>
 
@@ -163,8 +272,8 @@ function jumpToGithub() {
               </div>
               <div class="mockup-body">
                 <VueFlow
-                  v-model:nodes="nodes"
-                  v-model:edges="edges"
+                  :nodes="currentNodes"
+                  :edges="currentEdges"
                   :node-types="nodeTypes"
                   :default-viewport="{ zoom: 1.0 }"
                   :min-zoom="0.5"
@@ -183,6 +292,17 @@ function jumpToGithub() {
                     <NodePyConnectionLine v-bind="ConnectionLineProps"/>
                   </template>
                 </VueFlow>
+                
+                <!-- 轮播指示器 -->
+                <div class="carousel-indicators">
+                  <span 
+                    v-for="(_, index) in 3" 
+                    :key="index"
+                    class="indicator-dot"
+                    :class="{ active: currentExampleIndex === index }"
+                    @click="switchExample(index)"
+                  ></span>
+                </div>
               </div>
             </div>
           </div>
@@ -234,9 +354,9 @@ function jumpToGithub() {
           <div class="cta-box">
             <h2>准备好开始了吗？</h2>
             <p>立即注册，开启您的可视化金融分析之旅</p>
-            <el-button type="primary" size="large" @click="isLoggedIn ? jumpToProject() : jumpToLogin()" class="cta-btn">
+            <button  @click="isLoggedIn ? jumpToProject() : jumpToLogin()" class="cta-btn">
               {{ isLoggedIn ? '进入工作台' : '免费注册' }}
-            </el-button>
+            </button>
           </div>
 
           <div class="footer-bottom">
@@ -265,7 +385,6 @@ function jumpToGithub() {
 .nodes-style {
   position: absolute;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  transform-origin: center center;
   transition: transform 0.3s ease;
 
   &:hover {
@@ -451,19 +570,29 @@ function jumpToGithub() {
         justify-content: center;
       }
 
-      .el-button {
+      .button {
         border-radius: 8px;
         font-weight: 600;
         padding: 12px 28px;
       }
 
+      .secondary-button{
+        @include cancel-button-style;
+        width: 100px;
+        &:hover{
+          @include cancel-button-hover-style;
+        }
+      }
+
       .cta-button {
+        @include confirm-button-style;
+        width: 100px;
         background-color: $stress-color;
         border-color: $stress-color;
-        box-shadow: 0 4px 14px rgba($stress-color, 0.3);
 
         &:hover {
-          transform: translateY(-2px);
+          // transform: translateY(-2px);
+          @include confirm-button-hover-style;
         }
       }
     }
@@ -473,7 +602,6 @@ function jumpToGithub() {
     flex: 1.2;
     display: flex;
     justify-content: center;
-    perspective: 1000px;
 
     .editor-mockup {
       width: 100%;
@@ -486,13 +614,9 @@ function jumpToGithub() {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      transform: rotateY(-5deg) rotateX(2deg);
       transition: transform 0.5s ease;
       position: relative;
-
-      &:hover {
-        transform: rotateY(0) rotateX(0);
-      }
+      margin-top: 20px;
 
       .mockup-header {
         height: 36px;
@@ -505,6 +629,7 @@ function jumpToGithub() {
         .dots {
           display: flex;
           gap: 6px;
+
           span {
             width: 10px;
             height: 10px;
@@ -529,6 +654,35 @@ function jumpToGithub() {
         background-color: #fafafa;
         position: relative;
         overflow: hidden;
+        
+        // 轮播指示器样式
+        .carousel-indicators {
+          position: absolute;
+          bottom: 15px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 10px;
+          z-index: 10;
+          
+          .indicator-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #cbd5e1; // 蓝色系浅色
+            cursor: pointer;
+            transition: all 0.3s ease;
+            
+            &.active {
+              background-color: $stress-color; // 使用项目主色调
+              transform: scale(1.2);
+            }
+            
+            &:hover:not(.active) {
+              background-color: #94a3b8; // 悬停时加深颜色
+            }
+          }
+        }
       }
     }
   }
@@ -669,6 +823,7 @@ function jumpToGithub() {
     }
 
     .cta-btn {
+      @include cancel-button-style;
       background: white;
       color: $stress-color;
       border: none;
@@ -678,7 +833,8 @@ function jumpToGithub() {
       font-size: 16px;
 
       &:hover {
-        transform: scale(1.05);
+        // transform: scale(1.05);
+        @include cancel-button-hover-style;
       }
     }
   }

@@ -70,7 +70,7 @@ const menuPosition = computed<MenuPosition>(() => {
   const trigger = triggerRef.value.getBoundingClientRect()
   const menuWidth = menuRef.value?.offsetWidth || 320
   const menuHeight = menuRef.value?.offsetHeight || 300
-  const padding = 16 // 距离屏幕边缘的最小间距
+  const padding = 25 // 距离屏幕边缘的最小间距
 
   let top = '0'
   let left = '0'

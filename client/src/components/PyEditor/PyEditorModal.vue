@@ -33,6 +33,7 @@
     .pyeditor-modal {
         display: flex;
         flex: 1 1 auto;
+        height: 100%;
         flex-direction: column;
         box-sizing: border-box;
         padding: 10px;

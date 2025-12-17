@@ -114,8 +114,8 @@ const editorStore = useEditorStore()
 
 const router = useRouter()
 
-const logoutWidth = 300;
-const logoutHeight = 200;
+const logoutWidth = 350;
+const logoutHeight = 270;
 
 onMounted(async () => {
   if (!loginStore.isAuthenticated) return
@@ -147,7 +147,6 @@ async function handleLogout() {
     },
     id: 'logout',
   })
-  await userStore.refreshUserInfo();
 }
 
 // 判断是否有头像功能（未来可能添加）

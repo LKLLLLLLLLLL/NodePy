@@ -32,24 +32,49 @@
 </script>
 <template>
      <div class="create-project-container">
-        <el-form label-position="top" @submit.prevent="onCreateProject">
+        <el-form class="create-project-form" label-position="top" @submit.prevent="onCreateProject">
             <el-form-item label="项目名称">
-                <el-input placeholder="请输入项目名称" v-model="projectStore.currentProjectName" @keyup.enter="onCreateProject"></el-input>
+                <input class="name-input" placeholder="请输入项目名称" v-model="projectStore.currentProjectName" @keyup.enter="onCreateProject"></input>
             </el-form-item>
             <!-- <el-form-item label="描述">
                 <el-switch></el-switch>
             </el-form-item> -->
         </el-form>
-        <el-button class='button create'type="primary" @click="onCreateProject">创建</el-button>
-        <el-button class='button cancel' @click="onCancel">取消</el-button>
+        <div class="button-container">
+            <button class='button confirm-button' @click="onCreateProject">创建</button>
+            <button class='button cancel' @click="onCancel">取消</button>
+        </div>
     </div>
 </template>
 <style lang="scss" scoped>
 
-    @use "../../common/global.scss";
+    @use "../../common/global.scss" as *;
 
     .create-project-container {
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+        padding-bottom: 5px;
+    }
 
+    .create-project-form{
+        margin-bottom: 20px;
+    }
+
+    .button-container{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .name-input {
+        @include input-style;
+    }
+
+    .name-input:focus {
+        @include input-focus-style;
     }
 
     .button {
@@ -59,16 +84,19 @@
     .button.cancel{
         margin-top: 10px;
         margin-left: 0;
+        @include cancel-button-style;
     }
 
-    .form-buttons{
-        display: flex;
+    .button.cancel:hover{
+        @include cancel-button-hover-style;
+    }
+
+    .button.confirm-button{
         width: 100%;
+        @include confirm-button-style;
     }
 
-    .form-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
+    .button.confirm-button:hover{
+        @include confirm-button-hover-style;
     }
 </style>

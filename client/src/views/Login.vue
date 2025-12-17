@@ -338,7 +338,7 @@
     /* Large area that holds the whole centered card */
     .large-area {
         width: calc(100% - 80px);
-        max-width: 1100px;
+        max-width: 1400px;
         margin: 40px auto;
         min-height: calc(100vh - 120px);
         background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,252,255,0.9));
@@ -460,7 +460,7 @@
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
-        font-weight: 800;
+        font-weight: 700;
         font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
         padding: 0 6px;
         border-radius: 6px;
@@ -513,7 +513,7 @@
         cursor: pointer;
         transition: transform 0.12s ease, background 0.12s ease;
     }
-    .back-home-btn:hover { transform: translateY(-2px); }
+    // .back-home-btn:hover { transform: translateY(-2px); }
 
     /* formal copyright text */
     .large-footer .copyright {
@@ -697,6 +697,7 @@
 
     /* Make primary confirm button more prominent */
     .confirm-button {
+        @include confirm-button-style;
         width: 100%;
         height: 48px;
         font-size: 16px;
@@ -706,14 +707,11 @@
         background-color: $stress-color;
         color: #fff;
         border: none;
-        box-shadow: 0 8px 20px rgba(16,142,254,0.12);
         transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
     }
 
     .confirm-button:hover {
-        transform: translateY(-2px);
-        background-color: $hover-stress-color;
-        box-shadow: 0 12px 30px rgba(16,142,254,0.12);
+        @include confirm-button-hover-style;
     }
 
     /* Make the small text buttons lighter */

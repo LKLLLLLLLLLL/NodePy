@@ -60,8 +60,8 @@ function onCardClick() {
 
 async function handleClickDelete(){
     projectStore.toBeDeleted.id = props.id
-    const modalWidth = 450;
-    const modalHeight = 200;
+    const modalWidth = 350;
+    const modalHeight = 270;
     modalStore.createModal({
         id: 'delete-modal',
         title: "删除项目",
@@ -84,8 +84,8 @@ async function handleClickDelete(){
 async function handleClickUpdate(){
     await projectStore.getProjectSettings(props.id)
     projectStore.currentProjectId = props.id
-    const modalWidth = 300;
-    const modalHeight = 400;
+    const modalWidth = 400;
+    const modalHeight = 360;
     modalStore.createModal({
         id: 'update-modal',
         title: "更新项目",

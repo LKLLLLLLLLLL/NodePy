@@ -331,7 +331,9 @@
     .modal-body, .modal-content{
         // height: calc(100% - 40px - 40px); /* 调整高度计算 */
         display: flex;
-        flex-direction: column;
+        // flex-direction: column;
+        align-items: center;
+        justify-content: center;
         // margin-bottom: 10px;
         overflow: hidden; /* 改为hidden，让内部组件控制滚动 */
         flex: 1;
