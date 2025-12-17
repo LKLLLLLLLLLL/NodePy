@@ -84,8 +84,8 @@ async function handleClickDelete(){
 async function handleClickUpdate(){
     await projectStore.getProjectSettings(props.id)
     projectStore.currentProjectId = props.id
-    const modalWidth = 400;
-    const modalHeight = 360;
+    const modalWidth = 340;
+    const modalHeight = 320;
     modalStore.createModal({
         id: 'update-modal',
         title: "更新项目",
