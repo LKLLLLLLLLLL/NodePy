@@ -26,9 +26,9 @@ export const getProject = (vp: vueFlowProject): Project => {
             id: n.id,
             x: n.position.x,
             y: n.position.y,
-            parentNode: n.parentNode,
             width: n.dimensions.width,
-            height: n.dimensions.height
+            height: n.dimensions.height,
+            groupId: n.data.groupId
         }
     })
     const edges = vp.workflow.edges.map(e => {
@@ -75,9 +75,9 @@ export const initVueFlowProject = (p: Project, vp: vueFlowProject) => {
                 data_out: p.workflow.nodes[i]?.data_out,
                 error: p.workflow.nodes[i]?.error,
                 hint: p.workflow.nodes[i]?.hint,
-                is_virtual_node: p.workflow.nodes[i]?.is_virtual_node
+                is_virtual_node: p.workflow.nodes[i]?.is_virtual_node,
+                groupId: p.ui_state.nodes[i]?.groupId
             },
-            parentNode: p.ui_state.nodes[i]?.parentNode,
             width: p.ui_state.nodes[i]?.width,
             height: p.ui_state.nodes[i]?.height
         })

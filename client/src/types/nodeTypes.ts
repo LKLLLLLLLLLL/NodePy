@@ -1,4 +1,4 @@
-import type { File, ProjNode, server__models__schema__Schema__Type } from '@/utils/api'
+import type { File, ProjNode } from '@/utils/api'
 import type { Node } from '@vue-flow/core'
 
 
@@ -33,7 +33,8 @@ export const nodeCategoryColor = {
 export type AbstractNode = Omit<Node, 'data' | 'type'>
 
 export type BaseData = Omit<ProjNode, 'id' | 'type' | 'position'> & {
-    dbclicked?: boolean
+    dbclicked?: boolean,
+    groupId?: string
 }
 
 export interface BaseNode<T = BaseData> extends AbstractNode{

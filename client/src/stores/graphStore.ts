@@ -1189,29 +1189,29 @@ export const useGraphStore = defineStore('graph', () => {
         const addedForEachRowBeginNode: Nodetypes.ForEachRowBeginNode = {
           id: nextId('ForEachRowBeginNode'),
           position: {
-            x: padding,
-            y: containerHeight / 2
+            x: padding + position.x,
+            y: containerHeight / 2 + position.y
           },
           type: 'ForEachRowBeginNode',
-          parentNode: ForEachRowNodeId,
           data: {
             param: {
               pair_id
-            }
+            },
+            groupId: ForEachRowNodeId
           }
         }
         const addedForEachRowEndNode: Nodetypes.ForEachRowEndNode = {
           id: nextId('ForEachRowEndNode'),
           position: {
-            x: containerWidth - nodeWidth - padding,
-            y: containerHeight / 2
+            x: containerWidth - nodeWidth - padding + position.x,
+            y: containerHeight / 2 + position.y
           },
           type: 'ForEachRowEndNode',
-          parentNode: ForEachRowNodeId,
           data: {
             param: {
               pair_id
-            }
+            },
+            groupId: ForEachRowNodeId
           }
         }
         addNodes([addedForEachRowNode, addedForEachRowBeginNode, addedForEachRowEndNode])
@@ -1237,30 +1237,30 @@ export const useGraphStore = defineStore('graph', () => {
         const addedForRollingWindowBeginNode: Nodetypes.ForRollingWindowBeginNode = {
           id: nextId('ForRollingWindowBeginNode'),
           position: {
-            x: padding,
-            y: containerHeight / 2
+            x: padding + position.x,
+            y: containerHeight / 2 + position.y
           },
           type: 'ForRollingWindowBeginNode',
-          parentNode: ForRollingWindowNodeId,
           data: {
             param: {
               pair_id,
               window_size: 1
-            }
+            },
+            groupId: ForRollingWindowNodeId
           }
         }
         const addedForRollingWindowEndNode: Nodetypes.ForRollingWindowEndNode = {
           id: nextId('ForRollingWindowEndNode'),
           position: {
-            x: containerWidth - nodeWidth - padding,
-            y: containerHeight / 2
+            x: containerWidth - nodeWidth - padding + position.x,
+            y: containerHeight / 2 + position.y
           },
           type: 'ForRollingWindowEndNode',
-          parentNode: ForRollingWindowNodeId,
           data: {
             param: {
               pair_id
-            }
+            },
+            groupId: ForRollingWindowNodeId
           }
         }
         addNodes([addedForRollingWindowNode, addedForRollingWindowBeginNode, addedForRollingWindowEndNode])
