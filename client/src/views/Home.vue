@@ -2,6 +2,8 @@
 import { useLoginStore } from '@/stores/loginStore';
 import { usePageStore } from '@/stores/pageStore';
 import { onMounted, computed, ref, markRaw } from 'vue';
+import NodePyEdge from '@/components/NodePyEdge.vue';
+import NodePyConnectionLine from '@/components/NodePyConnectionLine.vue';
 import { useRouter } from 'vue-router';
 import { VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
@@ -45,8 +47,8 @@ const nodes = ref([
 ])
 
 const edges = ref([
-  { id: 'e1-3', source: '1', target: '3', sourceHandle: 'const', targetHandle: 'x', animated: true },
-  { id: 'e2-3', source: '2', target: '3', sourceHandle: 'const', targetHandle: 'y', animated: true }
+  { id: 'e1-3', source: '1', target: '3', sourceHandle: 'const', targetHandle: 'x', animated: true , type: 'NodePyEdge'},
+  { id: 'e2-3', source: '2', target: '3', sourceHandle: 'const', targetHandle: 'y', animated: true , type: 'NodePyEdge'}
 ])
 
 // 特性列表
@@ -161,8 +163,8 @@ function jumpToGithub() {
               </div>
               <div class="mockup-body">
                 <VueFlow
-                  v-model="nodes"
-                  :edges="edges"
+                  v-model:nodes="nodes"
+                  v-model:edges="edges"
                   :node-types="nodeTypes"
                   :default-viewport="{ zoom: 1.0 }"
                   :min-zoom="0.5"
@@ -171,7 +173,15 @@ function jumpToGithub() {
                   class="demo-flow"
                   id="main"
                 >
-                  <Background pattern-color="#aaa" :gap="20" />
+                  <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4"/>
+
+                  <template #edge-NodePyEdge="NodePyEdgeProps">
+                    <NodePyEdge v-bind="NodePyEdgeProps"/>
+                  </template>
+
+                  <template #connection-line="ConnectionLineProps">
+                    <NodePyConnectionLine v-bind="ConnectionLineProps"/>
+                  </template>
                 </VueFlow>
               </div>
             </div>
