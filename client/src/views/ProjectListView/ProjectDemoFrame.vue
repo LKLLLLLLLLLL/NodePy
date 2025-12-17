@@ -68,6 +68,7 @@ async function handleClickDelete(){
         isActive: true,
         isDraggable: false,
         isResizable: false,
+        isModal: true,
         position: {
                 x: (window.innerWidth - modalWidth) / 2,
                 y: (window.innerHeight - modalHeight) / 2
@@ -91,6 +92,7 @@ async function handleClickUpdate(){
         isActive: true,
         isDraggable: false,
         isResizable: false,
+        isModal: true,
         position: {
                 x: (window.innerWidth - modalWidth) / 2,
                 y: (window.innerHeight - modalHeight) / 2

@@ -8,6 +8,7 @@ export interface ModalInstance{
     isResizable: boolean;
     isDraggable: boolean;
     isResultModal?: boolean;
+    isModal?: boolean; // 添加新属性，控制是否启用模态模式
     component?: Component;
     zIndex?: number;
     position: {x: number, y: number};

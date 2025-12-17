@@ -96,6 +96,7 @@
             isActive: true,
             isDraggable: true,
             isResizable: false,
+            isModal: true,
             component: CreateProject,
             size: {
                 width: modalWidth,

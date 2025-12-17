@@ -119,6 +119,7 @@
             isActive: true,
             isResizable: true,
             isDraggable: true,
+            isModal: true,
             position:{
                 x: window.innerWidth / 2 - previewWidth / 2,
                 y: window.innerHeight / 2 - previewHeight / 2

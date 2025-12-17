@@ -246,6 +246,9 @@
 
 </script>
 <template>
+    <!-- 添加遮罩层 -->
+    <div class="modal-overlay" v-if="modal.isActive && modal.isModal" @click="closeModal"></div>
+    
     <div class = "modal-container controller-style" v-if="modal.isActive"
         :style="{
             left: modal.position.x + 'px',
@@ -294,6 +297,18 @@
 </template>
 <style scoped lang = "scss">
     @use '../common/global.scss' as *;
+    
+    /* 添加遮罩层样式 */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色遮罩 */
+        z-index: 999; /* 确保遮罩在模态框下方但在其他内容上方 */
+    }
+    
     .modal-container{
         @include controller-style;
         position: fixed;
@@ -302,6 +317,7 @@
         box-sizing: border-box;
         // padding: 10px 15px;
         background-color: $background-color;
+        z-index: 1000; /* 确保模态框在遮罩上方 */
     }
     .modal-head{
         display: flex;

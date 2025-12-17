@@ -136,6 +136,7 @@ async function handleLogout() {
     isActive: true,
     isResizable: false,
     isDraggable: true,
+    isModal: true,
     position: {
       x: window.innerWidth / 2 - logoutWidth / 2,
       y: window.innerHeight / 2 - logoutHeight / 2

@@ -24,6 +24,7 @@ export const useModalStore = defineStore('modal', () => {
             isResizable: modal.isResizable,
             isDraggable: modal.isDraggable,
             isResultModal: modal.isResultModal || false,
+            isModal: modal.isModal || false, // 添加新属性，默认为 false
             props: modal.props,
             zIndex: baseZIndex++,
             position: modal.position || { x: 100, y: 100 },
