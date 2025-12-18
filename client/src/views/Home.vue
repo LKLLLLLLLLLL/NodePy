@@ -325,7 +325,7 @@ onMounted(async () => {
   startCarousel()
 })
 
-const { onNodeClick, findNode, onConnect, onNodesInitialized, fitView, onNodeDragStop, addEdges, getNodes, onPaneClick, screenToFlowCoordinate } = useVueFlow('main')
+const { onNodeClick, findNode, onConnect, onNodesInitialized, fitView, onNodeDragStop, addEdges, getNodes, onPaneClick, screenToFlowCoordinate } = useVueFlow('demo')
 
 onNodesInitialized(() => {
   nextTick(() => {
@@ -425,7 +425,7 @@ function jumpToGithub() {
                   :max-zoom="2"
                   fit-view-on-init
                   class="demo-flow"
-                  id="main"
+                  id="demo"
                 >
                   <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4"/>
 
@@ -769,6 +769,7 @@ function jumpToGithub() {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
 
     // 轮播指示器样式
     .carousel-indicators {
