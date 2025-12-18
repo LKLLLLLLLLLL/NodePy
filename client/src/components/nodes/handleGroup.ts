@@ -159,32 +159,27 @@ const bfsFromEndNode = (endNode, nodeMap, edgeMap, updates, specialHandle, stopN
 
 
 export const deleteGroupIdWhenDeleteEdge = (removedEdge: any) => {
-    const { updateNode, findNode } = useVueFlow('main');
+    const { updateNode, findNode, getNodes } = useVueFlow('main');
     const EXCLUDED_NODE_TYPES = [
     'ForEachRowBeginNode',
     'ForEachRowEndNode', 
     'ForRollingWindowBeginNode',
     'ForRollingWindowEndNode'
     ];
-    const { source: src, target: tar } = removedEdge;
+    const { source: src} = removedEdge;
     const source = findNode(src)
-    const target = findNode(tar)
-
-    if(source && !EXCLUDED_NODE_TYPES.includes(source.type)) {
-        updateNode(source.id, node => ({
-            data: {
-                ...node.data,
-                groupId: undefined
+    if(source) {
+        const groupId = source.data.groupId
+        getNodes.value.forEach(node => {
+            if(node.data.groupId === groupId && !EXCLUDED_NODE_TYPES.includes(node.type)) {
+                updateNode(node.id, n => ({
+                    data: {
+                        ...n.data,
+                        groupId: undefined
+                    }
+                }))
             }
-        }))
-    }
-    if(target && !EXCLUDED_NODE_TYPES.includes(target.type)) {
-        updateNode(target.id, node => ({
-            data: {
-                ...node.data,
-                groupId: undefined
-            }
-        }))
+        })
     }
 }
 
