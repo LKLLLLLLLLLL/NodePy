@@ -7,7 +7,7 @@
     import type { NodeProps } from '@vue-flow/core'
     import { useVueFlow } from '@vue-flow/core'
     import {  onMounted, onUnmounted } from 'vue'
-    
+
 
     const props = defineProps<NodeProps<BaseData>>()
     let intervalId: any
@@ -17,45 +17,45 @@
     const updateContainerPosition = () => {
         const {getNodes, updateNode} = useVueFlow('main')
         const containerId = props.id
-        
+
         // 找到所有groupId等于当前容器id的节点
-        const childNodes = getNodes.value.filter(node => 
+        const childNodes = getNodes.value.filter(node =>
             node.data.groupId === containerId
         )
-        
+
         if (childNodes.length === 0) {
             // 如果没有子节点，使用默认位置
             return
         }
-        
+
         // 计算能包裹所有子节点的最小矩形
         let minX = Infinity
         let minY = Infinity
         let maxX = -Infinity
         let maxY = -Infinity
-        
+
         childNodes.forEach(node => {
             const nodeX = node.position.x
             const nodeY = node.position.y
             const nodeWidth = node.dimensions.width
             const nodeHeight = node.dimensions.height
-            
+
             minX = Math.min(minX, nodeX)
             minY = Math.min(minY, nodeY)
             maxX = Math.max(maxX, nodeX + nodeWidth)
             maxY = Math.max(maxY, nodeY + nodeHeight)
         })
-        
+
         // 添加一些内边距
         const padding = 30
         const containerWidth = maxX - minX + padding * 2
         const containerHeight = maxY - minY + padding * 2
-        
+
         // 更新容器节点的位置和大小
         updateNode(containerId, {
-            position: { 
-                x: minX - padding, 
-                y: minY - padding 
+            position: {
+                x: minX - padding,
+                y: minY - padding
             },
             width: containerWidth,
             height: containerHeight,
@@ -66,7 +66,7 @@
     onMounted(() => {
         intervalId = setInterval(() => {
             updateContainerPosition()
-        }, 20)
+        }, 10)
     })
     onUnmounted(() => {
         clearInterval(intervalId)
