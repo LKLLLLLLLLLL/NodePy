@@ -223,7 +223,6 @@ onBeforeUnmount(() => {
           :direction="submenuDirection"
           :on-select="selectNode"
           :anchor-rect="submenuAnchorRect"
-          :parent-category="item.value"
         />
       </li>
     </ul>
