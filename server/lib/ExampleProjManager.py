@@ -47,6 +47,7 @@ class ExampleProject(BaseModel):
 
     project_name: str
     updated_at: int
+    created_at: int
     thumb: str | None
     editable: bool
     workflow: ProjWorkflow
@@ -106,7 +107,7 @@ def initialize_example_projects() -> None:
                     thumb=base64.b64decode(example.thumb) if example.thumb else None,
                     show_in_explore=True,
                     updated_at=datetime.fromtimestamp(example.updated_at / 1000, tz=timezone.utc),
-                    created_at=datetime.fromtimestamp(example.updated_at / 1000, tz=timezone.utc),
+                    created_at=datetime.fromtimestamp(example.created_at / 1000, tz=timezone.utc),
                 )
                 db.add(new_project)
                 db.flush()  # Flush to get new_project.id
@@ -217,6 +218,7 @@ def persist_projects(project_name: str, new_name: str | None = None) -> None:
         return
 
     project_id = project_record.id
+    project_created_at = int(project_record.created_at.timestamp() * 1000)  # type: ignore
     project_data = get_project_by_id_sync(db_client, project_id, None)  # type: ignore
     if not project_data:
         return
@@ -266,6 +268,7 @@ def persist_projects(project_name: str, new_name: str | None = None) -> None:
     example_project = ExampleProject(
         project_name=new_project_name,
         updated_at=project_data.updated_at,
+        created_at=project_created_at,
         thumb=project_data.thumb,
         editable=project_data.editable,
         workflow=project_data.workflow,

@@ -100,7 +100,7 @@ Debugging and logging settings
 """
 
 # Whether to use caching mechanism globally
-USE_CACHE = True
+USE_CACHE = False
 
 # Whether to enable time tracing for interpreter
 TRACING_ENABLED = True

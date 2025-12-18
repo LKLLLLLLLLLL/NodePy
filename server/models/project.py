@@ -96,21 +96,6 @@ class ProjWorkflow(BaseModel):
             edges=topo_edges,
         )
 
-    # def merge_run_results_from(self, other: "ProjWorkflow") -> None:
-    #     """
-    #     Merge running results from another workflow instance.
-    #     Matching is done by node id.
-    #     """
-    #     other_node_map = {node.id: node for node in other.nodes}
-    #     for node in self.nodes:
-    #         if node.id in other_node_map:
-    #             other_node = other_node_map[node.id]
-    #             node.schema_out = other_node.schema_out
-    #             node.data_out = other_node.data_out
-    #             node.error = other_node.error
-    #             node.runningtime = other_node.runningtime
-    #     self.error_message = other.error_message
-
     def apply_patch(self, patch: 'ProjWorkflowPatch') -> None:
         """
         Apply a patch to the workflow.
