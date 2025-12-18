@@ -444,7 +444,7 @@ const nodeColor = (node: BaseNode) => {
     case 'TextAnnotationNode':
       return nodeCategoryColor.annotation
     case 'NodeContainer':
-      return 'rgba(148, 193, 252, 0.2)'
+      return nodeCategoryColor.container
     default:
       return nodeCategoryColor.default
   }

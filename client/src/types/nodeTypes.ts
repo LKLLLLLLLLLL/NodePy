@@ -26,6 +26,7 @@ export const nodeCategoryColor = {
     datetime: dataTypeColor.Datetime,
     machine: dataTypeColor.Model,
     annotation: 'rgba(100, 116, 139, 0.25)',
+    container: 'rgba(234, 179, 8, 0.4)',
     default: 'gray'
 }
 

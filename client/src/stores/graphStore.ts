@@ -59,7 +59,7 @@ export const useGraphStore = defineStore('graph', () => {
     }
     const id = nextId(type)
     const containerWidth = 1000
-    const containerHeight = 500
+    const containerHeight = 100
     const nodeWidth = 210
     const padding = 30
     const pair_id = Date.now() + Math.floor(Math.random() * 10)
