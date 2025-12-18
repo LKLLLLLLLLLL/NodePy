@@ -31,7 +31,7 @@ $datetime-node-color: $datetime-color; // 青色 - 日期时间处理
 $machine-node-color: $model-color;
 $annotation-node-color: #64748b; // 棕色 - 注释
 $annotation-node-body-color: rgba(100, 116, 139, 0.25); // 棕色 - 注释节点身体
-$node-container-color: rgba(234, 179, 8, 0.25);
+$node-container-color: rgba(234, 179, 8, 0.35);
 
 .nodes-style {
   border-radius: 9px;

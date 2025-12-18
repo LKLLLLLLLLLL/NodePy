@@ -131,7 +131,7 @@
 
 <style lang="scss">
     .vue-flow__node-TitleAnnotationNode {
-        z-index: -1 !important;
+        z-index: -2 !important;
         width: 500px;
         height: 500px;
         min-height: 30px;

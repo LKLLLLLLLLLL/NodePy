@@ -81,8 +81,8 @@
         width: 100%;
         height: 100%;
         background: $node-container-color;
-        border-radius: 9px;
-        box-shadow: 5px 2px 15px rgba(128, 128, 128, 0.1);
+        border-radius: 40px;
+        // box-shadow: 5px 2px 15px rgba(128, 128, 128, 0.1);
     }
 </style>
 

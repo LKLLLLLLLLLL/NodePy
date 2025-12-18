@@ -1,6 +1,6 @@
 <template>
     <div class="TextAnnotationNodeLayout nodes-style" :class="[{'nodes-selected': selected}]" @contextmenu="onContextMenu">
-        <NodeResizer :min-width="200" :min-height="90"/>
+        <NodeResizer :min-width="200" :min-height="60"/>
         <template v-if="isEditing">
             <AutosizeTextarea v-model="text"
                 @blur="commit"
@@ -152,14 +152,14 @@
     .TextAnnotationNodeLayout {
         width: 100%;
         height: auto;
-        min-height: 90px;
+        min-height: 60px;
         padding: 4px;
         font-weight: bold;
         .inputValue {
             display: block;
             width: 100%;
             height: auto;
-            min-height: 90px;
+            min-height: 60px;
             padding: 2px;
             border:none;
             outline:none;
@@ -181,7 +181,7 @@
         .displayText {
             width: 100%;
             height: auto;
-            min-height: 90px;
+            min-height: 60px;
             color: rgb(0, 0, 0);
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -200,9 +200,10 @@
 
 <style lang="scss">
     .vue-flow__node-TextAnnotationNode {
-        z-index: -1 !important;
-        min-height: 90px;
+        z-index: -2 !important;
+        min-height: 60px;
         min-width: 200px;
+        height: auto;
     }
     .vue-flow__resize-control {
         background: transparent !important;
