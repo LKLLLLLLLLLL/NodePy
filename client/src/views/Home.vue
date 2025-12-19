@@ -73,31 +73,36 @@ const nodes1 = ref([
     id: 'DateTimeNode_1',
     type: 'DateTimeNode',
     position: { x: 20, y: 30 },
-    data: { param: { value: '', isNow: true }, dbclicked: false, runningtime: 0.0893150000820242 }
+    data: { param: { value: '', isNow: true }, dbclicked: false, runningtime: 0.0893150000820242 },
+    class: 'nowheel'
   },
   {
     id: 'DateTimeNode_2',
     type: 'DateTimeNode',
     position: { x: 350, y: 400 },
-    data: { param: { value: '', isNow: false }, dbclicked: false, runningtime: 0.04911700000320707 }
+    data: { param: { value: '', isNow: false }, dbclicked: false, runningtime: 0.04911700000320707 },
+    class: 'nowheel'
   },
   {
     id: 'ConstNode_1',
     type: 'ConstNode',
     position: { x: 20, y: 200 },
-    data: { param: { value: 0, data_type: 'int' }, dbclicked: false, runningtime: 0.07266500006153365 }
+    data: { param: { value: 0, data_type: 'int' }, dbclicked: false, runningtime: 0.07266500006153365 },
+    class: 'nowheel'
   },
   {
     id: 'DatetimeComputeNode_1',
     type: 'DatetimeComputeNode',
     position: { x: 350, y: 100 },
-    data: { param: {}, dbclicked: false, runningtime: 0.15581699994982046 }
+    data: { param: {}, dbclicked: false, runningtime: 0.15581699994982046 },
+    class: 'nowheel'
   },
   {
     id: 'KlineNode_1',
     type: 'KlineNode',
     position: { x: 680, y: 150 },
-    data: { param: { data_type: 'stock', symbol: '', start_time: null, end_time: null, interval: '1m' }, dbclicked: false, runningtime: 710.2902609999546 }
+    data: { param: { data_type: 'stock', symbol: '', start_time: null, end_time: null, interval: '1m' }, dbclicked: false, runningtime: 710.2902609999546 },
+    class: 'nowheel'
   }
 ])
 
@@ -106,31 +111,36 @@ const nodes2 = ref([
     id: 'StatsNode_1',
     type: 'StatsNode',
     position: { x: 20, y: 50 },
-    data: { param: {}, dbclicked: false, runningtime: 0.2 }
+    data: { param: {}, dbclicked: false, runningtime: 0.2 },
+    class: 'nowheel'
   },
   {
     id: 'ConstNode_3',
     type: 'ConstNode',
     position: { x: 290, y: 300 },
-    data: { param: { value: 10, data_type: 'int' }, dbclicked: false, runningtime: 0.05348499962565256 }
+    data: { param: { value: 10, data_type: 'int' }, dbclicked: false, runningtime: 0.05348499962565256 },
+    class: 'nowheel'
   },
   {
     id: 'NumberBinOpNode_1',
     type: 'NumberBinOpNode',
     position: { x: 560, y: 201 },
-    data: { param: { op: 'DIV' }, dbclicked: false, runningtime: 0.0}
+    data: { param: { op: 'DIV' }, dbclicked: false, runningtime: 0.0},
+    class: 'nowheel'
   },
   {
     id: 'ToFloatNode_1',
     type: 'ToFloatNode',
     position: { x: 290, y: 170 },
-    data: { param: {}, dbclicked: false, runningtime: 0.0 }
+    data: { param: {}, dbclicked: false, runningtime: 0.0 },
+    class: 'nowheel'
   },
   {
     id: 'ToIntNode_1',
     type: 'ToIntNode',
     position: { x: 830, y: 321 },
-    data: { param: {}, dbclicked: false, runningtime: 0.0 }
+    data: { param: {}, dbclicked: false, runningtime: 0.0 },
+    class: 'nowheel'
   }
 ])
 
@@ -139,31 +149,36 @@ const nodes3 = ref([
     id: 'LinearRegressionNode_1',
     type: 'LinearRegressionNode',
     position: { x: 825, y: 300 },
-    data: { param: {feature_cols: ['Open', 'Close'],target_col: "Volume"}, dbclicked: false, runningtime: 53.1 }
+    data: { param: {feature_cols: ['Open', 'Close'],target_col: "Volume"}, dbclicked: false, runningtime: 53.1 },
+    class: 'nowheel'
   },
   {
     id: 'UploadNode_1',
     type: 'UploadNode',
     position: { x: 0, y: 50 },
-    data: { param: {}, dbclicked: false, runningtime: 0.05667999994329875 }
+    data: { param: {}, dbclicked: false, runningtime: 0.05667999994329875 },
+    class: 'nowheel'
   },
   {
     id: 'RegressionScoreNode_1',
     type: 'RegressionScoreNode',
     position: { x: 1100, y: 138 },
-    data: { param: {}, dbclicked: false, runningtime: 17.8 }
+    data: { param: {}, dbclicked: false, runningtime: 17.8 },
+    class: 'nowheel'
   },
   {
     id: 'FilterNode_1',
     type: 'FilterNode',
     position: { x: 550, y: 50 },
-    data: { param: {}, dbclicked: false, runningtime: 0.5 }
+    data: { param: {}, dbclicked: false, runningtime: 0.5 },
+    class: 'nowheel'
   },
   {
     id: 'TableFromFileNode_1',
     type: 'TableFromFileNode',
     position: { x: 275, y: 75 },
-    data: { param: {}, dbclicked: false, runningtime: 19.82704400052171 }
+    data: { param: {}, dbclicked: false, runningtime: 19.82704400052171 },
+    class: 'nowheel'
   }
 ])
 
@@ -172,31 +187,36 @@ const nodes4 = ref([
     id: 'DualAxisPlotNode_1',
     type: 'DualAxisPlotNode',
     position: { x: 950, y: 500 },
-    data: { param: {}, dbclicked: false, runningtime: 471.34476699920924 }
+    data: { param: {}, dbclicked: false, runningtime: 471.34476699920924 },
+    class: 'nowheel'
   },
   {
     id: 'KlineNode_1',
     type: 'KlineNode',
     position: { x: 50, y: 50 },
-    data: { param: { data_type: 'stock', symbol: 'AAPL', start_time: '2023-01-01', end_time: '2023-12-31', interval: '1d' }, dbclicked: false, runningtime: 329.65625900033046 }
+    data: { param: { data_type: 'stock', symbol: 'AAPL', start_time: '2023-01-01', end_time: '2023-12-31', interval: '1d' }, dbclicked: false, runningtime: 329.65625900033046 },
+    class: 'nowheel'
   },
   {
     id: 'KlineNode_2',
     type: 'KlineNode',
     position: { x: 50, y: 500 },
-    data: { param: { data_type: 'stock', symbol: 'GOOGL', start_time: '2023-01-01', end_time: '2023-12-31', interval: '1d' }, dbclicked: false, runningtime: 176.7138300001534 }
+    data: { param: { data_type: 'stock', symbol: 'GOOGL', start_time: '2023-01-01', end_time: '2023-12-31', interval: '1d' }, dbclicked: false, runningtime: 176.7138300001534 },
+    class: 'nowheel'
   },
   {
     id: 'MergeNode_1',
     type: 'MergeNode',
     position: { x: 500, y: 400 },
-    data: { param: { join_type: 'inner', left_on: [], right_on: [] }, dbclicked: false, runningtime: 1.6944159997365205 }
+    data: { param: { join_type: 'inner', left_on: [], right_on: [] }, dbclicked: false, runningtime: 1.6944159997365205 },
+    class: 'nowheel'
   },
   {
     id: 'QuickPlotNode_1',
     type: 'QuickPlotNode',
     position: { x: 500, y: 600},
-    data: { param: {plot_type: ['line'],title: null,x_col: "Open Time",y_col: ['Open']}, dbclicked: false, runningtime: 435.82994200005487 }
+    data: { param: {plot_type: ['line'],title: null,x_col: "Open Time",y_col: ['Open']}, dbclicked: false, runningtime: 435.82994200005487 },
+    class: 'nowheel'
   }
 ])
 
