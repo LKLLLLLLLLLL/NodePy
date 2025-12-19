@@ -263,14 +263,23 @@ def test_randomnode_process_row_count_too_large(node_ctor):
     )
     assert out["table"].type == Schema.Type.TABLE
     # runtime with huge row_count triggers NodeExecutionError
-    with pytest.raises(NodeExecutionError):
-        node.process(
-            {
-                "row_count": Data(payload=100001),
-                "min_value": Data(payload=0),
-                "max_value": Data(payload=10),
-            }
-        )
+    # patch the module-level constant the node uses (imported at module level)
+    import importlib
+    mod = importlib.import_module('server.interpreter.nodes.input.table')
+    from pytest import MonkeyPatch
+    mp = MonkeyPatch()
+    mp.setattr(mod, "MAX_GENERATED_TABLE_ROWS", 100000)
+    try:
+        with pytest.raises(NodeExecutionError):
+            node.process(
+                {
+                    "row_count": Data(payload=100001),
+                    "min_value": Data(payload=0),
+                    "max_value": Data(payload=10),
+                }
+            )
+    finally:
+        mp.undo()
 
 
 def test_randomnode_min_ge_max_raises(node_ctor):
@@ -322,8 +331,16 @@ def test_rangenode_large_range_raises(node_ctor):
         {"start": Schema(type=Schema.Type.INT), "end": Schema(type=Schema.Type.INT)}
     )
     # make a huge range to trigger execution error
-    with pytest.raises(NodeExecutionError):
-        node.process({"start": Data(payload=0), "end": Data(payload=200000)})
+    import importlib
+    mod = importlib.import_module('server.interpreter.nodes.input.table')
+    from pytest import MonkeyPatch
+    mp = MonkeyPatch()
+    mp.setattr(mod, "MAX_GENERATED_TABLE_ROWS", 100000)
+    try:
+        with pytest.raises(NodeExecutionError):
+            node.process({"start": Data(payload=0), "end": Data(payload=200000)})
+    finally:
+        mp.undo()
 
 
 def test_tablenode_mixed_type_int_float_conversion(node_ctor):

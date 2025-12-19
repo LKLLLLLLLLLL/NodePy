@@ -25,9 +25,9 @@ NodePy 是一个基于节点的金融数据分析平台，用户可以通过可�
 | | |
 | :---: | :---: |
 | <img src="client/public/screenshots/data_process.png" width="100%"><br>**交互式数据表格** | <img src="client/public/screenshots/visualize.png" width="100%"><br>**丰富的数据可视化** |
-| <img src="client/public/screenshots/project.png" width="100%"><br>**逻辑编排编辑器** | <img src="client/public/screenshots/all_nodes.png" width="100%"><br>**10大类 90+ 算子库** |
+| <img src="client/public/screenshots/project.png" width="100%"><br>**逻辑编排编辑器** | <img src="client/public/screenshots/all_nodes.png" width="100%"><br>**10大类 90+ 节点库** |
 | <img src="client/public/screenshots/workshop.png" width="100%"><br>**项目管理工作台** | <img src="client/public/screenshots/files.png" width="100%"><br>**云端文件管理** |
-| <img src="client/public/screenshots/explore.png" width="100%"><br>**内置丰富案例库** | <img src="client/public/screenshots/home.png" width="100%"><br>**开箱即用** |
+| <img src="client/public/screenshots/explore.png" width="100%"><br>**内置丰富案例库** | <img src="client/public/screenshots/home.png" width="100%"><br>**立刻开始** |
 
 </details>
 

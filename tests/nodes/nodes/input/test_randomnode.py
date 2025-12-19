@@ -69,10 +69,15 @@ def test_randomnode_execute_generates_table(node_ctor):
     assert "table" in outputs
 
 
-def test_randomnode_execute_rejects_large_row_count(node_ctor):
+def test_randomnode_execute_rejects_large_row_count(node_ctor, monkeypatch):
     """Execute stage: too large row_count raises NodeExecutionError."""
     node = node_ctor("RandomNode", id="r-exec-big", col_name="c", col_type="int")
     node.infer_schema({"row_count": Schema(type=Schema.Type.INT), "min_value": Schema(type=Schema.Type.INT), "max_value": Schema(type=Schema.Type.INT)})
+    # Ensure tests don't depend on global config: patch the max rows to a smaller value
+    # patch the value used by the node module (it imports the constant at module level)
+    import importlib
+    mod = importlib.import_module('server.interpreter.nodes.input.table')
+    monkeypatch.setattr(mod, "MAX_GENERATED_TABLE_ROWS", 100000)
     with pytest.raises(NodeExecutionError):
         node.process({"row_count": Data(payload=100001), "min_value": Data(payload=1), "max_value": Data(payload=100002)})
 
