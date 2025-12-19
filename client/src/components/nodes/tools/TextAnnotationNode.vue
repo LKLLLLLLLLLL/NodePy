@@ -200,10 +200,13 @@
 
 <style lang="scss">
     .vue-flow__node-TextAnnotationNode {
-        z-index: -2 !important;
+        z-index: -1 !important;
         min-height: 60px;
         min-width: 200px;
         height: auto;
+        :not(.nodes-selected) {
+            box-shadow: none !important;
+        }
     }
     .vue-flow__resize-control {
         background: transparent !important;

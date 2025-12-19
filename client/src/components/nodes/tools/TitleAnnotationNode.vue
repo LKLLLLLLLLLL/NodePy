@@ -75,6 +75,9 @@
     .TitleAnnotationNodeLayout {
         width: 100%;
         height: 100%;
+        :not(.nodes-selected) {
+            box-shadow: none !important;
+        }
         .title {
             display: flex;
             align-items: center; /* 垂直居中内容 */
@@ -131,7 +134,7 @@
 
 <style lang="scss">
     .vue-flow__node-TitleAnnotationNode {
-        z-index: -2 !important;
+        z-index: -1 !important;
         width: 500px;
         height: 500px;
         min-height: 30px;

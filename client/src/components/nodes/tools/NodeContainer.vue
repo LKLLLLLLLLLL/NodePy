@@ -47,15 +47,17 @@
         })
 
         // 添加一些内边距
-        const padding = 30
-        const containerWidth = maxX - minX + padding * 2
-        const containerHeight = maxY - minY + padding * 2
+        const padding_top = 35
+        const padding_bottom = 20
+        const padding_horizontal = 15
+        const containerWidth = maxX - minX + padding_horizontal * 2
+        const containerHeight = maxY - minY + padding_top + padding_bottom
 
         // 更新容器节点的位置和大小
         updateNode(containerId, {
             position: {
-                x: minX - padding,
-                y: minY - padding
+                x: minX - padding_horizontal,
+                y: minY - padding_top,
             },
             width: containerWidth,
             height: containerHeight,
@@ -66,7 +68,7 @@
     onMounted(() => {
         intervalId = setInterval(() => {
             updateContainerPosition()
-        }, 10)
+        }, 8.33)
     })
     onUnmounted(() => {
         clearInterval(intervalId)
@@ -81,7 +83,7 @@
         width: 100%;
         height: 100%;
         background: $node-container-color;
-        border-radius: 40px;
+        border-radius: 30px;
         // box-shadow: 5px 2px 15px rgba(128, 128, 128, 0.1);
     }
 </style>
@@ -89,6 +91,6 @@
 <style lang="scss">
     .vue-flow__node-NodeContainer {
         pointer-events: none !important;
-        z-index: -1 !important;
+        z-index: -2 !important;
     }
 </style>

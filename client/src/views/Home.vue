@@ -15,7 +15,18 @@ import type { ExploreListItem } from '@/utils/api';
 import ExampleDemoFrame from './ExampleView/ExampleDemoFrame.vue'
 
 import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiRocketLaunchOutline, mdiGithub} from '@mdi/js';
+import {
+  mdiRocketLaunchOutline,
+  mdiGithub,
+  mdiGraph,
+  mdiTableLarge,
+  mdiChartScatterPlot,
+  mdiFunctionVariant,
+  mdiBrain,
+  mdiTextSearch,
+  mdiCalendarClock,
+  mdiFileDocumentMultiple
+} from '@mdi/js';
 
 import ConstNode from '@/components/nodes/input/ConstNode.vue'
 import NumberBinOpNode from '@/components/nodes/compute/NumberBinOpNode.vue'
@@ -258,28 +269,52 @@ const currentEdges = computed(() => {
 // 特性列表
 const features = [
   {
-    icon: 'mdi-graph',
+    icon: mdiGraph,
     title: '严格类型系统',
     description: '支持 Int, Float, Bool, String, Table, File, Datetime 七大类型，确保数据流转的准确性。',
     nodeType: 'input' // 对应 node.scss 中的颜色分类
   },
   {
-    icon: 'mdi-table-large',
+    icon: mdiTableLarge,
     title: 'Pandas 表格处理',
     description: '内置强大的表格处理能力，支持过滤、去重、缺失值处理、列运算等复杂操作。',
     nodeType: 'tableProcess'
   },
   {
-    icon: 'mdi-chart-scatter-plot',
+    icon: mdiChartScatterPlot,
     title: '专业可视化',
     description: '支持散点图、折线图、柱状图、面积图、K线图等多种专业金融图表绘制。',
     nodeType: 'visualize'
   },
   {
-    icon: 'mdi-function-variant',
+    icon: mdiFunctionVariant,
     title: 'Python 驱动',
     description: '底层完全由 Python 驱动，兼容 Python 生态，计算结果精准可靠。',
     nodeType: 'compute'
+  },
+  {
+    icon: mdiBrain,
+    title: '机器学习支持',
+    description: '集成 scikit-learn，支持线性回归、逻辑回归等多种机器学习算法。',
+    nodeType: 'machineLearning'
+  },
+  {
+    icon: mdiTextSearch,
+    title: '文本处理',
+    description: '内置分词、正则匹配、情感分析等强大的文本处理能力。',
+    nodeType: 'stringProcess'
+  },
+  {
+    icon: mdiCalendarClock,
+    title: '时间序列',
+    description: '完整的时间序列数据处理能力，支持日期计算、移动窗口等操作。',
+    nodeType: 'datetimeProcess'
+  },
+  {
+    icon: mdiFileDocumentMultiple,
+    title: '文件系统',
+    description: '支持 CSV、Excel、JSON 等多种文件格式的导入导出，配额管理更安全。',
+    nodeType: 'file'
   }
 ]
 
@@ -291,7 +326,7 @@ const startCarousel = () => {
   if (carouselTimer.value) {
     clearInterval(carouselTimer.value)
   }
-  
+
   carouselTimer.value = setInterval(() => {
     currentExampleIndex.value = (currentExampleIndex.value + 1) % 4
   }, 3000) // 每3秒切换一次
@@ -320,7 +355,7 @@ onMounted(async () => {
   } catch (e) {
     console.error('Failed to fetch examples:', e)
   }
-  
+
   // 启动自动轮播
   startCarousel()
 })
@@ -441,8 +476,8 @@ function jumpToGithub() {
             </div>
             <!-- 轮播指示器 -->
             <div class="carousel-indicators">
-              <span 
-                v-for="(_, index) in 4" 
+              <span
+                v-for="(_, index) in 4"
                 :key="index"
                 class="indicator-dot"
                 :class="{ active: currentExampleIndex === index }"
@@ -468,7 +503,7 @@ function jumpToGithub() {
             >
               <div class="feature-icon-wrapper">
                 <div class="feature-icon">
-                  <span class="mdi" :class="feature.icon"></span>
+                  <svg-icon :path="feature.icon" :size="24" type="mdi"></svg-icon>
                 </div>
               </div>
               <h3 class="feature-title">{{ feature.title }}</h3>
@@ -556,6 +591,7 @@ function jumpToGithub() {
   min-height: 0;
   overflow-x: hidden;
   background-color: $background-color;
+  user-select: none;
 }
 
 .background-elements {
@@ -782,20 +818,20 @@ function jumpToGithub() {
       display: flex;
       gap: 10px;
       z-index: 10;
-      
+
       .indicator-dot {
-        width: 10px;
-        height: 10px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         background-color: #cbd5e1; // 蓝色系浅色
         cursor: pointer;
         transition: all 0.3s ease;
-        
+
         &.active {
           background-color: $stress-color; // 使用项目主色调
           // transform: scale(1.2);
         }
-        
+
         &:hover:not(.active) {
           background-color: #94a3b8; // 悬停时加深颜色
         }
@@ -892,7 +928,7 @@ function jumpToGithub() {
         align-items: center;
         justify-content: center;
 
-        .mdi {
+        svg {
           font-size: 24px;
           color: white;
         }
@@ -915,6 +951,22 @@ function jumpToGithub() {
     &.type-compute {
       .feature-icon { background: $compute-node-color; }
       &:hover { border-color: rgba($compute-node-color, 0.3); }
+    }
+    &.type-machineLearning {
+      .feature-icon { background: $machine-node-color; }
+      &:hover { border-color: rgba($machine-node-color, 0.3); }
+    }
+    &.type-stringProcess {
+      .feature-icon { background: $str-node-color; }
+      &:hover { border-color: rgba($str-node-color, 0.3); }
+    }
+    &.type-datetimeProcess {
+      .feature-icon { background: $datetime-node-color; }
+      &:hover { border-color: rgba($datetime-node-color, 0.3); }
+    }
+    &.type-file {
+      .feature-icon { background: $file-node-color; }
+      &:hover { border-color: rgba($file-node-color, 0.3); }
     }
 
     .feature-title {

@@ -96,8 +96,6 @@ def initialize_example_projects() -> None:
                     data = json.load(f)
                     example = ExampleProject(**data)
 
-                logger.info(f"Creating example project: {example.project_name}")
-
                 # 4. Create ProjectRecord (to get new project_id)
                 new_project = ProjectRecord(
                     name=example.project_name,
