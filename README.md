@@ -1,13 +1,35 @@
 <div align="center">
-  <img src="client/public/logo.png" alt="NodePy logo" style="width: 500px">
-  <!-- <h1>NodePy</h1> -->
+    <img src="client/public/logo.png" alt="NodePy logo" style="width: 500px">
+    <!-- <h1>NodePy</h1> -->
 </div>
 
 # NodePy
 
 NodePy 是一个基于节点的金融数据分析平台，用户可以通过可视化界面创建和执行复杂的数据处理和分析工作流。NodePy 提供了丰富的节点类型，涵盖数据导入、清洗、转换、分析和可视化等功能。
 
-![demo](client/public/demo.gif)
+<div align="center">
+    <img src="client/public/demo.gif" alt="demo" style="width: 500px">
+</div>
+
+## 功能预览
+
+- **包含90+节点**：支持数据导入、清洗、转换、分析、机器学习和可视化等功能。
+- **为金融数据分析而设计**：内置多种金融数据处理节点。
+- **可视化工作流编辑器**：通过拖拽节点创建数据处理工作流。
+- **在线运行，多端共享**：支持在云端运行，随时随地访问和管理数据分析项目。
+- **可自托管**：支持在本地或服务器上部署，确保数据安全和隐私。
+
+<details>
+<summary>点击展开查看更多</summary>
+
+| | |
+| :---: | :---: |
+| <img src="client/public/screenshots/data_process.png" width="100%"><br>**交互式数据表格** | <img src="client/public/screenshots/visualize.png" width="100%"><br>**丰富的数据可视化** |
+| <img src="client/public/screenshots/project.png" width="100%"><br>**逻辑编排编辑器** | <img src="client/public/screenshots/all_nodes.png" width="100%"><br>**10大类 90+ 算子库** |
+| <img src="client/public/screenshots/workshop.png" width="100%"><br>**项目管理工作台** | <img src="client/public/screenshots/files.png" width="100%"><br>**云端文件管理** |
+| <img src="client/public/screenshots/explore.png" width="100%"><br>**内置丰富案例库** | <img src="client/public/screenshots/home.png" width="100%"><br>**开箱即用** |
+
+</details>
 
 ## 快速开始
 请确保已经安装如下依赖：

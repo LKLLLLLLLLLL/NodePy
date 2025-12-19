@@ -68,7 +68,7 @@
     onMounted(() => {
         intervalId = setInterval(() => {
             updateContainerPosition()
-        }, 8.33)
+        }, 1)
     })
     onUnmounted(() => {
         clearInterval(intervalId)
