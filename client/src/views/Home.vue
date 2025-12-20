@@ -15,7 +15,18 @@ import type { ExploreListItem } from '@/utils/api';
 import ExampleDemoFrame from './ExampleView/ExampleDemoFrame.vue'
 
 import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiRocketLaunchOutline, mdiGithub} from '@mdi/js';
+import {
+  mdiRocketLaunchOutline,
+  mdiGithub,
+  mdiGraph,
+  mdiTableLarge,
+  mdiChartScatterPlot,
+  mdiFunctionVariant,
+  mdiBrain,
+  mdiTextSearch,
+  mdiCalendarClock,
+  mdiFileDocumentMultiple
+} from '@mdi/js';
 
 import ConstNode from '@/components/nodes/input/ConstNode.vue'
 import NumberBinOpNode from '@/components/nodes/compute/NumberBinOpNode.vue'
@@ -62,31 +73,36 @@ const nodes1 = ref([
     id: 'DateTimeNode_1',
     type: 'DateTimeNode',
     position: { x: 20, y: 30 },
-    data: { param: { value: '', isNow: true }, dbclicked: false, runningtime: 0.0893150000820242 }
+    data: { param: { value: '', isNow: true }, dbclicked: false, runningtime: 0.0893150000820242 },
+    class: 'nowheel'
   },
   {
     id: 'DateTimeNode_2',
     type: 'DateTimeNode',
     position: { x: 350, y: 400 },
-    data: { param: { value: '', isNow: false }, dbclicked: false, runningtime: 0.04911700000320707 }
+    data: { param: { value: '', isNow: false }, dbclicked: false, runningtime: 0.04911700000320707 },
+    class: 'nowheel'
   },
   {
     id: 'ConstNode_1',
     type: 'ConstNode',
     position: { x: 20, y: 200 },
-    data: { param: { value: 0, data_type: 'int' }, dbclicked: false, runningtime: 0.07266500006153365 }
+    data: { param: { value: 0, data_type: 'int' }, dbclicked: false, runningtime: 0.07266500006153365 },
+    class: 'nowheel'
   },
   {
     id: 'DatetimeComputeNode_1',
     type: 'DatetimeComputeNode',
     position: { x: 350, y: 100 },
-    data: { param: {}, dbclicked: false, runningtime: 0.15581699994982046 }
+    data: { param: {}, dbclicked: false, runningtime: 0.15581699994982046 },
+    class: 'nowheel'
   },
   {
     id: 'KlineNode_1',
     type: 'KlineNode',
     position: { x: 680, y: 150 },
-    data: { param: { data_type: 'stock', symbol: '', start_time: null, end_time: null, interval: '1m' }, dbclicked: false, runningtime: 710.2902609999546 }
+    data: { param: { data_type: 'stock', symbol: '', start_time: null, end_time: null, interval: '1m' }, dbclicked: false, runningtime: 710.2902609999546 },
+    class: 'nowheel'
   }
 ])
 
@@ -95,31 +111,36 @@ const nodes2 = ref([
     id: 'StatsNode_1',
     type: 'StatsNode',
     position: { x: 20, y: 50 },
-    data: { param: {}, dbclicked: false, runningtime: 0.2 }
+    data: { param: {}, dbclicked: false, runningtime: 0.2 },
+    class: 'nowheel'
   },
   {
     id: 'ConstNode_3',
     type: 'ConstNode',
     position: { x: 290, y: 300 },
-    data: { param: { value: 10, data_type: 'int' }, dbclicked: false, runningtime: 0.05348499962565256 }
+    data: { param: { value: 10, data_type: 'int' }, dbclicked: false, runningtime: 0.05348499962565256 },
+    class: 'nowheel'
   },
   {
     id: 'NumberBinOpNode_1',
     type: 'NumberBinOpNode',
     position: { x: 560, y: 201 },
-    data: { param: { op: 'DIV' }, dbclicked: false, runningtime: 0.0}
+    data: { param: { op: 'DIV' }, dbclicked: false, runningtime: 0.0},
+    class: 'nowheel'
   },
   {
     id: 'ToFloatNode_1',
     type: 'ToFloatNode',
     position: { x: 290, y: 170 },
-    data: { param: {}, dbclicked: false, runningtime: 0.0 }
+    data: { param: {}, dbclicked: false, runningtime: 0.0 },
+    class: 'nowheel'
   },
   {
     id: 'ToIntNode_1',
     type: 'ToIntNode',
     position: { x: 830, y: 321 },
-    data: { param: {}, dbclicked: false, runningtime: 0.0 }
+    data: { param: {}, dbclicked: false, runningtime: 0.0 },
+    class: 'nowheel'
   }
 ])
 
@@ -128,31 +149,36 @@ const nodes3 = ref([
     id: 'LinearRegressionNode_1',
     type: 'LinearRegressionNode',
     position: { x: 825, y: 300 },
-    data: { param: {feature_cols: ['Open', 'Close'],target_col: "Volume"}, dbclicked: false, runningtime: 53.1 }
+    data: { param: {feature_cols: ['Open', 'Close'],target_col: "Volume"}, dbclicked: false, runningtime: 53.1 },
+    class: 'nowheel'
   },
   {
     id: 'UploadNode_1',
     type: 'UploadNode',
     position: { x: 0, y: 50 },
-    data: { param: {}, dbclicked: false, runningtime: 0.05667999994329875 }
+    data: { param: {}, dbclicked: false, runningtime: 0.05667999994329875 },
+    class: 'nowheel'
   },
   {
     id: 'RegressionScoreNode_1',
     type: 'RegressionScoreNode',
     position: { x: 1100, y: 138 },
-    data: { param: {}, dbclicked: false, runningtime: 17.8 }
+    data: { param: {}, dbclicked: false, runningtime: 17.8 },
+    class: 'nowheel'
   },
   {
     id: 'FilterNode_1',
     type: 'FilterNode',
     position: { x: 550, y: 50 },
-    data: { param: {}, dbclicked: false, runningtime: 0.5 }
+    data: { param: {}, dbclicked: false, runningtime: 0.5 },
+    class: 'nowheel'
   },
   {
     id: 'TableFromFileNode_1',
     type: 'TableFromFileNode',
     position: { x: 275, y: 75 },
-    data: { param: {}, dbclicked: false, runningtime: 19.82704400052171 }
+    data: { param: {}, dbclicked: false, runningtime: 19.82704400052171 },
+    class: 'nowheel'
   }
 ])
 
@@ -161,31 +187,36 @@ const nodes4 = ref([
     id: 'DualAxisPlotNode_1',
     type: 'DualAxisPlotNode',
     position: { x: 950, y: 500 },
-    data: { param: {}, dbclicked: false, runningtime: 471.34476699920924 }
+    data: { param: {}, dbclicked: false, runningtime: 471.34476699920924 },
+    class: 'nowheel'
   },
   {
     id: 'KlineNode_1',
     type: 'KlineNode',
     position: { x: 50, y: 50 },
-    data: { param: { data_type: 'stock', symbol: 'AAPL', start_time: '2023-01-01', end_time: '2023-12-31', interval: '1d' }, dbclicked: false, runningtime: 329.65625900033046 }
+    data: { param: { data_type: 'stock', symbol: 'AAPL', start_time: '2023-01-01', end_time: '2023-12-31', interval: '1d' }, dbclicked: false, runningtime: 329.65625900033046 },
+    class: 'nowheel'
   },
   {
     id: 'KlineNode_2',
     type: 'KlineNode',
     position: { x: 50, y: 500 },
-    data: { param: { data_type: 'stock', symbol: 'GOOGL', start_time: '2023-01-01', end_time: '2023-12-31', interval: '1d' }, dbclicked: false, runningtime: 176.7138300001534 }
+    data: { param: { data_type: 'stock', symbol: 'GOOGL', start_time: '2023-01-01', end_time: '2023-12-31', interval: '1d' }, dbclicked: false, runningtime: 176.7138300001534 },
+    class: 'nowheel'
   },
   {
     id: 'MergeNode_1',
     type: 'MergeNode',
     position: { x: 500, y: 400 },
-    data: { param: { join_type: 'inner', left_on: [], right_on: [] }, dbclicked: false, runningtime: 1.6944159997365205 }
+    data: { param: { join_type: 'inner', left_on: [], right_on: [] }, dbclicked: false, runningtime: 1.6944159997365205 },
+    class: 'nowheel'
   },
   {
     id: 'QuickPlotNode_1',
     type: 'QuickPlotNode',
     position: { x: 500, y: 600},
-    data: { param: {plot_type: ['line'],title: null,x_col: "Open Time",y_col: ['Open']}, dbclicked: false, runningtime: 435.82994200005487 }
+    data: { param: {plot_type: ['line'],title: null,x_col: "Open Time",y_col: ['Open']}, dbclicked: false, runningtime: 435.82994200005487 },
+    class: 'nowheel'
   }
 ])
 
@@ -258,28 +289,52 @@ const currentEdges = computed(() => {
 // 特性列表
 const features = [
   {
-    icon: 'mdi-graph',
+    icon: mdiGraph,
     title: '严格类型系统',
     description: '支持 Int, Float, Bool, String, Table, File, Datetime 七大类型，确保数据流转的准确性。',
     nodeType: 'input' // 对应 node.scss 中的颜色分类
   },
   {
-    icon: 'mdi-table-large',
+    icon: mdiTableLarge,
     title: 'Pandas 表格处理',
     description: '内置强大的表格处理能力，支持过滤、去重、缺失值处理、列运算等复杂操作。',
     nodeType: 'tableProcess'
   },
   {
-    icon: 'mdi-chart-scatter-plot',
+    icon: mdiChartScatterPlot,
     title: '专业可视化',
     description: '支持散点图、折线图、柱状图、面积图、K线图等多种专业金融图表绘制。',
     nodeType: 'visualize'
   },
   {
-    icon: 'mdi-function-variant',
+    icon: mdiFunctionVariant,
     title: 'Python 驱动',
     description: '底层完全由 Python 驱动，兼容 Python 生态，计算结果精准可靠。',
     nodeType: 'compute'
+  },
+  {
+    icon: mdiBrain,
+    title: '机器学习支持',
+    description: '集成 scikit-learn，支持线性回归、逻辑回归等多种机器学习算法。',
+    nodeType: 'machineLearning'
+  },
+  {
+    icon: mdiTextSearch,
+    title: '文本处理',
+    description: '内置分词、正则匹配、情感分析等强大的文本处理能力。',
+    nodeType: 'stringProcess'
+  },
+  {
+    icon: mdiCalendarClock,
+    title: '时间序列',
+    description: '完整的时间序列数据处理能力，支持日期计算、移动窗口等操作。',
+    nodeType: 'datetimeProcess'
+  },
+  {
+    icon: mdiFileDocumentMultiple,
+    title: '文件系统',
+    description: '支持 CSV、Excel、JSON 等多种文件格式的导入导出，配额管理更安全。',
+    nodeType: 'file'
   }
 ]
 
@@ -291,7 +346,7 @@ const startCarousel = () => {
   if (carouselTimer.value) {
     clearInterval(carouselTimer.value)
   }
-  
+
   carouselTimer.value = setInterval(() => {
     currentExampleIndex.value = (currentExampleIndex.value + 1) % 4
   }, 3000) // 每3秒切换一次
@@ -320,12 +375,12 @@ onMounted(async () => {
   } catch (e) {
     console.error('Failed to fetch examples:', e)
   }
-  
+
   // 启动自动轮播
   startCarousel()
 })
 
-const { onNodeClick, findNode, onConnect, onNodesInitialized, fitView, onNodeDragStop, addEdges, getNodes, onPaneClick, screenToFlowCoordinate } = useVueFlow('main')
+const { onNodeClick, findNode, onConnect, onNodesInitialized, fitView, onNodeDragStop, addEdges, getNodes, onPaneClick, screenToFlowCoordinate } = useVueFlow('demo')
 
 onNodesInitialized(() => {
   nextTick(() => {
@@ -425,7 +480,7 @@ function jumpToGithub() {
                   :max-zoom="2"
                   fit-view-on-init
                   class="demo-flow"
-                  id="main"
+                  id="demo"
                 >
                   <Background color="rgba(50, 50, 50, 0.05)" variant="dots" :gap="20" :size="4"/>
 
@@ -441,8 +496,8 @@ function jumpToGithub() {
             </div>
             <!-- 轮播指示器 -->
             <div class="carousel-indicators">
-              <span 
-                v-for="(_, index) in 4" 
+              <span
+                v-for="(_, index) in 4"
                 :key="index"
                 class="indicator-dot"
                 :class="{ active: currentExampleIndex === index }"
@@ -468,7 +523,7 @@ function jumpToGithub() {
             >
               <div class="feature-icon-wrapper">
                 <div class="feature-icon">
-                  <span class="mdi" :class="feature.icon"></span>
+                  <svg-icon :path="feature.icon" :size="24" type="mdi"></svg-icon>
                 </div>
               </div>
               <h3 class="feature-title">{{ feature.title }}</h3>
@@ -556,6 +611,7 @@ function jumpToGithub() {
   min-height: 0;
   overflow-x: hidden;
   background-color: $background-color;
+  user-select: none;
 }
 
 .background-elements {
@@ -769,6 +825,7 @@ function jumpToGithub() {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
 
     // 轮播指示器样式
     .carousel-indicators {
@@ -781,20 +838,20 @@ function jumpToGithub() {
       display: flex;
       gap: 10px;
       z-index: 10;
-      
+
       .indicator-dot {
-        width: 10px;
-        height: 10px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         background-color: #cbd5e1; // 蓝色系浅色
         cursor: pointer;
         transition: all 0.3s ease;
-        
+
         &.active {
           background-color: $stress-color; // 使用项目主色调
           // transform: scale(1.2);
         }
-        
+
         &:hover:not(.active) {
           background-color: #94a3b8; // 悬停时加深颜色
         }
@@ -891,7 +948,7 @@ function jumpToGithub() {
         align-items: center;
         justify-content: center;
 
-        .mdi {
+        svg {
           font-size: 24px;
           color: white;
         }
@@ -914,6 +971,22 @@ function jumpToGithub() {
     &.type-compute {
       .feature-icon { background: $compute-node-color; }
       &:hover { border-color: rgba($compute-node-color, 0.3); }
+    }
+    &.type-machineLearning {
+      .feature-icon { background: $machine-node-color; }
+      &:hover { border-color: rgba($machine-node-color, 0.3); }
+    }
+    &.type-stringProcess {
+      .feature-icon { background: $str-node-color; }
+      &:hover { border-color: rgba($str-node-color, 0.3); }
+    }
+    &.type-datetimeProcess {
+      .feature-icon { background: $datetime-node-color; }
+      &:hover { border-color: rgba($datetime-node-color, 0.3); }
+    }
+    &.type-file {
+      .feature-icon { background: $file-node-color; }
+      &:hover { border-color: rgba($file-node-color, 0.3); }
     }
 
     .feature-title {

@@ -75,6 +75,9 @@
     .TitleAnnotationNodeLayout {
         width: 100%;
         height: 100%;
+        :not(.nodes-selected) {
+            box-shadow: none !important;
+        }
         .title {
             display: flex;
             align-items: center; /* 垂直居中内容 */

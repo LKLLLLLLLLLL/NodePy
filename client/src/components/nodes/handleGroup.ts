@@ -10,7 +10,7 @@ export const setGroupIdsByBFS = () => {
     const nodeMap = new Map(nodes.value.map(node => [node.id, node]));
     const edgeMap = new Map();
     
-    // 构建邻接表
+    // 构建邻接表（包含入度和出度）
     edges.value.forEach(edge => {
         if (!edgeMap.has(edge.source)) {
             edgeMap.set(edge.source, []);
@@ -38,12 +38,12 @@ export const setGroupIdsByBFS = () => {
     
     // 从每个 BeginNode 开始正向 BFS
     beginNodes.forEach(beginNode => {
-        bfsFromBeginNode(beginNode, nodeMap, edgeMap, updates, 'row', 'ForEachRowEndNode');
+        bfsFromBeginNode(beginNode, nodeMap, edgeMap, updates, 'ForEachRowEndNode');
     });
     
     // 从每个 EndNode 开始逆向 BFS
     endNodes.forEach(endNode => {
-        bfsFromEndNode(endNode, nodeMap, edgeMap, updates, 'row', 'ForEachRowBeginNode');
+        bfsFromEndNode(endNode, nodeMap, edgeMap, updates, 'ForEachRowBeginNode');
     });
 
 
@@ -52,12 +52,12 @@ export const setGroupIdsByBFS = () => {
     const endNodes2 = nodes.value.filter(n => n.type === 'ForRollingWindowEndNode');
     // 从每个 BeginNode2 开始正向 BFS
     beginNodes2.forEach(beginNode => {
-        bfsFromBeginNode(beginNode, nodeMap, edgeMap, updates, 'window', 'ForRollingWindowEndNode');
+        bfsFromBeginNode(beginNode, nodeMap, edgeMap, updates, 'ForRollingWindowEndNode');
     });
     
     // 从每个 EndNode2 开始逆向 BFS
     endNodes2.forEach(endNode => {
-        bfsFromEndNode(endNode, nodeMap, edgeMap, updates, 'window', 'ForRollingWindowBeginNode');
+        bfsFromEndNode(endNode, nodeMap, edgeMap, updates, 'ForRollingWindowBeginNode');
     });
     
     // 应用所有更新
@@ -73,15 +73,14 @@ export const setGroupIdsByBFS = () => {
     }
 };
 
-const bfsFromBeginNode = (beginNode, nodeMap, edgeMap, updates, specialHandle, stopNode) => {
+const bfsFromBeginNode = (beginNode, nodeMap, edgeMap, updates, stopNode) => {
     const queue: any[] = [];
     const visited = new Set([beginNode.id]);
     
-    // 从 row 端口开始
-    const startEdges = edgeMap.get(beginNode.id)?.filter(edge => 
-        edge.sourceHandle === specialHandle
-    ) || [];
+    // 获取开始节点的所有边
+    const startEdges = edgeMap.get(beginNode.id) || [];
     
+    // 从开始节点往后搜索
     startEdges.forEach(edge => {
         if (!visited.has(edge.target)) {
             queue.push({ nodeId: edge.target, groupId: beginNode.data.groupId });
@@ -102,28 +101,31 @@ const bfsFromBeginNode = (beginNode, nodeMap, edgeMap, updates, specialHandle, s
         
         updates.push({ id: currentNode.id, groupId });
         
-        // 获取当前节点的所有出边
-        const outEdges = edgeMap.get(currentNode.id) || [];
+        // 获取当前节点的所有出边和入边
+        const nEdges = edgeMap.get(currentNode.id) || [];
         
-        // 加入后继节点
-        outEdges.forEach(edge => {
+        // 加入相邻节点
+        nEdges.forEach(edge => {
             if (!visited.has(edge.target)) {
                 queue.push({ nodeId: edge.target, groupId });
                 visited.add(edge.target);
+            }
+            if(!visited.has(edge.source)) {
+                queue.push({ nodeId: edge.source, groupId });
+                visited.add(edge.source);
             }
         });
     }
 };
 
-const bfsFromEndNode = (endNode, nodeMap, edgeMap, updates, specialHandle, stopNode) => {
+const bfsFromEndNode = (endNode, nodeMap, edgeMap, updates, stopNode) => {
     const queue: any[] = [];
     const visited = new Set([endNode.id]);
     
-    // 从 row 端口开始（逆向）
-    const startEdges = edgeMap.get(endNode.id)?.filter(edge => 
-    edge.targetHandle === specialHandle
-    ) || [];
+    // 获取结束节点的所有边
+    const startEdges = edgeMap.get(endNode.id) || [];
     
+    // 从结束节点往前搜索
     startEdges.forEach(edge => {
         if (!visited.has(edge.source)) {
             queue.push({ nodeId: edge.source, groupId: endNode.data.groupId });
@@ -144,14 +146,18 @@ const bfsFromEndNode = (endNode, nodeMap, edgeMap, updates, specialHandle, stopN
         
         updates.push({ id: currentNode.id, groupId });
         
-        // 获取当前节点的所有入边
-        const inEdges = edgeMap.get(currentNode.id) || [];
+        // 获取当前节点的所有出边和入边
+        const nEdges = edgeMap.get(currentNode.id) || [];
         
-        // 加入前驱节点
-        inEdges.forEach(edge => {
+        // 加入相邻节点
+        nEdges.forEach(edge => {
             if (!visited.has(edge.source)) {
                 queue.push({ nodeId: edge.source, groupId });
                 visited.add(edge.source);
+            }
+            if(!visited.has(edge.target)) {
+                queue.push({ nodeId: edge.target, groupId });
+                visited.add(edge.target);
             }
         });
     }

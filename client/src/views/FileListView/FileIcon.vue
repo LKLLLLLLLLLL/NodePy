@@ -3,6 +3,7 @@
     import { useFileStore } from '@/stores/fileStore';
     import { FileItem } from '@/utils/api'; // @ts-ignore
     import SvgIcon from '@jamescoyle/vue-icon';
+    import Loading from '@/components/Loading.vue';
     import {
         mdiFileDelimited,
         mdiFileDocument,
@@ -99,7 +100,7 @@
     <div class="fileicon-container">
         <!-- 加载状态 -->
         <div v-if="loading" class="file-loading">
-            <div class="loading-spinner"></div>
+            <Loading />
         </div>
 
         <!-- 真实预览图（仅图片） -->

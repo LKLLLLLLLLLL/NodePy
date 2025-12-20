@@ -223,9 +223,11 @@
     }
     const onUpdateInputPortType = (portTypeIdx: number, idx: number) => {
         props.data.param.input_ports[inputPorts.value[idx]!.name] = portType[portTypeIdx] as 'int' | 'float' | 'bool' | 'str' | 'Datetime'
+        inputPorts.value[idx]!.type = portType[portTypeIdx] as 'int' | 'float' | 'bool' | 'str' | 'Datetime'
     }
     const onUpdateOutputPortType = (portTypeIdx: number, idx: number) => {
         props.data.param.output_ports[outputPorts.value[idx]!.name] = portType[portTypeIdx] as 'int' | 'float' | 'bool' | 'str' | 'Datetime'
+        outputPorts.value[idx]!.type = portType[portTypeIdx] as 'int' | 'float' | 'bool' | 'str' | 'Datetime'
     }
 
 
