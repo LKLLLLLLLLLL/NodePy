@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from server.models.data import Data, Table
-from server.models.exception import NodeParameterError, NodeValidationError
+from server.models.exception import NodeValidationError
 from server.models.types import ColType
 
 

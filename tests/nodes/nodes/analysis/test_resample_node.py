@@ -1,10 +1,8 @@
 import pandas as pd
 import pytest
 
-from datetime import datetime
-
 from server.models.data import Data, Table
-from server.models.exception import NodeParameterError, NodeExecutionError, NodeValidationError
+from server.models.exception import NodeExecutionError, NodeParameterError, NodeValidationError
 from server.models.types import ColType
 
 
