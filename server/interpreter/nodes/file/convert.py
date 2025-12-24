@@ -269,11 +269,12 @@ class TextFromFileNode(BaseNode):
             elif file_format == "pdf":
                 from io import BytesIO
 
-                import PyPDF2
+                import pymupdf
 
-                reader = PyPDF2.PdfReader(BytesIO(file_content))
-                for page in reader.pages:
-                    extracted = page.extract_text()
+                # reader = PyPDF2.PdfReader(BytesIO(file_content))
+                doc = pymupdf.open(stream=file_content, filetype="pdf") # type: ignore
+                for page in doc.pages():
+                    extracted = page.get_text()
                     if extracted:
                         text += extracted + "\n"
                 text = text.strip()

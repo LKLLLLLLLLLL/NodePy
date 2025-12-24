@@ -113,13 +113,13 @@ class InterruptedError(BaseException):
     pass
 
 
-def timeout(seconds: float):
+def timeout[T](seconds: float):
     """
     A decorator to set a timeout for a function execution using SIGALRM.
     Compatible with existing SIGTERM-based revocation mechanism.
     """
-    def _decorator(func: Callable):
-        def _wrapper(*args, **kwargs) -> Any:
+    def _decorator(func: Callable[..., T]) -> Callable[..., T]:
+        def _wrapper(*args, **kwargs) -> T:
             def _timeout_handler(signum, frame):
                 raise TimeoutException(
                     f"Function execution timed out after {seconds} seconds."
@@ -141,14 +141,14 @@ def timeout(seconds: float):
     return _decorator
 
 
-def time_check(seconds: float, callback: Callable[[], bool]):
+def time_check[T](seconds: float, callback: Callable[[], bool]):
     """
     A decorator to periodically check a condition during function execution using SIGALRM.
     The callback is called every 'seconds' seconds.
     Compatible with existing SIGTERM-based revocation mechanism.
     """
-    def _decorator(func: Callable):
-        def _wrapper(*args, **kwargs) -> Any:
+    def _decorator(func: Callable[..., T]) -> Callable[..., T]:
+        def _wrapper(*args, **kwargs) -> T:
             result_container = {"result": None, "exception": None, "completed": False}
 
             def _check_handler(signum, frame):
@@ -205,14 +205,14 @@ def _process_wrapper(queue: Queue, func: Callable, args: tuple, kwargs: dict) ->
         queue.put({"status": "error", "error": e})
 
 
-def run_in_process(func: Callable):
+def run_in_process[T](func: Callable[..., T]) -> Callable[..., T]:
     """
     A decorator to run a function (usually a node's process method) in a separate process.
     This allows the main thread to remain responsive to signals (like SIGTERM for revocation)
     even if the function executes blocking C-extension code (e.g., numpy, scikit-learn) that holds the GIL.
     """
 
-    def _wrapper(*args, **kwargs) -> Any:
+    def _wrapper(*args, **kwargs) -> T:
         # This is safe on Linux/Docker
         ctx = billiard.context.ForkContext()
         queue = Queue(ctx=ctx)
