@@ -26,8 +26,8 @@ export const getProject = (vp: vueFlowProject): Project => {
             id: n.id,
             x: n.position.x,
             y: n.position.y,
-            width: n.dimensions.width,
-            height: n.dimensions.height,
+            width: n.type === 'TitleAnnotationNode' || n.type === 'TextAnnotationNode' ? n.dimensions.width : undefined,
+            height: n.type === 'TitleAnnotationNode' || n.type === 'TextAnnotationNode' ? n.dimensions.height : undefined,
             groupId: n.data.groupId
         }
     })

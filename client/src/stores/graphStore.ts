@@ -1378,7 +1378,7 @@ export const useGraphStore = defineStore('graph', () => {
     }
   }
 
-  const addCopiedNode = (type: string, position: {x: number, y: number}, param: any, is_virtual_node: boolean|undefined, width: number, height: number) => {
+  const addCopiedNode = (type: string, position: {x: number, y: number}, param: any, is_virtual_node: boolean|undefined, width: number|undefined, height: number|undefined) => {
     const addedNode: Nodetypes.BaseNode = {
       id: nextId(type),
       position,
@@ -1448,8 +1448,8 @@ export const useGraphStore = defineStore('graph', () => {
           },
           JSON.parse(JSON.stringify(nodeInfo.param)), // deep copy to avoid param binding
           nodeInfo.is_virtual_node,
-          nodeInfo.width,
-          nodeInfo.height
+          nodeInfo.type === 'TitleAnnotationNode' || nodeInfo.type === 'TextAnnotationNode' ? nodeInfo.width : undefined,
+          nodeInfo.type === 'TitleAnnotationNode' || nodeInfo.type === 'TextAnnotationNode' ? nodeInfo.height : undefined
         )
         if(newNode) {
           idMap.value[nodeInfo.id] = newNode.id
