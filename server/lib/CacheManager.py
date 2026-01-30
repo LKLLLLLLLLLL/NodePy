@@ -63,11 +63,11 @@ class CacheManager:
                 logger.info(f"[cache] hit_rate: {hit_rate:.2%}")
         
 
-    def get(self, node_type: str, params: dict[str, Any], inputs: dict[str, Data]) -> tuple[dict[str, Data], float | dict[str, float]] | None:
+    def get(self, node_type: str, params: dict[str, Any], inputs: dict[str, Data]) -> tuple[dict[str, Data], float, dict[str, Any] | None] | None:
         """
         Get cached result for a node with given parameters and inputs. 
         Return None if not found.
-        Return (outputs, running_time) if found.
+        Return (outputs, running_time, extra) if found.
         """
         if not USE_CACHE:
             return None
@@ -79,8 +79,8 @@ class CacheManager:
                 # Use pickle to deserialize efficiently
                 assert isinstance(cached_value, bytes)
                 cache_data = pickle.loads(cached_value)
-                outputs, running_time = cache_data
-                return outputs, running_time
+                outputs, running_time, extra = cache_data
+                return outputs, running_time, extra
             except Exception as e:
                 logger.warning(f"Failed to load cache for {cache_key}: {e}")
                 return None
@@ -88,7 +88,7 @@ class CacheManager:
         self._add_cache_miss_num()
         return None
 
-    def set(self, node_type: str, params: dict[str, Any], inputs: dict[str, Data], outputs: dict[str, Data], running_time: float | dict[str, float]) -> None:
+    def set(self, node_type: str, params: dict[str, Any], inputs: dict[str, Data], outputs: dict[str, Data], running_time: float, extra: dict[str, Any] | None = None) -> None:
         """
         Set cached result for a node with given parameters and inputs.
         Allow running time as dict for control structure nodes.
@@ -106,7 +106,7 @@ class CacheManager:
 
         # Directly pickle the outputs (dict[str, Data])
         # Data objects and Pandas DataFrames are picklable and much faster than JSON conversion
-        cache_value = (outputs, running_time)
+        cache_value = (outputs, running_time, extra)
         try:
             self.redis_client.set(cache_key, pickle.dumps(cache_value))
             self.redis_client.expire(cache_key, CACHE_TTL_SECONDS)

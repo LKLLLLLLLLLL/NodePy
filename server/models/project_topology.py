@@ -10,6 +10,9 @@ class TopoNode(BaseModel):
     type: str
     params: dict[str, Any] = {}
 
+    def to_dict(self) -> dict[str, Any]:
+        return self.model_dump()
+
 
 class TopoEdge(BaseModel):
     src: str
@@ -17,6 +20,8 @@ class TopoEdge(BaseModel):
     tar: str
     tar_port: str
 
+    def to_dict(self) -> dict[str, Any]:
+        return self.model_dump()
 
 class WorkflowTopology(BaseModel):
     """
