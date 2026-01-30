@@ -223,6 +223,42 @@ class ControlStructureManager:
             assert isinstance(node_id, str)
             yield node_id
 
+    def hash_control_structure(self, graph: nx.MultiDiGraph, begin_node_id: str) -> str:
+        """
+        Get the hash of the control structure by its begin node id.
+        For check if the control structure has changed.
+        This method will hash all body nodes parameters and topology.
+        """
+        assert self.control_structures is not None, "Control structures have not been analyzed yet."
+        # 1. find pair id by begin node id
+        pair_id: int | None = None
+        for id, struc in self.control_structures.items():
+            if struc.begin_node_id == begin_node_id:
+                pair_id = id
+                break
+        if pair_id is None:
+            raise ValueError(f"Begin node id {begin_node_id} not found in any control structure.")
+        
+        # 2. get topological order of body nodes
+        struc = self.control_structures[pair_id]
+        assert struc.body_node_ids is not None
+        body_subgraph = graph.subgraph(struc.body_node_ids)
+        body_exec_queue = list(nx.topological_sort(body_subgraph)) # type: ignore
+
+        # 3. collect parameters and topology
+        control_structure_info: dict[str, Any] = {}
+        for node_id in body_exec_queue:
+            node = graph.nodes[node_id]
+            control_structure_info[str(node_id)] = {
+                "type": node.get("type"),
+                "params": node.get("params"),
+                "in_edges": list(graph.in_edges(node_id, data=True)), # type: ignore
+                "out_edges": list(graph.out_edges(node_id, data=True)),
+            }
+        
+        # 4. hash the info
+        return safe_hash(control_structure_info)
+
 class ProjectInterpreter:
     """
     The class to interpret and execute a workflow topology.
@@ -483,7 +519,10 @@ class ProjectInterpreter:
             else:
                 try:
                     output_data, running_time = self._execute_single_node(
-                        node_id, input_data, callbefore
+                        node_id, 
+                        input_data, 
+                        callbefore,
+                        use_cache=True
                     )
                 # 3. call callafter
                 except Exception as e:
@@ -602,6 +641,7 @@ class ProjectInterpreter:
         node_id: str, 
         input_data: dict[str, Data],
         callbefore: Callable[[str], None], 
+        use_cache: bool
     ) -> tuple[dict[str, Data], float]:
         """
         Execute a single node by its id with given inputs.
@@ -613,11 +653,13 @@ class ProjectInterpreter:
         output_data: dict[str, Data]
         running_time: float
         # 1. search cache
-        cache_data = self._cache_manager.get(
-            node_type=self._node_map[node_id].type,
-            params=self._node_map[node_id].params,
-            inputs=input_data,
-        )    
+        cache_data = None
+        if use_cache:
+            cache_data = self._cache_manager.get(
+                node_type=self._node_map[node_id].type,
+                params=self._node_map[node_id].params,
+                inputs=input_data,
+            )    
         
         if cache_data is None:
             # 2. execute node if cache miss
@@ -639,9 +681,10 @@ class ProjectInterpreter:
 
             running_time = (time.perf_counter() - start_time) * 1000  # in ms
         else:
-            output_data, running_time = cache_data   
+            assert isinstance(cache_data[1], float), "Cached running time should be a float for single nodes."
+            output_data, running_time = cache_data # type: ignore
         # 3. store to CacheManager
-        if output_data is not None:
+        if output_data is not None and use_cache:
             self._cache_manager.set(
                 node_type=self._node_map[node_id].type,
                 params=self._node_map[node_id].params,
@@ -679,6 +722,24 @@ class ProjectInterpreter:
             for node_id in self._control_structure_manager.iter_control_structure(self._graph, begin_node_id):
                 callbefore(node_id)
                 running_times[node_id] = 0.0
+            # hash control structure
+            control_structure_hash = self._control_structure_manager.hash_control_structure(self._graph, begin_node_id)
+            # check cache
+            cache_data = self._cache_manager.get(
+                node_type=self._node_map[end_node_id].type,
+                params={"control_structure_hash": control_structure_hash}, # set control structure hash as params
+                inputs=inputs,
+            )
+            if cache_data is not None:
+                # cache hit
+                outputs, running_times = cache_data
+                assert isinstance(running_times, dict), "Cached running time should be a dict for control structures."
+                # call callafter for begin node and body nodes
+                callafter(begin_node_id, "success", {}, running_times[begin_node_id])
+                for node_id in self._control_structure_manager.iter_control_structure(self._graph, begin_node_id):
+                    callafter(node_id, "success", {}, running_times[node_id])
+                return outputs, running_times[begin_node_id]
+            # cache miss, execute loop
             for input_datas in begin_node.iter_loop(inputs):
                 res_cache: dict[tuple[str, str], Data] = {} # local cache for exec result in this iteration: (node_id, port) -> Data
 
@@ -702,7 +763,10 @@ class ProjectInterpreter:
                     # 2. execute node
                     try:
                         output_data, running_time = self._execute_single_node(
-                            node_id, input_data, lambda nid: None
+                            node_id, 
+                            input_data, 
+                            lambda nid: None,
+                            use_cache=False,
                         ) # callbefore is a no-op for body nodes
                     # 3. call callafter
                     except Exception as e:
@@ -736,11 +800,20 @@ class ProjectInterpreter:
                 end_node.end_iter_loop(end_node_inputs)
             # combine outputs
             outputs = end_node.finalize_loop()
-            running_time = (time.perf_counter() - begin_time) * 1000  # in ms
+            total_running_time = (time.perf_counter() - begin_time) * 1000  # in ms
+            running_times[begin_node_id] = total_running_time 
+            # cache outputs for end node
+            self._cache_manager.set(
+                node_type=self._node_map[end_node_id].type,
+                params={"control_structure_hash": control_structure_hash}, # set control structure hash as params
+                inputs=inputs,
+                outputs=outputs,
+                running_time=running_times,
+            )
             # call callback for begin node and body nodes
-            callafter(begin_node_id, "success", {}, running_time)
+            callafter(begin_node_id, "success", {}, total_running_time)
             for node_id in self._control_structure_manager.iter_control_structure(self._graph, begin_node_id):
                 callafter(node_id, "success", {}, running_times[node_id])
-            return outputs, running_time # execute method will call callafter for end node
+            return outputs, total_running_time # execute method will call callafter for end node
         else:
             assert False, f"Unknown control structure begin node type {begin_node.type}."

@@ -267,6 +267,7 @@ class TextFromFileNode(BaseNode):
             if file_format == "txt":
                 text = file_content.decode("utf-8", errors="replace")
             elif file_format == "pdf":
+
                 from io import BytesIO
 
                 import pymupdf

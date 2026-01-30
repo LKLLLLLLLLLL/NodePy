@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi import File as fastapiFile
 from fastapi.responses import StreamingResponse
 from loguru import logger
-from pydantic import BaseModel
 
 from server.lib.AuthUtils import get_current_user
 from server.lib.FileManager import FileManager
@@ -155,10 +154,10 @@ async def get_file_content(
         logger.exception(f"Error retrieving file content for key {key}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-class DeleteResponse(BaseModel):
-    status: str
-
 # The delete file api is disabled for now, as it may cause inconsistent state if the file is still referenced by projects.
+
+# class DeleteResponse(BaseModel):
+#     status: str
 
 # @router.delete(
 #     "/{key}",

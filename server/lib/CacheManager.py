@@ -63,8 +63,12 @@ class CacheManager:
                 logger.info(f"[cache] hit_rate: {hit_rate:.2%}")
         
 
-    def get(self, node_type: str, params: dict[str, Any], inputs: dict[str, Data]) -> tuple[dict[str, Data], float] | None:
-        """Get cached result for a node with given parameters and inputs. Return None if not found."""
+    def get(self, node_type: str, params: dict[str, Any], inputs: dict[str, Data]) -> tuple[dict[str, Data], float | dict[str, float]] | None:
+        """
+        Get cached result for a node with given parameters and inputs. 
+        Return None if not found.
+        Return (outputs, running_time) if found.
+        """
         if not USE_CACHE:
             return None
         cache_key = CacheManager._get_cache_key(node_type, params, inputs)
@@ -84,8 +88,11 @@ class CacheManager:
         self._add_cache_miss_num()
         return None
 
-    def set(self, node_type: str, params: dict[str, Any], inputs: dict[str, Data], outputs: dict[str, Data], running_time: float) -> None:
-        """Set cached result for a node with given parameters and inputs."""
+    def set(self, node_type: str, params: dict[str, Any], inputs: dict[str, Data], outputs: dict[str, Data], running_time: float | dict[str, float]) -> None:
+        """
+        Set cached result for a node with given parameters and inputs.
+        Allow running time as dict for control structure nodes.
+        """
         if not USE_CACHE:
             return
 
