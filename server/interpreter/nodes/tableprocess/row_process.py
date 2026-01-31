@@ -576,6 +576,10 @@ class TableSliceNode(BaseNode):
             OutPort(
                 name="sliced_table",
                 description="Output table after slicing the input table.",
+            ),
+            OutPort(
+                name="remaining_table",
+                description="Output table containing the rows not included in the slice.",
             )
         ]
 
@@ -588,15 +592,25 @@ class TableSliceNode(BaseNode):
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
         table_data = input["table"]
         assert isinstance(table_data.payload, Table)
-        df = table_data.payload.df
+        df = table_data.payload.df.copy()
 
         sliced_df = df.iloc[self.begin:self.end:self.step]
-
         slice_data = Data(
             payload=Table(
                 df=sliced_df,
                 col_types=table_data.payload.col_types
             )
-        )    
+        )  
+        
+        remaining_df = df.drop(sliced_df.index)
+        remaining_data = Data(
+            payload=Table(
+                df=remaining_df,
+                col_types=table_data.payload.col_types
+            )
+        )
 
-        return {"sliced_table": slice_data}
+        return {
+            "sliced_table": slice_data,
+            "remaining_table": remaining_data,
+        }

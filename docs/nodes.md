@@ -850,6 +850,7 @@ K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 
 **输出：**
 - sliced_table: 切片后的表格，类型为Table。
+- remaining_table: 剩余的表格，类型为Table。
 
 #### 5.12 SelectColNode
 表格列选择节点，根据指定的列名列表从表格中选择对应的列。
