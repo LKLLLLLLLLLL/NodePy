@@ -27,6 +27,8 @@ class UnpackNode(BaseNode):
     A node to unpack a row into multiple columns of primitive values.
     """
     cols: list[str]
+    
+    _col_types: Dict[str, ColType] | None = PrivateAttr(default=None)
 
     @override
     def validate_parameters(self) -> None:
@@ -72,10 +74,11 @@ class UnpackNode(BaseNode):
 
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
-        input_schema = input_schemas["row"]
+        input_schema = input_schemas["row"].model_copy()
         assert input_schema.tab is not None
         output_schemas: Dict[str, Schema] = {}
-        output_schemas["unpacked_row"] = input_schema
+        
+        # add schemas for unpacked columns
         for col in self.cols:
             if col not in input_schema.tab.col_types:
                 raise NodeValidationError(
@@ -85,7 +88,16 @@ class UnpackNode(BaseNode):
                 )
             type_of_col = input_schema.tab.col_types[col]
             output_schemas[col] = Schema.from_coltype(type_of_col)
-
+        remained_schema = deepcopy(input_schema)
+        assert remained_schema.tab is not None
+        col_types = remained_schema.tab.col_types
+        # remove unpacked columns from the row schema
+        for col in self.cols:
+            if col in col_types:
+                del col_types[col]
+        remained_schema.tab.col_types = col_types
+        self._col_types = deepcopy(remained_schema.tab.col_types)
+        output_schemas["unpacked_row"] = remained_schema
         return output_schemas
 
     @override
@@ -98,8 +110,7 @@ class UnpackNode(BaseNode):
                 node_id=self.id,
                 err_msg=f"Input row must contain exactly one row, got {len(df)} rows.",
             )
-        output: Dict[str, Data] = {}
-        output["unpacked_row"] = input_row
+        output: Dict[str, Data] = {}   
         for col in self.cols:
             if col not in df.columns:
                 raise NodeExecutionError(
@@ -109,6 +120,14 @@ class UnpackNode(BaseNode):
             value = df.iloc[0][col]
             col_value = Data(payload=value)
             output[col] = col_value
+        remaind_df = df.copy().drop(columns=self.cols)
+        assert self._col_types is not None
+        output["unpacked_row"] = Data(
+            payload=Table(
+                df=remaind_df,
+                col_types=self._col_types,
+            )
+        )
         return output
 
     @override
