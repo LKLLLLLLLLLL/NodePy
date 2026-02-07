@@ -1008,10 +1008,11 @@ K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 **参数：**
 - op: 运算类型，类型为str，取值为"ADD", "SUB"。
 - unit: 时间单位，用来指定输入float/int的单位，类型为str，取值为"DAYS", "HOURS", "MINUTES", "SECONDS"。
+- value: 数值操作数，类型为int或float，可选，如果未提供则从输入端口获取。
 
 **输入：**
 - datetime: 日期时间操作数，类型为Datetime。
-- value: 数值操作数，类型为int或float。
+- value: 数值操作数，类型为int或float（可选），如果不为空，则优先级高于参数中的value。
 
 **输出：**
 - result: 运算结果，类型为Datetime。

@@ -22,6 +22,7 @@ class DatetimeComputeNode(BaseNode):
     """
     op: Literal["ADD", "SUB"]
     unit: Literal["DAYS", "HOURS", "MINUTES", "SECONDS"]
+    value: float | int | None = None
 
     @override
     def validate_parameters(self) -> None:
@@ -45,7 +46,7 @@ class DatetimeComputeNode(BaseNode):
             InPort(
                 name="value", 
                 description="The float value to compute with datetime",
-                optional=False,
+                optional=True,
                 accept=Pattern(types={Schema.Type.FLOAT, Schema.Type.INT})
             ),
         ], [
@@ -54,12 +55,25 @@ class DatetimeComputeNode(BaseNode):
 
     @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
+        # check if 'value' input schema is provided when self.value is None
+        if self.value is None and "value" not in input_schemas:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="value",
+                err_msg="Either parameter 'value' must be set or 'value' input schema must be provided."
+            )
         return {"result": Schema(type=Schema.Type.DATETIME)}
 
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         datetime_value = input["datetime"].payload
-        value = input["value"].payload
+        value: int| float
+        if "value" in input:
+            assert isinstance(input["value"].payload, (int, float))
+            value = input["value"].payload
+        else:
+            assert self.value is not None
+            value = self.value
 
         assert isinstance(datetime_value, datetime)
         assert isinstance(value, (int, float))
