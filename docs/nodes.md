@@ -346,6 +346,24 @@ K线数据节点，可以输出指定时间范围内的金融K线数据表格。
 - col1_choices: 列名列表，类型为List[str]，用于在UI中为col1参数提供可选值。
 - col2_choices: 列名列表，类型为List[str]，用于在UI中为col2参数提供可选值。
 
+#### 2.13 ColWithPrimCompareNode
+列与常量比较节点，支持对表格中的指定列与一个Prim类型(int, float)的输入进行`EQ`, `NEQ`, `LT`, `LTE`, `GT`, `GTE`六种比较运算，将结果存储在新的表格列中。
+
+**参数：**
+- op: 运算类型，类型为str，取值为"EQ", "NEQ", "LT", "LTE", "GT", "GTE"。
+- col: 要操作的表格列名，类型为str，该列必须为Prim类型(int, float)。
+- const: 要比较的常量值，类型为int, float，必须与列的数据类型一致。
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，包含新增的结果列。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
 #### 2.13 ToStringNode
 节点将输入的任意类型转换为字符串类型。
 
