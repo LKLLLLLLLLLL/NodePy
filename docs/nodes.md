@@ -419,12 +419,30 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 
 **参数：**
 - col: 要转换的表格列名，类型为str，该列可以是int, float, bool类型。
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
 
 **输入：**
 - table: 输入的表格，类型为Table。
 
 **输出：**
 - table: 输出的表格，类型为Table，指定列的数据类型已转换为str类型。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
+#### 2.19 ColToIntNode
+将指定列的数据类型转换为整数类型。
+
+**参数：**
+- col: 要转换的表格列名，类型为str，该列可以是float, bool或str类型。对于str类型，字符串必须能转换为float或是int格式。
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+- method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，指定列的数据类型已转换为int类型。
 
 **hint：**
 - col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
