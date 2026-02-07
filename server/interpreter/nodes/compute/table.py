@@ -37,6 +37,7 @@ class ColWithNumberBinOpNode(BaseNode):
     op: Literal["ADD", "COL_SUB_NUM", "NUM_SUB_COL", "MUL", "COL_DIV_NUM", "NUM_DIV_COL", "COL_POW_NUM", "NUM_POW_COL"]
     col: str # the column to operate on
     result_col: str | None = None  # if None, use default result col name
+    num: float | int | None = None  # if None, get from input port
 
     _col_types: dict[str, ColType] | None = PrivateAttr(None)
 
@@ -80,7 +81,7 @@ class ColWithNumberBinOpNode(BaseNode):
     def port_def(self) -> tuple[list[InPort], list[OutPort]]:
         return [
             InPort(name='table', description='Input table', accept=Pattern(types={Schema.Type.TABLE}, table_columns={self.col: {ColType.INT, ColType.FLOAT}}), optional=False),
-            InPort(name='num', description='Input primitive number', accept=Pattern(types={Schema.Type.INT, Schema.Type.FLOAT}), optional=False)
+            InPort(name='num', description='Input primitive number', accept=Pattern(types={Schema.Type.INT, Schema.Type.FLOAT}), optional=True)
         ], [
             OutPort(name='table', description='Output table with computed column')
         ]
@@ -101,14 +102,28 @@ class ColWithNumberBinOpNode(BaseNode):
         # 2. check if the table col and the num is in same type
         col_type = in_tab.col_types.get(self.col)
         assert col_type is not None
-        num_type = input_schemas['num']
-        if col_type != num_type:
-            raise NodeValidationError(
-                node_id=self.id,
-                err_inputs=['table', 'num'],
-                err_msgs=["",
-                        f"Table column '{self.col}' type '{col_type}' does not match primitive number type '{num_type}'."]
-            )
+        if 'num' in input_schemas:
+            num_type = input_schemas['num']
+            if col_type != num_type:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_inputs=['table', 'num'],
+                    err_msgs=["",
+                            f"Table column '{self.col}' type '{col_type}' does not match primitive number type '{num_type}'."]
+                )
+        else:
+            if self.num is None:
+                raise NodeParameterError(
+                    node_id=self.id,
+                    err_param_key="num",
+                    err_msg="Either parameter 'num' must be set or 'num' input schema must be provided."
+                )
+            if isinstance(self.num, int) and col_type != ColType.INT and col_type != ColType.FLOAT:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input='table',
+                    err_msg=f"Table column '{self.col}' type '{col_type}' does not match primitive number type 'INT'."
+                )
         # 3. build output schema
         res_col_type = None
         if self.op in {"ADD", "COL_SUB_NUM", "NUM_SUB_COL", "MUL"}:
@@ -125,9 +140,14 @@ class ColWithNumberBinOpNode(BaseNode):
     @override
     def process(self, input: dict[str, Data]) -> dict[str, Data]:
         table = input['table'].payload
-        num = input['num'].payload
+        num: int | float
+        if 'num' in input:
+            assert isinstance(input['num'].payload, (int, float))
+            num = input['num'].payload
+        else:
+            assert self.num is not None
+            num = self.num
         assert isinstance(table, Table)
-        assert isinstance(num, (int, float))
         assert self.result_col is not None
 
         df = table.df.copy()
