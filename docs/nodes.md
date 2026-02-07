@@ -447,6 +447,22 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **hint：**
 - col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
 
+#### 2.20 ColToFloatNode
+将指定列的数据类型转换为浮点数类型。
+
+**参数：**
+- col: 要转换的表格列名，类型为str，该列可以是int, bool或str类型。对于str类型，字符串必须能转换为float格式。
+- result_col: 结果表格列名，类型为str，可以为空，表示使用默认结果列名。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，指定列的数据类型已转换为float类型。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
 ### 3. 可视化节点(visualize)
 #### 3.1 QuickPlotNode
 快速绘图节点，支持对表格中的多个指定列进行快速可视化操作，每个列克独立指定为支持柱状图(bar)、折线图(line)、散点图(scatter)、面积图(area)四种图形类型。
