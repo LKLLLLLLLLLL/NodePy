@@ -1025,7 +1025,7 @@ class ColWithPrimCompareNode(BaseNode):
     
     op: Literal["EQ", "NEQ", "GT", "LT", "GTE", "LTE"]
     col: str  # the column to compare
-    const: int | float  # the primitive value to compare with
+    const: int | float | None = None  # the primitive value to compare with
     result_col: str | None = None  # if None, use default result col name
 
     _col_types: dict[str, ColType] | None = PrivateAttr(None)
@@ -1069,25 +1069,55 @@ class ColWithPrimCompareNode(BaseNode):
                 accept=Pattern(
                     types={Schema.Type.TABLE},
                     table_columns={self.col: {ColType.INT, ColType.FLOAT}}),
-                optional=False)
+                optional=False),
+            InPort(
+                name='const',
+                description='Primitive value to compare with',
+                accept=Pattern(
+                    types={Schema.Type.INT, Schema.Type.FLOAT}
+                ),
+                optional=True
+            )
         ], [
             OutPort(name='table', description='Output table with comparison result column')
         ]
 
     @override
     def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
-        # 1. check if const has same type with column
         assert input_schemas['table'].tab is not None
         in_tab = input_schemas['table'].tab
         col_type = in_tab.col_types.get(self.col)
         assert col_type is not None
         
-        if (isinstance(self.const, int) and col_type != ColType.INT) or (isinstance(self.const, float) and col_type != ColType.FLOAT):
-            raise NodeValidationError(
-                node_id=self.id,
-                err_input='table',
-                err_msg=f"Table column '{self.col}' type '{col_type}' does not match constant type '{type(self.const).__name__}'."
-            )
+        # 1. check if const has same type with column
+        if input_schemas.get('const') is None:
+            if self.const is None:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input='const',
+                    err_msg="Constant value must be provided either as input or parameter."
+                )
+            else:
+                if (isinstance(self.const, int) and col_type != ColType.INT) or (isinstance(self.const, float) and col_type != ColType.FLOAT):
+                    raise NodeValidationError(
+                        node_id=self.id,
+                        err_input='const',
+                        err_msg=f"Table column '{self.col}' type '{col_type}' does not match constant type '{type(self.const).__name__}'."
+                    )
+        else:
+            const_schema = input_schemas['const']
+            if const_schema.type == Schema.Type.INT and col_type != ColType.INT:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input='const',
+                    err_msg=f"Table column '{self.col}' type '{col_type}' does not match constant type 'int'."
+                )
+            if const_schema.type == Schema.Type.FLOAT and col_type != ColType.FLOAT:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input='table',
+                    err_msg=f"Table column '{self.col}' type '{col_type}' does not match constant type 'float'."
+                )
         # 2. check if new column name is exists
         assert self.result_col is not None
         if not in_tab.validate_new_col_name(self.result_col):
@@ -1111,21 +1141,29 @@ class ColWithPrimCompareNode(BaseNode):
         assert isinstance(table, Table)
         assert self.result_col is not None
 
+        const: int | float
+        if 'const' in input:
+            assert isinstance(input['const'].payload, (int, float))
+            const = input['const'].payload
+        else:
+            assert self.const is not None
+            const = self.const
+
         df = table.df.copy()
         series = df[self.col]
 
         if self.op == "EQ":
-            df[self.result_col] = series == self.const
+            df[self.result_col] = series == const
         elif self.op == "NEQ":
-            df[self.result_col] = series != self.const
+            df[self.result_col] = series != const
         elif self.op == "GT":
-            df[self.result_col] = series > self.const
+            df[self.result_col] = series > const
         elif self.op == "LT":
-            df[self.result_col] = series < self.const
+            df[self.result_col] = series < const
         elif self.op == "GTE":
-            df[self.result_col] = series >= self.const
+            df[self.result_col] = series >= const
         elif self.op == "LTE":
-            df[self.result_col] = series <= self.const
+            df[self.result_col] = series <= const
         else:
             raise NodeExecutionError(
                 node_id=self.id,
