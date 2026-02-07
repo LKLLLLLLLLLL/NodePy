@@ -705,10 +705,11 @@ K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 **参数：**
 - col_name: 列名，类型为str，可以为空，如果为空则生成默认列名。
 - col_type: 列的数据类型，类型为str，取值为"int", "float", "bool", "str", "Datetime"。
+- const_value: 列的常量值，类型根据col_type而定，如果为空则表示使用输入端口来提供常量值。
 
 **输入：**
 - table: 输入的表格，类型为Table。
-- const_value: 列的常量值，类型根据col_type而定。
+- const_value: 列的常量值，类型根据col_type而定，（可选），如果不为空，则优先级高于参数中的const_value。
 
 **输出：**
 - table: 输出的表格，类型为Table，包含新增的常量列。

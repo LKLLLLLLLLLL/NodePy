@@ -28,6 +28,7 @@ class InsertConstColNode(BaseNode):
     
     col_name: str | None
     col_type: ColType
+    const_value: bool | int | float | str | datetime | None = None
 
     @override
     def validate_parameters(self) -> None:
@@ -80,14 +81,53 @@ class InsertConstColNode(BaseNode):
 
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
-        const_value_schema = input_schemas["const_value"]
-        # Schema can be compared to ColType via Schema.__eq__ implementation
-        if const_value_schema != self.col_type:
-            raise NodeValidationError(
-                node_id=self.id,
-                err_input="const_value",
-                err_msg="Input const_value schema type does not match specified col_type.",
-            )
+        if "const_value" in input_schemas:
+            const_value_schema = input_schemas["const_value"]
+            # Schema can be compared to ColType via Schema.__eq__ implementation
+            if const_value_schema != self.col_type:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="const_value",
+                    err_msg="Input const_value schema type does not match specified col_type.",
+                )
+        else:
+            # if const_value input is not provided, ensure the parameter const_value is set
+            if self.const_value is None:
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="const_value",
+                    err_msg="No const_value input or parameter provided.",
+                )
+            if isinstance(self.const_value, bool) and self.col_type != ColType("bool"):
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="const_value",
+                    err_msg="Parameter const_value type does not match specified col_type.",
+                )
+            elif isinstance(self.const_value, int) and self.col_type != ColType("int"):
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="const_value",
+                    err_msg="Parameter const_value type does not match specified col_type.",
+                )
+            elif isinstance(self.const_value, float) and self.col_type != ColType("float"):
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="const_value",
+                    err_msg="Parameter const_value type does not match specified col_type.",
+                )
+            elif isinstance(self.const_value, str) and self.col_type != ColType("str"):
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="const_value",
+                    err_msg="Parameter const_value type does not match specified col_type.",
+                )
+            elif isinstance(self.const_value, datetime) and self.col_type != ColType("Datetime"):
+                raise NodeValidationError(
+                    node_id=self.id,
+                    err_input="const_value",
+                    err_msg="Parameter const_value type does not match specified col_type.",
+                )
         input_table_schema = input_schemas["table"]
         assert self.col_name is not None
         return {
@@ -102,8 +142,14 @@ class InsertConstColNode(BaseNode):
         input_table = input_table_data.payload
         assert isinstance(input_table, Table)
 
-        const_value_data = input["const_value"]
-        const_value = const_value_data.payload
+        const_value: bool | int | float | str | datetime
+        if "const_value" in input:
+            const_value_data = input["const_value"]
+            assert isinstance(const_value_data.payload, (bool, int, float, str, datetime))
+            const_value = const_value_data.payload
+        else:
+            assert self.const_value is not None
+            const_value = self.const_value
 
         # create a Series with the constant value
         num_rows = len(input_table.df)
