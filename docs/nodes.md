@@ -366,7 +366,7 @@ K线数据节点，可以输出指定时间范围内的金融K线数据表格。
 **hint：**
 - col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
 
-#### 2.13 ToStringNode
+#### 2.14 ToStringNode
 节点将输入的任意类型转换为字符串类型。
 
 **参数：**
@@ -378,7 +378,7 @@ K线数据节点，可以输出指定时间范围内的金融K线数据表格。
 **输出：**
 - output: 输出的字符串，类型为str。
 
-#### 2.14 ToIntNode
+#### 2.15 ToIntNode
 节点将输入的任意类型转换为整数类型。
 
 **参数：**
@@ -390,7 +390,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - output: 输出的整数，类型为int。
 
-#### 2.15 ToFloatNode
+#### 2.16 ToFloatNode
 节点将输入的任意类型转换为浮点数类型。
 
 **参数：**
@@ -402,7 +402,7 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - output: 输出的浮点数，类型为float。
 
-#### 2.16 ToBoolNode
+#### 2.17 ToBoolNode
 节点将输入的任意类型转换为布尔类型。
 
 **参数：**
@@ -414,6 +414,20 @@ method: 转换方法，类型为str，取值为"FLOOR", "CEIL", "ROUND"。
 **输出：**
 - output: 输出的布尔值，类型为bool。
 
+#### 2.18 ColToStringNode
+将指定列的数据类型转换为字符串类型。
+
+**参数：**
+- col: 要转换的表格列名，类型为str，该列可以是int, float, bool类型。
+
+**输入：**
+- table: 输入的表格，类型为Table。
+
+**输出：**
+- table: 输出的表格，类型为Table，指定列的数据类型已转换为str类型。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
 
 ### 3. 可视化节点(visualize)
 #### 3.1 QuickPlotNode

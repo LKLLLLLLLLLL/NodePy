@@ -1,12 +1,15 @@
 import math
-from typing import Literal, override
+from typing import Any, Literal, override
 
-from server.models.data import Data
+from pydantic import PrivateAttr
+
+from server.models.data import Data, Table
 from server.models.exception import (
     NodeExecutionError,
     NodeParameterError,
 )
-from server.models.schema import Pattern, Schema
+from server.models.schema import Pattern, Schema, check_no_illegal_cols, generate_default_col_name
+from server.models.types import ColType
 
 from ..base_node import BaseNode, InPort, OutPort, register_node
 
@@ -274,3 +277,100 @@ class ToBoolNode(BaseNode):
                 err_msg=f"Unsupported input type '{type(input_data)}' for ToBoolNode."
             )
         return {'output': Data(payload=output)}
+
+@register_node()
+class ColToStringNode(BaseNode):
+    """
+    Convert input column data to string type.
+    """
+    col: str
+    result_col: str | None = None
+
+    _col_types: dict[str, ColType] | None = PrivateAttr(default=None)
+    @override
+    def validate_parameters(self) -> None:
+        if not self.type == "ColToStringNode":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="type",
+                err_msg="Type must be 'ColToStringNode'",
+            )
+        if self.col.strip() == "":
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="col",
+                err_msg="Column name 'col' must be a non-empty string.",
+            )
+        if self.result_col is None or self.result_col.strip() == "":
+            self.result_col = generate_default_col_name(self.id, "to_string")
+        if self.result_col == self.col:
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="result_col",
+                err_msg="Result column name 'result_col' must be different from input column name 'col'.",
+            )
+        if not check_no_illegal_cols([self.result_col]):
+            raise NodeParameterError(
+                node_id=self.id,
+                err_param_key="result_col",
+                err_msg=f"Result column name '{self.result_col}' contains illegal characters.",
+            )
+        return
+
+    @override
+    def port_def(self) -> tuple[list[InPort], list[OutPort]]:
+        return [
+            InPort(
+                name="table",
+                description="Input column data to be converted to string type.",
+                optional=False,
+                accept=Pattern(
+                    types={Schema.Type.TABLE},
+                    table_columns={
+                        self.col: {ColType.BOOL, ColType.INT, ColType.FLOAT}
+                    }
+                )
+            )
+        ], [
+            OutPort(
+                name='table',
+                description='Output column data converted to string type.',
+            )
+        ]
+    
+    @override
+    def infer_output_schemas(self, input_schemas: dict[str, Schema]) -> dict[str, Schema]:
+        input_schema = input_schemas["table"]
+        assert self.result_col is not None
+        output_schema = input_schema.append_col(self.result_col, ColType.STR)
+        
+        assert output_schema.tab is not None
+        self._col_types = output_schema.tab.col_types.copy()
+        
+        return {'table': output_schema}
+
+    @override
+    def process(self, input: dict[str, Data]) -> dict[str, Data]:
+        assert isinstance(input["table"].payload, Table)
+        table: Table = input['table'].payload
+        assert self.result_col is not None
+        assert self._col_types is not None
+
+        df = table.df.copy()
+        series = df[self.col]
+        df[self.result_col] = series.astype(str)
+
+        new_table = Table(df=df, col_types=self._col_types)
+        return {'table': Data(payload=new_table)}
+
+    @override
+    @classmethod
+    def hint(cls, input_schemas: dict[str, Schema], current_params: dict) -> dict[str, Any]:
+        hint = {}
+        if 'table' in input_schemas:
+            table_schema = input_schemas['table']
+            if table_schema.tab is not None:
+                for col, col_type in table_schema.tab.col_types.items():
+                    if col_type in {ColType.BOOL, ColType.INT, ColType.FLOAT}:
+                        hint.setdefault('col_choices', []).append(col)
+        return hint
