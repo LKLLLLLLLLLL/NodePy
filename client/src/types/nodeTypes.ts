@@ -303,6 +303,20 @@ export interface ColCompareNode extends BaseNode<ColCompareNodeData>{
 }
 
 
+export interface ColWithPrimCompareNodeParam {
+    op: typeof CmpOpList[number],
+    col: string,
+    const: number | null,
+    result_col: string,
+}
+export type ColWithPrimCompareNodeData = BaseData & {
+    param: ColWithPrimCompareNodeParam
+}
+export interface ColWithPrimCompareNode extends BaseNode<ColWithPrimCompareNodeData>{
+    type: 'ColWithPrimCompareNode'
+}
+
+
 export interface ToStringNode extends BaseNode {
     type: 'ToStringNode'
 }

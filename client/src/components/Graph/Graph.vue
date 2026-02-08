@@ -35,6 +35,7 @@ import BoolColUnaryOpNode from '../nodes/compute/BoolColUnaryOpNode.vue'
 import NumberColWithColBinOpNode from '../nodes/compute/NumberColWithColBinOpNode.vue'
 import BoolColWithColBinOpNode from '../nodes/compute/BoolColWithColBinOpNode.vue'
 import ColCompareNode from '../nodes/compute/ColCompareNode.vue'
+import ColWithPrimCompareNode from '../nodes/compute/ColWithPrimCompareNode.vue'
 import ToStringNode from '../nodes/compute/ToStringNode.vue'
 import ToIntNode from '../nodes/compute/ToIntNode.vue'
 import ToFloatNode from '../nodes/compute/ToFloatNode.vue'
@@ -360,6 +361,7 @@ const nodeColor = (node: BaseNode) => {
     case 'NumberColWithColBinOpNode':
     case 'BoolColWithColBinOpNode':
     case 'ColCompareNode':
+    case 'ColWithPrimCompareNode':
     case 'ToStringNode':
     case 'ToIntNode':
     case 'ToFloatNode':
@@ -624,6 +626,10 @@ const editableStyle = computed(() => graphStore.project.editable ? 'auto' : 'non
 
         <template #node-ColCompareNode="ColCompareNodeProps">
           <ColCompareNode v-bind="ColCompareNodeProps"/>
+        </template>
+        
+        <template #node-ColWithPrimCompareNode="ColWithPrimCompareNodeProps">
+          <ColWithPrimCompareNode v-bind="ColWithPrimCompareNodeProps"/>
         </template>
 
         <template #node-ToStringNode="ToStringNodeProps">

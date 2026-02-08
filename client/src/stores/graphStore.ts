@@ -344,6 +344,22 @@ export const useGraphStore = defineStore('graph', () => {
         }
         addNodes(addedColCompareNode)
         break
+      case 'ColWithPrimCompareNode':
+        const addedColWithPrimCompareNode: Nodetypes.ColWithPrimCompareNode = {
+          id,
+          position,
+          type: 'ColWithPrimCompareNode',
+          data: {
+            param: {
+              op: 'EQ',
+              col: '',
+              const: 0,
+              result_col: ''
+            }
+          }
+        }
+        addNodes(addedColWithPrimCompareNode)
+        break
       case 'ToStringNode':
         const addedToStringNode: Nodetypes.ToStringNode = {
           id,

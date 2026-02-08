@@ -96,6 +96,10 @@ export const nodeMenuItems: MenuNode[] = [
                 value: 'ColCompareNode'
             },
             {
+                label: '列与常量比较',
+                value: 'ColWithPrimCompareNode'
+            },
+            {
                 label: '转为字符串',
                 value: 'ToStringNode'
             },
