@@ -56,9 +56,15 @@
             </div>
             <div class="output-sliced_table port">
                 <div class="output-port-description">
-                    表格输出
+                    切片表格输出
                 </div>
-                <Handle id="sliced_table" type="source" :position="Position.Right" :class="[`${schema_type}-handle-color`, {'node-errhandle': sliced_tableHasErr}]"/>
+                <Handle id="sliced_table" type="source" :position="Position.Right" :class="[`${sliced_table_type}-handle-color`, {'node-errhandle': sliced_tableHasErr}]"/>
+            </div>
+            <div class="output-remaining_table port">
+                <div class="output-port-description">
+                    剩余表格输出
+                </div>
+                <Handle id="remaining_table" type="source" :position="Position.Right" :class="[`${remaining_table_type}-handle-color`, {'node-errhandle': remaining_tableHasErr}]"/>
             </div>
         </div>
         <ErrorMsg :err-msg="errMsg"/>
@@ -88,8 +94,10 @@
     const step = ref(props.data.param.step)
     const stepDisabled = computed(() => hasInputEdge(props.id, 'step'))
     const table_type = computed(() => getInputType(props.id, 'table'))
-    const schema_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['sliced_table']?.type || 'default')
+    const sliced_table_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['sliced_table']?.type || 'default')
+    const remaining_table_type = computed(():server__models__schema__Schema__Type|'default' => props.data.schema_out?.['remaining_table']?.type || 'default')
     const sliced_tableHasErr = computed(() => handleOutputError(props.id, 'sliced_table'))
+    const remaining_tableHasErr = computed(() => handleOutputError(props.id, 'remaining_table'))
     const errMsg = ref<string[]>([])
     const beginHasErr = ref({
         id: 'begin',
@@ -145,6 +153,9 @@
             }
             .begin, .end, .step {
                 padding: 0 $node-padding-hor;
+                margin-bottom: $node-margin;
+            }
+            .output-sliced_table {
                 margin-bottom: $node-margin;
             }
         }
