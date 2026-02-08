@@ -113,11 +113,11 @@
     const opUi = ['等于', '不等于', '小于', '小于等于', '大于', '大于等于']
     const defaultSelectedOP = op.indexOf(props.data.param.op)
     const colHint = computed(() => {
-        if(props.data.hint?.col1_choices?.length === 0) return ['']
-        return props.data.hint?.col1_choices || ['']
+        if(props.data.hint?.col_choices?.length === 0) return ['']
+        return props.data.hint?.col_choices || ['']
     })
-    const col1 = ref(props.data.param.col)   //  used for defaultSelectedCol
-    const defaultSelectedCol = computed(() => colHint.value.indexOf(col1.value))
+    const col = ref(props.data.param.col)   //  used for defaultSelectedCol
+    const defaultSelectedCol = computed(() => colHint.value.indexOf(col.value))
     const result_col = ref(props.data.param.result_col)
     const constValue = ref(props.data.param.const)
     const constDisabled = computed(() => hasInputEdge(props.id, 'const'))
@@ -162,7 +162,7 @@
 
     const clearSelectCol = (resolve: any) => {
         props.data.param.col = ''
-        col1.value = props.data.param.col
+        col.value = props.data.param.col
         resolve()
     }
 
