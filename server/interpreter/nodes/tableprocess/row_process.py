@@ -586,7 +586,8 @@ class TableSliceNode(BaseNode):
     @override
     def infer_output_schemas(self, input_schemas: Dict[str, Schema]) -> Dict[str, Schema]:
         table_schema = input_schemas["table"]
-        return {"sliced_table": table_schema}
+        remaind_schema = input_schemas['table']
+        return {"sliced_table": table_schema, "remaining_table": remaind_schema}
 
     @override
     def process(self, input: Dict[str, Data]) -> Dict[str, Data]:
