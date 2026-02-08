@@ -1038,6 +1038,7 @@ class ColCompareNode(BaseNode):
                     hint['col2_choices'].append(col_name)
         return hint
 
+@register_node()
 class ColWithPrimCompareNode(BaseNode):
     """
     A node to compare a table column with a primitive value and output a boolean column.
