@@ -354,7 +354,8 @@ export const useGraphStore = defineStore('graph', () => {
               op: 'EQ',
               col: '',
               const: 0,
-              result_col: ''
+              result_col: '',
+              data_type: 'int'
             }
           }
         }

@@ -17,12 +17,33 @@
             </div>
             <div class="const">
                 <NodepyNumberInput
+                    v-if="data.param.data_type == 'int'"
                     v-model="constValue"
                     class="nodrag"
                     @update-value="() => updateSimpleStringNumberBoolValue(data.param, 'const', constValue)"
                     :disabled="constDisabled"
                     :allow-empty="true"
                  />
+                <NodepyNumberInput
+                    v-else-if="data.param.data_type == 'float'"
+                    v-model="constValue"
+                    class="nodrag"
+                    @update-value="() => updateSimpleStringNumberBoolValue(data.param, 'const', constValue)"
+                    :denominator="1000"
+                    :disabled="constDisabled"
+                    :allow-empty="true"
+                 />
+            </div>
+            <div class="data_type">
+                <div class="param-description">
+                    类型
+                </div>
+                <NodepySelectFew
+                    :options="dataTypeUi"
+                    :default-selected="defaultSelectedDataType"
+                    @select-change="(e: any) => updateSimpleSelectFew(data.param, 'data_type', dataType, e)"
+                    class="nodrag"
+                />
             </div>
             <div class="op">
                 <div class="param-description" :class="{'node-has-paramerr': opHasErr.value}">
@@ -74,15 +95,20 @@
     import ErrorMsg from '../tools/ErrorMsg.vue'
     import NodeTitle from '../tools/NodeTitle.vue'
     import Timer from '../tools/Timer.vue'
+    import NodepySelectFew from '../tools/Nodepy-selectFew.vue'
     import NodepySelectMany from '../tools/Nodepy-selectMany.vue'
     import NodepyStringInput from '../tools/Nodepy-StringInput.vue'
     import NodepyNumberInput from '../tools/Nodepy-NumberInput/Nodepy-NumberInput.vue'
     import { hasInputEdge } from '../hasEdge'
-    import { updateSimpleStringNumberBoolValue, updateSimpleSelectMany } from '../updateParam'
+    import { updateSimpleStringNumberBoolValue, updateSimpleSelectMany, updateSimpleSelectFew } from '../updateParam'
+    import { dataTypeColor } from '@/types/nodeTypes'
     import type { ColWithPrimCompareNodeData } from '@/types/nodeTypes'
 
 
     const props = defineProps<NodeProps<ColWithPrimCompareNodeData>>()
+    const dataType = ['int', 'float']
+    const dataTypeUi = ['整数', '浮点数']
+    const defaultSelectedDataType = [dataType.indexOf(props.data.param.data_type)]
     const op = ["EQ", "NEQ", "LT", "LTE", "GT", "GTE"]
     const opUi = ['等于', '不等于', '小于', '小于等于', '大于', '大于等于']
     const defaultSelectedOP = op.indexOf(props.data.param.op)
@@ -124,6 +150,14 @@
         handleId: 'const',
         value: false
     })
+    const constHandleColor = computed(() => {
+        switch(props.data.param.data_type) {
+            case 'int':
+                return dataTypeColor.int
+            case 'float':
+                return dataTypeColor.float
+        }
+    })
 
 
     const clearSelectCol = (resolve: any) => {
@@ -156,13 +190,16 @@
             .input-const {
                 margin-bottom: 2px;
             }
-            .op, .col, .const, .result_col {
+            .data_type, .op, .col, .const, .result_col {
                 padding: 0 $node-padding-hor;
                 margin-bottom: $node-margin;
             }
         }
     }
-    .all-handle-color {
+    .all-handle-color[data-handleid="table"] {
         background: $table-color;
+    }
+    .all-handle-color[data-handleid="const"] {
+        background: v-bind(constHandleColor);
     }
 </style>

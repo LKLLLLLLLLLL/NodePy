@@ -308,6 +308,7 @@ export interface ColWithPrimCompareNodeParam {
     col: string,
     const: number | null,
     result_col: string,
+    data_type: 'int' | 'float'
 }
 export type ColWithPrimCompareNodeData = BaseData & {
     param: ColWithPrimCompareNodeParam
