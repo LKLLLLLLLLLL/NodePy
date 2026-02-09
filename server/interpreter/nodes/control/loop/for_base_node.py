@@ -3,7 +3,7 @@ from typing import Dict, Generator
 
 from server.models.data import Data
 
-from .control_struc_base_node import ControlStrucBaseNode
+from ..control_struc_base_node import ControlStrucBaseNode
 
 """
 Base class for For loop begin nodes.

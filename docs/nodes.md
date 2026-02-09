@@ -1252,7 +1252,7 @@ K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 **hint：**
 - col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
 
-### 9. 控制节点(control)
+### 9 控制节点(control)
 #### 9.1 CustomScriptNode
 用户自定义脚本节点，允许用户编写自定义的Python脚本来处理输入数据并生成输出数据。注意，为了安全起见，用户脚本将在受限的环境中执行，且只能使用预定义的安全库和函数。
 
@@ -1275,7 +1275,8 @@ K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 - script_template: str，预定义的脚本模版内容，供用户参考和编辑使用。
 
 #### 9.2 ForEachRowNode
-表格逐行处理节点。该节点包含两个实际的节点：ForEachRowBeginNode, ForEachRowEndNode。前者标志循环体的开始，后者标志循环体的结束。用户可以在这两个节点之间插入任意数量的处理节点，这些节点将对输入表格的每一行依次进行处理。
+表格逐行处理节点。该节点包含两个实际的节点：ForEachRowBeginNode, ForEachRowEndNode。
+前者标志循环体的开始，后者标志循环体的结束。用户可以在这两个节点之间插入任意数量的处理节点，这些节点将对输入表格的每一行依次进行处理。
 
 *注意：这两个节点以及循环体都被视为一个节点，它的runningtime、data_out等运行数据都会储存在begin节点上。*
 
@@ -1304,7 +1305,8 @@ K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 - table: 输出的表格，类型为Table，包含所有处理后的行。
 
 #### 9.3 ForRollingWindowNode
-表格滚动窗口处理节点。该节点包含两个实际的节点：ForRollingWindowBeginNode, ForRollingWindowEndNode。前者标志滚动窗口循环体的开始，后者标志滚动窗口循环体的结束。用户可以在这两个节点之间插入任意数量的处理节点，这些节点将对输入表格的每一个滚动窗口依次进行处理。
+表格滚动窗口处理节点。该节点包含两个实际的节点ForRollingWindowBeginNode, ForRollingWindowEndNode。
+前者标志滚动窗口循环体的开始，后者标志滚动窗口循环体的结束。用户可以在这两个节点之间插入任意数量的处理节点，这些节点将对输入表格的每一个滚动窗口依次进行处理。
 
 ##### (1) ForRollingWindowBeginNode
 表格滚动窗口处理开始节点，标志滚动窗口循环体的开始。
@@ -1331,7 +1333,42 @@ K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 **输出：**
 - table: 输出的表格，类型为Table，包含所有处理后的滚动窗口行。
 
-#### 9.4 UnpackNode
+#### 9.4 MapColumnNode
+列映射节点。该节点包含两个实际的节点：MapColumnBeginNode, MapColumnEndNode。
+表格的某一列的每一行上应用更改，相当于`ForEachRowNode` + `GetCellNode` + `PackNode`的组合。
+
+注：两个节点的remains和cell端口在创建后默认连接在一起。
+
+##### (1) MapColumnBeginNode
+列映射起始节点，标志列映射循环体的开始。
+
+**参数：**
+- col: 应用的列。
+
+**输入：**
+- table: 需要处理的表格，类型为Table。
+
+**输出：**
+- remains: 剩余的列组成的行，类型为Table。
+- cell: 当前需要处理的单元格，类型可以为任何能够填入表格的数据。
+
+**hint：**
+- col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
+
+##### (2) MapColumnEndNode
+列映射结束节点，标志列映射循环体的结束。
+
+**参数：**
+- result_col: 结果列名，类型为str，可以为空，表示使用默认结果列名。
+
+**输入：**
+- remains: 剩余的列组成的行，类型为Table。
+- cell: 处理完毕的单元格，类型可以为`int`, `float`, `bool`, `str`, `datetime`。
+
+**输出：**
+- table: 处理后的表格，类型为Table。
+
+#### 9.5 UnpackNode
 解包节点，将输入的单行表格拆分为多个输出端口，每个端口对应表格中的一列。
 
 **参数：**
@@ -1348,7 +1385,7 @@ K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 - cols_choices: 列名列表，类型为List[str]，用于在UI中为cols参数提供可选值。
 - outputs: 列名列表，类型为List[str]，用于在UI中显示动态输出端口的名称。
 
-#### 9.5 PackNode
+#### 9.6 PackNode
 打包节点，将多个输入端口的数据打包为单行表格，每个端口对应表格中的一列。
 
 **参数：**
@@ -1364,7 +1401,7 @@ K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 **hint：**
 - inputs: 输入端口名称列表，类型为List[str]，用于在UI中显示动态输入端口的名称。
 
-#### 9.6 GetCellNode
+#### 9.7 GetCellNode
 单元格获取节点，从输入的表格中获取指定行、指定列的值。
 
 **参数：**
@@ -1381,7 +1418,7 @@ K线图绘制节点，支持对输入的K线数据表格进行K线图绘制。
 **hint：**
 - col_choices: 列名列表，类型为List[str]，用于在UI中为col参数提供可选值。
 
-#### 9.7 SetCellNode
+#### 9.8 SetCellNode
 单元格设置节点，向输入的表格中指定行、指定列设置值。
 
 **参数：**

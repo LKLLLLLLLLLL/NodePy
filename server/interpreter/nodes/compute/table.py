@@ -1065,7 +1065,7 @@ class ColWithPrimCompareNode(BaseNode):
                 err_param_key="col",
                 err_msg="Column name cannot be empty."
             )
-        if self.result_col is None:
+        if self.result_col is None or self.result_col.strip() == "":
             self.result_col = generate_default_col_name(self.id, "result")
         if self.col == self.result_col:
             raise NodeParameterError(
