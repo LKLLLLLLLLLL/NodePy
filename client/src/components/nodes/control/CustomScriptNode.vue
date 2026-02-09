@@ -6,7 +6,7 @@
             <template v-for="(inputPort, idx) in inputPorts" :key="inputPort.id">
                 <div class="input-data port">
                     <div class="input-port-description">
-                        输入
+                        {{ inputPort.name }}
                         <hr></hr>
                     </div>
                     <Handle :id="inputPort.name" type="target" :position="Position.Left" :class="[`${inputPort.type}-handle-color`, {'node-errhandle': inputHasErr[idx]!.value.value}]" :key="inputPort.name"/>
@@ -39,16 +39,10 @@
                     添加输入
                 </NodepyButton>
             </div>
-            <div class="script">
-                <div class="param-description" :class="{'node-has-paramerr': scriptHasErr.value}">自定义Python脚本</div>
-                <NodepyButton :handle-click="openEditorModal">
-                    编辑脚本
-                </NodepyButton>
-            </div>
             <template v-for="(outputPort, idx) in outputPorts" :key="outputPort.id">
                 <div class="output-data port">
                     <div class="output-port-description">
-                        输出
+                        {{ outputPort.name }}
                         <hr></hr>
                     </div>
                     <Handle :id="outputPort.name" type="source" :position="Position.Right" :class="[`${outputPort.type}-handle-color`, {'node-errhandle': outPutHasErr[idx]}]" :key="outputPort.name"/>
@@ -79,6 +73,15 @@
                 <NodepyButton :handle-click="addOutputPort">
                     <NodepyPlus/>
                     添加输出
+                </NodepyButton>
+            </div>
+            <div class="script">
+                <hr></hr>
+                <div class="param-description script-description" :class="{'node-has-paramerr': scriptHasErr.value}">
+                    自定义Python脚本
+                </div>
+                <NodepyButton :handle-click="openEditorModal">
+                    编辑脚本
                 </NodepyButton>
             </div>
         </div>
@@ -272,6 +275,12 @@
                             background-color: #eee;
                         }
                     }
+                }
+            }
+            .script {
+                margin-top: 2 * $node-margin;   // double margin to avoid overlap with the previous element
+                .script-description {
+                    margin-top: $node-margin - 7px;
                 }
             }
         }
