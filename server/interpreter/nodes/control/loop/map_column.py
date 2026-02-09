@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generator, Literal, override
+from typing import Any, Dict, Generator, override
 
 import pandas as pd
 from pydantic import PrivateAttr
@@ -34,11 +34,6 @@ class MapColumnBeginNode(ForBaseBeginNode):
 
     # _remains_col_types: dict[str, Any] | None = PrivateAttr(None)
 
-    @property
-    @override
-    def pair_type(self) -> Literal["BEGIN", "END"]:
-        return "BEGIN"
-    
     @override
     def validate_parameters(self) -> None:
         if not self.type == "MapColumnBeginNode":
@@ -139,11 +134,6 @@ class MapColumnEndNode(ForBaseEndNode):
     result_col: str | None = None
     
     _output_rows: list[Data] = PrivateAttr([])
-
-    @property
-    @override
-    def pair_type(self) -> Literal["BEGIN", "END"]:
-        return "END"
 
     @override
     def validate_parameters(self) -> None:

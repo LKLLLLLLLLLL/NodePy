@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generator, Literal, override
+from typing import Any, Dict, Generator, override
 
 import pandas as pd
 from pydantic import PrivateAttr
@@ -30,11 +30,6 @@ class ForRollingWindowBeginNode(ForBaseBeginNode):
     """
 
     window_size: int
-
-    @property
-    @override
-    def pair_type(self) -> Literal["BEGIN", "END"]:
-        return "BEGIN"
 
     @override
     def validate_parameters(self) -> None:
@@ -112,11 +107,6 @@ class ForRollingWindowEndNode(ForBaseEndNode):
     """
 
     _outputs_tables: list[Data] = PrivateAttr(default=[])
-
-    @property
-    @override
-    def pair_type(self) -> Literal["BEGIN", "END"]:
-        return "END"
 
     @override
     def validate_parameters(self) -> None:

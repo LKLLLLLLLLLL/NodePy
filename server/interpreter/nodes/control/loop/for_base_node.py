@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Dict, Generator
+from typing import Dict, Generator, Literal, override
 
 from server.models.data import Data
 
@@ -14,6 +14,11 @@ class ForBaseBeginNode(ControlStrucBaseNode):
     Marks the beginning of a for loop.
     """
 
+    @property
+    @override
+    def pair_type(self) -> Literal["BEGIN", "END"]:
+        return "BEGIN"
+
     @abstractmethod
     def iter_loop(self, inputs: Dict[str, Data]) -> Generator[Dict[str, Data], None, None]:
         """
@@ -25,6 +30,11 @@ class ForBaseEndNode(ControlStrucBaseNode):
     """
     Marks the end of a for loop.
     """
+
+    @property
+    @override
+    def pair_type(self) -> Literal["BEGIN", "END"]:
+        return "END"
 
     @abstractmethod
     def end_iter_loop(self, loop_outputs: Dict[str, Data]) -> None:

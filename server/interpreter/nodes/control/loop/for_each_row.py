@@ -1,4 +1,4 @@
-from typing import Dict, Generator, Literal, override
+from typing import Dict, Generator, override
 
 import pandas as pd
 from pydantic import PrivateAttr
@@ -24,11 +24,6 @@ class ForEachRowBeginNode(ForBaseBeginNode):
     """
     Marks the beginning of a row-by-row loop.
     """
-
-    @property
-    @override
-    def pair_type(self) -> Literal["BEGIN", "END"]:
-        return "BEGIN"
 
     @override
     def validate_parameters(self) -> None:
@@ -93,11 +88,6 @@ class ForEachRowEndNode(ForBaseEndNode):
     """
 
     _output_rows: list[Data] = PrivateAttr(default=[])
-
-    @property
-    @override
-    def pair_type(self) -> Literal["BEGIN", "END"]:
-        return "END"
 
     @override
     def validate_parameters(self) -> None:

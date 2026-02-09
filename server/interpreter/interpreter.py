@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from server import DEBUG, logger
 from server.config import TRACING_ENABLED
-from server.interpreter.nodes.control.for_base_node import (
+from server.interpreter.nodes.control.loop.for_base_node import (
     ForBaseBeginNode,
     ForBaseEndNode,
 )
