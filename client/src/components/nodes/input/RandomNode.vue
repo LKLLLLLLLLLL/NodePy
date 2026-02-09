@@ -70,7 +70,7 @@
     import { dataTypeColor } from '@/types/nodeTypes'
 
 
-    const {removeEdges} = useVueFlow('main')
+    const {removeEdges} = useVueFlow()
     const props = defineProps<NodeProps<RandomNodeData>>()
     const col_type = ['int', 'float', 'str', 'bool']
     const col_typeChinese = ['整数', '浮点数', '字符串', '布尔值']

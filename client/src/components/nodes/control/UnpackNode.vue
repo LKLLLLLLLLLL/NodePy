@@ -55,7 +55,7 @@
     import type { UnpackNodeData } from '@/types/nodeTypes'
 
 
-    const {removeEdges} = useVueFlow('main')
+    const {removeEdges} = useVueFlow()
     const props = defineProps<NodeProps<UnpackNodeData>>()
     const colsHint = computed(() => {
         if(props.data.hint?.cols_choices?.length === 0) return ['']

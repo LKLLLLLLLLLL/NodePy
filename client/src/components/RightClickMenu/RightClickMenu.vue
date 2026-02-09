@@ -26,7 +26,7 @@ const setMenuItemRef = (el: unknown, idx: number) => {
   menuItemRefs.value[idx] = (el as HTMLElement) || null
 }
 
-const { onPaneContextMenu, screenToFlowCoordinate } = useVueFlow('main')
+const { onPaneContextMenu, screenToFlowCoordinate } = useVueFlow()
 
 // 绑定面板右键事件
 onPaneContextMenu((e: MouseEvent) => {

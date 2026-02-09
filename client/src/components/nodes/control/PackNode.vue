@@ -64,7 +64,7 @@
     import type { PackNodeData } from '@/types/nodeTypes'
 
 
-    const {removeEdges, getEdges} = useVueFlow('main')
+    const {removeEdges, getEdges} = useVueFlow()
     const props = defineProps<NodeProps<PackNodeData>>()
     const inputPorts = ref(props.data.param.cols.map((name, idx) => {
         return {

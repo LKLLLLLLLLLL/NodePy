@@ -6,7 +6,7 @@ import type { BaseNode } from '@/types/nodeTypes'
 
 
 const props = defineProps<EdgeProps>()
-const {findNode} = useVueFlow('main')
+const {findNode} = useVueFlow()
 const sourceNode = computed(():BaseNode|undefined => {
     return findNode(props.source)
 })

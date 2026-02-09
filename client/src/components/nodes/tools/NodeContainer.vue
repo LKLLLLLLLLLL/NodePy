@@ -11,11 +11,11 @@
 
     const props = defineProps<NodeProps<BaseData>>()
     let intervalId: any
+    const {getNodes, updateNode} = useVueFlow()
 
 
     // 计算并更新容器节点的位置
     const updateContainerPosition = () => {
-        const {getNodes, updateNode} = useVueFlow('main')
         const containerId = props.id
 
         // 找到所有groupId等于当前容器id的节点

@@ -17,7 +17,7 @@
     import type { BaseNode } from '@/types/nodeTypes'
 
     const { startHandle } = useConnection()
-    const {findNode} = useVueFlow('main')
+    const {findNode} = useVueFlow()
     const pathData = computed(() =>
         getBezierPath({
             sourceX: props.sourceX,

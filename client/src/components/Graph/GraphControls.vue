@@ -116,7 +116,7 @@
         })
     })
 
-    const {zoomIn,zoomOut,fitView, onPaneClick, screenToFlowCoordinate} = useVueFlow('main');
+    const {zoomIn,zoomOut,fitView, onPaneClick, screenToFlowCoordinate} = useVueFlow();
     let pendingAnnotateOff: (() => void) | null = null
     const armedAnnotateType = ref<'text' | 'title' | null>(null)
 
